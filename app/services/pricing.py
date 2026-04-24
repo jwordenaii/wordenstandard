@@ -3,23 +3,21 @@ Ballpark pricing estimator for J. Worden & Sons quote requests.
 
 Math basis (industry-standard cost ranges):
   Residential paving    $3.50 – $8.00 / sq ft
-  Commercial paving     $2.50 – $6.00 / sq ft  (volume & mobilisation efficiencies)
+  Commercial paving     $2.50 – $6.00 / sq ft  (volume & mobilization efficiencies)
   Sealcoating           $0.15 – $0.35 / sq ft
   Crack filling         $0.40 – $1.00 / sq ft  (average crack density assumption)
   Parking lot           $3.00 – $7.00 / sq ft
   Driveway              $3.50 – $7.50 / sq ft
   Maintenance plan      $0.20 – $0.45 / sq ft / year
 
-All estimates include a $300 mobilisation floor — no job dispatches for less.
+All estimates include a $300 mobilization floor — no job dispatches for less.
 Returned figures are rounded to the nearest $50 for realistic quoting.
 
 Verification:
   1 000 sq ft residential paving  → $3 500 – $8 000  ✓
   5 000 sq ft commercial paving   → $12 500 – $30 000 ✓
-  2 000 sq ft sealcoating         → $300 – $700       ✓ (above mobilisation floor)
+  2 000 sq ft sealcoating         → $300 – $700       ✓ (above mobilization floor)
 """
-
-import math
 
 # ── Rate table: service → property_type → (low, high) $/sq ft ────────────────
 
@@ -38,7 +36,7 @@ _ROUND_TO = 50                     # round to nearest $50
 
 
 def _round_to_nearest(value: float, nearest: int) -> int:
-    return int(math.ceil(value / nearest) * nearest)
+    return int(round(value / nearest) * nearest)
 
 
 def estimate_price(
