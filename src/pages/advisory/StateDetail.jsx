@@ -109,7 +109,7 @@ export default function StateDetail() {
   const abbr = stateInfo.abbr
 
   // Helpers to get a single state record from a loaded dataset
-  const row = (dataset) => (Array.isArray(dataset) ? dataset.find(s => s.abbr === abbr) : dataset) || {}
+  const findStateRecord = (dataset) => (Array.isArray(dataset) ? dataset.find(s => s.abbr === abbr) : dataset) || {}
   const [liensData, payData] = Array.isArray(tabData.liens) ? tabData.liens : [null, null]
 
   return (
@@ -158,7 +158,7 @@ export default function StateDetail() {
         {loading && <TabSpinner />}
 
         {!loading && activeTab === 'licensing' && tabData.licensing && (() => {
-          const lic = row(tabData.licensing)
+          const lic = findStateRecord(tabData.licensing)
           return (
             <Section title="Contractor Licensing">
               <Row label="License Required" value={lic.stateLicenseRequired} />
@@ -180,8 +180,8 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'liens' && liensData && (() => {
-          const lien = row(liensData)
-          const pay = row(payData)
+          const lien = findStateRecord(liensData)
+          const pay = findStateRecord(payData)
           return (
             <>
               <Section title="Mechanics Lien Laws">
@@ -212,7 +212,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'contracts' && tabData.contracts && (() => {
-          const cl = row(tabData.contracts)
+          const cl = findStateRecord(tabData.contracts)
           return (
             <Section title="Contract & Construction Law">
               <Row label="Written Contract SOL" value={cl.solWrittenContractYears ? `${cl.solWrittenContractYears} years` : null} citation={cl.citation} />
@@ -232,7 +232,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'utilities' && tabData.utilities && (() => {
-          const util = row(tabData.utilities)
+          const util = findStateRecord(tabData.utilities)
           return (
             <Section title="811 / One-Call Utility Rules">
               <Row label="One-Call Center" value={util.oneCallCenterName} />
@@ -251,7 +251,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'permits' && tabData.permits && (() => {
-          const bp = row(tabData.permits)
+          const bp = findStateRecord(tabData.permits)
           return (
             <Section title="Building Codes & Permits">
               <Row label="IBC Edition" value={bp.ibcEditionAdopted} citation={bp.citation} />
@@ -270,7 +270,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'safety' && tabData.safety && (() => {
-          const sf = row(tabData.safety)
+          const sf = findStateRecord(tabData.safety)
           return (
             <Section title="OSHA & Worker Safety">
               <Row label="State OSHA Plan" value={sf.oshaStatePlan} citation={sf.citation} />
@@ -288,7 +288,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'prevwage' && tabData.prevwage && (() => {
-          const pw = row(tabData.prevwage)
+          const pw = findStateRecord(tabData.prevwage)
           return (
             <Section title="Prevailing Wage">
               <Row label="State Law Exists" value={pw.prevailingWageLaw} citation={pw.citation} />
@@ -306,7 +306,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'roads' && tabData.roads && (() => {
-          const rd = row(tabData.roads)
+          const rd = findStateRecord(tabData.roads)
           return (
             <Section title="Roads & Paving Regulations">
               <Row label="DOT Specs Publication" value={rd.dotSpecsPublication} citation={rd.citation} />
@@ -325,7 +325,7 @@ export default function StateDetail() {
         })()}
 
         {!loading && activeTab === 'env' && tabData.env && (() => {
-          const env = row(tabData.env)
+          const env = findStateRecord(tabData.env)
           return (
             <Section title="Environmental Permits">
               <Row label="NPDES Authority" value={env.npdesAuthority} citation={env.citation} />

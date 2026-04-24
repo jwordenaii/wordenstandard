@@ -146,6 +146,8 @@ Respond conversationally in 2–4 sentences. Be confident, knowledgeable, and fr
 
 
 class ChatRequest(BaseModel):
+    # 1000 chars ≈ ~250 tokens — well within gpt-4o-mini's context window while
+    # preventing abuse of the public endpoint
     question: str = Field(..., min_length=1, max_length=1000, strip_whitespace=True)
     state_code: Optional[str] = Field(default=None, max_length=2)
 
@@ -215,7 +217,7 @@ def _openai_chat(question: str, state_code: Optional[str]) -> str:
             temperature=0.7,
         )
         return response.choices[0].message.content or _stub_chat(question)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001 — openai raises many subtypes; json/network errors also possible
         logger.error("OpenAI chat call failed: %s", exc)
         return _stub_chat(question)
 
