@@ -9,7 +9,17 @@ export default defineConfig({
     react(),
     sitemap({
       hostname: SITE_URL,
-      routes: ['/', '/services', '/about', '/contact', '/quote', '/reviews'],
+      routes: [
+        '/',
+        '/services',
+        '/about',
+        '/contact',
+        '/quote',
+        '/reviews',
+        '/advisory',
+        '/advisory/utilities',
+        '/advisory/compare',
+      ],
     }),
   ],
   build: {

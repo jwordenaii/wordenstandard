@@ -3,17 +3,24 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import FloatingCTA from './components/FloatingCTA'
+import ChatWidget from './components/ChatWidget'
 import ScrollToTop from './components/ScrollToTop'
 import ErrorBoundary from './components/ErrorBoundary'
 
 // Lazy-loaded pages for code splitting
-const Home     = lazy(() => import('./pages/Home'))
-const Services = lazy(() => import('./pages/Services'))
-const About    = lazy(() => import('./pages/About'))
-const Contact  = lazy(() => import('./pages/Contact'))
-const Quote    = lazy(() => import('./pages/Quote'))
-const Reviews  = lazy(() => import('./pages/Reviews'))
-const NotFound = lazy(() => import('./pages/NotFound'))
+const Home         = lazy(() => import('./pages/Home'))
+const Services     = lazy(() => import('./pages/Services'))
+const About        = lazy(() => import('./pages/About'))
+const Contact      = lazy(() => import('./pages/Contact'))
+const Quote        = lazy(() => import('./pages/Quote'))
+const Reviews      = lazy(() => import('./pages/Reviews'))
+const NotFound     = lazy(() => import('./pages/NotFound'))
+
+// Advisory pages — lazy-loaded so the 512KB legal dataset never hits the main bundle
+const AdvisoryHub  = lazy(() => import('./pages/advisory/AdvisoryHub'))
+const StateDetail  = lazy(() => import('./pages/advisory/StateDetail'))
+const UtilitiesHub = lazy(() => import('./pages/advisory/UtilitiesHub'))
+const StateCompare = lazy(() => import('./pages/advisory/StateCompare'))
 
 function PageLoader() {
   return (
@@ -39,12 +46,18 @@ export default function App() {
                 <Route path="/contact"  element={<Contact />} />
                 <Route path="/quote"    element={<Quote />} />
                 <Route path="/reviews"  element={<Reviews />} />
+                {/* Advisory Board routes */}
+                <Route path="/advisory"                element={<AdvisoryHub />} />
+                <Route path="/advisory/state/:stateCode" element={<StateDetail />} />
+                <Route path="/advisory/utilities"      element={<UtilitiesHub />} />
+                <Route path="/advisory/compare"        element={<StateCompare />} />
                 <Route path="*"         element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>
           <Footer />
           <FloatingCTA />
+          <ChatWidget />
         </div>
       </ErrorBoundary>
     </BrowserRouter>

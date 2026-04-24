@@ -43,6 +43,7 @@ export const api = {
   submitContact:  (data) => request('POST', '/api/v1/leads/contact', data),
   getReviews:     ()     => request('GET',  '/api/v1/reviews'),
   getSchema:      ()     => request('GET',  '/api/v1/schema/local-business'),
+  askAI:          (data) => request('POST', '/api/v1/ai/chat',       data),
   // Content blocks managed via the admin Webpage Maker.
   // The frontend uses these as optional overrides — hardcoded defaults remain
   // in place if a block is missing (graceful degradation).
