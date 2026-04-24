@@ -1,13 +1,35 @@
 import os
+import logging
+from contextlib import asynccontextmanager
+
+from dotenv import load_dotenv  # noqa: E402 — must run before other imports
+
+# Load .env / .env.local for local development.
+# In production (Railway/Render) env vars are injected directly.
+load_dotenv()
 
 from fastapi import FastAPI, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from .core.security import verify_premium_security
+from .core.limiter import limiter
 from .services.ai_brain import SupremeCourtAI
 from .services.telemetry import FleetOperations
 from .routers import leads, reviews, schema_ld, ai as ai_router
+
+logger = logging.getLogger(__name__)
+
+# ── Lifespan ──────────────────────────────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("JWordenAI backend starting up (FastAPI %s)", __import__("fastapi").__version__)
+    yield
+    logger.info("JWordenAI backend shutting down")
+
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -17,7 +39,11 @@ app = FastAPI(
         "Backend API for J. Worden & Sons Asphalt Paving — lead capture, "
         "reviews, AI inspection, and fleet telemetry."
     ),
+    lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 _EXTRA_ORIGINS = [

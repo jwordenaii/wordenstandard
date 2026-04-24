@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 
 const NAV_LINKS = [
@@ -16,11 +16,19 @@ export default function Navbar() {
 
   useEffect(() => { setOpen(false) }, [pathname])
 
+  const handleScroll = useCallback(() => setScrolled(window.scrollY > 20), [])
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open])
 
   return (
     <header
@@ -31,7 +39,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group" aria-label="J. Worden & Sons — Home">
             <div className="w-8 h-8 bg-brand-amber rounded-md flex items-center justify-center font-display font-black text-brand-navy text-sm">
               JW
             </div>
@@ -41,7 +49,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1" aria-label="Primary navigation">
             {NAV_LINKS.map(({ to, label }) => (
               <NavLink
                 key={to}
@@ -72,40 +80,63 @@ export default function Navbar() {
 
           {/* Hamburger */}
           <button
-            className="md:hidden text-white p-2 rounded-md hover:bg-white/10"
-            aria-label="Toggle menu"
+            id="mobile-menu-button"
+            className="md:hidden text-white p-2 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-brand-amber"
+            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
             onClick={() => setOpen(!open)}
           >
-            <span className="block w-5 h-0.5 bg-current mb-1 transition-all" />
-            <span className="block w-5 h-0.5 bg-current mb-1 transition-all" />
-            <span className="block w-5 h-0.5 bg-current transition-all" />
+            {open ? (
+              /* X icon */
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              /* Hamburger icon */
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
         </div>
 
         {/* Mobile menu */}
-        {open && (
-          <div className="md:hidden pb-4 border-t border-white/10 mt-2">
-            {NAV_LINKS.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/'}
-                className={({ isActive }) =>
-                  `block px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-brand-amber text-brand-navy'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-            <Link to="/quote" className="mt-3 mx-4 btn-primary text-sm justify-center">
-              Get a Free Quote
-            </Link>
-          </div>
-        )}
+        <div
+          id="mobile-menu"
+          role="navigation"
+          aria-label="Mobile navigation"
+          className={`md:hidden overflow-hidden transition-all duration-300 ${
+            open ? 'max-h-96 pb-4' : 'max-h-0'
+          } border-t border-white/10`}
+        >
+          {NAV_LINKS.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                `block px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                  isActive
+                    ? 'bg-brand-amber text-brand-navy'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+          <Link
+            to="/quote"
+            className="mt-3 mx-4 btn-primary text-sm justify-center"
+            onClick={() => {
+              if (typeof window.gtag === 'function')
+                window.gtag('event', 'cta_click', { location: 'navbar_mobile' })
+            }}
+          >
+            Get a Free Quote
+          </Link>
+        </div>
       </div>
     </header>
   )

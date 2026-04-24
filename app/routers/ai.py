@@ -50,15 +50,16 @@ def _stub_analysis() -> dict:
 
 
 def _openai_analysis(image_bytes: bytes, mime_type: str) -> dict:
+    import json
     try:
-        import openai  # type: ignore
+        from openai import OpenAI  # type: ignore
 
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         b64 = base64.b64encode(image_bytes).decode()
         data_url = f"data:{mime_type};base64,{b64}"
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4-vision-preview",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
@@ -67,7 +68,8 @@ def _openai_analysis(image_bytes: bytes, mime_type: str) -> dict:
                         "image and return a JSON object with: damage_detected (bool), "
                         "severity (none/minor/moderate/severe), findings (list of "
                         "{type, coverage_pct, urgency}), recommended_services (list), "
-                        "estimated_lifespan_years (int), notes (str)."
+                        "estimated_lifespan_years (int), notes (str). "
+                        "Return only valid JSON, no markdown fences."
                     ),
                 },
                 {
@@ -80,14 +82,13 @@ def _openai_analysis(image_bytes: bytes, mime_type: str) -> dict:
             ],
             max_tokens=600,
         )
-        import json
 
-        text = response.choices[0].message["content"]
-        # Extract JSON block if wrapped in markdown
+        text = response.choices[0].message.content or ""
+        # Strip markdown code fences if model adds them
         if "```" in text:
             text = text.split("```")[1].lstrip("json").strip()
         result = json.loads(text)
-        result["engine"] = "gpt-4-vision"
+        result["engine"] = "gpt-4o"
         return result
     except Exception as exc:  # noqa: BLE001
         logger.error("OpenAI vision call failed: %s", exc)

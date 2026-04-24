@@ -17,9 +17,11 @@ export default {
         display: ['Montserrat', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
-        'hero-pattern': "linear-gradient(135deg, #1a1a2e 0%, #2d2d2d 100%)",
+        'hero-pattern': 'linear-gradient(135deg, #1a1a2e 0%, #2d2d2d 100%)',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')({ strategy: 'class' }),
+  ],
 }

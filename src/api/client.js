@@ -2,23 +2,40 @@
  * API client — reads VITE_API_BASE_URL at build time.
  * Falls back to relative paths so the frontend still works when
  * the backend is not yet deployed.
+ *
+ * All requests include a 10-second AbortController timeout so the UI
+ * never hangs indefinitely on a slow/down backend.
  */
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
+const DEFAULT_TIMEOUT_MS = 10_000
 
 async function request(method, path, body) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
+
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' },
+    signal: controller.signal,
   }
   if (body) opts.body = JSON.stringify(body)
 
-  const res = await fetch(`${BASE}${path}`, opts)
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(err.detail || `HTTP ${res.status}`)
+  try {
+    const res = await fetch(`${BASE}${path}`, opts)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail || `HTTP ${res.status}`)
+    }
+    return res.json()
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
   }
-  return res.json()
 }
 
 export const api = {

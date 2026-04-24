@@ -70,7 +70,7 @@ const HOME_FAQS = [
   {
     question: 'Are you licensed and insured?',
     answer:
-      'Yes. J. Worden & Sons is fully licensed and carries general liability and workers' compensation insurance.',
+      "Yes. J. Worden & Sons is fully licensed and carries general liability and workers' compensation insurance.",
   },
 ]
 
@@ -124,7 +124,7 @@ export default function Home() {
           >
             Built on Every
             <br />
-            <span className="text-brand-amber">Road We've Paved.</span>
+            <span className="text-brand-amber">Road We&apos;ve Paved.</span>
           </motion.h1>
 
           <motion.p
