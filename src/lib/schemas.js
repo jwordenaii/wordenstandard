@@ -3,9 +3,13 @@
  *
  * Kept in a separate module so that SchemaMarkup.jsx can be a
  * pure component file (required by react-refresh/only-export-components).
+ *
+ * SITE_URL is read from VITE_SITE_URL at build time so that staging and
+ * production deployments automatically use the correct canonical domain.
  */
 
-export const SITE_URL = 'https://jworden.netlify.app'
+export const SITE_URL =
+  import.meta.env.VITE_SITE_URL || 'https://jworden.netlify.app'
 
 export const LOCAL_BUSINESS_SCHEMA = {
   '@context': 'https://schema.org',

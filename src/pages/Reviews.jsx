@@ -191,7 +191,7 @@ export default function Reviews() {
             Your review helps other homeowners and businesses find quality asphalt contractors.
           </p>
           <a
-            href="https://g.page/r/YOUR_GOOGLE_PLACE_ID/review"
+            href={`https://g.page/r/${import.meta.env.VITE_GOOGLE_PLACE_ID || 'YOUR_GOOGLE_PLACE_ID'}/review`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
