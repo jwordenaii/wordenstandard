@@ -39,11 +39,16 @@ async function request(method, path, body) {
 }
 
 export const api = {
-  submitQuote:   (data) => request('POST', '/api/v1/leads/quote',   data),
-  submitContact: (data) => request('POST', '/api/v1/leads/contact', data),
-  getReviews:    ()     => request('GET',  '/api/v1/reviews'),
-  getSchema:     ()     => request('GET',  '/api/v1/schema/local-business'),
-  askAI:         (data) => request('POST', '/api/v1/ai/chat',       data),
+  submitQuote:    (data) => request('POST', '/api/v1/leads/quote',   data),
+  submitContact:  (data) => request('POST', '/api/v1/leads/contact', data),
+  getReviews:     ()     => request('GET',  '/api/v1/reviews'),
+  getSchema:      ()     => request('GET',  '/api/v1/schema/local-business'),
+  askAI:          (data) => request('POST', '/api/v1/ai/chat',       data),
+  // Content blocks managed via the admin Webpage Maker.
+  // The frontend uses these as optional overrides — hardcoded defaults remain
+  // in place if a block is missing (graceful degradation).
+  getContent:     ()     => request('GET',  '/api/v1/content'),
+  getContentBlock:(key)  => request('GET',  `/api/v1/content/${key}`),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────
