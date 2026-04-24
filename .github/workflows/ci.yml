@@ -10,6 +10,8 @@ jobs:
   frontend:
     name: Frontend — Lint & Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: .
@@ -43,6 +45,8 @@ jobs:
   backend:
     name: Backend — Python Lint & Import Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 

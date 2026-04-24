@@ -63,7 +63,7 @@ def _openai_analysis(image_bytes: bytes, mime_type: str) -> dict:
                 {
                     "role": "system",
                     "content": (
-                        "You are an expert asphalt inspector. Analyse the provided "
+                        "You are an expert asphalt inspector. Analyze the provided "
                         "image and return a JSON object with: damage_detected (bool), "
                         "severity (none/minor/moderate/severe), findings (list of "
                         "{type, coverage_pct, urgency}), recommended_services (list), "

@@ -19,6 +19,7 @@ Required env vars for production:
 """
 
 import os
+import re
 import json
 import logging
 import smtplib
@@ -63,6 +64,17 @@ def _build_email_body(data: dict) -> tuple[str, str]:
     return subject, html
 
 
+_EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+
+
+def _validate_emails(addresses: list[str]) -> list[str]:
+    valid = [e for e in addresses if _EMAIL_RE.match(e)]
+    invalid = [e for e in addresses if not _EMAIL_RE.match(e)]
+    if invalid:
+        logger.warning("Skipping malformed recipient address(es): %s", invalid)
+    return valid
+
+
 def _send_smtp(subject: str, html_body: str, to_addresses: list[str]) -> None:
     host = os.getenv("SMTP_HOST", "")
     port = int(os.getenv("SMTP_PORT", "587"))
@@ -71,6 +83,11 @@ def _send_smtp(subject: str, html_body: str, to_addresses: list[str]) -> None:
 
     if not (host and user and password):
         logger.info("SMTP not configured – skipping email. subject=%s", subject)
+        return
+
+    to_addresses = _validate_emails(to_addresses)
+    if not to_addresses:
+        logger.warning("No valid recipient addresses — skipping email")
         return
 
     msg = MIMEMultipart("alternative")
