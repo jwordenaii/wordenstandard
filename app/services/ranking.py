@@ -52,6 +52,10 @@ _SIZE_TIERS = [
     (     0,  5),
 ]
 
+# Time-decay parameters
+_DECAY_POINTS_PER_HOUR: int = 2   # ranking score reduction per overdue hour
+_DECAY_MAX_PENALTY: int = 40       # maximum penalty (so HOT leads never sink to zero)
+
 
 def _size_score(sqft: float | None) -> int:
     if not sqft:
@@ -92,8 +96,8 @@ def _time_decay(lead, now: datetime) -> int:
         return 0   # within SLA — no penalty
 
     overdue_hours = hours_old - sla_hours
-    # −2 pts per overdue hour, capped at −40 so HOT leads never sink to zero
-    return max(-40, -int(overdue_hours * 2))
+    # −_DECAY_POINTS_PER_HOUR pts per overdue hour, capped at −_DECAY_MAX_PENALTY
+    return max(-_DECAY_MAX_PENALTY, -int(overdue_hours * _DECAY_POINTS_PER_HOUR))
 
 
 def compute_ranking_score(lead, now: datetime | None = None) -> int:

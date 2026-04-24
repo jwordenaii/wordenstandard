@@ -27,7 +27,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import secrets
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -207,7 +209,6 @@ def admin_content_create(
     key = key.strip().lower()
 
     # Validate key format
-    import re
     if not re.fullmatch(r"[a-z0-9_\-]+", key):
         return _render(
             request,
@@ -252,8 +253,9 @@ def admin_content_create(
     db.add(block)
     db.commit()
     logger.info("Admin created content block key=%s", key)
+    safe_key = quote(key, safe="")
     return RedirectResponse(
-        url=f"/admin/content?flash_msg=Block+%27{key}%27+created.&flash_type=success",
+        url=f"/admin/content?flash_msg=Block+%27{safe_key}%27+created.&flash_type=success",
         status_code=303,
     )
 
@@ -295,8 +297,9 @@ def admin_content_update(
     block.meta_json = meta_json.strip() or None
     db.commit()
     logger.info("Admin updated content block key=%s", key)
+    safe_key = quote(key, safe="")
     return RedirectResponse(
-        url=f"/admin/content?flash_msg=Block+%27{key}%27+saved.&flash_type=success",
+        url=f"/admin/content?flash_msg=Block+%27{safe_key}%27+saved.&flash_type=success",
         status_code=303,
     )
 
@@ -313,7 +316,8 @@ def admin_content_delete(
     db.delete(block)
     db.commit()
     logger.info("Admin deleted content block key=%s", key)
+    safe_key = quote(key, safe="")
     return RedirectResponse(
-        url=f"/admin/content?flash_msg=Block+%27{key}%27+deleted.&flash_type=success",
+        url=f"/admin/content?flash_msg=Block+%27{safe_key}%27+deleted.&flash_type=success",
         status_code=303,
     )
