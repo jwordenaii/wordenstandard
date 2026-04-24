@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA, faqSchema } from '../components/SchemaMarkup'
 import { trackEvent } from '../api/client'
+import CountUp from '../components/CountUp'
+import FAQAccordion from '../components/FAQAccordion'
 
 const SERVICES = [
   {
@@ -256,16 +258,18 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { num: '40+', label: 'Years in business' },
-                { num: '500+', label: 'Projects completed' },
-                { num: '4.9★', label: 'Google rating' },
-                { num: '100%', label: 'Licensed & insured' },
-              ].map(({ num, label }) => (
+                { end: 40,  prefix: '',  suffix: '+',  decimals: 0, label: 'Years in business' },
+                { end: 500, prefix: '',  suffix: '+',  decimals: 0, label: 'Projects completed' },
+                { end: 4.9, prefix: '',  suffix: '★',  decimals: 1, label: 'Google rating' },
+                { end: 100, prefix: '',  suffix: '%',  decimals: 0, label: 'Licensed & insured' },
+              ].map(({ end, prefix, suffix, decimals, label }) => (
                 <div
                   key={label}
                   className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center"
                 >
-                  <div className="font-display font-black text-brand-amber text-3xl">{num}</div>
+                  <div className="font-display font-black text-brand-amber text-3xl">
+                    <CountUp end={end} prefix={prefix} suffix={suffix} decimals={decimals} />
+                  </div>
                   <div className="text-white/60 text-sm mt-1">{label}</div>
                 </div>
               ))}
@@ -278,22 +282,7 @@ export default function Home() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="section-heading text-center mb-12">Common Questions</h2>
-          <div className="space-y-4">
-            {HOME_FAQS.map(({ question, answer }) => (
-              <details
-                key={question}
-                className="card p-6 group cursor-pointer"
-              >
-                <summary className="font-semibold text-brand-navy list-none flex justify-between items-center gap-4">
-                  {question}
-                  <span className="text-brand-amber group-open:rotate-45 transition-transform text-xl flex-shrink-0">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 text-brand-navy/70 text-sm leading-relaxed">{answer}</p>
-              </details>
-            ))}
-          </div>
+          <FAQAccordion items={HOME_FAQS} />
         </div>
       </section>
 

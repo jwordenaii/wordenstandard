@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import SchemaMarkup, { serviceSchema, faqSchema } from '../components/SchemaMarkup'
+import FAQAccordion from '../components/FAQAccordion'
 
 const SERVICES = [
   {
@@ -209,19 +210,7 @@ export default function Services() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="section-heading text-center mb-12">Service FAQs</h2>
-          <div className="space-y-4">
-            {SERVICE_FAQS.map(({ question, answer }) => (
-              <details key={question} className="card p-6 group cursor-pointer">
-                <summary className="font-semibold text-brand-navy list-none flex justify-between items-center gap-4">
-                  {question}
-                  <span className="text-brand-amber group-open:rotate-45 transition-transform text-xl flex-shrink-0">
-                    +
-                  </span>
-                </summary>
-                <p className="mt-3 text-brand-navy/70 text-sm leading-relaxed">{answer}</p>
-              </details>
-            ))}
-          </div>
+          <FAQAccordion items={SERVICE_FAQS} />
         </div>
       </section>
 
