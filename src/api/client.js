@@ -43,6 +43,7 @@ export const api = {
   submitContact: (data) => request('POST', '/api/v1/leads/contact', data),
   getReviews:    ()     => request('GET',  '/api/v1/reviews'),
   getSchema:     ()     => request('GET',  '/api/v1/schema/local-business'),
+  askAI:         (data) => request('POST', '/api/v1/ai/chat',       data),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

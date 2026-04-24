@@ -78,6 +78,14 @@ const CATEGORIES = [
     color: 'bg-stone-50 border-stone-200',
     accent: 'text-stone-700',
   },
+  {
+    to: '/advisory/compare',
+    icon: '⚖️',
+    title: 'Compare States',
+    desc: 'Pick any 2–3 states and compare licensing, lien laws, utilities, safety, permits, and more side by side.',
+    color: 'bg-brand-amber/10 border-brand-amber/30',
+    accent: 'text-brand-navy',
+  },
 ]
 
 export default function AdvisoryHub() {
