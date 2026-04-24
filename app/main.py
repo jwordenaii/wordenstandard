@@ -16,6 +16,8 @@ from slowapi.errors import RateLimitExceeded
 
 from .core.security import verify_premium_security
 from .core.limiter import limiter
+from .database import create_all_tables
+from . import models  # noqa: F401 — registers ORM models with Base.metadata
 from .services.ai_brain import SupremeCourtAI
 from .services.telemetry import FleetOperations
 from .routers import leads, reviews, schema_ld, ai as ai_router
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("JWordenAI backend starting up (FastAPI %s)", __import__("fastapi").__version__)
+    create_all_tables()
     yield
     logger.info("JWordenAI backend shutting down")
 

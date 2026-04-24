@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SchemaMarkup from '../components/SchemaMarkup'
 import { api, trackEvent } from '../api/client'
+import { estimatePrice } from '../lib/pricing'
 
 // ── Step definitions ──────────────────────────────────────────────────────────
 
@@ -275,6 +276,28 @@ export default function Quote() {
                   <p className="text-xs text-brand-navy/40 mt-1">
                     Don&apos;t know exactly? An estimate is fine.
                   </p>
+                  {/* Live ballpark estimate */}
+                  {(() => {
+                    const est = estimatePrice(
+                      form.service_type,
+                      form.property_type,
+                      form.project_size_sqft
+                    )
+                    if (!est) return null
+                    return (
+                      <div className="mt-3 bg-brand-amber/10 border border-brand-amber/30 rounded-xl px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-widest text-brand-amber mb-1">
+                          Ballpark Estimate
+                        </p>
+                        <p className="font-display font-black text-brand-navy text-xl">
+                          {est.lowFmt} – {est.highFmt}
+                        </p>
+                        <p className="text-xs text-brand-navy/50 mt-1 leading-relaxed">
+                          {est.disclaimer}
+                        </p>
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 <div>
