@@ -7,7 +7,7 @@ All timestamps are stored in UTC.
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+from sqlalchemy import Column, DateTime, Float, Integer, String, Text, UniqueConstraint
 
 from .database import Base
 
@@ -57,3 +57,28 @@ class ContactMessage(Base):
 
     def __repr__(self) -> str:
         return f"<ContactMessage id={self.id} name={self.name!r}>"
+
+
+class PageContent(Base):
+    """
+    CMS content blocks managed through the admin dashboard (webpage maker).
+
+    Each block has a unique ``key`` (e.g. "hero", "services_intro") and stores
+    a ``title``, a rich ``body`` (HTML or Markdown), and an optional JSON blob
+    in ``meta_json`` for extra structured data (colours, CTAs, etc.).
+    The frontend fetches blocks via the public /api/v1/content endpoints.
+    """
+
+    __tablename__ = "page_contents"
+    __table_args__ = (UniqueConstraint("key", name="uq_page_contents_key"),)
+
+    id         = Column(Integer, primary_key=True, index=True)
+    key        = Column(String(100), nullable=False, index=True)
+    title      = Column(String(200), nullable=False)
+    body       = Column(Text, nullable=False, default="")
+    meta_json  = Column(Text, nullable=True)   # optional JSON for extra fields
+    updated_at = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<PageContent key={self.key!r} title={self.title!r}>"
