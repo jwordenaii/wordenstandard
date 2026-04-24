@@ -1,0 +1,329 @@
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA, faqSchema } from '../components/SchemaMarkup'
+import { trackEvent } from '../api/client'
+
+const SERVICES = [
+  {
+    icon: '🛣',
+    title: 'Asphalt Paving',
+    desc: 'New construction and overlay paving for driveways, roads, and commercial lots. Built to last 20+ years.',
+    href: '/services#paving',
+  },
+  {
+    icon: '🖤',
+    title: 'Sealcoating',
+    desc: 'Protective coal-tar or asphalt-based sealcoat that doubles the life of your pavement.',
+    href: '/services#sealcoating',
+  },
+  {
+    icon: '🔧',
+    title: 'Crack Filling',
+    desc: 'Hot-pour rubberized crack fill stops water intrusion before it becomes costly base damage.',
+    href: '/services#crackfill',
+  },
+  {
+    icon: '🏢',
+    title: 'Parking Lots',
+    desc: 'Full-service commercial parking lot construction, ADA compliance, and line striping.',
+    href: '/services#parking',
+  },
+  {
+    icon: '🏠',
+    title: 'Driveways',
+    desc: 'Residential driveway installation and replacement. Clean, fast, and priced fairly.',
+    href: '/services#driveways',
+  },
+  {
+    icon: '🔄',
+    title: 'Maintenance Plans',
+    desc: 'Annual maintenance programs for commercial properties — sealcoat, crack fill, and touch-up on a schedule.',
+    href: '/services#maintenance',
+  },
+]
+
+const TRUST_BADGES = [
+  { label: 'KFC',      desc: 'Trusted vendor' },
+  { label: "Arby's",   desc: 'Franchise partner' },
+  { label: 'Taco Bell',desc: 'Commercial client' },
+  { label: '40 Years', desc: 'Est. 1984' },
+  { label: '4th Gen',  desc: 'Family owned' },
+  { label: '⭐ 4.9',   desc: '87 Google Reviews' },
+]
+
+const HOME_FAQS = [
+  {
+    question: 'How long does a new asphalt driveway last?',
+    answer:
+      'A properly installed and maintained asphalt driveway lasts 20–30 years. Regular sealcoating every 3–5 years significantly extends lifespan.',
+  },
+  {
+    question: 'How soon can we use the driveway after paving?',
+    answer:
+      'You can walk on new asphalt after 24 hours and drive on it after 48–72 hours. Full cure takes about 6 months.',
+  },
+  {
+    question: 'Do you offer free estimates?',
+    answer:
+      'Yes. All quotes are free and come with a detailed breakdown. Fill out our quote form or call us directly.',
+  },
+  {
+    question: 'Are you licensed and insured?',
+    answer:
+      'Yes. J. Worden & Sons is fully licensed and carries general liability and workers' compensation insurance.',
+  },
+]
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.08 },
+  }),
+}
+
+export default function Home() {
+  return (
+    <>
+      <SchemaMarkup
+        title="4th-Generation Asphalt Paving Since 1984"
+        description="J. Worden & Sons — trusted asphalt paving, sealcoating, crack filling, and parking lot construction. Serving residential and commercial clients since 1984. Free estimates."
+        canonical="/"
+        schema={[LOCAL_BUSINESS_SCHEMA, faqSchema(HOME_FAQS)]}
+      />
+
+      {/* ── Hero ──────────────────────────────────────────────────────── */}
+      <section className="relative min-h-screen flex items-center bg-brand-navy overflow-hidden pt-16">
+        {/* Background texture */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(45deg, #f5a623 0, #f5a623 1px, transparent 0, transparent 50%)',
+            backgroundSize: '20px 20px',
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+          >
+            <span className="inline-block bg-brand-amber/20 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+              Est. 1984 · 4th Generation · Family Owned
+            </span>
+          </motion.div>
+
+          <motion.h1
+            className="font-display font-black text-white text-5xl md:text-7xl leading-tight mb-6"
+            initial="hidden"
+            animate="visible"
+            custom={1}
+            variants={fadeUp}
+          >
+            Built on Every
+            <br />
+            <span className="text-brand-amber">Road We've Paved.</span>
+          </motion.h1>
+
+          <motion.p
+            className="text-white/70 text-xl max-w-2xl mx-auto mb-10"
+            initial="hidden"
+            animate="visible"
+            custom={2}
+            variants={fadeUp}
+          >
+            J. Worden &amp; Sons has been laying down quality asphalt for four
+            generations. Trusted by KFC, Arby&apos;s, Taco Bell, and hundreds of
+            homeowners — we show up, we do it right, and we stand behind every job.
+          </motion.p>
+
+          <motion.div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial="hidden"
+            animate="visible"
+            custom={3}
+            variants={fadeUp}
+          >
+            <Link
+              to="/quote"
+              className="btn-primary text-lg px-8 py-4"
+              onClick={() => trackEvent('cta_click', { location: 'hero_primary' })}
+            >
+              Get a Free Quote
+            </Link>
+            <a
+              href="tel:+15555555555"
+              className="btn-outline text-lg px-8 py-4"
+              onClick={() => trackEvent('phone_click', { location: 'hero' })}
+            >
+              📞 Call Us Today
+            </a>
+          </motion.div>
+        </div>
+
+        {/* Scroll hint */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/30 text-xs flex flex-col items-center gap-1 animate-bounce">
+          <span>Scroll</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </section>
+
+      {/* ── Trust badges ──────────────────────────────────────────────── */}
+      <section className="bg-brand-charcoal py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
+            {TRUST_BADGES.map(({ label, desc }) => (
+              <div key={label} className="text-center">
+                <div className="font-display font-black text-brand-amber text-xl">{label}</div>
+                <div className="text-white/40 text-xs mt-0.5">{desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Services overview ─────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="section-heading mb-4">Our Services</h2>
+            <p className="text-brand-navy/60 max-w-xl mx-auto">
+              From new construction to annual maintenance — we handle every phase of
+              commercial and residential asphalt work.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {SERVICES.map((svc, i) => (
+              <motion.a
+                key={svc.title}
+                href={svc.href}
+                className="card p-6 group cursor-pointer hover:border-brand-amber border-2 border-transparent"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.07 }}
+              >
+                <div className="text-4xl mb-4">{svc.icon}</div>
+                <h3 className="font-display font-bold text-lg mb-2 group-hover:text-brand-amber transition-colors">
+                  {svc.title}
+                </h3>
+                <p className="text-brand-navy/60 text-sm leading-relaxed">{svc.desc}</p>
+              </motion.a>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link to="/services" className="btn-primary">
+              View All Services
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Why choose us ─────────────────────────────────────────────── */}
+      <section className="py-20 bg-brand-navy text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="font-display font-black text-4xl mb-6">
+                Why Four Generations Have
+                <span className="text-brand-amber block">Trusted the Worden Name</span>
+              </h2>
+              <ul className="space-y-4">
+                {[
+                  ['40+ years', 'of asphalt expertise in this region'],
+                  ['Commercial-grade', 'equipment on every residential job'],
+                  ['Transparent pricing', 'no hidden fees, ever'],
+                  ['On-time guarantee', 'or we send daily updates'],
+                  ['Fully insured', 'licensed and bonded'],
+                ].map(([bold, rest]) => (
+                  <li key={bold} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full bg-brand-amber flex-shrink-0 flex items-center justify-center text-brand-navy font-bold text-xs mt-0.5">
+                      ✓
+                    </span>
+                    <span className="text-white/80">
+                      <strong className="text-white">{bold}</strong> {rest}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/about" className="mt-8 btn-outline inline-flex">
+                Our Story
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { num: '40+', label: 'Years in business' },
+                { num: '500+', label: 'Projects completed' },
+                { num: '4.9★', label: 'Google rating' },
+                { num: '100%', label: 'Licensed & insured' },
+              ].map(({ num, label }) => (
+                <div
+                  key={label}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center"
+                >
+                  <div className="font-display font-black text-brand-amber text-3xl">{num}</div>
+                  <div className="text-white/60 text-sm mt-1">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────────────── */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="section-heading text-center mb-12">Common Questions</h2>
+          <div className="space-y-4">
+            {HOME_FAQS.map(({ question, answer }) => (
+              <details
+                key={question}
+                className="card p-6 group cursor-pointer"
+              >
+                <summary className="font-semibold text-brand-navy list-none flex justify-between items-center gap-4">
+                  {question}
+                  <span className="text-brand-amber group-open:rotate-45 transition-transform text-xl flex-shrink-0">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 text-brand-navy/70 text-sm leading-relaxed">{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA Banner ───────────────────────────────────────────────── */}
+      <section className="py-16 bg-brand-amber">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="font-display font-black text-brand-navy text-4xl mb-4">
+            Ready to Get Started?
+          </h2>
+          <p className="text-brand-navy/70 mb-8 text-lg">
+            Free estimates. Fast turnaround. Quality that lasts 20+ years.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/quote"
+              className="bg-brand-navy text-white font-bold px-8 py-4 rounded-lg hover:bg-brand-navy/90 transition-colors text-lg"
+              onClick={() => trackEvent('cta_click', { location: 'home_bottom_banner' })}
+            >
+              Request a Free Quote
+            </Link>
+            <a
+              href="tel:+15555555555"
+              className="border-2 border-brand-navy text-brand-navy font-bold px-8 py-4 rounded-lg hover:bg-brand-navy hover:text-white transition-colors text-lg"
+              onClick={() => trackEvent('phone_click', { location: 'home_bottom_banner' })}
+            >
+              📞 (555) 555-5555
+            </a>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
