@@ -1,0 +1,62 @@
+/**
+ * API client — reads VITE_API_BASE_URL at build time.
+ * Falls back to relative paths so the frontend still works when
+ * the backend is not yet deployed.
+ *
+ * All requests include a 10-second AbortController timeout so the UI
+ * never hangs indefinitely on a slow/down backend.
+ */
+
+const BASE = import.meta.env.VITE_API_BASE_URL || ''
+const DEFAULT_TIMEOUT_MS = 10_000
+
+async function request(method, path, body) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
+
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    signal: controller.signal,
+  }
+  if (body) opts.body = JSON.stringify(body)
+
+  try {
+    const res = await fetch(`${BASE}${path}`, opts)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail || `HTTP ${res.status}`)
+    }
+    return res.json()
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+export const api = {
+  submitQuote:   (data) => request('POST', '/api/v1/leads/quote',   data),
+  submitContact: (data) => request('POST', '/api/v1/leads/contact', data),
+  getReviews:    ()     => request('GET',  '/api/v1/reviews'),
+  getSchema:     ()     => request('GET',  '/api/v1/schema/local-business'),
+}
+
+// ── GA4 event helpers ─────────────────────────────────────────────────────────
+export function trackEvent(eventName, params = {}) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, params)
+  }
+}
+
+export function trackPageView(path, title) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'page_view', {
+      page_path: path,
+      page_title: title,
+    })
+  }
+}

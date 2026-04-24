@@ -1,0 +1,52 @@
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import FloatingCTA from './components/FloatingCTA'
+import ScrollToTop from './components/ScrollToTop'
+import ErrorBoundary from './components/ErrorBoundary'
+
+// Lazy-loaded pages for code splitting
+const Home     = lazy(() => import('./pages/Home'))
+const Services = lazy(() => import('./pages/Services'))
+const About    = lazy(() => import('./pages/About'))
+const Contact  = lazy(() => import('./pages/Contact'))
+const Quote    = lazy(() => import('./pages/Quote'))
+const Reviews  = lazy(() => import('./pages/Reviews'))
+const NotFound = lazy(() => import('./pages/NotFound'))
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-brand-navy">
+      <div className="w-10 h-10 border-4 border-brand-amber border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <ErrorBoundary>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-1">
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/"         element={<Home />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/about"    element={<About />} />
+                <Route path="/contact"  element={<Contact />} />
+                <Route path="/quote"    element={<Quote />} />
+                <Route path="/reviews"  element={<Reviews />} />
+                <Route path="*"         element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <Footer />
+          <FloatingCTA />
+        </div>
+      </ErrorBoundary>
+    </BrowserRouter>
+  )
+}
