@@ -14,7 +14,7 @@ export default [
     restorationBondNote: 'Road cut bond required for work in state right-of-way; amount set by district',
     pavingSpecification: 'ALDOT Standard Specifications for Highway Construction',
     haulRoutePermitRequired: true,
-    haul RouteNote: 'Overweight/oversize loads require route permit and may require escort',
+    haulRouteNote: 'Overweight/oversize loads require route permit and may require escort',
     localRoadAuthority: 'County commissions and municipal public works departments',
     encroachmentPermitRequired: true,
     citation: 'Ala. Admin. Code r. 450-10-1 et seq. (Utility Accommodation)',
