@@ -3,7 +3,7 @@ import { SITE_URL } from '../lib/schemas'
 
 // Re-export schema helpers so existing page imports still work via this path.
 // eslint-disable-next-line react-refresh/only-export-components
-export { LOCAL_BUSINESS_SCHEMA, serviceSchema, faqSchema, reviewsSchema } from '../lib/schemas'
+export { LOCAL_BUSINESS_SCHEMA, serviceSchema, faqSchema, reviewsSchema, howToSchema, videoObjectSchema } from '../lib/schemas'
 
 /**
  * Injects SEO meta tags, Open Graph, Twitter Card, and JSON-LD

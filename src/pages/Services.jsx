@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import SchemaMarkup, { serviceSchema, faqSchema } from '../components/SchemaMarkup'
+import SchemaMarkup, { serviceSchema, faqSchema, howToSchema } from '../components/SchemaMarkup'
 import FAQAccordion from '../components/FAQAccordion'
 
 const SERVICES = [
@@ -9,6 +9,7 @@ const SERVICES = [
     icon: '🛣',
     title: 'Asphalt Paving',
     tagline: 'New construction & overlay paving',
+    priceRange: 'Starting around $3–$8 per sq ft depending on project size and base conditions',
     description:
       'Whether you need a brand-new asphalt surface or a milled-and-overlaid refresh, our crews use commercial-grade compaction equipment to deliver a smooth, durable result. We handle base preparation, grading, and drainage planning before the first ton of asphalt goes down.',
     features: [
@@ -25,6 +26,7 @@ const SERVICES = [
     icon: '🖤',
     title: 'Sealcoating',
     tagline: 'Extend pavement life by 50%',
+    priceRange: 'Starting around $0.15–$0.25 per sq ft for spray or squeegee application',
     description:
       'A quality sealcoat fills surface voids, blocks UV oxidation, repels fuel and oil spills, and gives your pavement that jet-black finish. We apply it by spray or squeegee depending on surface texture, and we let nothing move until it is fully cured.',
     features: [
@@ -41,6 +43,7 @@ const SERVICES = [
     icon: '🔧',
     title: 'Crack Filling',
     tagline: 'Stop water before it destroys your base',
+    priceRange: 'Starting around $0.50–$2.00 per linear foot of crack',
     description:
       'Water entering through cracks is the #1 cause of asphalt failure. Our hot-pour rubberized crack fill expands and contracts with temperature cycles, creating a waterproof seal that outlasts cold-pour products by years.',
     features: [
@@ -56,6 +59,7 @@ const SERVICES = [
     icon: '🏢',
     title: 'Parking Lots',
     tagline: 'Commercial lots built to handle heavy traffic',
+    priceRange: 'Starting around $3–$7 per sq ft; varies by lot size, drainage, and base depth',
     description:
       'Commercial parking lots demand thicker base depths, precise drainage grades, and line striping that meets code. We have completed lots for fast-food chains, retail centers, warehouses, and apartment complexes across the region.',
     features: [
@@ -73,6 +77,7 @@ const SERVICES = [
     icon: '🏠',
     title: 'Residential Driveways',
     tagline: 'Curb appeal that lasts a generation',
+    priceRange: 'Most residential driveways run $2,500–$8,000 depending on size and base conditions',
     description:
       'We remove your old driveway, prep the sub-base, and install a full-depth asphalt section sized for your soil conditions and vehicle load. Most residential driveways are completed in a single day.',
     features: [
@@ -89,6 +94,7 @@ const SERVICES = [
     icon: '🔄',
     title: 'Maintenance Plans',
     tagline: 'One contract — zero pavement headaches',
+    priceRange: 'Custom pricing based on lot square footage and services included',
     description:
       'Commercial property managers rely on our annual maintenance plans to keep lots looking sharp and code-compliant year after year. We schedule sealcoating, crack fill, and minor repairs on a rotating calendar.',
     features: [
@@ -124,6 +130,33 @@ const SERVICE_FAQS = [
   },
 ]
 
+const SEALCOATING_HOW_TO = howToSchema(
+  'How Sealcoating Is Applied',
+  'Step-by-step process J. Worden & Sons uses to apply professional sealcoating to asphalt pavement.',
+  [
+    {
+      name: 'Surface Inspection & Crack Filling',
+      text: 'We inspect the entire asphalt surface for cracks, potholes, and damage. All cracks are filled with hot-pour rubberized sealant and allowed to cure before any sealer is applied.',
+    },
+    {
+      name: 'Surface Cleaning',
+      text: 'The pavement is blown clean with commercial air blowers and power-washed to remove oil spots, dirt, and debris. Oil stains are spot-treated with a primer to prevent bleed-through.',
+    },
+    {
+      name: 'Edging & Masking',
+      text: 'All curbs, sidewalks, and garage aprons are masked off with tape and paper to protect adjacent surfaces. Crews hand-cut the edges for a clean, professional line.',
+    },
+    {
+      name: 'Sealer Application',
+      text: 'Sealcoat is applied by commercial spray equipment or squeegee — the method is chosen based on surface texture and condition. Two coats are applied for maximum protection and uniform coverage.',
+    },
+    {
+      name: 'Curing & Traffic Control',
+      text: 'The sealed surface must cure for 24–48 hours depending on temperature and humidity. Cones and signs are placed to keep traffic off until the sealer has fully hardened.',
+    },
+  ]
+)
+
 export default function Services() {
   return (
     <>
@@ -133,9 +166,10 @@ export default function Services() {
         canonical="/services"
         schema={[
           ...SERVICES.map((s) =>
-            serviceSchema(s.title, s.description, `/services#${s.id}`)
+            serviceSchema(s.title, s.description, `/services#${s.id}`, s.priceRange)
           ),
           faqSchema(SERVICE_FAQS),
+          SEALCOATING_HOW_TO,
         ]}
         breadcrumb={[
           { name: 'Home', path: '/' },

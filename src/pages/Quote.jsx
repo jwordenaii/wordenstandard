@@ -149,7 +149,7 @@ export default function Quote() {
             </p>
             {result && (
               <div
-                className={`inline-block px-5 py-2 rounded-full text-sm font-bold mb-6 ${
+                className={`inline-block px-5 py-2 rounded-full text-sm font-bold mb-4 ${
                   result.lead_score === 'HOT'
                     ? 'bg-red-100 text-red-700'
                     : result.lead_score === 'WARM'
@@ -160,6 +160,9 @@ export default function Quote() {
                 {result.follow_up_sla}
               </div>
             )}
+            <p className="text-sm text-brand-navy/50 mb-6">
+              ⏱ We respond within 2 hours during business hours.
+            </p>
             <a href="/" className="btn-primary">
               Back to Home
             </a>
@@ -426,19 +429,27 @@ export default function Quote() {
                   </div>
                 )}
 
-                <div className="flex justify-between">
-                  <button type="button" onClick={back} className="btn-outline">
-                    ← Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={status === 'submitting'}
-                    className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {status === 'submitting' ? 'Submitting…' : 'Submit Request ✓'}
-                  </button>
+                {/* Social proof — figures sourced from Google Business Profile reviews */}
+                <div className="flex items-center justify-center gap-2 py-3 mb-2 text-sm text-brand-navy/60 border-t border-gray-100">
+                  <span className="text-brand-amber text-base">⭐⭐⭐⭐⭐</span>
+                  <span>
+                    Trusted by <strong className="text-brand-navy">87+ happy customers</strong> · 4.9 Google rating
+                  </span>
                 </div>
+
+                <div className="flex justify-between">
+                   <button type="button" onClick={back} className="btn-outline">
+                     ← Edit
+                   </button>
+                   <button
+                     type="button"
+                     onClick={handleSubmit}
+                     disabled={status === 'submitting'}
+                     className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                   >
+                     {status === 'submitting' ? 'Submitting…' : 'Submit Request ✓'}
+                   </button>
+                 </div>
               </div>
             )}
           </div>

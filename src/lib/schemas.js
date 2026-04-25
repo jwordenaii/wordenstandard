@@ -18,18 +18,31 @@ export const LOCAL_BUSINESS_SCHEMA = {
   description:
     'Fourth-generation asphalt paving company serving residential and commercial clients since 1984.',
   foundingDate: '1984',
-  telephone: '+1-555-555-5555',
-  email: 'contact@jworden.com',
+  telephone: '+18044461296',
+  email: 'contact@jwordenasphalt.com',
   url: SITE_URL,
   logo: `${SITE_URL}/logo.png`,
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '123 Paving Way',
-    addressLocality: 'Your City',
-    addressRegion: 'ST',
-    postalCode: '00000',
+    streetAddress: '1601 Ware Bottom Springs Rd Suite 214',
+    addressLocality: 'Chester',
+    addressRegion: 'VA',
+    postalCode: '23836',
     addressCountry: 'US',
   },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 37.3529,
+    longitude: -77.4326,
+  },
+  areaServed: [
+    { '@type': 'City', name: 'Chester', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+    { '@type': 'City', name: 'Richmond', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+    { '@type': 'City', name: 'Chesterfield', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+    { '@type': 'City', name: 'Colonial Heights', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+    { '@type': 'City', name: 'Hopewell', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+    { '@type': 'City', name: 'Petersburg', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+  ],
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
@@ -47,7 +60,7 @@ export const LOCAL_BUSINESS_SCHEMA = {
   },
 }
 
-export function serviceSchema(name, description, url) {
+export function serviceSchema(name, description, url, priceRange) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -56,10 +69,60 @@ export function serviceSchema(name, description, url) {
     provider: {
       '@type': 'LocalBusiness',
       name: 'J. Worden & Sons Asphalt Paving',
+      telephone: '+18044461296',
       url: SITE_URL,
     },
-    areaServed: { '@type': 'State', name: 'Your State' },
+    areaServed: [
+      { '@type': 'City', name: 'Chester', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+      { '@type': 'City', name: 'Richmond', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+      { '@type': 'City', name: 'Chesterfield', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+      { '@type': 'City', name: 'Colonial Heights', containedInPlace: { '@type': 'State', name: 'Virginia' } },
+    ],
+    ...(priceRange
+      ? {
+          offers: {
+            '@type': 'Offer',
+            priceSpecification: {
+              '@type': 'PriceSpecification',
+              priceCurrency: 'USD',
+              description: priceRange,
+            },
+          },
+        }
+      : {}),
     url: `${SITE_URL}${url}`,
+  }
+}
+
+export function howToSchema(name, description, steps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name,
+    description,
+    step: steps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    })),
+  }
+}
+
+export function videoObjectSchema({ name, description, thumbnailUrl, uploadDate, contentUrl }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name,
+    description,
+    thumbnailUrl,
+    uploadDate,
+    ...(contentUrl ? { contentUrl } : {}),
+    publisher: {
+      '@type': 'Organization',
+      name: 'J. Worden & Sons Asphalt Paving',
+      url: SITE_URL,
+    },
   }
 }
 
