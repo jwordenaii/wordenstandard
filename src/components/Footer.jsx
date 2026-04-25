@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 
 const LINKS = [
-  { to: '/',        label: 'Home' },
-  { to: '/services',label: 'Services' },
-  { to: '/about',   label: 'About' },
-  { to: '/reviews', label: 'Reviews' },
-  { to: '/quote',   label: 'Free Quote' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/',         label: 'Home' },
+  { to: '/services', label: 'Services' },
+  { to: '/about',    label: 'About' },
+  { to: '/reviews',  label: 'Reviews' },
+  { to: '/advisory', label: 'Advisory Board' },
+  { to: '/quote',    label: 'Free Quote' },
+  { to: '/contact',  label: 'Contact' },
 ]
 
 const SERVICES = [
