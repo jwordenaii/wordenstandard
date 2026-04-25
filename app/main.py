@@ -22,6 +22,7 @@ from .services.ai_brain import SupremeCourtAI
 from .services.telemetry import FleetOperations
 from .routers import leads, reviews, schema_ld, ai as ai_router
 from .routers import admin as admin_router, content as content_router
+from .routers import advisor as advisor_router
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ app.include_router(reviews.router)
 app.include_router(schema_ld.router)
 app.include_router(ai_router.router)
 app.include_router(content_router.router)
+app.include_router(advisor_router.router)
 app.include_router(admin_router.router)
 
 
