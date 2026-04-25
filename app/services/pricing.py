@@ -43,6 +43,7 @@ def estimate_price(
     service_type: str,
     property_type: str,
     project_size_sqft: float,
+    state_code: str | None = None,
 ) -> dict | None:
     """
     Return a ballpark cost range or None if the service is not recognised.
@@ -52,20 +53,24 @@ def estimate_price(
     service_type      : one of the keys in _RATES
     property_type     : 'residential' | 'commercial'
     project_size_sqft : positive float
+    state_code        : optional 2-letter state abbreviation for regional adjustment
 
     Returns
     -------
     {
         "low_usd":    int,
         "high_usd":   int,
-        "low_fmt":    str,   # "$X,XXX"
+        "low_fmt":    str,
         "high_fmt":   str,
+        "multiplier": float,   # state adjustment applied (1.0 = national average)
         "disclaimer": str,
     }
     """
-    service  = (service_type  or "").lower().strip()
+    from .state_data import get_price_multiplier  # noqa: PLC0415
+
+    service   = (service_type  or "").lower().strip()
     property_ = (property_type or "residential").lower().strip()
-    sqft     = float(project_size_sqft or 0)
+    sqft      = float(project_size_sqft or 0)
 
     if service not in _RATES or sqft <= 0:
         return None
@@ -74,7 +79,9 @@ def estimate_price(
     if not rates:
         return None
 
-    low_raw, high_raw = rates[0] * sqft, rates[1] * sqft
+    multiplier = get_price_multiplier(state_code) if state_code else 1.0
+    low_raw  = rates[0] * sqft * multiplier
+    high_raw = rates[1] * sqft * multiplier
 
     low  = max(_round_to_nearest(low_raw,  _ROUND_TO), int(_MOBILISATION_FLOOR_LOW))
     high = max(_round_to_nearest(high_raw, _ROUND_TO), int(_MOBILISATION_FLOOR_HIGH))
@@ -83,10 +90,11 @@ def estimate_price(
         return f"${n:,}"
 
     return {
-        "low_usd":  low,
-        "high_usd": high,
-        "low_fmt":  fmt(low),
-        "high_fmt": fmt(high),
+        "low_usd":   low,
+        "high_usd":  high,
+        "low_fmt":   fmt(low),
+        "high_fmt":  fmt(high),
+        "multiplier": round(multiplier, 3),
         "disclaimer": (
             "Ballpark estimate only — final price depends on site conditions, "
             "material costs, and access. A free on-site quote is always included."
