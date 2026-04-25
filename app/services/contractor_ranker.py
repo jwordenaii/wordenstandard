@@ -260,7 +260,6 @@ def score_contractor_bid(
     lic_s  = _score_license_classes(bid.license_classes)
     bond_s = _bond_score(bid.bond_amount, bid.bid_amount)
     exp_s  = _experience_score(bid.years_experience)
-    comp_s = (100 if bid.has_insurance else 40) + (0 if not bid.workers_comp else 0)
     comp_s = 100 if (bid.has_insurance and bid.workers_comp) else (60 if bid.has_insurance else 30)
 
     composite = int(

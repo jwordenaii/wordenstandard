@@ -108,7 +108,7 @@ class SupremeCourtAI:
         if compliance_data is None:
             return {
                 "is_compliant": False,
-                "legal_notes": f"State '{state}' not recognised. Verify license requirements locally.",
+                "legal_notes": f"State '{state}' not recognized. Verify license requirements locally.",
                 "liability_risk": "MEDIUM",
                 "license_required": True,
                 "prevailing_wage_applicable": False,
@@ -125,7 +125,7 @@ class SupremeCourtAI:
         # License check
         if lic_required:
             recommendations.append(
-                f"Verify active contractor license in {abbr} before mobilising."
+                f"Verify active contractor license in {abbr} before mobilizing."
             )
         else:
             recommendations.append(
