@@ -107,8 +107,8 @@ export default function Navbar() {
           role="navigation"
           aria-label="Mobile navigation"
           className={`md:hidden overflow-hidden transition-all duration-300 ${
-            open ? 'max-h-96 pb-4' : 'max-h-0'
-          } border-t border-white/10`}
+            open ? 'max-h-96 pb-4 border-t border-white/10' : 'max-h-0'
+          }`}
         >
           {NAV_LINKS.map(({ to, label }) => (
             <NavLink

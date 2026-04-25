@@ -21,6 +21,7 @@ const AdvisoryHub  = lazy(() => import('./pages/advisory/AdvisoryHub'))
 const StateDetail  = lazy(() => import('./pages/advisory/StateDetail'))
 const UtilitiesHub = lazy(() => import('./pages/advisory/UtilitiesHub'))
 const StateCompare = lazy(() => import('./pages/advisory/StateCompare'))
+const CategoryHub  = lazy(() => import('./pages/advisory/CategoryHub'))
 
 function PageLoader() {
   return (
@@ -47,10 +48,12 @@ export default function App() {
                 <Route path="/quote"    element={<Quote />} />
                 <Route path="/reviews"  element={<Reviews />} />
                 {/* Advisory Board routes */}
-                <Route path="/advisory"                element={<AdvisoryHub />} />
-                <Route path="/advisory/state/:stateCode" element={<StateDetail />} />
-                <Route path="/advisory/utilities"      element={<UtilitiesHub />} />
-                <Route path="/advisory/compare"        element={<StateCompare />} />
+                <Route path="/advisory"                    element={<AdvisoryHub />} />
+                <Route path="/advisory/state/:stateCode"   element={<StateDetail />} />
+                <Route path="/advisory/utilities"          element={<UtilitiesHub />} />
+                <Route path="/advisory/compare"            element={<StateCompare />} />
+                {/* Generic category hub — handles licensing, construction-law, safety, etc. */}
+                <Route path="/advisory/:category"          element={<CategoryHub />} />
                 <Route path="*"         element={<NotFound />} />
               </Routes>
             </Suspense>
