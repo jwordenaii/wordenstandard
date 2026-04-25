@@ -80,16 +80,19 @@ export default function Footer() {
               Contact
             </h3>
             <a
-              href="tel:+15555555555"
+              href="tel:+18044461296"
               className="text-brand-amber font-bold text-sm hover:underline"
               onClick={() => {
                 if (typeof window.gtag === 'function')
                   window.gtag('event', 'phone_click', { location: 'footer' })
               }}
             >
-              (555) 555-5555
+              (804) 446-1296
             </a>
             <p className="text-xs text-white/40 mt-1">Mon–Fri 7am–5pm</p>
+            <p className="text-xs text-white/40 mt-2 leading-relaxed">
+              1601 Ware Bottom Springs Rd<br />Suite 214, Chester VA 23836
+            </p>
           </div>
         </div>
 

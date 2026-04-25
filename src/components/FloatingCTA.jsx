@@ -1,19 +1,28 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 /**
  * Floating "Get a Free Quote" CTA button pinned to the bottom-right.
- * Hides until the user scrolls past the hero (300px) so it doesn't
- * compete with the hero CTA above the fold.
+ * Hides until the user starts scrolling, then becomes visible 3 seconds
+ * after the first scroll event — so it doesn't compete with the hero CTA.
  */
 export default function FloatingCTA() {
   const [visible, setVisible] = useState(false)
+  const timerRef = useRef(null)
+  const startedRef = useRef(false)
 
-  const onScroll = useCallback(() => setVisible(window.scrollY > 300), [])
+  const onScroll = useCallback(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+    timerRef.current = setTimeout(() => setVisible(true), 3000)
+  }, [])
 
   useEffect(() => {
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
   }, [onScroll])
 
   return (
