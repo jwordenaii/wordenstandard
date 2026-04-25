@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom'
 
 /**
  * Floating "Get a Free Quote" CTA button pinned to the bottom-right.
- * Hides until the user starts scrolling, then becomes visible 3 seconds
+ * Hides until the user starts scrolling, then becomes visible VISIBILITY_DELAY_MS
  * after the first scroll event — so it doesn't compete with the hero CTA.
  */
+
+const VISIBILITY_DELAY_MS = 3000
+
 export default function FloatingCTA() {
   const [visible, setVisible] = useState(false)
   const timerRef = useRef(null)
@@ -14,7 +17,7 @@ export default function FloatingCTA() {
   const onScroll = useCallback(() => {
     if (startedRef.current) return
     startedRef.current = true
-    timerRef.current = setTimeout(() => setVisible(true), 3000)
+    timerRef.current = setTimeout(() => setVisible(true), VISIBILITY_DELAY_MS)
   }, [])
 
   useEffect(() => {

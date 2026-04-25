@@ -429,9 +429,9 @@ export default function Quote() {
                   </div>
                 )}
 
-                {/* Social proof */}
+                {/* Social proof — figures sourced from Google Business Profile reviews */}
                 <div className="flex items-center justify-center gap-2 py-3 mb-2 text-sm text-brand-navy/60 border-t border-gray-100">
-                  <span className="text-brand-amber text-base">★★★★★</span>
+                  <span className="text-brand-amber text-base">⭐⭐⭐⭐⭐</span>
                   <span>
                     Trusted by <strong className="text-brand-navy">87+ happy customers</strong> · 4.9 Google rating
                   </span>
