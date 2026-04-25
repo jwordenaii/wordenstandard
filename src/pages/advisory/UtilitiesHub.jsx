@@ -40,7 +40,7 @@ const DEPTH_COLS = [
   { key: 'water', label: 'Water (in)', sortable: false, render: (v) => v?.minBurialDepthIn ? `${v.minBurialDepthIn}"` : '—' },
   { key: 'sewer', label: 'Sewer (in)', sortable: false, render: (v) => v?.minBurialDepthIn ? `${v.minBurialDepthIn}"` : '—' },
   { key: 'telecom', label: 'Telecom (in)', sortable: false, render: (v) => v?.minBurialDepthIn ? `${v.minBurialDepthIn}"` : '—' },
-  { key: 'water', label: 'Frost Line (in)', sortable: false, render: (_, row) => row.water?.frostLineDepthIn != null ? `${row.water.frostLineDepthIn}"` : '—' },
+  { key: 'frostLine', label: 'Frost Line (in)', sortable: false, render: (_, row) => row.water?.frostLineDepthIn != null ? `${row.water.frostLineDepthIn}"` : '—' },
 ]
 
 export default function UtilitiesHub() {

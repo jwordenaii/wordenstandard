@@ -215,18 +215,18 @@ export default function StateDetail() {
           const cl = findStateRecord(tabData.contracts)
           return (
             <Section title="Contract & Construction Law">
-              <Row label="Written Contract SOL" value={cl.solWrittenContractYears ? `${cl.solWrittenContractYears} years` : null} citation={cl.citation} />
-              <Row label="Oral Contract SOL" value={cl.solOralContractYears ? `${cl.solOralContractYears} years` : null} />
-              <Row label="Statute of Repose" value={cl.statueOfReposeYears ? `${cl.statueOfReposeYears} years` : null} />
-              <Row label="Repose Note" value={cl.statueOfReposeNote} />
-              <Row label="Right to Cure Law" value={cl.rightToCureLaw} citation={cl.rightToCureCitation} />
-              <Row label="Right to Cure Notice" value={cl.rightToCureNoticeDays ? `${cl.rightToCureNoticeDays} days` : null} />
-              <Row label="Anti-Indemnity Statute" value={cl.antiIndemnityStatute} citation={cl.antiIndemnityCitation} />
+              <Row label="Written Contract SOL" value={cl.statuteOfLimitationsWrittenYears ? `${cl.statuteOfLimitationsWrittenYears} years` : null} citation={cl.statSOLCitation} />
+              <Row label="Oral Contract SOL" value={cl.statuteOfLimitationsOralYears ? `${cl.statuteOfLimitationsOralYears} years` : null} />
+              <Row label="Statute of Repose" value={cl.statuteOfReposeYears ? `${cl.statuteOfReposeYears} years` : null} citation={cl.statSORCitation} />
+              <Row label="Implied Warranty of Construction" value={cl.impliedWarrantyConstruction} />
+              <Row label="Implied Warranty Note" value={cl.impliedWarrantyNote} />
+              <Row label="Right to Repair Law" value={cl.rightToRepairLaw} citation={cl.rightToRepairCitation} />
+              <Row label="Anti-Indemnity Law" value={cl.antiIndemnityLaw} citation={cl.citation} />
               <Row label="Anti-Indemnity Note" value={cl.antiIndemnityNote} />
-              <Row label="No-Damages-for-Delay" value={cl.noDamagesForDelayEnforceable} />
-              <Row label="Delay Note" value={cl.noDamagesNote} />
-              <Row label="Arbitration Enforceable" value={cl.arbitrationClauseEnforceable} />
-              <Row label="Arbitration Note" value={cl.arbitrationNote} />
+              <Row label="Pay-If-Paid Enforceable" value={cl.payIfPaidEnforceable} />
+              <Row label="Liquidated Damages Enforceable" value={cl.liquidatedDamagesEnforceable} />
+              <Row label="Force Majeure Codified" value={cl.forceMajeureCodified} />
+              <Row label="Notes" value={cl.notes} />
             </Section>
           )
         })()}
@@ -273,16 +273,16 @@ export default function StateDetail() {
           const sf = findStateRecord(tabData.safety)
           return (
             <Section title="OSHA & Worker Safety">
-              <Row label="State OSHA Plan" value={sf.oshaStatePlan} citation={sf.citation} />
-              <Row label="State Plan Agency" value={sf.statePlanAgency} />
-              <Row label="Agency URL" value={sf.statePlanUrl} />
-              <Row label="Trenching Supplement" value={sf.trenchingExcavationSupplement} />
-              <Row label="Trenching Note" value={sf.trenchingNote} />
-              <Row label="Fall Protection Supplement" value={sf.fallProtectionSupplement} />
-              <Row label="Heat Illness Rule" value={sf.heatIllnessPreventionRule} />
-              <Row label="Heat Illness Note" value={sf.heatIllnessNote} />
-              <Row label="Penalty Schedule" value={sf.penaltySchedule} />
-              <Row label="Max Willful Penalty" value={sf.maxWillfulPenalty ? `$${sf.maxWillfulPenalty.toLocaleString()}` : null} />
+              <Row label="State OSHA Plan" value={sf.statePlanState} citation={sf.citation} />
+              <Row label="Plan Agency" value={sf.oshAuthority} />
+              <Row label="Agency URL" value={sf.oshUrl} />
+              <Row label="Fall Protection Threshold" value={sf.fallProtectionThresholdFt ? `${sf.fallProtectionThresholdFt} ft` : null} />
+              <Row label="Scaffolding Regulations" value={sf.scaffoldingRegulations} />
+              <Row label="Excavation Safety" value={sf.excavationSafetyRegulations} />
+              <Row label="Confined Space" value={sf.confinedSpaceRegulations} />
+              <Row label="Hazard Communication" value={sf.hazardCommunicationStandard} />
+              <Row label="Workers Comp Required" value={sf.workerCompProgramRequired} />
+              <Row label="Notes" value={sf.notes} />
             </Section>
           )
         })()}
@@ -292,14 +292,10 @@ export default function StateDetail() {
           return (
             <Section title="Prevailing Wage">
               <Row label="State Law Exists" value={pw.prevailingWageLaw} citation={pw.citation} />
-              <Row label="Law Name" value={pw.lawName} />
-              <Row label="Coverage Threshold" value={pw.coverageThresholdUSD ? `$${pw.coverageThresholdUSD.toLocaleString()}` : null} />
-              <Row label="Project Types Covered" value={pw.projectTypesCovered} />
-              <Row label="Apprenticeship Ratio" value={pw.apprenticeshipRatioRequired} />
-              <Row label="Apprenticeship Note" value={pw.apprenticeshipNote} />
-              <Row label="Certified Payroll Required" value={pw.certifiedPayrollRequired} />
-              <Row label="Certified Payroll Note" value={pw.certifiedPayrollNote} />
-              <Row label="Federal Davis-Bacon Applies" value={pw.davisBaconFederalApplies} />
+              <Row label="Law Scope" value={pw.lawScope} />
+              <Row label="Administered By" value={pw.administeredBy} />
+              <Row label="Coverage Threshold" value={pw.thresholdForPublicWorks} />
+              <Row label="Federal Davis-Bacon Applies" value={pw.davisBaconApplies} />
               <Row label="Notes" value={pw.notes} />
             </Section>
           )
