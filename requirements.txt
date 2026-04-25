@@ -14,3 +14,13 @@ jinja2==3.1.6
 opencv-python-headless==4.10.0.84
 numpy==1.26.4
 apify-client==1.8.1
+
+# ── Background tasks: Celery + Redis ────────────────────────────────────────
+celery[redis]==5.4.0
+redis==5.2.1
+
+# ── LangChain RAG pipeline ───────────────────────────────────────────────────
+langchain==0.3.25
+langchain-openai==0.3.16
+langchain-community==0.3.25
+chromadb==0.6.3
