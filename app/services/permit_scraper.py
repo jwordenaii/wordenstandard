@@ -200,7 +200,7 @@ def lookup_dpor_license(
     Look up a DPOR license or address via the Apify Virginia DPOR scraper.
 
     Requires APIFY_TOKEN environment variable.
-    Returns a raw dict with licence details or an error payload.
+    Returns a raw dict with license details or an error payload.
     """
     apify_token = os.getenv("APIFY_TOKEN", "")
     if not apify_token:

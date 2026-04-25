@@ -74,7 +74,10 @@ def measure_image_areas(
     try:
         import cv2  # noqa: PLC0415 — imported lazily to keep startup fast
     except ImportError as exc:
-        raise RuntimeError("opencv-python-headless is not installed") from exc
+        raise RuntimeError(
+            "opencv-python-headless is not installed. "
+            "Install it with: pip install opencv-python-headless==4.10.0.84"
+        ) from exc
 
     # Decode bytes → numpy array → BGR image
     arr = np.frombuffer(image_bytes, dtype=np.uint8)

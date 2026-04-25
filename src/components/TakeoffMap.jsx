@@ -247,7 +247,7 @@ export default function TakeoffMap() {
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Loading…
               </span>
-            ) : 'Analyse Site'}
+            ) : 'Analyze Site'}
           </button>
           <button
             type="button"

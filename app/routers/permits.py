@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
-from typing import Optional
 
 from ..core.limiter import limiter
 from ..services.permit_scraper import fetch_vpt_permits, fetch_deq_permits, lookup_dpor_license
@@ -85,8 +84,8 @@ async def deq_permits(
 # ── DPOR ──────────────────────────────────────────────────────────────────────
 
 class DporRequest(BaseModel):
-    license_number: Optional[str] = Field(default=None, max_length=50, description="DPOR license number")
-    address: Optional[str] = Field(default=None, max_length=300, description="Contractor address to look up")
+    license_number: str | None = Field(default=None, max_length=50, description="DPOR license number")
+    address: str | None = Field(default=None, max_length=300, description="Contractor address to look up")
 
 
 @router.post(

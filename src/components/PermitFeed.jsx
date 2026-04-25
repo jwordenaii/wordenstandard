@@ -175,7 +175,7 @@ export default function PermitFeed({
             <tbody>
               {permits.map((p, i) => (
                 <PermitRow
-                  key={p.permit_id || i}
+                  key={`${p.source || 'permit'}-${p.permit_id || p.address || i}`}
                   permit={p}
                   onCreateQuote={handleCreateQuote}
                 />
