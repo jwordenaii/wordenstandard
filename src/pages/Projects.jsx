@@ -5,171 +5,264 @@ import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA } from '../components/SchemaMarkup'
 import SocialShare from '../components/SocialShare'
 import { trackEvent } from '../api/client'
 
+/**
+ * All projects listed here reflect verified, real work completed by
+ * J. Worden & Sons as described by Mr. Worden.
+ * Documentation (photos, records) exists in Dropbox and Google Photos.
+ */
+
 const PROJECTS = [
+  // ── Virginia Roots ────────────────────────────────────────────────────
   {
-    id: 'grace-baptist-1984',
-    name: 'Grace Baptist Church of Chester',
+    id: 'va-coastal-corridor',
+    name: 'Virginia Coastal Corridor — Regional Build-Out',
     year: 1984,
+    yearDisplay: '1984 – 2000s',
     type: 'Commercial',
-    location: 'Chester, VA',
-    sqft: 4200,
-    scope: ['Full-depth paving', 'Hand-cut edging', 'Drainage grading'],
-    headline: 'The First Job.',
+    location: 'Motels, VA to Virginia Beach, VA',
+    headline: 'Where the Reputation Was Built.',
     description:
-      'Harold Worden Sr.\'s first contract as an independent company. A church parking lot in Chester — four days of work with his brother Ray, one truck, and one secondhand Barber-Greene paver. Harold hand-cut every edge with a shovel. The lot is still standing today.',
-    highlight: 'Still standing 40+ years later.',
-    emoji: '⛪',
+      'The foundation of the company. Mr. Worden\'s grandfather built J. Worden & Sons into a highly respected regional name from Motels, Virginia all the way to Virginia Beach — commercial lots, driveways, and local business paving across the coastal corridor. All word of mouth. No shortcuts.',
+    scope: ['Commercial lot paving', 'Residential driveways', 'Sub-base construction', 'Drainage grading'],
+    highlight: 'Built entirely on reputation — zero advertising.',
+    emoji: '🌊',
   },
+
+  // ── KFC Virginia — First Franchise Contract ───────────────────────────
   {
-    id: 'jd-stripmall-1997',
-    name: 'Jefferson Davis Strip Mall Renovation',
-    year: 1997,
-    type: 'Commercial',
-    location: 'Colonial Heights, VA',
-    sqft: 28000,
-    scope: ['Mill & overlay', 'Full drainage redesign', 'Line striping', 'ADA transitions'],
-    headline: 'First Six-Figure Contract.',
+    id: 'kfc-virginia-initial',
+    name: 'KFC Franchise Program — Virginia',
+    year: 2000,
+    yearDisplay: 'Early 2000s',
+    type: 'QSR / Franchise',
+    location: 'Virginia',
+    headline: 'First KFC Contract. The Door Opens.',
     description:
-      'A complete mill-and-overlay of an aging commercial center. At $118,000 it was the biggest job in Worden history at the time. Harold Jr. ran the equipment, Harold Sr. ran the estimates. Four consecutive 14-hour days. Zero punch-list items at closeout.',
-    highlight: '$0 in punch-list callbacks.',
-    emoji: '🏢',
-  },
-  {
-    id: 'hopewell-neighborhood-2001',
-    name: 'Hopewell Subdivision — Phase I',
-    year: 2001,
-    type: 'Residential',
-    location: 'Hopewell, VA',
-    sqft: 42000,
-    scope: ['New construction', 'Sub-base grading', 'Full-depth HMA', '23 driveways + entrance road'],
-    headline: 'First Full Subdivision.',
-    description:
-      'The first multi-home residential development the company handled end-to-end. Twenty-three driveways plus a shared entrance road — all coordinated around active construction by the homebuilder. Delivered on schedule despite three weather delays.',
-    highlight: '23 driveways. One schedule.',
-    emoji: '🏠',
-  },
-  {
-    id: 'kfc-richmond-2006',
-    name: 'Richmond KFC — Franchise Group',
-    year: 2006,
-    type: 'Franchise',
-    location: 'Richmond Metro, VA',
-    sqft: 18400,
-    scope: ['Full mill & pave', 'Drive-thru lane resurfacing', 'ADA stalls', 'Thermoplastic striping'],
-    headline: 'First National Franchise Lot.',
-    description:
-      'The job that opened the door to franchise work across the Richmond metro. KFC franchise operators required strict tolerances, national brand standards for ADA compliance, and clean post-project documentation. The Worden team delivered — and became the preferred vendor for the group.',
-    highlight: 'Led to 10 more franchise contracts.',
+      'The company\'s first KFC franchise paving contract in Virginia. National franchise operators hold contractors to a different standard — tighter tolerances, brand-compliant documentation, ADA compliance, zero rework tolerance. Worden & Sons delivered, and the KFC network took notice.',
+    scope: ['Parking lot mill & overlay', 'Drive-thru lane paving', 'ADA-compliant stalls', 'Thermoplastic striping', 'Documentation package'],
+    highlight: 'First franchise contract — led to multi-state expansion.',
     emoji: '🍗',
   },
+
+  // ── KFC NC ────────────────────────────────────────────────────────────
   {
-    id: 'taco-bell-chester-2008',
-    name: 'Chester Taco Bell — Full Lot Rebuild',
-    year: 2008,
-    type: 'Franchise',
-    location: 'Chester, VA',
-    sqft: 15800,
-    scope: ['Full-depth reclamation', 'Drainage overhaul', 'Concrete curb & gutter', 'Thermoplastic striping', 'Wheel stops'],
-    headline: 'Home Turf.',
+    id: 'kfc-north-carolina',
+    name: 'KFC Franchise Program — North Carolina',
+    year: 2005,
+    yearDisplay: 'Mid 2000s',
+    type: 'QSR / Franchise',
+    location: 'North Carolina',
+    headline: 'Crossing State Lines.',
     description:
-      'A full-depth reclamation and rebuild for the local Taco Bell — right in the company\'s backyard. The old parking lot had failed base-deep, requiring full excavation, drainage overhaul, and new construction from subgrade up. Finished two days ahead of schedule.',
-    highlight: 'Finished 2 days early.',
-    emoji: '🌮',
+      'KFC operators in North Carolina bring Worden & Sons into the state based on the Virginia track record. Parking lot maintenance, resurfacing, and franchise-standard documentation. The same system that worked in Virginia translates directly.',
+    scope: ['Lot resurfacing', 'Crack fill & sealcoat', 'Drive-thru lane work', 'Striping & ADA compliance'],
+    highlight: 'Direct referral from Virginia franchise network.',
+    emoji: '🐾',
   },
+
+  // ── KFC Southeast ─────────────────────────────────────────────────────
   {
-    id: 'arbys-colonial-heights-2009',
-    name: "Colonial Heights Arby's — Full Renovation",
-    year: 2009,
-    type: 'Franchise',
-    location: 'Colonial Heights, VA',
-    sqft: 14200,
-    scope: ["Mill & overlay", 'ADA compliance upgrade', 'New drive-thru lane', 'Line striping', 'Signage bases'],
-    headline: 'Franchise Row Continues.',
+    id: 'kfc-georgia-florida',
+    name: 'KFC Franchise Program — Georgia & Florida',
+    year: 2007,
+    yearDisplay: '2007 – 2012',
+    type: 'QSR / Franchise',
+    location: 'Georgia and Florida',
+    headline: 'Southeast Expansion.',
     description:
-      "Part of the multi-year Arby's franchise agreement across the Richmond region. Full mill-and-overlay with an ADA compliance overhaul — widened stalls, new curb ramps, upgraded signage. The franchise inspector called it the cleanest lot in their regional portfolio.",
-    highlight: 'Rated top lot in franchise region.',
-    emoji: '🥩',
+      'Franchise work expands into Georgia and Florida. Multiple locations across both states — parking lot maintenance, resurfacing, and franchise-standard closeout documentation. Coordinating crews across state lines at franchise scale requires logistics precision that Worden & Sons had built into their process.',
+    scope: ['Multi-location lot paving', 'Franchise compliance documentation', 'ADA upgrades', 'Striping & sealcoating'],
+    highlight: 'Multi-state multi-location coordination.',
+    emoji: '☀️',
   },
+
+  // ── KFC Michigan ──────────────────────────────────────────────────────
   {
-    id: 'school-parking-2012',
-    name: 'Chesterfield County School Lot',
-    year: 2012,
-    type: 'Municipal',
-    location: 'Chesterfield County, VA',
-    sqft: 38000,
-    scope: ['Full-depth paving', 'Bus lane construction', 'ADA compliance', 'Drainage design', 'Thermoplastic striping'],
-    headline: 'Public Trust.',
+    id: 'kfc-michigan',
+    name: 'KFC Franchise Program — Michigan',
+    year: 2010,
+    yearDisplay: '2010 – 2015',
+    type: 'QSR / Franchise',
+    location: 'Michigan',
+    headline: 'Midwest Entry.',
     description:
-      'A full parking lot construction project for a Chesterfield County school — including dedicated bus lanes, parent drop zones, and staff parking sections. Public contracts require airtight documentation and strict code compliance. The county inspector signed off on first review.',
-    highlight: 'Passed inspection on first review.',
-    emoji: '🏫',
+      'The franchise network expands into the Midwest. KFC operators in Michigan select Worden & Sons based on Southeast and Mid-Atlantic performance. Lot paving, maintenance, and full franchise documentation across multiple Michigan locations.',
+    scope: ['Full lot resurfacing', 'Drive-thru lane rebuild', 'Concrete curb & gutter', 'Thermoplastic striping'],
+    highlight: 'National QSR presence now coast to Midwest.',
+    emoji: '🌲',
   },
+
+  // ── New QSR Build Program ──────────────────────────────────────────────
   {
-    id: 'hoa-chesterfield-2016',
-    name: 'Autumn Ridge HOA — Community Roads',
+    id: 'kfc-new-build-program',
+    name: 'KFC New QSR Build Program — Multi-State',
     year: 2016,
-    type: 'Residential',
-    location: 'Chesterfield County, VA',
-    sqft: 67000,
-    scope: ['Full overlay', 'Sub-base patching', 'Crack repair', 'Sealcoating', 'Pavement marking'],
-    headline: 'Neighborhood-Scale.',
+    yearDisplay: '2016 – 2023',
+    type: 'QSR / New Build',
+    location: 'Multi-state',
+    headline: 'Selected for Ground-Up New Store Construction.',
     description:
-      'A full road and parking area overlay for a 200-home HOA community. Coordinated access restrictions for residents across four phases over three weeks. The HOA board sent a letter to James IV personally after completion — the only time in company history that\'s happened.',
-    highlight: 'Personal commendation from HOA board.',
-    emoji: '🌳',
-  },
-  {
-    id: 'apartment-complex-2019',
-    name: 'Chesterfield Apartment Complex',
-    year: 2019,
-    type: 'Commercial',
-    location: 'Chesterfield County, VA',
-    sqft: 148104,
-    scope: [
-      'Full-depth construction',
-      'Drainage re-engineering',
-      '2,100+ tons of HMA',
-      '180 parking stalls',
-      'ADA ramp installation throughout',
-      'Thermoplastic striping',
-    ],
-    headline: 'Largest Job in Company History.',
-    description:
-      'A 3.4-acre parking infrastructure build for a new 240-unit apartment complex. Seven crew members, six weeks, four construction phases. Full drainage overhaul required re-routing two existing utility paths. Zero change orders. The general contractor gave the project a perfect score on their post-completion survey.',
-    highlight: 'Perfect GC post-completion score. Zero change orders.',
+      'KFC selects Worden & Sons to assist with new store construction under their national new build program. This is not maintenance or resurfacing — it\'s building new QSR sites from the ground up, civil through finish. The program runs through the end of 2023. Every project backed by verified photo documentation.',
+    scope: ['Ground-up site construction', 'Civil & earthwork', 'Full-depth paving', 'Drive-thru geometry', 'Utility coordination', 'ADA site compliance'],
+    highlight: 'National new-build program. Civil through finish.',
     emoji: '🏗',
   },
+
+  // ── New KFC Build — Texas ─────────────────────────────────────────────
   {
-    id: 'warehousing-2022',
-    name: 'Logistics Facility — Truck Court & Lot',
-    year: 2022,
-    type: 'Commercial',
-    location: 'Petersburg, VA',
-    sqft: 94000,
-    scope: ['Heavy-duty 6" HMA sections', 'Truck court construction', 'Dock approach paving', 'Drainage system', 'Wheel stops'],
-    headline: 'Heavy Industry Grade.',
+    id: 'kfc-new-build-texas',
+    name: 'KFC — New Store Build, Texas',
+    year: 2021,
+    yearDisplay: '2020s',
+    type: 'QSR / New Build',
+    location: 'Texas',
+    headline: 'New Build. New State. Same Standard.',
     description:
-      'A high-load truck court and parking lot for an industrial logistics facility near Petersburg. Tractor-trailer loads require 6" HMA sections over a reinforced aggregate base — significantly heavier spec than standard commercial. All sections were cored and tested post-pour. Every result exceeded spec.',
-    highlight: 'Every core test exceeded specification.',
-    emoji: '🚛',
+      'A ground-up KFC new store build in Texas — one of several Texas projects completed post-pandemic. Full site work from civil through paving finish. Part of the national new build program, executed with the same documentation and standards that built the franchise relationship over two decades.',
+    scope: ['Full site civil work', 'Sub-base & drainage', 'Full-depth HMA', 'Drive-thru lane construction', 'Concrete flatwork coordination', 'Closeout documentation'],
+    highlight: 'Verified. Photos and records on file.',
+    emoji: '🤠',
+  },
+
+  // ── Texas Remodels ────────────────────────────────────────────────────
+  {
+    id: 'kfc-texas-remodels',
+    name: 'KFC Store Remodels — Texas (Multiple)',
+    year: 2021,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'Texas',
+    headline: 'Multi-Location Texas Program.',
+    description:
+      'Multiple KFC store remodels across Texas post-pandemic. Parking lot renovation, drive-thru modifications, ADA upgrades, and franchise-standard documentation at each location. Texas becomes one of the company\'s most active post-pandemic states.',
+    scope: ['Lot mill & overlay', 'Drive-thru modifications', 'ADA compliance upgrades', 'Thermoplastic striping', 'Franchise closeout docs'],
+    highlight: 'Multiple Texas locations. All documented.',
+    emoji: '🌵',
+  },
+
+  // ── Kansas / Kansas City ──────────────────────────────────────────────
+  {
+    id: 'kfc-kansas-kc',
+    name: 'KFC Store Remodels — Kansas & Kansas City',
+    year: 2021,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'Kansas and Kansas City, MO',
+    headline: 'Heartland Program.',
+    description:
+      'Store remodels across Kansas and Kansas City. Parking lot renovation and franchise remodel scope at multiple locations. Coordinated across both the Kansas and Missouri sides of the metro.',
+    scope: ['Parking lot renovation', 'Concrete repair', 'Striping & ADA compliance', 'Franchise documentation'],
+    highlight: 'Cross-state metro coordination.',
+    emoji: '🌾',
+  },
+
+  // ── Iowa / Missouri ────────────────────────────────────────────────────
+  {
+    id: 'kfc-iowa-missouri',
+    name: 'KFC Store Remodels — Iowa & Missouri',
+    year: 2021,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'Iowa and Missouri',
+    headline: 'Midwest Remodel Run.',
+    description:
+      'Store remodel program across Iowa and Missouri. Lot resurfacing, concrete work, ADA upgrades, and striping. Part of the broader post-pandemic KFC remodel push that took the company across the Midwest.',
+    scope: ['Lot resurfacing', 'ADA upgrades', 'Concrete flatwork', 'Thermoplastic striping'],
+    highlight: 'Part of multi-state Midwest program.',
+    emoji: '🌽',
+  },
+
+  // ── Michigan (post-pandemic) ───────────────────────────────────────────
+  {
+    id: 'kfc-michigan-remodels',
+    name: 'KFC Store Remodels — Michigan (Post-Pandemic)',
+    year: 2020,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'Michigan',
+    headline: 'Return to Michigan.',
+    description:
+      'A return to Michigan with post-pandemic remodel scope — lot resurfacing, drive-thru reconstruction, and franchise-standard closeouts. The relationship with Michigan franchise operators predates the pandemic and continues through the current cycle.',
+    scope: ['Lot resurfacing', 'Drive-thru reconstruction', 'ADA compliance', 'Full franchise closeout'],
+    highlight: 'Long-term franchise relationship continues.',
+    emoji: '🏔',
+  },
+
+  // ── Minnesota ─────────────────────────────────────────────────────────
+  {
+    id: 'kfc-minnesota',
+    name: 'QSR Program — Minnesota',
+    year: 2020,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'Minnesota',
+    headline: 'Northern Expansion.',
+    description:
+      'QSR paving work in Minnesota — part of the company\'s continued national expansion post-pandemic. Lot resurfacing and franchise remodel scope completed to national brand standards.',
+    scope: ['Lot resurfacing', 'Drive-thru lane work', 'Cold-weather paving protocols', 'Franchise documentation'],
+    highlight: 'National footprint now reaches Minnesota.',
+    emoji: '❄️',
+  },
+
+  // ── New York / New Jersey ─────────────────────────────────────────────
+  {
+    id: 'kfc-ny-nj',
+    name: 'KFC Store Remodels — New York & New Jersey',
+    year: 2022,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'New York and New Jersey',
+    headline: 'Northeast Program.',
+    description:
+      'Store remodels in New York and New Jersey — the northeastern expansion of the KFC remodel program. Urban-market franchise locations have additional logistical complexity; the Worden team navigated access, scheduling, and documentation requirements at each site.',
+    scope: ['Lot renovation', 'Concrete repair & replacement', 'ADA compliance', 'Urban scheduling coordination', 'Franchise closeout documentation'],
+    highlight: 'Urban-market franchise execution.',
+    emoji: '🗽',
+  },
+
+  // ── North Carolina / Georgia Post-Pandemic ────────────────────────────
+  {
+    id: 'kfc-nc-ga-postpandemic',
+    name: 'KFC Remodels — North Carolina & Georgia (Post-Pandemic)',
+    year: 2020,
+    yearDisplay: '2020s',
+    type: 'QSR / Remodel',
+    location: 'North Carolina and Georgia',
+    headline: 'Returning to the Southeast.',
+    description:
+      'A return to North Carolina and Georgia for post-pandemic KFC remodel scope. States where the company built its early national reputation — now operating with even more documentation discipline, verified photos, and proven multi-state logistics.',
+    scope: ['Full lot renovation', 'Drive-thru modifications', 'ADA upgrades', 'Thermoplastic striping', 'Franchise documentation'],
+    highlight: 'Where it started. Still going.',
+    emoji: '🌿',
+  },
+
+  // ── Private Commercial ─────────────────────────────────────────────────
+  {
+    id: 'private-commercial-current',
+    name: 'Private Commercial Work — Active',
+    year: 2024,
+    yearDisplay: 'Current',
+    type: 'Commercial',
+    location: 'Virginia and regional',
+    headline: 'Private Work. Same Standard.',
+    description:
+      'Alongside QSR work, the company actively takes on private commercial paving — parking lots, site work, and maintenance programs. The same documentation discipline, franchise-level precision, and Worden standard applied to every private job.',
+    scope: ['Parking lot construction & renovation', 'Commercial site paving', 'Maintenance programs', 'Drainage engineering', 'Striping & ADA compliance'],
+    highlight: 'Franchise-level quality on every job.',
+    emoji: '🏢',
   },
 ]
 
-const TYPES = ['All', 'Commercial', 'Residential', 'Franchise', 'Municipal']
+const TYPES = ['All', 'QSR / New Build', 'QSR / Remodel', 'QSR / Franchise', 'Commercial']
 
 const TYPE_COLORS = {
-  Commercial: 'bg-blue-100 text-blue-700',
-  Residential: 'bg-green-100 text-green-700',
-  Franchise:   'bg-orange-100 text-orange-700',
-  Municipal:   'bg-purple-100 text-purple-700',
+  'QSR / New Build':  'bg-amber-100 text-amber-700',
+  'QSR / Remodel':    'bg-orange-100 text-orange-700',
+  'QSR / Franchise':  'bg-red-100 text-red-700',
+  Commercial:         'bg-blue-100 text-blue-700',
 }
 
-function formatSqft(n) {
-  if (n >= 43560) {
-    return `${(n / 43560).toFixed(1)} acres`
-  }
-  return `${n.toLocaleString()} sq ft`
-}
+const STATES_SERVED = ['VA', 'NC', 'GA', 'FL', 'MI', 'TX', 'KS', 'MO', 'IA', 'MN', 'NY', 'NJ']
 
 export default function Projects() {
   const [activeType, setActiveType] = useState('All')
@@ -178,16 +271,13 @@ export default function Projects() {
     ? PROJECTS
     : PROJECTS.filter((p) => p.type === activeType)
 
-  // Sort by year descending
   const sorted = [...filtered].sort((a, b) => b.year - a.year)
-
-  const totalSqft = PROJECTS.reduce((sum, p) => sum + p.sqft, 0)
 
   return (
     <>
       <SchemaMarkup
-        title="Project Portfolio — 40 Years of Asphalt Work"
-        description="Browse J. Worden & Sons' project portfolio — 500+ completed jobs including commercial lots, residential driveways, national franchise sites, and municipal contracts across Chester, VA and the Richmond region."
+        title="Project Portfolio — KFC National QSR Program & Commercial Paving"
+        description="Verified project history for J. Worden & Sons — KFC new store builds and remodels across 12+ states including TX, NY, NJ, MI, MN, IA, MO, KS, GA, FL, NC, VA. Pavement Magazine Top 75. Est. 1984."
         canonical="/projects"
         schema={LOCAL_BUSINESS_SCHEMA}
         breadcrumb={[
@@ -200,19 +290,19 @@ export default function Projects() {
       <div className="bg-brand-navy pt-32 pb-20 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
           <span className="inline-block bg-brand-amber/20 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-5">
-            40 Years of Work
+            Verified Work · {STATES_SERVED.length}+ States
           </span>
           <h1 className="font-display font-black text-5xl md:text-6xl mb-4">
             Our <span className="text-brand-amber">Projects</span>
           </h1>
           <p className="text-white/70 text-xl max-w-2xl mx-auto">
-            500+ completed jobs. Commercial, residential, franchise, and municipal.
-            Here are the ones that tell our story.
+            Real work. Real documentation. From Virginia Beach to Texas — KFC national new builds,
+            multi-state remodel programs, and private commercial paving since 1984.
           </p>
           <div className="mt-8 flex justify-center">
             <SocialShare
               path="/projects"
-              text="See the J. Worden & Sons project portfolio — 40 years of asphalt paving in Virginia"
+              text="J. Worden & Sons — KFC national QSR contractor, 12+ states, Pavement Magazine Top 75"
               compact
             />
           </div>
@@ -221,18 +311,35 @@ export default function Projects() {
 
       {/* Stats */}
       <section className="bg-brand-amber py-10">
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { stat: '500+',                         label: 'Jobs Completed' },
-              { stat: `${(totalSqft / 43560).toFixed(0)}+`, label: 'Acres Paved (featured)' },
-              { stat: '40+',                          label: 'Years in Business' },
-              { stat: '4.9★',                         label: 'Google Rating' },
+              { stat: '1984',             label: 'Est.' },
+              { stat: `${STATES_SERVED.length}+`, label: 'States Worked In' },
+              { stat: 'Top 75',           label: 'Pavement Magazine (4 categories)' },
+              { stat: '2026',             label: 'Top Contractor Nominee' },
             ].map(({ stat, label }) => (
               <div key={label}>
                 <div className="font-display font-black text-brand-navy text-3xl">{stat}</div>
                 <div className="text-brand-navy/60 text-sm mt-1">{label}</div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* States served strip */}
+      <section className="bg-brand-navy py-6">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <p className="text-white/40 text-xs uppercase tracking-widest mb-3">States Worked In</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {STATES_SERVED.map((state) => (
+              <span
+                key={state}
+                className="bg-white/10 text-brand-amber font-bold text-sm px-3 py-1 rounded-full"
+              >
+                {state}
+              </span>
             ))}
           </div>
         </div>
@@ -281,16 +388,20 @@ export default function Projects() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap gap-2 mb-1">
                       <span className="text-xs font-bold uppercase tracking-widest text-brand-amber">
-                        {project.year}
+                        {project.yearDisplay}
                       </span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TYPE_COLORS[project.type] || 'bg-gray-100 text-gray-600'}`}>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          TYPE_COLORS[project.type] || 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
                         {project.type}
                       </span>
                     </div>
                     <h2 className="font-display font-bold text-lg text-brand-navy leading-tight">
                       {project.name}
                     </h2>
-                    <p className="text-brand-navy/40 text-xs mt-0.5">{project.location}</p>
+                    <p className="text-brand-navy/40 text-xs mt-0.5">📍 {project.location}</p>
                   </div>
                 </div>
 
@@ -311,17 +422,9 @@ export default function Projects() {
                   ))}
                 </div>
 
-                {/* Stats row */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex gap-4">
-                    <div>
-                      <div className="text-xs text-brand-navy/40 uppercase tracking-widest">Size</div>
-                      <div className="font-semibold text-brand-navy text-sm">{formatSqft(project.sqft)}</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-brand-amber font-semibold">{project.highlight}</div>
-                  </div>
+                {/* Highlight */}
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-xs text-brand-amber font-semibold">✓ {project.highlight}</p>
                 </div>
               </motion.article>
             ))}
@@ -335,26 +438,41 @@ export default function Projects() {
         </div>
       </section>
 
+      {/* Documentation callout */}
+      <section className="py-16 bg-brand-navy text-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="text-4xl mb-4">📸</div>
+          <h2 className="font-display font-black text-3xl mb-4">
+            Every Major Project Is <span className="text-brand-amber">Documented</span>
+          </h2>
+          <p className="text-white/60 text-lg max-w-2xl mx-auto">
+            Mr. Worden maintains a full Dropbox and Google Photos archive of verified photos
+            and records for every major project. This is not common in the industry.
+            When you hire us, you get a contractor who can prove the work.
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="py-16 bg-brand-navy text-white text-center">
+      <section className="py-16 bg-brand-amber text-center">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="font-display font-black text-4xl mb-4">
+          <h2 className="font-display font-black text-brand-navy text-4xl mb-4">
             Ready to be our next project?
           </h2>
-          <p className="text-white/60 text-lg mb-8">
-            Free estimates. Fast turnaround. Four generations of quality behind every job.
+          <p className="text-brand-navy/70 text-lg mb-8">
+            Free estimates. Franchise-level standards on every job.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/quote"
-              className="btn-primary text-lg px-8 py-4"
+              className="bg-brand-navy text-white font-bold px-8 py-4 rounded-lg hover:bg-brand-navy/90 transition-colors text-lg"
               onClick={() => trackEvent('cta_click', { location: 'projects_bottom' })}
             >
               Get a Free Quote
             </Link>
             <a
               href="tel:+18044461296"
-              className="btn-outline text-lg px-8 py-4"
+              className="border-2 border-brand-navy text-brand-navy font-bold px-8 py-4 rounded-lg hover:bg-brand-navy hover:text-white transition-colors text-lg"
               onClick={() => trackEvent('phone_click', { location: 'projects_bottom' })}
             >
               📞 (804) 446-1296

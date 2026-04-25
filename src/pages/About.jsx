@@ -6,7 +6,7 @@ import SocialShare from '../components/SocialShare'
 
 /**
  * All content in this file reflects the verified, real history of
- * J. Worden & Sons as told by owner James Worden.
+ * J. Worden & Sons as told by owner Mr. Worden.
  * No fictional names, characters, or events are included.
  */
 
@@ -15,7 +15,7 @@ const TIMELINE = [
     year: 'The Foundation',
     headline: 'A Lifetime in the Trades.',
     event:
-      'Our founder — James Worden\'s grandfather — spent more than 30 years running a roofing company before making the move to asphalt paving. By the time he picked up a paver, he already knew what it meant to work in the heat, meet a deadline, and stand behind a job. That foundation never left the company.',
+      'Our founder — Mr. Worden\'s grandfather — spent more than 30 years running a roofing company before making the move to asphalt paving. By the time he picked up a paver, he already knew what it meant to work in the heat, meet a deadline, and stand behind a job. That foundation never left the company.',
   },
   {
     year: 'Est. 1984',
@@ -31,9 +31,9 @@ const TIMELINE = [
   },
   {
     year: 'Age 14',
-    headline: 'James Worden Joins His Grandfather.',
+    headline: 'Mr. Worden Joins His Grandfather.',
     event:
-      'James Worden started working alongside his grandfather at fourteen years old. Not watching — working. Learning to grade, to read a mat, to run a crew, to estimate a job. Everything he knows about paving, he learned hands-on from the man who built the company.',
+      'Mr. Worden started working alongside his grandfather at fourteen years old. Not watching — working. Learning to grade, to read a mat, to run a crew, to estimate a job. Everything he knows about paving, he learned hands-on from the man who built the company.',
   },
   {
     year: 'The Franchise Era Begins',
@@ -57,13 +57,13 @@ const TIMELINE = [
     year: '2015',
     headline: 'The Founder Passes.',
     event:
-      'James Worden\'s grandfather passes away in 2015. He built the company from nothing — from a roofing career into an asphalt legacy that reached from Virginia Beach to Michigan. The business he started, and the standard he held, live on in every job the company takes.',
+      'Mr. Worden\'s grandfather passes away in 2015. He built the company from nothing — from a roofing career into an asphalt legacy that reached from Virginia Beach to Michigan. The business he started, and the standard he held, live on in every job the company takes.',
   },
   {
     year: '2016',
-    headline: 'James Worden Takes Over.',
+    headline: 'Mr. Worden Takes Over.',
     event:
-      'James Worden takes over leadership of the company his grandfather built. He had been working in it for over twenty years at that point. The transition was not about changing the company — it was about carrying it forward. Same standards. Same name. Same promise.',
+      'Mr. Worden takes over leadership of the company his grandfather built. He had been working in it for over twenty years at that point. The transition was not about changing the company — it was about carrying it forward. Same standards. Same name. Same promise.',
   },
   {
     year: 'Post-Pandemic Multi-State',
@@ -189,7 +189,7 @@ export default function About() {
     <>
       <SchemaMarkup
         title="About J. Worden & Sons — Family-Owned Asphalt Paving Since 1984"
-        description="The real story of J. Worden & Sons — founded by James Worden's grandfather after 30 years in roofing. From Virginia Beach to KFC national builds across 10+ states. Pavement Magazine Top 75. Best of Houzz. 2026 Top Contractor Nominee."
+        description="The real story of J. Worden & Sons — founded by Mr. Worden's grandfather after 30 years in roofing. From Virginia Beach to KFC national builds across 10+ states. Pavement Magazine Top 75. Best of Houzz. 2026 Top Contractor Nominee."
         canonical="/about"
         schema={LOCAL_BUSINESS_SCHEMA}
         breadcrumb={[
@@ -248,7 +248,7 @@ export default function About() {
             beside him at 14. Everything I know about this trade, I learned from him —
             and I run this company the same way he did.&rdquo;
           </p>
-          <p className="mt-6 text-brand-navy/50 font-medium">— James Worden, Owner</p>
+          <p className="mt-6 text-brand-navy/50 font-medium">— Mr. Worden, Owner</p>
         </div>
       </section>
 
@@ -393,7 +393,7 @@ export default function About() {
               </p>
             </motion.div>
 
-            {/* James Worden */}
+            {/* Mr. Worden */}
             <motion.div
               className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center"
               initial={{ opacity: 0, y: 20 }}
@@ -404,7 +404,7 @@ export default function About() {
               <div className="w-20 h-20 rounded-full bg-brand-amber/20 flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">👷</span>
               </div>
-              <h3 className="font-display font-bold text-xl text-brand-amber">James Worden</h3>
+              <h3 className="font-display font-bold text-xl text-brand-amber">Mr. Worden</h3>
               <p className="text-white/50 text-sm mt-1">Owner · Since 2016</p>
               <p className="text-white/70 text-sm mt-4 leading-relaxed">
                 Started working alongside his grandfather at age 14. Took over the company in 2016.
