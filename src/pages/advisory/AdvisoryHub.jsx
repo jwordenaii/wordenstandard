@@ -86,6 +86,22 @@ const CATEGORIES = [
     color: 'bg-brand-amber/10 border-brand-amber/30',
     accent: 'text-brand-navy',
   },
+  {
+    to: '/advisory/legal-strategy',
+    icon: '🤝',
+    title: 'Legal Strategy Advisor',
+    desc: 'Score your state\'s negotiation strength, identify your strongest legal position, and get dispute-specific strategy for liens, payment, and contract breach.',
+    color: 'bg-violet-50 border-violet-200',
+    accent: 'text-violet-700',
+  },
+  {
+    to: '/advisory/contractor-ranker',
+    icon: '🏗️',
+    title: 'Contractor Ranker',
+    desc: 'Rank contractor bids by price, licensing tier, bonding, and experience. Plus: find the best base license state and strongest lien jurisdiction.',
+    color: 'bg-emerald-50 border-emerald-200',
+    accent: 'text-emerald-700',
+  },
 ]
 
 export default function AdvisoryHub() {
