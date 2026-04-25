@@ -218,7 +218,7 @@ export default function StateDetail() {
               <Row label="Written Contract SOL" value={cl.statuteOfLimitationsWrittenYears ? `${cl.statuteOfLimitationsWrittenYears} years` : null} citation={cl.statSOLCitation} />
               <Row label="Oral Contract SOL" value={cl.statuteOfLimitationsOralYears ? `${cl.statuteOfLimitationsOralYears} years` : null} />
               <Row label="Statute of Repose" value={cl.statuteOfReposeYears ? `${cl.statuteOfReposeYears} years` : null} citation={cl.statSORCitation} />
-              <Row label="Implied Warranty" value={cl.impliedWarrantyConstruction} />
+              <Row label="Implied Warranty of Construction" value={cl.impliedWarrantyConstruction} />
               <Row label="Implied Warranty Note" value={cl.impliedWarrantyNote} />
               <Row label="Right to Repair Law" value={cl.rightToRepairLaw} citation={cl.rightToRepairCitation} />
               <Row label="Anti-Indemnity Law" value={cl.antiIndemnityLaw} citation={cl.citation} />
