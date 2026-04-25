@@ -25,7 +25,7 @@ import CitationBadge from '../../components/advisory/CitationBadge'
 
 // ── Column helper ─────────────────────────────────────────────────────────────
 
-const bool = (v) => (v == null ? '—' : v ? '✅ Yes' : '❌ No')
+const bool = (v) => (v === null || v === undefined ? '—' : v ? '✅ Yes' : '❌ No')
 const cite = (v) => <CitationBadge citation={v} />
 const arr  = (v) => (Array.isArray(v) ? (v.length ? v.join(', ') : '—') : (v ?? '—'))
 const yrs  = (v) => (v ? `${v} yr${v !== 1 ? 's' : ''}` : '—')
@@ -66,7 +66,7 @@ const CATEGORIES = {
   'construction-law': {
     emoji: '⚖️',
     title: 'Construction Law — Liens & Prompt Payment',
-    desc: "Mechanics lien filing deadlines, preliminary notice rules, prompt payment periods, and retainage caps for all 50 states.",
+    desc: 'Mechanics lien filing deadlines, preliminary notice rules, prompt payment periods, and retainage caps for all 50 states.',
     sections: [
       {
         heading: 'Mechanics Lien Laws — All 50 States',
@@ -318,8 +318,8 @@ export default function CategoryHub() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         <DisclaimerBanner />
 
-        {config.sections.map((section, i) => (
-          <CategorySection key={i} section={section} />
+        {config.sections.map((section) => (
+          <CategorySection key={section.heading} section={section} />
         ))}
 
         {/* Bottom nav */}
