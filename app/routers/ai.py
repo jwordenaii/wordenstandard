@@ -133,16 +133,36 @@ async def photo_inspect(
 
 # ── AI Chat ───────────────────────────────────────────────────────────────────
 
-_CHAT_SYSTEM_PROMPT = """You are JWordenAI, the expert assistant for J. Worden & Sons Asphalt Paving — a 4th-generation family company serving the US since 1984. You specialize in:
+_CHAT_SYSTEM_PROMPT = """You are JWordenAI — the intelligent assistant for J. Worden & Sons Asphalt Paving.
 
-1. Asphalt paving, sealcoating, crack filling, parking lots, and driveways
-2. Construction law across all 50 US states: contractor licensing, mechanics lien laws, prompt payment rules, contract law, prevailing wage, 811/utility rules, OSHA safety, building permits, and environmental permits
-3. Pricing guidance: asphalt paving runs roughly $2–$5/sqft for residential, $3–$7/sqft for commercial. Sealcoating is $0.15–$0.30/sqft. Crack filling is $1–$3/linear ft
-4. Project best practices: HMA temperature requirements, compaction density, base prep, ADA compliance
+COMPANY FACTS (verified — do not contradict):
+• Founded 1984 by Mr. Worden's grandfather after 30+ years in roofing
+• Mr. Worden started working in the field at age 14; took over the company in 2016
+• Headquarters: Chester, Virginia (1601 Ware Bottom Springs Rd Suite 214)
+• Phone: (804) 446-1296
+• KFC national franchise paving: VA, NC, GA, FL, MI, TX, KS, MO, IA, MN, NY, NJ and more
+• KFC new store builds (ground-up QSR construction) under national program, 2016–2023
+• Awards: Pavement Magazine Top 75 (4 categories), Best of Houzz (multiple years),
+  2026 Top Contractor Award Nominee
+• Full photo documentation: Dropbox + Google Photos archive of all major projects
 
-When asked about specific state construction law, answer accurately and include a note to verify with a licensed attorney since laws change. When asked about paving projects, be helpful and suggest getting a free quote at /quote.
+YOUR EXPERTISE:
+1. Asphalt paving, sealcoating, crack filling, parking lots, driveways, QSR/franchise site work
+2. Construction law across all 50 US states: contractor licensing, mechanics lien laws,
+   prompt payment rules, contract law, prevailing wage, 811/utility rules, OSHA, permits
+3. Pricing guidance (national baseline, adjusted by state labor and material costs):
+   Residential paving $3.50–$8.00/sqft · Commercial $2.50–$6.00/sqft ·
+   Sealcoating $0.15–$0.35/sqft · Crack fill $0.40–$1.00/sqft
+4. QSR/franchise site standards: ADA drive-thru widths, brand documentation, tolerances
+5. Project best practices: HMA temps, compaction density, base prep, drainage
 
-Respond conversationally in 2–4 sentences. Be confident, knowledgeable, and friendly."""
+RULES:
+• Be confident and direct — 2–4 sentences for simple Q&A
+• For state-specific legal questions, always add: "Verify with a licensed attorney — laws change."
+• For pricing, mention the free on-site quote at /quote
+• Never invent project details not listed above
+• If asked who owns the company, say "Mr. Worden" — do not use first names
+• If confidence is low on a specific fact, say so clearly"""
 
 
 class ChatRequest(BaseModel):
@@ -227,18 +247,35 @@ def _openai_chat(question: str, state_code: Optional[str]) -> str:
     summary="JWordenAI natural language Q&A",
     response_model=ChatResponse,
 )
-async def chat(req: ChatRequest):
+async def chat(req: ChatRequest, db=None):
     """
     Public endpoint — no auth required.
-    Accepts a natural language question about construction law or paving services.
-    Uses GPT-4o-mini when OPENAI_API_KEY is set; falls back to a curated stub.
+    Uses GPT-4o / GPT-4o-mini via the premium AI engine with confidence scoring.
+    Decisions below HUMAN_REVIEW_THRESHOLD are logged to the review queue.
     """
-    openai_key = os.getenv("OPENAI_API_KEY", "")
-    if openai_key:
-        answer = _openai_chat(req.question, req.state_code)
-        engine = "gpt-4o-mini"
-    else:
-        answer = _stub_chat(req.question)
-        engine = "stub"
+    from ..services.ai_engine import run_chat, HUMAN_REVIEW_THRESHOLD  # noqa: PLC0415
+    from ..models import HumanReviewQueue  # noqa: PLC0415
 
-    return ChatResponse(answer=answer, engine=engine)
+    decision = run_chat(req.question, state_code=req.state_code)
+
+    # Persist low-confidence decisions for human review
+    if decision.needs_human_review:
+        try:
+            from ..database import SessionLocal  # noqa: PLC0415
+            _db = SessionLocal()
+            try:
+                item = HumanReviewQueue(
+                    decision_type  = "chat",
+                    input_summary  = req.question[:500],
+                    ai_answer      = decision.answer[:2000],
+                    ai_engine      = decision.engine,
+                    confidence     = decision.confidence,
+                )
+                _db.add(item)
+                _db.commit()
+            finally:
+                _db.close()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Could not save review queue item: %s", exc)
+
+    return ChatResponse(answer=decision.answer, engine=decision.engine)

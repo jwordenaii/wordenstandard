@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SchemaMarkup from '../components/SchemaMarkup'
 import { api, trackEvent } from '../api/client'
 import { estimatePrice } from '../lib/pricing'
+import { STATE_OPTIONS, getStateSummary } from '../lib/states50'
 
 // ── Step definitions ──────────────────────────────────────────────────────────
 
@@ -32,6 +33,7 @@ const INITIAL_FORM = {
   service_type: '',
   property_type: 'residential',
   project_size_sqft: '',
+  state_code: '',
   urgency: 'flexible',
   address: '',
   name: '',
@@ -279,22 +281,26 @@ export default function Quote() {
                   <p className="text-xs text-brand-navy/40 mt-1">
                     Don&apos;t know exactly? An estimate is fine.
                   </p>
-                  {/* Live ballpark estimate */}
+                  {/* Live ballpark estimate — state-adjusted */}
                   {(() => {
                     const est = estimatePrice(
                       form.service_type,
                       form.property_type,
-                      form.project_size_sqft
+                      form.project_size_sqft,
+                      form.state_code || null,
                     )
                     if (!est) return null
                     return (
                       <div className="mt-3 bg-brand-amber/10 border border-brand-amber/30 rounded-xl px-4 py-3">
                         <p className="text-xs font-bold uppercase tracking-widest text-brand-amber mb-1">
-                          Ballpark Estimate
+                          Ballpark Estimate{form.state_code ? ` · ${form.state_code} Adjusted` : ''}
                         </p>
                         <p className="font-display font-black text-brand-navy text-xl">
                           {est.lowFmt} – {est.highFmt}
                         </p>
+                        {est.stateNote && (
+                          <p className="text-xs text-brand-navy/60 mt-1">{est.stateNote}</p>
+                        )}
                         <p className="text-xs text-brand-navy/50 mt-1 leading-relaxed">
                           {est.disclaimer}
                         </p>
@@ -304,8 +310,40 @@ export default function Quote() {
                 </div>
 
                 <div>
-                  <FieldLabel required>How soon do you need this done?</FieldLabel>
+                  <FieldLabel>Project State</FieldLabel>
                   <select
+                    name="state_code"
+                    value={form.state_code}
+                    onChange={handleChange}
+                    className={inputCls}
+                  >
+                    <option value="">Select a state…</option>
+                    {STATE_OPTIONS.map(({ value, label }) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                  {/* State compliance note */}
+                  {form.state_code && (() => {
+                    const s = getStateSummary(form.state_code)
+                    if (!s || !s.complianceNotes.length) return null
+                    return (
+                      <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                        <p className="text-xs font-bold text-blue-700 mb-1">
+                          {s.name} — Key Requirements
+                        </p>
+                        <ul className="text-xs text-blue-600 space-y-0.5">
+                          {s.complianceNotes.map(n => (
+                            <li key={n}>• {n}</li>
+                          ))}
+                        </ul>
+                        <p className="text-xs text-blue-500 mt-1">{s.seasonNote}</p>
+                      </div>
+                    )
+                  })()}
+                </div>
+
+                <div>
+                  <FieldLabel required>How soon do you need this done?</FieldLabel>                  <select
                     name="urgency"
                     value={form.urgency}
                     onChange={handleChange}
@@ -406,13 +444,14 @@ export default function Quote() {
                 <div className="bg-gray-50 rounded-xl p-5 space-y-3 text-sm mb-8">
                   {[
                     ['Service',       SERVICES.find((s) => s.value === form.service_type)?.label || form.service_type],
-                    ['Property Type', form.property_type],
-                    ['Size',          form.project_size_sqft ? `${form.project_size_sqft} sq ft` : 'Not specified'],
-                    ['Urgency',       URGENCIES.find((u) => u.value === form.urgency)?.label],
-                    ['Address',       form.address || 'Not specified'],
-                    ['Name',          form.name],
-                    ['Email',         form.email],
-                    ['Phone',         form.phone],
+                     ['Property Type', form.property_type],
+                     ['Size',          form.project_size_sqft ? `${form.project_size_sqft} sq ft` : 'Not specified'],
+                     ['State',         form.state_code ? STATE_OPTIONS.find(o => o.value === form.state_code)?.label : 'Not specified'],
+                     ['Urgency',       URGENCIES.find((u) => u.value === form.urgency)?.label],
+                     ['Address',       form.address || 'Not specified'],
+                     ['Name',          form.name],
+                     ['Email',         form.email],
+                     ['Phone',         form.phone],
                   ].map(([key, val]) => (
                     <div key={key} className="flex gap-3">
                       <span className="font-semibold text-brand-navy/50 w-28 flex-shrink-0">

@@ -46,12 +46,12 @@ const SERVICES = [
 ]
 
 const TRUST_BADGES = [
-  { label: 'KFC',      desc: 'Trusted vendor' },
-  { label: "Arby's",   desc: 'Franchise partner' },
-  { label: 'Taco Bell',desc: 'Commercial client' },
-  { label: '40 Years', desc: 'Est. 1984' },
-  { label: '4th Gen',  desc: 'Family owned' },
-  { label: '⭐ 4.9',   desc: '87 Google Reviews' },
+  { label: 'KFC',              desc: 'National QSR vendor'       },
+  { label: 'Pavement Mag',     desc: 'Top 75 · 4 categories'     },
+  { label: 'Best of Houzz',    desc: 'Multiple years'            },
+  { label: '2026 Nominee',     desc: 'Top Contractor Award'      },
+  { label: '12+ States',       desc: 'Verified QSR work'         },
+  { label: 'Est. 1984',        desc: 'Family owned'              },
 ]
 
 const HOME_FAQS = [
