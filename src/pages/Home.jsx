@@ -4,6 +4,7 @@ import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA, faqSchema } from '../components/Sc
 import { trackEvent } from '../api/client'
 import CountUp from '../components/CountUp'
 import FAQAccordion from '../components/FAQAccordion'
+import SocialLinks from '../components/SocialLinks'
 
 const SERVICES = [
   {
@@ -283,6 +284,40 @@ export default function Home() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="section-heading text-center mb-12">Common Questions</h2>
           <FAQAccordion items={HOME_FAQS} />
+        </div>
+      </section>
+
+      {/* ── Social Follow ─────────────────────────────────────────────── */}
+      <section className="py-16 bg-brand-navy text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
+            Follow Along
+          </span>
+          <h2 className="font-display font-black text-3xl mt-2 mb-3">
+            See the Work Before You Call
+          </h2>
+          <p className="text-white/60 mb-8 max-w-xl mx-auto">
+            Before &amp; afters, crew in the field, and paving tips for homeowners and
+            property managers — across every platform.
+          </p>
+          <SocialLinks
+            size="lg"
+            variant="badge"
+            className="justify-center flex-wrap"
+          />
+          <div className="mt-10 pt-8 border-t border-white/10 grid grid-cols-3 gap-6 max-w-sm mx-auto">
+            {[
+              { icon: '⭐', stat: '4.9', label: 'Google Rating' },
+              { icon: '💬', stat: '87',  label: 'Reviews' },
+              { icon: '📍', stat: '40+', label: 'Years Local' },
+            ].map(({ icon, stat, label }) => (
+              <div key={label} className="text-center">
+                <div className="text-2xl mb-1">{icon}</div>
+                <div className="font-display font-black text-brand-amber text-xl">{stat}</div>
+                <div className="text-white/40 text-xs">{label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

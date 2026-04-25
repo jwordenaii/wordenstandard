@@ -16,6 +16,7 @@ const Quote        = lazy(() => import('./pages/Quote'))
 const Reviews      = lazy(() => import('./pages/Reviews'))
 const NotFound     = lazy(() => import('./pages/NotFound'))
 const CommandCenter = lazy(() => import('./pages/CommandCenter'))
+const Projects      = lazy(() => import('./pages/Projects'))
 
 // Advisory pages — lazy-loaded so the 512KB legal dataset never hits the main bundle
 const AdvisoryHub          = lazy(() => import('./pages/advisory/AdvisoryHub'))
@@ -52,6 +53,8 @@ export default function App() {
                 <Route path="/reviews"  element={<Reviews />} />
                 {/* Command Center — operations dashboard */}
                 <Route path="/command-center" element={<CommandCenter />} />
+                {/* Projects / Portfolio */}
+                <Route path="/projects" element={<Projects />} />
                 {/* Advisory Board routes */}
                 <Route path="/advisory"                            element={<AdvisoryHub />} />
                 <Route path="/advisory/state/:stateCode"           element={<StateDetail />} />

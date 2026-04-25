@@ -8,6 +8,8 @@
  * production deployments automatically use the correct canonical domain.
  */
 
+import { SAME_AS_URLS } from './social'
+
 export const SITE_URL =
   import.meta.env.VITE_SITE_URL || 'https://jworden.netlify.app'
 
@@ -18,6 +20,7 @@ export const LOCAL_BUSINESS_SCHEMA = {
   description:
     'Fourth-generation asphalt paving company serving residential and commercial clients since 1984.',
   foundingDate: '1984',
+  sameAs: SAME_AS_URLS,
   telephone: '+18044461296',
   email: 'contact@jwordenasphalt.com',
   url: SITE_URL,
