@@ -257,7 +257,7 @@ export default function InnovationPanel() {
 
           {adopted.methods?.length === 0 && (
             <div className="text-center py-12 text-brand-navy/30 text-sm">
-              No methods adopted yet. Mark trials as "adopted" to build your competitive intelligence asset.
+              No methods adopted yet. Mark trials as &quot;adopted&quot; to build your competitive intelligence asset.
             </div>
           )}
         </div>

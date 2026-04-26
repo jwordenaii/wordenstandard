@@ -230,7 +230,7 @@ export default function BidIntelPanel() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-brand-navy/40">Click "Analyze" to get AI-powered win/loss insights based on your bid history.</p>
+              <p className="text-sm text-brand-navy/40">Click &quot;Analyze&quot; to get AI-powered win/loss insights based on your bid history.</p>
             )}
           </div>
         </div>

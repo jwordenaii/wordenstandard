@@ -176,7 +176,7 @@ export default function WorkforcePanel() {
             ))}
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-brand-navy/60 mb-1">
-                Certifications (JSON array, e.g. [&#123;"cert":"OSHA 30","expiry_date":"2026-01-01"&#125;])
+                Certifications (JSON array, e.g. [&#123;&quot;cert&quot;:&quot;OSHA 30&quot;,&quot;expiry_date&quot;:&quot;2026-01-01&quot;&#125;])
               </label>
               <textarea
                 value={certsInput}
@@ -279,7 +279,7 @@ export default function WorkforcePanel() {
       {tab === 'query' && (
         <div className="space-y-4">
           <div className="card p-6">
-            <h4 className="font-semibold text-brand-navy mb-3">Who's Available + Qualified?</h4>
+            <h4 className="font-semibold text-brand-navy mb-3">Who&apos;s Available + Qualified?</h4>
             <div className="flex gap-3">
               <input
                 type="text"
