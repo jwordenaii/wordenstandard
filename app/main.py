@@ -59,6 +59,7 @@ from .routers import workforce as workforce_router
 from .routers import bid_intelligence as bid_intelligence_router
 from .routers import kpi_wall as kpi_wall_router
 from .routers import innovations as innovations_router
+from .routers import visualizer as visualizer_router
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +142,7 @@ app.include_router(workforce_router.router)
 app.include_router(bid_intelligence_router.router)
 app.include_router(kpi_wall_router.router)
 app.include_router(innovations_router.router)
+app.include_router(visualizer_router.router)
 
 
 # ── Legacy endpoints (kept for backward compatibility) ────────────────────────
