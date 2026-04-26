@@ -10,10 +10,11 @@ Routes:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
 from ..core.limiter import limiter
+from ..core.security import verify_premium_security
 from ..services.permit_scraper import fetch_vpt_permits, fetch_deq_permits, lookup_dpor_license
 from ..services.lead_scorer import score_lead
 

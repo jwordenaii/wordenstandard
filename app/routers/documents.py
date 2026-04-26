@@ -9,8 +9,6 @@ Routes:
 Max file size: 20 MB. Requires premium security.
 """
 
-from __future__ import annotations
-
 import logging
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
