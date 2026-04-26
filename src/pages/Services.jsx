@@ -375,7 +375,7 @@ export default function Services() {
             Not sure which service you need?
           </h2>
           <p className="text-brand-navy/70 mb-6">
-            Tell us about your project and we will recommend the right approach — whether that&apos;s paving, masonry, a full GC engagement, or an interior design consultation. No pressure.
+            Tell us about your project and we will recommend the right approach — whether that&rsquo;s paving, masonry, a full GC engagement, or an interior design consultation. No pressure.
           </p>
           <Link to="/quote" className="bg-brand-navy text-white font-bold px-8 py-4 rounded-lg hover:bg-brand-navy/90 transition-colors">
             Start Your Free Quote

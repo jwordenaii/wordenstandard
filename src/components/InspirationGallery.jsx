@@ -19,25 +19,25 @@ const CATEGORIES = [
     id: 'interior',
     label: 'Interior Design',
     icon: '🎨',
-    color: 'from-rose-500 to-orange-400',
+    gradient: 'from-rose-500 to-orange-400',
   },
   {
     id: 'outdoor',
     label: 'Outdoor Living',
     icon: '🪨',
-    color: 'from-stone-600 to-amber-600',
+    gradient: 'from-stone-600 to-amber-600',
   },
   {
     id: 'masonry',
     label: 'Stone Masonry',
     icon: '🧱',
-    color: 'from-gray-700 to-slate-500',
+    gradient: 'from-gray-700 to-slate-500',
   },
   {
     id: 'construction',
     label: 'Construction',
     icon: '🏗',
-    color: 'from-brand-navy to-blue-700',
+    gradient: 'from-brand-navy to-blue-700',
   },
 ]
 

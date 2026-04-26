@@ -24,7 +24,8 @@ _COMPANY_NAME = "J. Worden & Sons Asphalt Paving"
 _COMPANY_ADDRESS = "1601 Ware Bottom Springs Rd Suite 214, Chester, VA 23836"
 _COMPANY_PHONE = "(804) 446-1296"
 _COMPANY_EMAIL = os.getenv("NOTIFY_TO_EMAIL", "").split(",")[0].strip() or "info@jwordenasphalt.com"
-_COMPANY_LICENSE = "Licensed & Insured | VA Class A Contractor"
+_COMPANY_LICENSE = "Licensed & Insured | VA Class A General Contractor"
+_DEFAULT_SERVICE_TYPE = "paving"
 
 
 def generate_proposal_text(lead: dict) -> str:
@@ -119,7 +120,7 @@ _SERVICE_SCOPE_HINTS: dict[str, str] = {
 
 
 def _build_gpt_prompt(lead: dict) -> str:
-    service_key = (lead.get("service_type") or "paving").lower().strip()
+    service_key = (lead.get("service_type") or _DEFAULT_SERVICE_TYPE).lower().strip()
     scope_hint = _SERVICE_SCOPE_HINTS.get(service_key, "")
 
     return f"""Write a professional project proposal for the following client.
@@ -205,7 +206,7 @@ def _template_proposal(lead: dict) -> str:
     today = datetime.now(timezone.utc).strftime("%B %d, %Y")
     name = lead.get("name", "Valued Customer")
     address = lead.get("address", "Project Address TBD")
-    service_key = (lead.get("service_type") or "paving").lower().strip()
+    service_key = (lead.get("service_type") or _DEFAULT_SERVICE_TYPE).lower().strip()
     service = service_key.replace("_", " ").title()
     sqft = lead.get("project_size_sqft", "TBD")
     price_low = lead.get("price_low", "Contact for pricing")

@@ -338,8 +338,6 @@ _TECHNICAL_KEYWORDS = {
     "install", "thickness", "inches", "compaction", "hma", "hot mix",
     "base", "sub-base", "gravel", "temperature", "laydown", "cure",
     "density", "drainage", "slope", "grade", "rout", "saw cut",
-    "cobblestone", "paver", "brick", "stone", "masonry", "mortar",
-    "fieldstone", "flagstone", "retaining",
 }
 
 _ADA_QSR_KEYWORDS = {
