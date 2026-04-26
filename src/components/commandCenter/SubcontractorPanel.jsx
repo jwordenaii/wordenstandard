@@ -298,7 +298,10 @@ export default function SubcontractorPanel() {
             <label className="text-xs font-semibold text-brand-navy/60">Subcontractor:</label>
             <select
               value={selectedSubId || ''}
-              onChange={(e) => setSelectedSubId(Number(e.target.value))}
+              onChange={(e) => {
+                const { value } = e.target
+                setSelectedSubId(value === '' ? null : Number(value))
+              }}
               className="input text-sm flex-1 max-w-xs"
             >
               <option value="">— select subcontractor —</option>
