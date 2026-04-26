@@ -244,7 +244,7 @@ def _build_case_study(m: ProjectMetric) -> str:
         from openai import OpenAI  # noqa: PLC0415
         client = OpenAI(api_key=api_key)
         cost_note = ""
-        if m.actual_cost and m.estimated_cost:
+        if m.actual_cost and m.estimated_cost and m.estimated_cost > 0:
             pct = round(abs(m.actual_cost - m.estimated_cost) / m.estimated_cost * 100, 1)
             direction = "under" if m.actual_cost <= m.estimated_cost else "over"
             cost_note = f"Completed {pct}% {direction} budget."
