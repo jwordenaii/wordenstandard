@@ -1,12 +1,16 @@
 /**
- * ChatWidget — floating JWordenAI chatbot bubble.
+ * ChatWidget — J. Worden Sr. founder persona chat bubble.
  *
  * Renders a chat button fixed to the bottom-left corner (FloatingCTA lives
- * on the right). On click it expands to a compact chat panel.  All questions
- * are sent to POST /api/v1/ai/chat; a client-side stub answers gracefully
- * when the backend is unavailable.
+ * on the right). On click it expands to a chat panel voiced as J. Worden Sr.,
+ * the company founder.  All questions are sent to POST /api/v1/ai/chat; a
+ * client-side stub answers gracefully when the backend is unavailable.
+ *
+ * The widget auto-opens with a greeting after a short delay on first visit
+ * (once per browser session) to proactively engage arriving customers.
  */
 import { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 
 // Generate a stable session ID per browser session (persisted in sessionStorage)
@@ -25,13 +29,13 @@ function getOrCreateSessionId() {
 }
 
 const SUGGESTIONS = [
-  'Do I need a license to pave in Texas?',
-  'What is the 811 notice period in Florida?',
-  'How much does asphalt paving cost per sqft?',
-  'What is a mechanics lien?',
+  'How much does a new driveway cost?',
+  'Can you pave my parking lot?',
+  'I need sealcoating — how do I get started?',
+  'What areas do you serve?',
 ]
 
-const BOT_AVATAR = '🤖'
+const BOT_AVATAR = '👴'
 const USER_AVATAR = '👷'
 
 function Message({ msg }) {
@@ -69,11 +73,14 @@ function TypingIndicator() {
   )
 }
 
+// How long (ms) to wait before auto-opening the chat on a visitor's first page load
+const GREETING_DELAY_MS = 6000
+
 const INITIAL_MESSAGES = [
   {
     id: 0,
     role: 'bot',
-    text: "Hi! I'm JWordenAI 👋 — ask me anything about asphalt paving, construction law across all 50 states, or getting a project estimate.",
+    text: "Welcome — I'm a digital tribute to J. Worden Sr., founder of J. Worden & Sons Paving since 1984. I'm here to answer your questions, give you a ballpark, and get you on our schedule. What are you working on today?",
   },
 ]
 
@@ -86,6 +93,17 @@ export default function ChatWidget() {
   const inputRef = useRef(null)
   // Stable session ID — persisted across page navigations within the same tab
   const sessionIdRef = useRef(getOrCreateSessionId())
+
+  // Auto-open once per session after a short delay to proactively greet visitors
+  useEffect(() => {
+    const greeted = sessionStorage.getItem('jworden_greeted')
+    if (greeted) return
+    const timer = setTimeout(() => {
+      setOpen(true)
+      sessionStorage.setItem('jworden_greeted', '1')
+    }, GREETING_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -120,7 +138,7 @@ export default function ChatWidget() {
         {
           id: Date.now() + 1,
           role: 'bot',
-          text: "I'm having trouble connecting right now. Please try again shortly, or reach us directly at /contact.",
+          text: "Sorry — we're having a little trouble connecting right now. Give us a call at (804) 446-1296 or head to /contact and we'll get right back to you.",
         },
       ])
     } finally {
@@ -140,15 +158,15 @@ export default function ChatWidget() {
       {/* Chat panel */}
       {open && (
         <div className="mb-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-brand-navy/10 flex flex-col overflow-hidden"
-          style={{ maxHeight: '70vh' }}
+          style={{ maxHeight: '75vh' }}
         >
           {/* Header */}
           <div className="bg-brand-navy text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-xl">🤖</span>
+              <span className="text-2xl">👴</span>
               <div>
-                <div className="font-bold text-sm">JWordenAI</div>
-                <div className="text-white/50 text-xs">Paving &amp; Construction Law Expert</div>
+                <div className="font-bold text-sm">J. Worden Sr.</div>
+                <div className="text-white/60 text-xs">Founder · 40+ Years in Paving</div>
               </div>
             </div>
             <button
@@ -186,6 +204,17 @@ export default function ChatWidget() {
             </div>
           )}
 
+          {/* Schedule / Deposit CTA */}
+          <div className="px-4 pb-3 flex-shrink-0">
+            <Link
+              to="/quote"
+              onClick={() => setOpen(false)}
+              className="block w-full text-center bg-brand-amber text-brand-navy text-sm font-bold rounded-lg py-2 hover:bg-brand-amber/80 transition-colors"
+            >
+              📅 Book Free On-Site Visit &amp; Hold My Spot
+            </Link>
+          </div>
+
           {/* Input */}
           <div className="border-t border-brand-navy/10 px-3 py-3 flex gap-2 flex-shrink-0">
             <input
@@ -194,7 +223,7 @@ export default function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about paving or construction law…"
+              placeholder="Ask Mr. Worden anything…"
               maxLength={1000}
               className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-amber/50 focus:border-brand-amber transition-colors"
             />
@@ -216,12 +245,12 @@ export default function ChatWidget() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="bg-brand-navy text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-brand-navy/90 transition-all hover:scale-105 active:scale-95"
-        aria-label={open ? 'Close JWordenAI chat' : 'Open JWordenAI chat'}
+        aria-label={open ? 'Close chat with J. Worden Sr.' : 'Chat with J. Worden Sr., our founder'}
       >
         {open ? (
           <span className="text-xl">✕</span>
         ) : (
-          <span className="text-2xl">🤖</span>
+          <span className="text-2xl">👴</span>
         )}
       </button>
     </div>

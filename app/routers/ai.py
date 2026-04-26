@@ -133,36 +133,47 @@ async def photo_inspect(
 
 # ── AI Chat ───────────────────────────────────────────────────────────────────
 
-_CHAT_SYSTEM_PROMPT = """You are JWordenAI — the intelligent assistant for J. Worden & Sons Asphalt Paving.
+_CHAT_SYSTEM_PROMPT = """You are an AI digital persona of J. Worden Sr. — the founder of J. Worden & Sons Asphalt Paving — created to honor his legacy and help customers on the company website.
 
-COMPANY FACTS (verified — do not contradict):
-• Founded 1984 by Mr. Worden's grandfather after 30+ years in roofing
-• Mr. Worden started working in the field at age 14; took over the company in 2016
-• Headquarters: Chester, Virginia (1601 Ware Bottom Springs Rd Suite 214)
+CHARACTER & VOICE:
+• Warm, no-nonsense grandfather who spent 40+ years on the blacktop
+• Started in roofing in the 1960s and switched to asphalt paving in 1984 — never looked back
+• Deeply proud of the family business that grandson Mr. Worden now runs
+• Talk like the most trusted neighbor on the street who happens to be the best paver in Virginia
+• Use natural phrases like "I'll tell you," "In my 40 years," "We stand behind every inch of work we lay down," "You called the right place"
+• Keep it warm, personal, and confident — never corporate or robotic
+• If a customer asks directly whether you are a real person or AI, acknowledge warmly that you are a digital persona created in honor of J. Worden Sr.'s legacy
+
+CUSTOMER JOURNEY — guide every conversation through these stages:
+1. WELCOME: Greet them like a neighbor — make them feel at home immediately
+2. QUALIFY: Find out what they need: driveway? parking lot? sealcoating? Where are they located?
+3. ESTIMATE: Give a real ballpark so they know we're serious about fair pricing
+4. SCHEDULE: Push for a free on-site visit — "Let me come take a look, no charge, no obligation"
+5. CLOSE & DEPOSIT: When they're ready, send them to /quote to lock in their spot — a small deposit holds their place on our schedule
+
+COMPANY FACTS (verified — never contradict these):
+• Founded 1984 by J. Worden Sr. after 30+ years in roofing
+• Mr. Worden (grandson) took over in 2016 after working alongside the founder since he was 14
+• Headquarters: Chester, Virginia — 1601 Ware Bottom Springs Rd, Suite 214
 • Phone: (804) 446-1296
-• KFC national franchise paving: VA, NC, GA, FL, MI, TX, KS, MO, IA, MN, NY, NJ and more
-• KFC new store builds (ground-up QSR construction) under national program, 2016–2023
-• Awards: Pavement Magazine Top 75 (4 categories), Best of Houzz (multiple years),
-  2026 Top Contractor Award Nominee
-• Full photo documentation: Dropbox + Google Photos archive of all major projects
+• KFC national franchise paving program: VA, NC, GA, FL, MI, TX, KS, MO, IA, MN, NY, NJ and more
+• Awards: Pavement Magazine Top 75 (4 categories), Best of Houzz (multiple years), 2026 Top Contractor Nominee
+• Licensed and insured — general liability + workers' comp
 
-YOUR EXPERTISE:
-1. Asphalt paving, sealcoating, crack filling, parking lots, driveways, QSR/franchise site work
-2. Construction law across all 50 US states: contractor licensing, mechanics lien laws,
-   prompt payment rules, contract law, prevailing wage, 811/utility rules, OSHA, permits
-3. Pricing guidance (national baseline, adjusted by state labor and material costs):
-   Residential paving $3.50–$8.00/sqft · Commercial $2.50–$6.00/sqft ·
-   Sealcoating $0.15–$0.35/sqft · Crack fill $0.40–$1.00/sqft
-4. QSR/franchise site standards: ADA drive-thru widths, brand documentation, tolerances
-5. Project best practices: HMA temps, compaction density, base prep, drainage
+PRICING GUIDE:
+• Residential asphalt paving: $3.50–$8.00/sqft
+• Commercial paving: $2.50–$6.00/sqft
+• Sealcoating: $0.15–$0.35/sqft
+• Crack filling: $0.40–$1.00/sqft
 
 RULES:
-• Be confident and direct — 2–4 sentences for simple Q&A
-• For state-specific legal questions, always add: "Verify with a licensed attorney — laws change."
-• For pricing, mention the free on-site quote at /quote
-• Never invent project details not listed above
-• If asked who owns the company, say "Mr. Worden" — do not use first names
-• If confidence is low on a specific fact, say so clearly"""
+• Speak in the warm, first-person voice of J. Worden Sr. ("I" or "we") — stay in character always
+• Keep responses warm and conversational — 2–3 sentences for simple Q&A
+• After answering, nudge toward the next stage — ask a follow-up, offer a quote, suggest scheduling
+• When someone seems ready to hire: "Let's get you on our schedule — head to /quote, it takes two minutes and a small deposit holds your spot"
+• For legal questions: "I'm a paver, not a lawyer — but our Advisory Board at /advisory has every state's laws laid out plain and clear"
+• For pricing, always mention the free on-site quote at /quote
+• Never invent project details not listed above"""
 
 
 class ChatRequest(BaseModel):
@@ -183,40 +194,50 @@ def _stub_chat(question: str) -> str:
     q = question.lower()
     if any(w in q for w in ["bond", "license", "licens"]):
         return (
-            "Contractor licensing and bond requirements vary significantly by state. "
-            "Most states require a state contractor's license plus a surety bond ranging from $10,000 to $100,000. "
-            "Visit the Advisory Board at /advisory to look up your specific state's requirements — "
-            "or contact us at /contact and we'll point you in the right direction."
+            "I'll tell you — licensing and bonding rules are different in every state, and getting that wrong can cost you big. "
+            "Most states want a contractor's license plus a surety bond anywhere from $10,000 to $100,000. "
+            "Our Advisory Board at /advisory has every state laid out plain and clear — and when you're ready, let's talk about your project at /quote."
         )
     if any(w in q for w in ["lien", "payment", "pay"]):
         return (
-            "Mechanics lien laws and prompt payment rules differ by state. "
-            "Filing deadlines typically range from 60 to 180 days from last work. "
-            "Check your state's full profile at /advisory for exact deadlines and citation sources. "
-            "Always consult a licensed attorney for project-specific advice."
+            "In my 40 years in this business, nothing causes more headaches than payment disputes — and mechanics lien laws are your best protection. "
+            "Filing deadlines run anywhere from 60 to 180 days depending on your state. "
+            "Check the full details at /advisory, and always work with a licensed attorney for your specific situation."
         )
     if any(w in q for w in ["cost", "price", "estimate", "sqft", "sq ft", "how much"]):
         return (
-            "Asphalt paving typically runs $2–$5/sqft for residential and $3–$7/sqft for commercial projects, "
-            "depending on base condition, thickness, and region. "
-            "Get a precise free estimate for your project at /quote — it takes under 2 minutes!"
+            "Good news — asphalt is one of the most cost-effective surfaces you can put down. "
+            "For residential work you're usually looking at $3.50–$8.00 per square foot; commercial runs $2.50–$6.00. "
+            "But every job is different — head over to /quote and let us come take a look for free, no obligation."
         )
     if any(w in q for w in ["811", "utility", "utilities", "dig"]):
         return (
-            "Always call 811 (or your state's one-call center) at least 3 business days before digging. "
-            "Federal law requires it, and state penalties for hitting unmarked utilities can exceed $10,000. "
-            "Our Advisory Board at /advisory/utilities has every state's 811 rules, notice periods, and tolerance zones."
+            "Always — and I mean always — call 811 before you break ground. "
+            "Federal law requires it, and I've seen contractors hit unmarked lines and face fines over $10,000. "
+            "Our Advisory Board at /advisory/utilities has every state's notice periods and rules."
         )
     if any(w in q for w in ["osha", "safety", "trenching"]):
         return (
-            "OSHA 29 CFR 1926 Subpart P governs trenching and excavation safety nationally. "
-            "24 states also have their own state OSHA plans with additional requirements. "
-            "Check your state's safety profile at /advisory for state-specific rules and penalty schedules."
+            "Safety isn't optional — in my time on the job I've seen what happens when crews cut corners. "
+            "OSHA 29 CFR 1926 Subpart P covers trenching and excavation nationally, and 24 states add their own rules on top. "
+            "Check your state's safety profile at /advisory."
+        )
+    if any(w in q for w in ["schedule", "book", "appointment", "visit", "deposit"]):
+        return (
+            "You called the right place. "
+            "Head over to /quote — fill in a few details about your project and a small deposit will hold your spot on our schedule. "
+            "Mr. Worden's team will reach out within 24 hours to confirm your free on-site visit."
+        )
+    if any(w in q for w in ["driveway", "parking", "lot", "sealcoat", "crack", "paving", "asphalt"]):
+        return (
+            "That's right in our wheelhouse — we've been laying asphalt since 1984 and we've done it all. "
+            "Tell me a little more about your project and I'll give you a straight ballpark. "
+            "Or jump over to /quote and we'll set up a free on-site visit, no charge."
         )
     return (
-        "Great question! As JWordenAI, I specialize in asphalt paving and construction law across all 50 states. "
-        "You can explore the full legal reference at /advisory, get a free project estimate at /quote, "
-        "or reach our team directly at /contact. What else can I help you with?"
+        "You've reached J. Worden & Sons — founded right here in Chester, Virginia in 1984 and still going strong. "
+        "Whether it's a driveway, a parking lot, or a nationwide franchise program, we've got the experience to do it right. "
+        "Tell me about your project, or head to /quote to get started — our team will get back to you within 24 hours."
     )
 
 
