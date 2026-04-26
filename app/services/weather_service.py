@@ -5,7 +5,7 @@ Uses OpenWeatherMap Geocoding + One Call API for 7-day forecasts.
 Requires OPENWEATHERMAP_API_KEY env var.
 
 Paving suitability rules:
-  ✅ No precipitation forecast (< 20% probability)
+  ✅ No precipitation forecast (< 30% probability)
   ✅ High temperature >= 50°F
   ✅ Wind speed < 25 mph
 

@@ -178,7 +178,7 @@ def create_lead_from_transcript(transcript: str, db=None) -> dict:
         }
     except Exception as exc:  # noqa: BLE001
         logger.error("create_lead_from_transcript error: %s", exc)
-        return {"error": str(exc), "entities": entities}
+        return {"error": "Lead creation failed.", "entities": entities}
 
 
 def _stub_entities() -> dict:

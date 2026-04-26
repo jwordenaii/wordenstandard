@@ -126,32 +126,46 @@ async def twilio_recording_callback(
         logger.warning("Twilio callback received with no RecordingUrl")
         return {"status": "ignored", "reason": "no recording URL"}
 
+    # SSRF protection: reconstruct a safe URL from the RecordingSid if available,
+    # otherwise validate that RecordingUrl is from a known Twilio domain.
     try:
         import httpx  # noqa: PLC0415
-
-        # Download the recording
-        auth_sid = os.getenv("TWILIO_ACCOUNT_SID", "")
-        auth_token = os.getenv("TWILIO_AUTH_TOKEN", "")
-
-        mp3_url = RecordingUrl if RecordingUrl.endswith(".mp3") else f"{RecordingUrl}.mp3"
-
-        # SSRF protection: only allow Twilio recording domains
-        _ALLOWED_TWILIO_HOSTS = (
-            "api.twilio.com",
-            "recording.twilio.com",
-            "media.twiliocdn.com",
-        )
         from urllib.parse import urlparse  # noqa: PLC0415
-        parsed = urlparse(mp3_url)
-        if parsed.scheme != "https" or not any(
-            parsed.netloc == h or parsed.netloc.endswith(f".{h}")
-            for h in _ALLOWED_TWILIO_HOSTS
-        ):
-            logger.warning("Twilio callback with disallowed URL host: %s", parsed.netloc)
-            return {"status": "error", "detail": "Invalid recording URL host."}
+
+        # Prefer constructing URL from the known-safe RecordingSid
+        if RecordingSid and RecordingSid.startswith("RE") and RecordingSid.isalnum():
+            auth_sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+            auth_token = os.getenv("TWILIO_AUTH_TOKEN", "")
+            if not auth_sid:
+                return {"status": "error", "detail": "Twilio credentials not configured."}
+            safe_url = (
+                f"https://api.twilio.com/2010-04-01/Accounts/{auth_sid}"
+                f"/Recordings/{RecordingSid}.mp3"
+            )
+        else:
+            # Fallback: validate RecordingUrl domain strictly
+            _ALLOWED_TWILIO_HOSTS = (
+                "api.twilio.com",
+                "recording.twilio.com",
+                "media.twiliocdn.com",
+            )
+            parsed = urlparse(RecordingUrl)
+            if parsed.scheme != "https" or not any(
+                parsed.netloc == h or parsed.netloc.endswith(f".{h}")
+                for h in _ALLOWED_TWILIO_HOSTS
+            ):
+                logger.warning("Twilio callback with disallowed URL host: %s", parsed.netloc)
+                return {"status": "error", "detail": "Invalid recording URL host."}
+            # Also require port to be absent or 443
+            if parsed.port is not None and parsed.port != 443:
+                logger.warning("Twilio callback with non-standard port: %s", parsed.port)
+                return {"status": "error", "detail": "Invalid recording URL port."}
+            auth_sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+            auth_token = os.getenv("TWILIO_AUTH_TOKEN", "")
+            safe_url = RecordingUrl if RecordingUrl.endswith(".mp3") else f"{RecordingUrl}.mp3"
 
         auth = (auth_sid, auth_token) if auth_sid and auth_token else None
-        resp = httpx.get(mp3_url, auth=auth, timeout=30.0, follow_redirects=True)
+        resp = httpx.get(safe_url, auth=auth, timeout=30.0, follow_redirects=False)
         resp.raise_for_status()
 
         transcript = transcribe_audio(resp.content, "audio/mpeg")
@@ -163,7 +177,6 @@ async def twilio_recording_callback(
             RecordingSid,
             lead_result.get("lead_id"),
         )
-        # Return only safe fields — do not propagate internal error details
         return {
             "status": "processed",
             "lead_id": lead_result.get("lead_id"),
