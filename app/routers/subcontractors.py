@@ -35,8 +35,11 @@ router = APIRouter(prefix="/api/v1/subcontractors", tags=["subcontractors"])
 def _parse_dt(s: Optional[str]) -> Optional[datetime]:
     if not s:
         return None
-    dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
-    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+    except Exception:  # noqa: BLE001
+        return None
 
 
 class SubcontractorCreate(BaseModel):
