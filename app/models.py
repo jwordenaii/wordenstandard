@@ -832,3 +832,87 @@ class TruckPosition(Base):
 
     def __repr__(self) -> str:
         return f"<TruckPosition truck={self.truck_id!r} status={self.status!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# iGrade Engine — Graded AI Processing Log
+# Records grade tier, confidence, and self-correction status for every AI call.
+# ══════════════════════════════════════════════════════════════════════════════
+
+class GradeLog(Base):
+    """
+    Graded AI processing record.
+
+    Every AI decision (chat, compliance, lead score, takeoff) is graded
+    A–D by the iGradeEngine before routing to the appropriate model tier.
+    Grades are stored here for performance analytics, self-correction sweeps,
+    and continuous improvement reporting.
+
+    Grade scale:
+      A — Complex / high-value (legal, compliance, QSR, multi-state) → GPT-4o
+      B — Standard paving Q&A or pricing estimate                     → GPT-4o-mini
+      C — Simple info / quick lookup                                  → GPT-4o-mini fast
+      D — Bulk / batch / repeat query                                 → Rule engine / cache
+    """
+
+    __tablename__ = "grade_logs"
+
+    id                 = Column(Integer, primary_key=True, index=True)
+    decision_type      = Column(String(60), nullable=False, index=True)   # chat | compliance | lead_score | takeoff
+    grade              = Column(String(2),  nullable=False, index=True)   # A | B | C | D
+    input_summary      = Column(Text, nullable=False)
+    ai_engine          = Column(String(60), nullable=True)                # gpt-4o | gpt-4o-mini | rule_engine | stub
+    confidence         = Column(Float, nullable=False, default=0.0)
+    was_corrected      = Column(Integer, default=0, nullable=False)       # 1 = human flagged/corrected this
+    correction_applied = Column(Integer, default=0, nullable=False)       # 1 = auto-correction injected
+    processing_ms      = Column(Integer, nullable=True)                   # wall-clock response time
+    tenant_id          = Column(String(60), nullable=True, index=True, default='default')
+    created_at         = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<GradeLog id={self.id} type={self.decision_type!r} grade={self.grade!r} conf={self.confidence:.2f}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Extended Storage — Media File Registry
+# Tracks every project photo, blueprint, permit, contract, and report.
+# Mirrors the existing Dropbox / Google Photos archive in a queryable DB.
+# ══════════════════════════════════════════════════════════════════════════════
+
+class MediaFile(Base):
+    """
+    Registry of uploaded or externally-linked media files.
+
+    Provides fast, queryable metadata for all project documentation —
+    photos, blueprints, permits, contracts, and AI-generated reports —
+    without duplicating file content.  Actual files live in the configured
+    storage provider (local filesystem, Dropbox, GCS, or S3).
+    """
+
+    __tablename__ = "media_files"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    filename          = Column(String(500), nullable=False)
+    file_type         = Column(String(30),  nullable=True)    # photo | blueprint | permit | contract | report | other
+    mime_type         = Column(String(100), nullable=True)
+    file_size_bytes   = Column(Integer,     nullable=True)
+    storage_url       = Column(String(1000), nullable=True)   # external URL (Dropbox share / GCS signed URL)
+    storage_provider  = Column(String(30),  nullable=True, default='local')  # local | dropbox | gcs | s3
+
+    # Soft link to parent record
+    linked_to_type    = Column(String(60),  nullable=True)    # lead | project | customer | document
+    linked_to_id      = Column(Integer,     nullable=True, index=True)
+
+    # Descriptive metadata
+    project_name      = Column(String(200), nullable=True, index=True)
+    tags              = Column(String(500), nullable=True)    # comma-separated
+    ai_description    = Column(Text,        nullable=True)    # AI Vision caption
+
+    # Multi-tenant
+    tenant_id         = Column(String(60),  nullable=True, index=True, default='default')
+
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at        = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<MediaFile id={self.id} name={self.filename!r} type={self.file_type!r}>"
