@@ -20,6 +20,9 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+# Max characters stored for the input pattern in AICorrection records
+MAX_INPUT_PATTERN_LENGTH = 2000
+
 
 def get_corrections(
     decision_type: str,
@@ -85,7 +88,7 @@ def save_correction(
 
         correction = AICorrection(
             decision_type=decision_type,
-            input_pattern=input_summary[:2000],
+            input_pattern=input_summary[:MAX_INPUT_PATTERN_LENGTH],
             corrected_answer=corrected_answer,
             reviewer_notes=reviewer_notes,
             usage_count=0,

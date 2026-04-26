@@ -135,6 +135,21 @@ async def twilio_recording_callback(
 
         mp3_url = RecordingUrl if RecordingUrl.endswith(".mp3") else f"{RecordingUrl}.mp3"
 
+        # SSRF protection: only allow Twilio recording domains
+        _ALLOWED_TWILIO_HOSTS = (
+            "api.twilio.com",
+            "recording.twilio.com",
+            "media.twiliocdn.com",
+        )
+        from urllib.parse import urlparse  # noqa: PLC0415
+        parsed = urlparse(mp3_url)
+        if parsed.scheme != "https" or not any(
+            parsed.netloc == h or parsed.netloc.endswith(f".{h}")
+            for h in _ALLOWED_TWILIO_HOSTS
+        ):
+            logger.warning("Twilio callback with disallowed URL host: %s", parsed.netloc)
+            return {"status": "error", "detail": "Invalid recording URL host."}
+
         auth = (auth_sid, auth_token) if auth_sid and auth_token else None
         resp = httpx.get(mp3_url, auth=auth, timeout=30.0, follow_redirects=True)
         resp.raise_for_status()
@@ -148,8 +163,14 @@ async def twilio_recording_callback(
             RecordingSid,
             lead_result.get("lead_id"),
         )
-        return {"status": "processed", "lead_result": lead_result}
+        # Return only safe fields — do not propagate internal error details
+        return {
+            "status": "processed",
+            "lead_id": lead_result.get("lead_id"),
+            "score_label": lead_result.get("score_label"),
+            "transcript_length": len(transcript),
+        }
 
     except Exception as exc:  # noqa: BLE001
         logger.error("Twilio recording callback error: %s", exc)
-        return {"status": "error", "detail": str(exc)}
+        return {"status": "error", "detail": "Processing failed. Please try again."}

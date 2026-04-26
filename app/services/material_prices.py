@@ -36,7 +36,7 @@ _EIA_URL = "https://api.eia.gov/v2/petroleum/pri/wfr/data/"
 
 # In-process fallback cache (when Redis unavailable)
 _in_process_cache: dict = {}
-_BASELINE_PRICE_PER_GALLON = 2.85  # national baseline $/gallon for road oil
+_BASELINE_PRICE_PER_GALLON = 2.85  # national baseline $/gallon for road oil — EIA EPD2F series, Q4 2024 average
 
 
 # ── Cache helpers ─────────────────────────────────────────────────────────────

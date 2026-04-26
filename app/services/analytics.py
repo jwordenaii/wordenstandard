@@ -105,7 +105,7 @@ def get_lead_funnel(db) -> dict:
         }
     except Exception as exc:  # noqa: BLE001
         logger.error("get_lead_funnel error: %s", exc)
-        return {"error": str(exc)}
+        return {"error": "An internal error occurred. Please try again."}
 
 
 def get_revenue_forecast(db) -> dict:
@@ -152,7 +152,7 @@ def get_revenue_forecast(db) -> dict:
         }
     except Exception as exc:  # noqa: BLE001
         logger.error("get_revenue_forecast error: %s", exc)
-        return {"error": str(exc)}
+        return {"error": "An internal error occurred. Please try again."}
 
 
 def get_permit_to_lead_rate(db) -> dict:
@@ -176,7 +176,7 @@ def get_permit_to_lead_rate(db) -> dict:
         }
     except Exception as exc:  # noqa: BLE001
         logger.error("get_permit_to_lead_rate error: %s", exc)
-        return {"error": str(exc)}
+        return {"error": "An internal error occurred. Please try again."}
 
 
 def get_review_approval_rate(db) -> dict:
@@ -218,7 +218,7 @@ def get_review_approval_rate(db) -> dict:
         return {"by_decision_type": results}
     except Exception as exc:  # noqa: BLE001
         logger.error("get_review_approval_rate error: %s", exc)
-        return {"error": str(exc)}
+        return {"error": "An internal error occurred. Please try again."}
 
 
 def get_monthly_lead_volume(db) -> list:

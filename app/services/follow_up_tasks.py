@@ -22,13 +22,16 @@ from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 
-_BROKER_URL = os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+_BROKER_URL = os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL", "")
 
 # ── Celery app ────────────────────────────────────────────────────────────────
 
 try:
     from celery import Celery  # type: ignore
     from celery.schedules import crontab  # type: ignore
+
+    if not _BROKER_URL:
+        raise ImportError("CELERY_BROKER_URL / REDIS_URL not configured")
 
     celery_app = Celery("jworden_followups", broker=_BROKER_URL, backend=_BROKER_URL)
     celery_app.conf.update(
@@ -53,10 +56,10 @@ try:
         },
     )
     _CELERY_AVAILABLE = True
-except ImportError:
+except ImportError as _e:
     celery_app = None  # type: ignore
     _CELERY_AVAILABLE = False
-    logger.warning("Celery not installed — follow-up tasks disabled")
+    logger.warning("Follow-up tasks disabled: %s", _e)
 
 
 # ── Celery tasks ──────────────────────────────────────────────────────────────

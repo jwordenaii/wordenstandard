@@ -152,4 +152,4 @@ def get_compliance_summary(db) -> dict:
         }
     except Exception as exc:  # noqa: BLE001
         logger.error("get_compliance_summary error: %s", exc)
-        return {"error": str(exc)}
+        return {"error": "An internal error occurred. Please try again."}

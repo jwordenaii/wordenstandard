@@ -28,6 +28,11 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# ── Paving suitability thresholds ─────────────────────────────────────────────
+MAX_PRECIP_PROB_THRESHOLD = 0.30   # Rain probability above this → unsuitable
+MIN_TEMP_F_THRESHOLD = 50.0        # High temp below this → unsuitable
+MAX_WIND_MPH_THRESHOLD = 25.0      # Wind above this → unsuitable
+
 _OWM_KEY = os.getenv("OPENWEATHERMAP_API_KEY", "")
 _GEO_URL = "https://api.openweathermap.org/geo/1.0/direct"
 _FORECAST_URL = "https://api.openweathermap.org/data/3.0/onecall"
@@ -61,12 +66,12 @@ def _ms_to_mph(ms: float) -> float:
 
 def _is_suitable(high_f: float, precip_prob: float, wind_mph: float) -> tuple[bool, str]:
     """Return (is_suitable, reason) for paving conditions."""
-    if precip_prob >= 0.30:
+    if precip_prob >= MAX_PRECIP_PROB_THRESHOLD:
         return False, f"Rain probability {int(precip_prob*100)}% — asphalt won't cure properly"
-    if high_f < 50:
-        return False, f"High temp {high_f}°F is below 50°F minimum for proper compaction"
-    if wind_mph >= 25:
-        return False, f"Wind {wind_mph} mph exceeds 25 mph safe threshold"
+    if high_f < MIN_TEMP_F_THRESHOLD:
+        return False, f"High temp {high_f}°F is below {MIN_TEMP_F_THRESHOLD:.0f}°F minimum for proper compaction"
+    if wind_mph >= MAX_WIND_MPH_THRESHOLD:
+        return False, f"Wind {wind_mph} mph exceeds {MAX_WIND_MPH_THRESHOLD:.0f} mph safe threshold"
     return True, "Conditions suitable for paving work"
 
 

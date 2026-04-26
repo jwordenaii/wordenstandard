@@ -137,5 +137,8 @@ async def national_permits(
     if not state_list:
         raise HTTPException(status_code=422, detail="No valid states provided.")
 
-    results = await fetch_all_permits(state_list, keyword=keyword, limit=limit)
+    import asyncio  # noqa: PLC0415
+    results = await asyncio.get_event_loop().run_in_executor(
+        None, lambda: fetch_all_permits(state_list, keyword=keyword, max_results=limit)
+    )
     return {"status": "ok", "count": len(results), "results": results}
