@@ -50,6 +50,31 @@ const RATES = {
     commercial:  { low: 0.18, high: 0.40 },
     default:     { low: 0.20, high: 0.45 },
   },
+  // General Contracting — GC fee as a cost-per-sqft proxy for managed construction
+  // (actual cost is project-specific; these are ballpark managed-build figures)
+  general_contracting: {
+    residential: { low: 85.0, high: 250.0 },
+    commercial:  { low: 75.0, high: 200.0 },
+    default:     { low: 80.0, high: 225.0 },
+  },
+  // Interior Design — per sq ft of designed space (furnishings & materials excluded)
+  interior_design: {
+    residential: { low: 5.0, high: 18.0 },
+    commercial:  { low: 8.0, high: 25.0 },
+    default:     { low: 5.0, high: 20.0 },
+  },
+  // Cobblestone & Brick Paver Patios — installed sq ft
+  cobblestone_pavers: {
+    residential: { low: 15.0, high: 55.0 },
+    commercial:  { low: 18.0, high: 60.0 },
+    default:     { low: 15.0, high: 55.0 },
+  },
+  // Stone Masonry — installed sq ft of wall / patio surface
+  stone_masonry: {
+    residential: { low: 30.0, high: 85.0 },
+    commercial:  { low: 35.0, high: 100.0 },
+    default:     { low: 30.0, high: 90.0 },
+  },
 }
 
 /** Format a dollar value: round to nearest $50 for clarity */

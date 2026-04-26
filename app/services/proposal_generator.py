@@ -24,7 +24,8 @@ _COMPANY_NAME = "J. Worden & Sons Asphalt Paving"
 _COMPANY_ADDRESS = "1601 Ware Bottom Springs Rd Suite 214, Chester, VA 23836"
 _COMPANY_PHONE = "(804) 446-1296"
 _COMPANY_EMAIL = os.getenv("NOTIFY_TO_EMAIL", "").split(",")[0].strip() or "info@jwordenasphalt.com"
-_COMPANY_LICENSE = "Licensed & Insured | VA Class A Contractor"
+_COMPANY_LICENSE = "Licensed & Insured | VA Class A General Contractor"
+_DEFAULT_SERVICE_TYPE = "paving"
 
 
 def generate_proposal_text(lead: dict) -> str:
@@ -48,14 +49,20 @@ def generate_proposal_text(lead: dict) -> str:
                 {
                     "role": "system",
                     "content": (
-                        "You are a professional estimator at J. Worden & Sons Asphalt Paving. "
+                        "You are a senior estimator and project manager at J. Worden & Sons, "
+                        "a VA Class A General Contractor and Best of Houzz–recognized firm. "
+                        "The company provides: asphalt paving, sealcoating, crack filling, "
+                        "parking lot construction, general contracting (new builds, QSR/franchise "
+                        "ground-up construction), interior design & decorating, cobblestone & brick "
+                        "paver patios, and natural stone masonry. "
                         "Write polished, client-ready project proposals. Be specific, confident, "
-                        "and professional. Include all sections requested."
+                        "and professional. Include all sections requested. Tailor the scope of work, "
+                        "materials, and specifications to the exact service type requested."
                     ),
                 },
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=1200,
+            max_tokens=1400,
             temperature=0.4,
         )
         return response.choices[0].message.content or _template_proposal(lead)
@@ -64,8 +71,59 @@ def generate_proposal_text(lead: dict) -> str:
         return _template_proposal(lead)
 
 
+_SERVICE_SCOPE_HINTS: dict[str, str] = {
+    "general_contracting": (
+        "Include: full scope of general contracting services (permit pull, subcontractor "
+        "management, schedule milestones, budget tracking, weekly owner reports, punch-list "
+        "and warranty documentation). Reference VA Class A GC license."
+    ),
+    "interior_design": (
+        "Include: design process phases (discovery, mood board, 3D renders, FF&E procurement, "
+        "install coordination). Reference Best of Houzz recognition. Note that FF&E costs are "
+        "separate from the design fee and will be itemized in a procurement schedule."
+    ),
+    "cobblestone_pavers": (
+        "Include: base engineering (compacted aggregate depth, bedding sand), paver pattern options "
+        "(herringbone, running bond, fan, custom), edge restraints, polymeric sand jointing, "
+        "and optional sealing. Note ICPI installation standards."
+    ),
+    "stone_masonry": (
+        "Include: stone type options (fieldstone, bluestone, limestone, flagstone), wall construction "
+        "method (dry-stack or mortared with Type S mortar), drainage behind retaining walls, "
+        "and any outdoor fireplace or fire feature integration. Note structural footing requirements."
+    ),
+    "paving": (
+        "Include: base prep, hot-mix asphalt (HMA) specs, compaction density targets (92–96%), "
+        "drainage grades, and any ADA transition requirements."
+    ),
+    "driveway": (
+        "Include: demo and haul-off of existing surface, compacted stone base, 2\"–3\" HMA "
+        "wearing course, edging, apron tie-in, and cleanup."
+    ),
+    "parking_lot": (
+        "Include: site grading, 4\"–6\" HMA over compacted base, ADA parking and curb ramps, "
+        "thermoplastic line striping, wheel stops, and signage."
+    ),
+    "sealcoating": (
+        "Include: surface inspection, crack filling before sealing, surface cleaning and "
+        "oil-spot priming, two-coat sealer application, and 24–48 hour cure period."
+    ),
+    "crackfill": (
+        "Include: crack inspection and classification, saw-cut & rout for wide/working cracks, "
+        "hot-pour rubberized sealant application and compatibility with upcoming sealcoating."
+    ),
+    "maintenance": (
+        "Include: annual inspection schedule, priority mobilization commitment, multi-year "
+        "volume pricing, and documentation for property records."
+    ),
+}
+
+
 def _build_gpt_prompt(lead: dict) -> str:
-    return f"""Write a professional asphalt paving proposal for the following client.
+    service_key = (lead.get("service_type") or _DEFAULT_SERVICE_TYPE).lower().strip()
+    scope_hint = _SERVICE_SCOPE_HINTS.get(service_key, "")
+
+    return f"""Write a professional project proposal for the following client.
 
 CLIENT INFO:
   Name: {lead.get('name', 'Valued Customer')}
@@ -75,7 +133,7 @@ CLIENT INFO:
   Phone: {lead.get('phone', 'N/A')}
 
 PROJECT DETAILS:
-  Service: {lead.get('service_type', 'Asphalt Paving')}
+  Service: {lead.get('service_type', 'Asphalt Paving').replace('_', ' ').title()}
   Property Type: {lead.get('property_type', 'Commercial')}
   Area: {lead.get('project_size_sqft', 'TBD')} sq ft
   Urgency: {lead.get('urgency', 'flexible')}
@@ -83,10 +141,13 @@ PROJECT DETAILS:
 
 PRICING RANGE: ${lead.get('price_low', 'TBD')} – ${lead.get('price_high', 'TBD')}
 
+SERVICE-SPECIFIC SCOPE GUIDANCE:
+{scope_hint}
+
 Please write a complete proposal including:
 1. Professional greeting and project overview
-2. Detailed scope of work
-3. Materials and specifications (HMA type, thickness, base prep)
+2. Detailed scope of work (tailored to the service type above)
+3. Materials and specifications
 4. Pricing summary with the range above
 5. Project timeline estimate
 6. 1-year workmanship warranty terms
@@ -96,18 +157,67 @@ Please write a complete proposal including:
 Format with clear section headers."""
 
 
+_SERVICE_WORK_ITEMS: dict[str, list[str]] = {
+    "general_contracting": [
+        "• Permit acquisition and code compliance management",
+        "• Licensed subcontractor procurement, vetting, and scheduling",
+        "• Detailed project schedule with milestone tracking",
+        "• Budget management and transparent change-order process",
+        "• Weekly owner progress reports and on-site quality inspections",
+        "• Final punch-list, certificate of occupancy, and warranty documentation",
+    ],
+    "interior_design": [
+        "• Discovery consultation — style survey, functional requirements, budget review",
+        "• Digital mood boards and curated material palettes",
+        "• 3D visualization renders for spatial planning and client approval",
+        "• FF&E (furniture, fixtures & equipment) procurement and vendor coordination",
+        "• Installation coordination, delivery management, and final styling",
+        "• Post-install walkthrough and project photography",
+    ],
+    "cobblestone_pavers": [
+        "• Site preparation and subgrade inspection",
+        "• 6\"–8\" compacted aggregate base installation per ICPI standards",
+        "• 1\" bedding sand course, screeded to grade",
+        "• Paver installation in approved pattern with commercial edge restraints",
+        "• Polymeric sand jointing, compacted and activated",
+        "• Optional penetrating sealer application for stain protection",
+        "• Site cleanup and project documentation",
+    ],
+    "stone_masonry": [
+        "• Site survey, layout, and footing design",
+        "• Excavation and compacted aggregate footing installation",
+        "• Stone selection and hand-fitting of natural stone units",
+        "• Wall construction per specified method (dry-stack or mortared)",
+        "• Drainage fabric and gravel backfill behind retaining walls",
+        "• Capstone installation and mortar finishing",
+        "• Site cleanup and final inspection",
+    ],
+}
+
+_DEFAULT_WORK_ITEMS = [
+    "• Site preparation and subgrade inspection",
+    "• Installation of specified materials per industry standards",
+    "• Proper compaction or bonding to achieve specified density/adhesion",
+    "• Final grading and cleanup",
+]
+
+
 def _template_proposal(lead: dict) -> str:
     today = datetime.now(timezone.utc).strftime("%B %d, %Y")
     name = lead.get("name", "Valued Customer")
     address = lead.get("address", "Project Address TBD")
-    service = lead.get("service_type", "Asphalt Paving").replace("_", " ").title()
+    service_key = (lead.get("service_type") or _DEFAULT_SERVICE_TYPE).lower().strip()
+    service = service_key.replace("_", " ").title()
     sqft = lead.get("project_size_sqft", "TBD")
     price_low = lead.get("price_low", "Contact for pricing")
     price_high = lead.get("price_high", "")
 
     price_str = f"${price_low:,} – ${price_high:,}" if isinstance(price_low, (int, float)) else str(price_low)
 
-    return f"""J. WORDEN & SONS ASPHALT PAVING
+    work_items = _SERVICE_WORK_ITEMS.get(service_key, _DEFAULT_WORK_ITEMS)
+    work_block = "\n".join(work_items)
+
+    return f"""J. WORDEN & SONS
 Project Proposal
 Date: {today}
 
@@ -123,15 +233,11 @@ SCOPE OF WORK:
 Service Type: {service}
 Estimated Area: {sqft} sq ft
 
-J. Worden & Sons Asphalt Paving proposes to furnish all materials,
-equipment, and labor necessary to complete the {service.lower()} project
-at the above-referenced location.
+J. Worden & Sons proposes to furnish all materials, equipment, and labor
+necessary to complete the {service.lower()} project at the above-referenced location.
 
 WORK INCLUDES:
-• Site preparation and subgrade inspection
-• Installation of hot mix asphalt (HMA) per VDOT/state specifications
-• Proper compaction to achieve 92–96% density
-• Final grading and cleanup
+{work_block}
 
 PRICING SUMMARY:
 Estimated Total: {price_str}
@@ -139,10 +245,10 @@ Estimated Total: {price_str}
 
 TIMELINE:
 • Mobilization within 5–10 business days of signed contract
-• Project duration: 1–3 days depending on scope
+• Project duration: 1–5 days depending on scope
 
 WARRANTY:
-J. Worden & Sons provides a 1-year workmanship warranty on all paving work.
+J. Worden & Sons provides a 1-year workmanship warranty on all work.
 Material warranties follow manufacturer specifications.
 
 PAYMENT TERMS:

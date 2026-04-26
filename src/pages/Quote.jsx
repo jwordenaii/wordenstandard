@@ -14,12 +14,16 @@ const STEPS = [
 ]
 
 const SERVICES = [
-  { value: 'paving',       label: '🛣 Asphalt Paving' },
-  { value: 'sealcoating',  label: '🖤 Sealcoating' },
-  { value: 'crackfill',    label: '🔧 Crack Filling' },
-  { value: 'parking_lot',  label: '🏢 Parking Lot' },
-  { value: 'driveway',     label: '🏠 Driveway' },
-  { value: 'maintenance',  label: '🔄 Maintenance Plan' },
+  { value: 'paving',              label: '🛣 Asphalt Paving' },
+  { value: 'sealcoating',         label: '🖤 Sealcoating' },
+  { value: 'crackfill',           label: '🔧 Crack Filling' },
+  { value: 'parking_lot',         label: '🏢 Parking Lot' },
+  { value: 'driveway',            label: '🏠 Driveway' },
+  { value: 'maintenance',         label: '🔄 Maintenance Plan' },
+  { value: 'general_contracting', label: '🏗 General Contracting' },
+  { value: 'interior_design',     label: '🎨 Interior Design & Decorating' },
+  { value: 'cobblestone_pavers',  label: '🪨 Cobblestone / Brick Paver Patio' },
+  { value: 'stone_masonry',       label: '🧱 Stone Masonry' },
 ]
 
 const URGENCIES = [
