@@ -396,3 +396,56 @@ class Tenant(Base):
 
     def __repr__(self) -> str:
         return f"<Tenant tenant_id={self.tenant_id!r} company={self.company_name!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Blog Post — AI-generated and manually authored content for SEO
+# ══════════════════════════════════════════════════════════════════════════════
+
+class BlogPost(Base):
+    """
+    Blog / knowledge-base article.  Can be authored manually via the admin
+    dashboard or AI-drafted via the /api/v1/blog/draft endpoint and then
+    reviewed + published.
+
+    status lifecycle: draft → review → published | archived
+    """
+    __tablename__ = "blog_posts"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    slug            = Column(String(200), nullable=False, unique=True, index=True)
+    title           = Column(String(300), nullable=False)
+    excerpt         = Column(Text, nullable=False, default="")
+    body            = Column(Text, nullable=False, default="")
+
+    # Classification
+    category        = Column(String(60),  nullable=True)   # tips | how-to | industry | local | commercial
+    tags            = Column(String(500), nullable=True)   # comma-separated
+
+    # SEO fields
+    meta_title      = Column(String(300), nullable=True)
+    meta_description= Column(String(320), nullable=True)
+    focus_keyword   = Column(String(120), nullable=True)
+    canonical_url   = Column(String(500), nullable=True)
+
+    # Publish state
+    status          = Column(String(20), default='draft', nullable=False)   # draft | review | published | archived
+    published_at    = Column(DateTime(timezone=True), nullable=True)
+    featured        = Column(Integer, default=0, nullable=False)            # 1 = pinned/featured
+
+    # Authorship
+    author_name     = Column(String(120), default='J. Worden & Sons', nullable=False)
+    ai_generated    = Column(Integer, default=0, nullable=False)            # 1 = AI-drafted
+
+    # Read metrics
+    read_time_minutes = Column(Integer, nullable=True)
+    view_count      = Column(Integer, default=0, nullable=False)
+
+    # Multi-tenant
+    tenant_id       = Column(String(60), nullable=True, index=True, default='default')
+
+    created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at      = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<BlogPost slug={self.slug!r} status={self.status!r}>"

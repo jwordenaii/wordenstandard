@@ -198,7 +198,7 @@ def run_chat(
     """
     openai_key = os.getenv("OPENAI_API_KEY", "")
 
-    # Build state-context injection
+    # Build state-context injection using RAG knowledge base
     state_fragment = ""
     if state_code:
         # Import here to avoid circular deps
@@ -211,6 +211,17 @@ def run_chat(
     user_msg = question
     if state_fragment:
         user_msg = f"{state_fragment}\n\n{question}"
+
+    # Inject RAG knowledge base context into system prompt
+    try:
+        from ..services.knowledge_base import build_rag_system_prompt  # noqa: PLC0415
+        enriched_system = build_rag_system_prompt(
+            question=question,
+            state_code=state_code,
+            base_prompt=JWORDEN_SYSTEM_PROMPT,
+        )
+    except Exception:  # noqa: BLE001
+        enriched_system = JWORDEN_SYSTEM_PROMPT
 
     # Determine model: use GPT-4o for legal/compliance, fast model for simple
     q_lower = question.lower()
@@ -238,7 +249,7 @@ def run_chat(
     except Exception:  # noqa: BLE001
         pass
 
-    messages = [{"role": "system", "content": JWORDEN_SYSTEM_PROMPT}]
+    messages = [{"role": "system", "content": enriched_system}]
     messages.extend(correction_messages)
 
     # Feature 1: Include conversation history

@@ -114,6 +114,22 @@ export const api = {
   // ── National Permits (Feature 6) ──────────────────────────────────
   getNationalPermits: (states, keyword = 'asphalt', limit = 25) =>
     request('GET', `/api/v1/permits/national?states=${encodeURIComponent(states)}&keyword=${encodeURIComponent(keyword)}&limit=${limit}`),
+
+  // ── Blog (Feature: blog & knowledge center) ────────────────────────
+  listBlogPosts:        (params = {}) => request('GET', `/api/v1/blog${buildQS(params)}`),
+  getBlogPost:          (slug) => request('GET', `/api/v1/blog/${slug}`),
+  generateBlogDraft:    (data) => request('POST', '/api/v1/blog/draft', data),
+  createBlogPost:       (data) => request('POST', '/api/v1/blog', data),
+  updateBlogPost:       (slug, data) => request('PUT', `/api/v1/blog/${slug}`, data),
+  publishBlogPost:      (slug) => request('POST', `/api/v1/blog/${slug}/publish`),
+
+  // ── Review AI Response ──────────────────────────────────────────────
+  generateReviewResponse: (data) => request('POST', '/api/v1/reviews/respond', data),
+
+  // ── SEO Generation ──────────────────────────────────────────────────
+  generateCityPageCopy: (data) => request('POST', '/api/v1/seo/city-page', data),
+  generateMetaTags:     (data) => request('POST', '/api/v1/seo/meta-tags', data),
+  generateFAQ:          (data) => request('POST', '/api/v1/seo/faq', data),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────
