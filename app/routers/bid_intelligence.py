@@ -257,7 +257,11 @@ def _rule_based_analysis(rows) -> dict:
         if r.outcome == "won":
             service_wins[svc] = service_wins.get(svc, 0) + 1
 
-    best_svc = max(service_wins, key=lambda s: service_wins[s] / service_totals[s], default=None)
+    best_svc = max(
+        (s for s in service_wins if service_totals.get(s, 0) > 0),
+        key=lambda s: service_wins[s] / service_totals[s],
+        default=None,
+    )
     if best_svc:
         rate = round(service_wins[best_svc] / service_totals[best_svc] * 100, 1)
         insights.append(f"Highest win rate by service: {best_svc} at {rate}%.")

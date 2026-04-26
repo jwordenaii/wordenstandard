@@ -151,7 +151,7 @@ async def forecast(
     for i in range(13):
         ws = week_start + timedelta(weeks=i)
         we = ws + timedelta(weeks=1)
-        weeks.append({"label": ws.strftime("%-m/%-d"), "start": ws, "end": we, "income": 0.0, "expense": 0.0})
+        weeks.append({"label": f"{ws.month}/{ws.day}", "start": ws, "end": we, "income": 0.0, "expense": 0.0})
 
     entries = db.query(CashFlowEntry).all()
     for e in entries:

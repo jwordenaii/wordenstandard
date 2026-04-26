@@ -305,7 +305,6 @@ async def delete_performance(
     db: Session = Depends(get_db),
     _: dict = Depends(verify_premium_security),
 ):
-    from fastapi import HTTPException  # noqa: PLC0415
     perf = db.get(SubcontractorPerformance, perf_id)
     if not perf:
         raise HTTPException(status_code=404, detail="Performance record not found")

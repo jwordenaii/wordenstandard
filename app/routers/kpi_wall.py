@@ -70,7 +70,8 @@ async def kpi_wall(
         SafetyIncident.incident_date >= twelve_months_ago,
     ).count()
     # Estimate hours: 200k = 100 workers × 50 wks × 40 hrs
-    trir = round((recordables * 200_000) / 200_000, 2) if True else None
+    estimated_hours = 200_000
+    trir = round((recordables * 200_000) / estimated_hours, 2)
 
     # ── 4. Cash Position (net of all future entries) ──────────────────────────
     future_entries = db.query(CashFlowEntry).filter(
