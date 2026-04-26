@@ -73,11 +73,14 @@ function TypingIndicator() {
   )
 }
 
+// How long (ms) to wait before auto-opening the chat on a visitor's first page load
+const GREETING_DELAY_MS = 6000
+
 const INITIAL_MESSAGES = [
   {
     id: 0,
     role: 'bot',
-    text: "Welcome — I'm J. Worden Sr., founder of J. Worden & Sons Paving. I started laying asphalt back in '84 and I'm here to help you get your project done right. What are you working on today?",
+    text: "Welcome — I'm a digital tribute to J. Worden Sr., founder of J. Worden & Sons Paving since 1984. I'm here to answer your questions, give you a ballpark, and get you on our schedule. What are you working on today?",
   },
 ]
 
@@ -98,7 +101,7 @@ export default function ChatWidget() {
     const timer = setTimeout(() => {
       setOpen(true)
       sessionStorage.setItem('jworden_greeted', '1')
-    }, 6000)
+    }, GREETING_DELAY_MS)
     return () => clearTimeout(timer)
   }, [])
 
