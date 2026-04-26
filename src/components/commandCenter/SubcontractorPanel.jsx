@@ -213,9 +213,9 @@ export default function SubcontractorPanel() {
                       <div className="text-brand-navy/40 text-xs">{s.company}</div>
                     </td>
                     <td className="py-2.5 pr-3 hidden sm:table-cell text-brand-navy/60">{s.state_code}</td>
-                    <td className="py-2.5 pr-3"><ExpiryBadge date={s.insurance_expiry} label="Insurance" /></td>
-                    <td className="py-2.5 pr-3 hidden md:table-cell"><ExpiryBadge date={s.bond_expiry} label="Bond" /></td>
-                    <td className="py-2.5"><ExpiryBadge date={s.license_expiry} label="License" /></td>
+                    <td className="py-2.5 pr-3"><ExpiryBadge date={s.insurance_expiry} /></td>
+                    <td className="py-2.5 pr-3 hidden md:table-cell"><ExpiryBadge date={s.bond_expiry} /></td>
+                    <td className="py-2.5"><ExpiryBadge date={s.license_expiry} /></td>
                   </tr>
                 ))}
               </tbody>

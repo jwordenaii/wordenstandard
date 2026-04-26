@@ -53,7 +53,7 @@ export const api = {
   // ── Analytics (Feature 10) ─────────────────────────────────────────
   getAnalyticsDashboard: () => request('GET', '/api/v1/analytics/dashboard'),
   getAnalyticsFunnel:    () => request('GET', '/api/v1/analytics/funnel'),
-  getRevenueforecast:    () => request('GET', '/api/v1/analytics/revenue-forecast'),
+  getRevenueForecast:    () => request('GET', '/api/v1/analytics/revenue-forecast'),
   getMonthlyVolume:      () => request('GET', '/api/v1/analytics/monthly-volume'),
 
   // ── CRM Pipeline (Feature 3) ───────────────────────────────────────
