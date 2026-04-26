@@ -36,6 +36,9 @@ import HumanReviewPanel from '../components/commandCenter/HumanReviewPanel'
 import DocumentsPanel from '../components/commandCenter/DocumentsPanel'
 import VoicePanel from '../components/commandCenter/VoicePanel'
 import FollowUpsPanel from '../components/commandCenter/FollowUpsPanel'
+import SchedulingPanel from '../components/commandCenter/SchedulingPanel'
+import JobCostingPanel from '../components/commandCenter/JobCostingPanel'
+import RFIChangeOrderPanel from '../components/commandCenter/RFIChangeOrderPanel'
 
 // Lazy-load TakeoffMap because @vis.gl/react-google-maps is a heavier dep
 const TakeoffMap = lazy(() => import('../components/TakeoffMap'))
@@ -141,6 +144,9 @@ const PANELS = [
   { id: 'documents',     label: '📁 Documents' },
   { id: 'voice',         label: '🎙 Voice Intake' },
   { id: 'follow-ups',    label: '🔔 Follow-Ups' },
+  { id: 'scheduling',    label: '🗓 Scheduling' },
+  { id: 'job-costing',   label: '💰 Job Costing' },
+  { id: 'rfi-co',        label: '📝 RFI / Change Orders' },
 ]
 
 export default function CommandCenter() {
@@ -382,6 +388,15 @@ function CommandCenterInner() {
 
         {/* ── Follow-Ups panel ── */}
         {activePanel === 'follow-ups' && <FollowUpsPanel />}
+
+        {/* ── Scheduling (CPM) panel ── */}
+        {activePanel === 'scheduling' && <SchedulingPanel />}
+
+        {/* ── Job Costing panel ── */}
+        {activePanel === 'job-costing' && <JobCostingPanel />}
+
+        {/* ── RFI / Change Orders panel ── */}
+        {activePanel === 'rfi-co' && <RFIChangeOrderPanel />}
 
         {/* ── Bottom CTA ── */}
         <section className="mt-12 bg-brand-navy rounded-2xl p-8 text-center text-white">
