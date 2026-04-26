@@ -31,7 +31,7 @@ try:
     from celery.schedules import crontab  # type: ignore
 
     if not _BROKER_URL:
-        raise ImportError("CELERY_BROKER_URL / REDIS_URL not configured")
+        raise RuntimeError("CELERY_BROKER_URL / REDIS_URL not configured")
 
     celery_app = Celery("jworden_followups", broker=_BROKER_URL, backend=_BROKER_URL)
     celery_app.conf.update(
@@ -56,7 +56,7 @@ try:
         },
     )
     _CELERY_AVAILABLE = True
-except ImportError as _e:
+except (ImportError, RuntimeError) as _e:
     celery_app = None  # type: ignore
     _CELERY_AVAILABLE = False
     logger.warning("Follow-up tasks disabled: %s", _e)

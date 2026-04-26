@@ -87,10 +87,15 @@ def _gpt_json_call(client, system_prompt: str, user_content) -> dict:
         return json.loads(text)
     except json.JSONDecodeError as exc:
         logger.error("GPT JSON parse error: %s", exc)
-        return {"error": "Could not parse GPT response as JSON", "raw": text[:500] if "text" in dir() else ""}
+        raw_snippet = ""
+        try:
+            raw_snippet = text[:500]
+        except Exception:  # noqa: BLE001
+            pass
+        return {"error": "Could not parse GPT response as JSON", "raw": raw_snippet}
     except Exception as exc:  # noqa: BLE001
         logger.error("GPT call error: %s", exc)
-        return {"error": str(exc)}
+        return {"error": "AI service temporarily unavailable"}
 
 
 def parse_contract(file_bytes: bytes, mime_type: str) -> dict:

@@ -67,7 +67,7 @@ def transcribe_audio(audio_bytes: bytes, content_type: str) -> str:
         return response.text or ""
     except Exception as exc:  # noqa: BLE001
         logger.error("Whisper transcription error: %s", exc)
-        return f"[Transcription failed: {exc}]"
+        return "[Transcription failed. Please try again or contact us directly.]"
 
 
 def extract_lead_entities(transcript: str) -> dict:
