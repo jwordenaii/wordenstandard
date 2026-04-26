@@ -91,6 +91,36 @@ export const api = {
     request('GET', `/api/v1/market/competitors?location=${encodeURIComponent(location)}&service=${encodeURIComponent(service)}`),
   getMarketSignals:   (stateCode) => request('GET', `/api/v1/market/signals/${stateCode}`),
   getSeasonalDemand:  (stateCode) => request('GET', `/api/v1/market/seasonal/${stateCode}`),
+
+  // ── Proposals (Feature 1) ──────────────────────────────────────────
+  generateProposal: (leadId) => request('POST', `/api/v1/proposals/generate`, { lead_id: leadId }),
+  sendProposal:     (proposalId) => request('POST', `/api/v1/proposals/${proposalId}/send`),
+
+  // ── Human Review Queue (Feature 5) ────────────────────────────────
+  listReviewQueue:   (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''))
+    ).toString()
+    return request('GET', `/api/v1/review/queue${qs ? `?${qs}` : ''}`)
+  },
+  getReviewStats:    () => request('GET', '/api/v1/review/stats'),
+  approveReviewItem: (id, correction) =>
+    request('POST', `/api/v1/review/queue/${id}/approve`, { correction: correction || null }),
+  rejectReviewItem:  (id, correction) =>
+    request('POST', `/api/v1/review/queue/${id}/reject`, { correction: correction || null }),
+
+  // ── Follow-Ups (Feature 4) ─────────────────────────────────────────
+  listFollowUps:  (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''))
+    ).toString()
+    return request('GET', `/api/v1/followups${qs ? `?${qs}` : ''}`)
+  },
+  cancelFollowUp: (taskId) => request('POST', `/api/v1/followups/${taskId}/cancel`),
+
+  // ── National Permits (Feature 6) ──────────────────────────────────
+  getNationalPermits: (states, keyword = 'asphalt', limit = 25) =>
+    request('GET', `/api/v1/permits/national?states=${encodeURIComponent(states)}&keyword=${encodeURIComponent(keyword)}&limit=${limit}`),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

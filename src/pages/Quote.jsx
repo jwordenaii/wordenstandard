@@ -3,7 +3,6 @@ import SchemaMarkup from '../components/SchemaMarkup'
 import { api, trackEvent } from '../api/client'
 import { estimatePrice } from '../lib/pricing'
 import { STATE_OPTIONS, getStateSummary } from '../lib/states50'
-
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -101,6 +100,13 @@ export default function Quote() {
   const [result, setResult] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
 
+  // Proposal pipeline state (shown after successful quote submission)
+  const [proposalStatus, setProposalStatus]  = useState('idle')  // idle | generating | done | error
+  const [proposal, setProposal]             = useState(null)
+  const [proposalError, setProposalError]   = useState('')
+  const [sendStatus, setSendStatus]         = useState('idle')
+  const [sendMsg, setSendMsg]               = useState('')
+
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }))
   const handleChange = (e) => set(e.target.name, e.target.value)
 
@@ -131,6 +137,49 @@ export default function Quote() {
     }
   }
 
+  const handleGenerateProposal = async () => {
+    if (!result?.lead_id) return
+    setProposalStatus('generating')
+    setProposalError('')
+    setProposal(null)
+    setSendMsg('')
+    try {
+      const data = await api.generateProposal(result.lead_id)
+      setProposal(data)
+      setProposalStatus('done')
+    } catch (e) {
+      setProposalError(e.message)
+      setProposalStatus('error')
+    }
+  }
+
+  const handleDownloadProposal = () => {
+    if (!proposal?.pdf_b64) return
+    const bytes = atob(proposal.pdf_b64)
+    const arr   = new Uint8Array(Array.from(bytes, (c) => c.charCodeAt(0)))
+    const blob  = new Blob([arr], { type: 'application/pdf' })
+    const url   = URL.createObjectURL(blob)
+    const a     = document.createElement('a')
+    a.href      = url
+    a.download  = `proposal-lead-${result.lead_id}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleSendProposal = async () => {
+    if (!proposal?.proposal_id) return
+    setSendStatus('sending')
+    setSendMsg('')
+    try {
+      const data = await api.sendProposal(proposal.proposal_id)
+      setSendMsg(data.detail || 'Proposal emailed successfully!')
+      setSendStatus('done')
+    } catch (e) {
+      setSendMsg(`Error: ${e.message}`)
+      setSendStatus('error')
+    }
+  }
+
   if (status === 'success') {
     return (
       <>
@@ -139,35 +188,108 @@ export default function Quote() {
           description="Get a free no-obligation asphalt paving estimate from J. Worden & Sons. Multi-step quote form with instant response."
           canonical="/quote"
         />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-16 px-4">
-          <div className="max-w-lg w-full bg-white rounded-2xl shadow-lg p-10 text-center">
-            <div className="text-5xl mb-4">🎉</div>
-            <h2 className="font-display font-black text-3xl text-brand-navy mb-3">
-              Quote Request Received!
-            </h2>
-            <p className="text-brand-navy/60 mb-6">
-              Thanks, <strong>{form.name}</strong>! We&apos;ll reach out to{' '}
-              <strong>{form.email}</strong> shortly.
-            </p>
-            {result && (
-              <div
-                className={`inline-block px-5 py-2 rounded-full text-sm font-bold mb-4 ${
-                  result.lead_score === 'HOT'
-                    ? 'bg-red-100 text-red-700'
-                    : result.lead_score === 'WARM'
-                    ? 'bg-orange-100 text-orange-700'
-                    : 'bg-blue-100 text-blue-700'
-                }`}
-              >
-                {result.follow_up_sla}
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-16 px-4 py-16">
+          <div className="max-w-lg w-full space-y-6">
+            {/* Confirmation card */}
+            <div className="bg-white rounded-2xl shadow-lg p-10 text-center">
+              <div className="text-5xl mb-4">🎉</div>
+              <h2 className="font-display font-black text-3xl text-brand-navy mb-3">
+                Quote Request Received!
+              </h2>
+              <p className="text-brand-navy/60 mb-6">
+                Thanks, <strong>{form.name}</strong>! We&apos;ll reach out to{' '}
+                <strong>{form.email}</strong> shortly.
+              </p>
+              {result && (
+                <div
+                  className={`inline-block px-5 py-2 rounded-full text-sm font-bold mb-4 ${
+                    result.lead_score === 'HOT'
+                      ? 'bg-red-100 text-red-700'
+                      : result.lead_score === 'WARM'
+                      ? 'bg-orange-100 text-orange-700'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}
+                >
+                  {result.follow_up_sla}
+                </div>
+              )}
+              <p className="text-sm text-brand-navy/50 mb-6">
+                ⏱ We respond within 2 hours during business hours.
+              </p>
+              <a href="/" className="btn-primary">
+                Back to Home
+              </a>
+            </div>
+
+            {/* Proposal pipeline card — only shown when a lead_id was returned */}
+            {result?.lead_id && (
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h3 className="font-display font-bold text-brand-navy text-xl mb-1">
+                  📄 Generate a Proposal
+                </h3>
+                <p className="text-brand-navy/50 text-sm mb-5">
+                  Use JWordenAI to instantly draft a professional proposal for this project, then
+                  download as PDF or email it directly to the client.
+                </p>
+
+                {proposalStatus === 'idle' && (
+                  <button
+                    type="button"
+                    onClick={handleGenerateProposal}
+                    className="btn-primary"
+                  >
+                    ✨ Generate Proposal
+                  </button>
+                )}
+
+                {proposalStatus === 'generating' && (
+                  <div className="flex items-center gap-3 text-brand-navy/60 text-sm">
+                    <span className="w-5 h-5 border-2 border-brand-amber border-t-transparent rounded-full animate-spin" />
+                    Generating proposal…
+                  </div>
+                )}
+
+                {proposalStatus === 'error' && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm mb-3">
+                    {proposalError}
+                  </div>
+                )}
+
+                {proposalStatus === 'done' && proposal && (
+                  <div className="space-y-4">
+                    <pre className="bg-gray-50 rounded-xl p-4 text-xs text-brand-navy/70 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+                      {proposal.proposal_text}
+                    </pre>
+                    <div className="flex flex-wrap gap-3">
+                      {proposal.pdf_b64 && (
+                        <button
+                          type="button"
+                          onClick={handleDownloadProposal}
+                          className="btn-outline flex items-center gap-2 text-sm"
+                        >
+                          ⬇ Download PDF
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleSendProposal}
+                        disabled={sendStatus === 'sending'}
+                        className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      >
+                        {sendStatus === 'sending' ? 'Sending…' : '📧 Email to Client'}
+                      </button>
+                    </div>
+                    {sendMsg && (
+                      <div className={`text-sm rounded-lg px-4 py-2 ${
+                        sendMsg.startsWith('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+                      }`}>
+                        {sendMsg}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
-            <p className="text-sm text-brand-navy/50 mb-6">
-              ⏱ We respond within 2 hours during business hours.
-            </p>
-            <a href="/" className="btn-primary">
-              Back to Home
-            </a>
           </div>
         </div>
       </>

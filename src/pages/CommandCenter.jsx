@@ -2,7 +2,7 @@
  * CommandCenter — JWordenAI proprietary operations dashboard.
  *
  * Panels:
- *  1. Permit Feed       — live Virginia VPT / DEQ permit leads
+ *  1. Permit Feed       — live Virginia VPT / DEQ / National permit leads
  *  2. Takeoff Tool      — Google Maps + Solar API + OpenCV photo measurement
  *  3. Analytics         — BI dashboard (leads, funnel, revenue forecast)
  *  4. CRM Pipeline      — lead stage management
@@ -11,10 +11,13 @@
  *  7. Lien Calendar     — mechanics lien deadline tracker
  *  8. Subcontractors    — insurance/bond compliance monitor
  *  9. Market Intel      — competitor radar + market signals
+ * 10. Proposals         — GPT-4o proposal generator with PDF download + email send
+ * 11. Human Review      — AI decision review queue; approve/reject with feedback
+ * 12. Documents         — Upload contracts/blueprints/permits for AI Vision analysis
+ * 13. Voice Intake      — Upload audio / Twilio recording → transcript + lead
+ * 14. Follow-Ups        — Scheduled follow-up task list with cancel support
  *
- * Mirrors the advisory page layout (brand-navy header, scrollable tab bar).
- * Access is intentionally unguarded on the frontend; protect via server
- * auth or deploy behind a private URL for production use.
+ * Protected by an optional pin gate (VITE_CC_PASSWORD env var).
  */
 
 import { lazy, Suspense, useState } from 'react'
@@ -28,9 +31,69 @@ import MaterialsPanel from '../components/commandCenter/MaterialsPanel'
 import LienCalendarPanel from '../components/commandCenter/LienCalendarPanel'
 import SubcontractorPanel from '../components/commandCenter/SubcontractorPanel'
 import MarketIntelPanel from '../components/commandCenter/MarketIntelPanel'
+import ProposalsPanel from '../components/commandCenter/ProposalsPanel'
+import HumanReviewPanel from '../components/commandCenter/HumanReviewPanel'
+import DocumentsPanel from '../components/commandCenter/DocumentsPanel'
+import VoicePanel from '../components/commandCenter/VoicePanel'
+import FollowUpsPanel from '../components/commandCenter/FollowUpsPanel'
 
 // Lazy-load TakeoffMap because @vis.gl/react-google-maps is a heavier dep
 const TakeoffMap = lazy(() => import('../components/TakeoffMap'))
+
+// ── Login Guard ───────────────────────────────────────────────────────────────
+const CC_PASSWORD = import.meta.env.VITE_CC_PASSWORD || ''
+const SESSION_KEY = 'jworden_cc_unlocked'
+
+function LoginGate({ children }) {
+  const [unlocked, setUnlocked] = useState(
+    !CC_PASSWORD || sessionStorage.getItem(SESSION_KEY) === '1',
+  )
+  const [pin, setPin] = useState('')
+  const [error, setError] = useState(false)
+
+  if (unlocked) return children
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (pin === CC_PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, '1')
+      setUnlocked(true)
+    } else {
+      setError(true)
+      setPin('')
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-navy flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-10 max-w-sm w-full text-center">
+        <div className="text-4xl mb-4">🔒</div>
+        <h2 className="font-display font-black text-2xl text-brand-navy mb-2">
+          Command Center
+        </h2>
+        <p className="text-brand-navy/50 text-sm mb-6">
+          Enter the access PIN to continue.
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="password"
+            value={pin}
+            onChange={(e) => { setPin(e.target.value); setError(false) }}
+            placeholder="Access PIN"
+            autoFocus
+            className="w-full border border-gray-200 rounded-lg px-4 py-3 text-brand-navy text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-amber/50 focus:border-brand-amber"
+          />
+          {error && (
+            <p className="text-red-500 text-xs">Incorrect PIN. Try again.</p>
+          )}
+          <button type="submit" className="btn-primary w-full">
+            Unlock →
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 function TabButton({ active, onClick, children }) {
   return (
@@ -58,8 +121,9 @@ function MapLoader() {
 }
 
 const FEED_TABS = [
-  { id: 'vpt',  label: '🏗 VPT Permits',  source: 'vpt', keyword: 'paving' },
-  { id: 'deq',  label: '💧 DEQ Permits',  source: 'deq', keyword: '' },
+  { id: 'vpt',      label: '🏗 VPT Permits',      source: 'vpt',      keyword: 'paving' },
+  { id: 'deq',      label: '💧 DEQ Permits',      source: 'deq',      keyword: '' },
+  { id: 'national', label: '🌎 National Permits',  source: 'national', keyword: 'asphalt' },
 ]
 
 const PANELS = [
@@ -72,12 +136,27 @@ const PANELS = [
   { id: 'lien-calendar', label: '📅 Lien Calendar' },
   { id: 'subcontractors',label: '🏗 Subs' },
   { id: 'market-intel',  label: '🔍 Market Intel' },
+  { id: 'proposals',     label: '📄 Proposals' },
+  { id: 'human-review',  label: '🧠 Human Review' },
+  { id: 'documents',     label: '📁 Documents' },
+  { id: 'voice',         label: '🎙 Voice Intake' },
+  { id: 'follow-ups',    label: '🔔 Follow-Ups' },
 ]
 
 export default function CommandCenter() {
+  return (
+    <LoginGate>
+      <CommandCenterInner />
+    </LoginGate>
+  )
+}
+
+function CommandCenterInner() {
   const [activePanel, setActivePanel] = useState('permits')
   const [activeFeed, setActiveFeed]   = useState('vpt')
   const [vptKeyword, setVptKeyword]   = useState('paving')
+  const [natKeyword, setNatKeyword]   = useState('asphalt')
+  const [natStates, setNatStates]     = useState('VA,TX,FL,NC,GA,NY,NJ,MI')
 
   const currentFeed = FEED_TABS.find((t) => t.id === activeFeed)
 
@@ -159,14 +238,35 @@ export default function CommandCenter() {
                   />
                 </div>
               )}
+              {activeFeed === 'national' && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <label className="text-xs text-brand-navy/50 font-medium whitespace-nowrap">States:</label>
+                  <input
+                    type="text"
+                    value={natStates}
+                    onChange={(e) => setNatStates(e.target.value)}
+                    placeholder="VA,TX,FL…"
+                    className="input text-sm py-1.5 w-44"
+                  />
+                  <label className="text-xs text-brand-navy/50 font-medium whitespace-nowrap">Keyword:</label>
+                  <input
+                    type="text"
+                    value={natKeyword}
+                    onChange={(e) => setNatKeyword(e.target.value)}
+                    placeholder="asphalt"
+                    className="input text-sm py-1.5 w-32"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Feed */}
             <div className="card p-6">
               <PermitFeed
-                key={`${activeFeed}-${vptKeyword}`}
+                key={`${activeFeed}-${vptKeyword}-${natKeyword}-${natStates}`}
                 source={currentFeed?.source}
-                keyword={vptKeyword}
+                keyword={activeFeed === 'national' ? natKeyword : vptKeyword}
+                states={activeFeed === 'national' ? natStates : undefined}
                 limit={50}
                 pollIntervalMs={300_000}
               />
@@ -267,6 +367,21 @@ export default function CommandCenter() {
 
         {/* ── Market Intelligence panel ── */}
         {activePanel === 'market-intel' && <MarketIntelPanel />}
+
+        {/* ── Proposals panel ── */}
+        {activePanel === 'proposals' && <ProposalsPanel />}
+
+        {/* ── Human Review Queue panel ── */}
+        {activePanel === 'human-review' && <HumanReviewPanel />}
+
+        {/* ── Documents panel ── */}
+        {activePanel === 'documents' && <DocumentsPanel />}
+
+        {/* ── Voice Intake panel ── */}
+        {activePanel === 'voice' && <VoicePanel />}
+
+        {/* ── Follow-Ups panel ── */}
+        {activePanel === 'follow-ups' && <FollowUpsPanel />}
 
         {/* ── Bottom CTA ── */}
         <section className="mt-12 bg-brand-navy rounded-2xl p-8 text-center text-white">
