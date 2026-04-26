@@ -12,7 +12,7 @@ https://lis.virginia.gov or the relevant permit API endpoint.
 
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,6 @@ def scrape_and_persist(max_pages: int = 5) -> dict:
                     **validated.model_dump(exclude={"raw_json"}),
                     priority_score=score,
                     priority_label=label,
-                    scraped_at=datetime.now(timezone.utc),
                 )
                 db.add(lead)
 
