@@ -306,7 +306,7 @@ export default function Home() {
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3">
                     <span className="w-5 h-5 rounded-full bg-brand-amber/20 flex items-center justify-center text-brand-amber font-bold text-xs">✓</span>
-                    <span dangerouslySetInnerHTML={{ __html: item }} />
+                    <span>{item}</span>
                   </li>
                 ))}
               </ul>

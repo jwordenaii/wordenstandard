@@ -86,7 +86,7 @@ def _call_openai_seo(system: str, user: str, max_tokens: int = 600) -> str | Non
         )
         return (resp.choices[0].message.content or "").strip()
     except Exception as exc:  # noqa: BLE001
-        logger.error("SEO OpenAI call failed: %s", exc)
+        logger.error("SEO OpenAI call failed [endpoint=%s]: %s", "seo_generation", exc)
         return None
 
 

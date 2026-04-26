@@ -117,7 +117,7 @@ function MarkdownContent({ markdown }) {
           {listItems.map((item, k) => (
             <li key={k} className="flex items-start gap-3 text-brand-navy/75">
               <span className="mt-1.5 w-2 h-2 rounded-full bg-brand-amber flex-shrink-0" />
-              <span dangerouslySetInnerHTML={{ __html: renderInline(item) }} />
+              <span><InlineText text={item} /></span>
             </li>
           ))}
         </ul>
@@ -136,7 +136,7 @@ function MarkdownContent({ markdown }) {
           {checklist.map((item, k) => (
             <li key={k} className="flex items-center gap-3 text-brand-navy/75">
               <span className="text-green-500 font-bold">☑</span>
-              <span dangerouslySetInnerHTML={{ __html: renderInline(item) }} />
+              <span><InlineText text={item} /></span>
             </li>
           ))}
         </ul>
@@ -147,8 +147,9 @@ function MarkdownContent({ markdown }) {
       // skip blank
     } else {
       elements.push(
-        <p key={i} className="text-brand-navy/75 leading-relaxed mb-4"
-          dangerouslySetInnerHTML={{ __html: renderInline(line) }} />
+        <p key={i} className="text-brand-navy/75 leading-relaxed mb-4">
+          <InlineText text={line} />
+        </p>
       )
     }
     i++
@@ -158,11 +159,45 @@ function MarkdownContent({ markdown }) {
   return <div className="prose-jworden">{elements}</div>
 }
 
-function renderInline(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-brand-navy">$1</strong>')
-    .replace(/`(.+?)`/g, '<code class="bg-gray-100 text-brand-navy px-1.5 py-0.5 rounded text-sm font-mono">$1</code>')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-brand-amber font-semibold hover:underline">$1</a>')
+/**
+ * InlineText — safely renders inline Markdown (bold, code, links) as React nodes.
+ * No dangerouslySetInnerHTML — all content is constructed as React elements.
+ */
+function InlineText({ text }) {
+  const parts = []
+  let remaining = text
+  let key = 0
+
+  const TOKENS = [
+    { re: /\*\*(.+?)\*\*/,      render: (m, k) => <strong key={k} className="font-bold text-brand-navy">{m[1]}</strong> },
+    { re: /`(.+?)`/,             render: (m, k) => <code key={k} className="bg-gray-100 text-brand-navy px-1.5 py-0.5 rounded text-sm font-mono">{m[1]}</code> },
+    { re: /\[(.+?)\]\((.+?)\)/, render: (m, k) => <a key={k} href={m[2]} className="text-brand-amber font-semibold hover:underline">{m[1]}</a> },
+  ]
+
+  while (remaining.length > 0) {
+    let earliest = null
+    let earliestToken = null
+    let earliestMatch = null
+
+    for (const token of TOKENS) {
+      const match = remaining.match(token.re)
+      if (match !== null && (earliest === null || match.index < earliest)) {
+        earliest = match.index
+        earliestToken = token
+        earliestMatch = match
+      }
+    }
+
+    if (earliest === null) {
+      parts.push(remaining)
+      break
+    }
+    if (earliest > 0) parts.push(remaining.slice(0, earliest))
+    parts.push(earliestToken.render(earliestMatch, key++))
+    remaining = remaining.slice(earliest + earliestMatch[0].length)
+  }
+
+  return <>{parts.map((p, i) => typeof p === 'string' ? <span key={i}>{p}</span> : p)}</>
 }
 
 const CATEGORY_ICONS = {

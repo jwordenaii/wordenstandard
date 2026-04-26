@@ -104,7 +104,7 @@ Write the review response now:
         return (response.choices[0].message.content or "").strip()
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("OpenAI review response failed: %s", exc)
+        logger.error("OpenAI review response (tone=%s, rating=%d) failed: %s", tone, rating, exc)
         return _template_response(review_text, reviewer_name, rating, tone)
 
 

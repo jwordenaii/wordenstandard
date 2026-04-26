@@ -233,8 +233,8 @@ def assemble_context(
             frag = get_state_prompt_fragment(state_code.upper())
             if frag:
                 context_blocks.append(f"\n=== {state_code.upper()} STATE CONTEXT ===\n{frag}\n=== END STATE CONTEXT ===\n")
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("State context injection skipped for %s: %s", state_code, exc)
 
     return "\n".join(context_blocks)
 
