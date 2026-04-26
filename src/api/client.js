@@ -38,6 +38,14 @@ async function request(method, path, body) {
   }
 }
 
+/** Build a query string from an object, omitting null/undefined/empty values. */
+function buildQS(params) {
+  const qs = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''))
+  ).toString()
+  return qs ? `?${qs}` : ''
+}
+
 export const api = {
   submitQuote:    (data) => request('POST', '/api/v1/leads/quote',   data),
   submitContact:  (data) => request('POST', '/api/v1/leads/contact', data),
@@ -57,12 +65,7 @@ export const api = {
   getMonthlyVolume:      () => request('GET', '/api/v1/analytics/monthly-volume'),
 
   // ── CRM Pipeline (Feature 3) ───────────────────────────────────────
-  getCRMLeads:    (params = {}) => {
-    const qs = new URLSearchParams(
-      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''))
-    ).toString()
-    return request('GET', `/api/v1/crm/leads${qs ? `?${qs}` : ''}`)
-  },
+  getCRMLeads:    (params = {}) => request('GET', `/api/v1/crm/leads${buildQS(params)}`),
   updateLeadStage: (leadId, stage, closedReason) =>
     request('PATCH', `/api/v1/crm/leads/${leadId}/stage`, { pipeline_stage: stage, closed_reason: closedReason }),
   getCRMFunnel:   () => request('GET', '/api/v1/crm/funnel'),
@@ -91,6 +94,26 @@ export const api = {
     request('GET', `/api/v1/market/competitors?location=${encodeURIComponent(location)}&service=${encodeURIComponent(service)}`),
   getMarketSignals:   (stateCode) => request('GET', `/api/v1/market/signals/${stateCode}`),
   getSeasonalDemand:  (stateCode) => request('GET', `/api/v1/market/seasonal/${stateCode}`),
+
+  // ── Proposals (Feature 1) ──────────────────────────────────────────
+  generateProposal: (leadId) => request('POST', `/api/v1/proposals/generate`, { lead_id: leadId }),
+  sendProposal:     (proposalId) => request('POST', `/api/v1/proposals/${proposalId}/send`),
+
+  // ── Human Review Queue (Feature 5) ────────────────────────────────
+  listReviewQueue:   (params = {}) => request('GET', `/api/v1/review/queue${buildQS(params)}`),
+  getReviewStats:    () => request('GET', '/api/v1/review/stats'),
+  approveReviewItem: (id, correction) =>
+    request('POST', `/api/v1/review/queue/${id}/approve`, { correction: correction || null }),
+  rejectReviewItem:  (id, correction) =>
+    request('POST', `/api/v1/review/queue/${id}/reject`, { correction: correction || null }),
+
+  // ── Follow-Ups (Feature 4) ─────────────────────────────────────────
+  listFollowUps:  (params = {}) => request('GET', `/api/v1/followups${buildQS(params)}`),
+  cancelFollowUp: (taskId) => request('POST', `/api/v1/followups/${taskId}/cancel`),
+
+  // ── National Permits (Feature 6) ──────────────────────────────────
+  getNationalPermits: (states, keyword = 'asphalt', limit = 25) =>
+    request('GET', `/api/v1/permits/national?states=${encodeURIComponent(states)}&keyword=${encodeURIComponent(keyword)}&limit=${limit}`),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

@@ -9,6 +9,21 @@
 import { useState, useRef, useEffect } from 'react'
 import { api } from '../api/client'
 
+// Generate a stable session ID per browser session (persisted in sessionStorage)
+function getOrCreateSessionId() {
+  const key = 'jworden_chat_session_id'
+  let sid = sessionStorage.getItem(key)
+  if (!sid) {
+    // Use crypto.randomUUID() when available (all modern browsers); fall back
+    // to a time-based ID only in environments where the Web Crypto API is absent.
+    sid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? `web-${crypto.randomUUID()}`
+      : `web-${Date.now()}-${Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => b.toString(16).padStart(2, '0')).join('')}`
+    sessionStorage.setItem(key, sid)
+  }
+  return sid
+}
+
 const SUGGESTIONS = [
   'Do I need a license to pave in Texas?',
   'What is the 811 notice period in Florida?',
@@ -69,6 +84,8 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
+  // Stable session ID — persisted across page navigations within the same tab
+  const sessionIdRef = useRef(getOrCreateSessionId())
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -90,7 +107,9 @@ export default function ChatWidget() {
     setLoading(true)
 
     try {
-      const data = await api.askAI({ question })
+      const data = await api.askAI({ question, session_id: sessionIdRef.current })
+      // If the backend echoes back a session_id, keep ours in sync
+      if (data.session_id) sessionIdRef.current = data.session_id
       setMessages((prev) => [
         ...prev,
         { id: Date.now() + 1, role: 'bot', text: data.answer },
