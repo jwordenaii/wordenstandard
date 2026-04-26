@@ -188,10 +188,13 @@ def run_chat(
     question: str,
     state_code: Optional[str] = None,
     use_fast_model: bool = False,
+    history: Optional[list] = None,
+    db=None,
 ) -> AIDecision:
     """
     Natural language Q&A.  Returns an AIDecision with confidence score.
     Upgrades to GPT-4o for complex / legal questions automatically.
+    Supports multi-turn history (Feature 1) and corrections injection (Feature 2).
     """
     openai_key = os.getenv("OPENAI_API_KEY", "")
 
@@ -225,10 +228,25 @@ def run_chat(
             needs_human_review=confidence < HUMAN_REVIEW_THRESHOLD,
         )
 
-    messages = [
-        {"role": "system", "content": JWORDEN_SYSTEM_PROMPT},
-        {"role": "user",   "content": user_msg},
-    ]
+    # Feature 2: Inject past corrections as few-shot examples
+    correction_messages: list = []
+    try:
+        from ..services.corrections_engine import get_corrections  # noqa: PLC0415
+        corrections = get_corrections("chat", question, db=db)
+        for c in corrections:
+            correction_messages.append({"role": "system", "content": c})
+    except Exception:  # noqa: BLE001
+        pass
+
+    messages = [{"role": "system", "content": JWORDEN_SYSTEM_PROMPT}]
+    messages.extend(correction_messages)
+
+    # Feature 1: Include conversation history
+    if history:
+        messages.extend(history)
+
+    messages.append({"role": "user", "content": user_msg})
+
     answer, error = _call_openai(messages, model=model, max_tokens=350, temperature=0.6)
 
     if error or not answer:

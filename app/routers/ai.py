@@ -170,11 +170,13 @@ class ChatRequest(BaseModel):
     # preventing abuse of the public endpoint
     question: str = Field(..., min_length=1, max_length=1000, strip_whitespace=True)
     state_code: Optional[str] = Field(default=None, max_length=2)
+    session_id: Optional[str] = Field(default=None, max_length=100)
 
 
 class ChatResponse(BaseModel):
     answer: str
     engine: str
+    session_id: Optional[str] = None
 
 
 def _stub_chat(question: str) -> str:
@@ -250,32 +252,56 @@ def _openai_chat(question: str, state_code: Optional[str]) -> str:
 async def chat(req: ChatRequest, db=None):
     """
     Public endpoint — no auth required.
+    Supports multi-turn conversation via session_id (Feature 1).
     Uses GPT-4o / GPT-4o-mini via the premium AI engine with confidence scoring.
     Decisions below HUMAN_REVIEW_THRESHOLD are logged to the review queue.
     """
+    import uuid  # noqa: PLC0415
     from ..services.ai_engine import run_chat, HUMAN_REVIEW_THRESHOLD  # noqa: PLC0415
     from ..models import HumanReviewQueue  # noqa: PLC0415
+    from ..services.conversation_memory import get_session, save_message  # noqa: PLC0415
 
-    decision = run_chat(req.question, state_code=req.state_code)
+    # Feature 1: Conversation memory — resolve or create session
+    session_id = req.session_id or str(uuid.uuid4())
+
+    # Load conversation history
+    _db = None
+    try:
+        from ..database import SessionLocal  # noqa: PLC0415
+        _db = SessionLocal()
+    except Exception:  # noqa: BLE001
+        pass
+
+    history = get_session(session_id, db=_db)
+
+    decision = run_chat(req.question, state_code=req.state_code, history=history)
+
+    # Save user message + AI response to session
+    try:
+        save_message(session_id, "user", req.question, db=_db)
+        save_message(session_id, "assistant", decision.answer, db=_db)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Could not save session messages: %s", exc)
 
     # Persist low-confidence decisions for human review
-    if decision.needs_human_review:
+    if decision.needs_human_review and _db:
         try:
-            from ..database import SessionLocal  # noqa: PLC0415
-            _db = SessionLocal()
-            try:
-                item = HumanReviewQueue(
-                    decision_type  = "chat",
-                    input_summary  = req.question[:500],
-                    ai_answer      = decision.answer[:2000],
-                    ai_engine      = decision.engine,
-                    confidence     = decision.confidence,
-                )
-                _db.add(item)
-                _db.commit()
-            finally:
-                _db.close()
+            item = HumanReviewQueue(
+                decision_type  = "chat",
+                input_summary  = req.question[:500],
+                ai_answer      = decision.answer[:2000],
+                ai_engine      = decision.engine,
+                confidence     = decision.confidence,
+            )
+            _db.add(item)
+            _db.commit()
         except Exception as exc:  # noqa: BLE001
             logger.warning("Could not save review queue item: %s", exc)
 
-    return ChatResponse(answer=decision.answer, engine=decision.engine)
+    if _db:
+        try:
+            _db.close()
+        except Exception:  # noqa: BLE001
+            pass
+
+    return ChatResponse(answer=decision.answer, engine=decision.engine, session_id=session_id)

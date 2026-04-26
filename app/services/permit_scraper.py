@@ -24,16 +24,39 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-# ── TTL cache ─────────────────────────────────────────────────────────────────
+# ── TTL cache (Redis-backed with in-process fallback) ─────────────────────────
 
 TTL_SECONDS = int(os.getenv("PERMIT_CACHE_TTL_SECONDS", "300"))  # 5 min default
 
 _cache: dict[str, tuple[float, Any]] = {}
 
 
+def _get_redis():
+    """Return a Redis client or None if Redis is not configured."""
+    redis_url = os.getenv("REDIS_URL", "")
+    if not redis_url:
+        return None
+    try:
+        import redis  # noqa: PLC0415
+        return redis.from_url(redis_url, decode_responses=True)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _cache_get(key: str) -> Any | None:
     if TTL_SECONDS <= 0:
         return None
+    # Try Redis first
+    try:
+        r = _get_redis()
+        if r:
+            import json  # noqa: PLC0415
+            val = r.get(f"jworden:permits:{key}")
+            if val:
+                return json.loads(val)
+    except Exception:  # noqa: BLE001
+        pass
+    # Fallback to in-process cache
     entry = _cache.get(key)
     if entry and (time.monotonic() - entry[0]) < TTL_SECONDS:
         return entry[1]
@@ -41,6 +64,16 @@ def _cache_get(key: str) -> Any | None:
 
 
 def _cache_set(key: str, value: Any) -> None:
+    # Try Redis first
+    try:
+        r = _get_redis()
+        if r:
+            import json  # noqa: PLC0415
+            r.setex(f"jworden:permits:{key}", TTL_SECONDS, json.dumps(value))
+            return
+    except Exception:  # noqa: BLE001
+        pass
+    # Fallback to in-process cache
     _cache[key] = (time.monotonic(), value)
 
 

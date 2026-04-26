@@ -3,6 +3,14 @@ SQLAlchemy ORM models for J. Worden & Sons lead persistence.
 
 Tables created automatically by create_all_tables() on startup.
 All timestamps are stored in UTC.
+
+New models added for enterprise features:
+  - ChatSession          : multi-turn conversation memory
+  - AICorrection         : human-review learning loop
+  - FollowUpTask         : automated follow-up sequences
+  - LienCalendarEntry    : mechanics lien deadline tracker
+  - SubcontractorRoster  : insurance/bond compliance monitor
+  - Tenant               : white-label multi-tenant support
 """
 
 from datetime import datetime, timezone
@@ -37,6 +45,16 @@ class Lead(Base):
     score_label     = Column(String(10), nullable=True)   # HOT | WARM | COOL
     score_priority  = Column(Integer, nullable=True)
 
+    # Pipeline CRM stage tracking (Feature 3)
+    pipeline_stage    = Column(String(30), default='new', nullable=False)
+    contacted_at      = Column(DateTime(timezone=True), nullable=True)
+    proposal_sent_at  = Column(DateTime(timezone=True), nullable=True)
+    closed_at         = Column(DateTime(timezone=True), nullable=True)
+    closed_reason     = Column(String(100), nullable=True)
+
+    # Multi-tenant (Feature 15)
+    tenant_id       = Column(String(60), nullable=True, index=True, default='default')
+
     created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
 
     def __repr__(self) -> str:
@@ -53,6 +71,9 @@ class ContactMessage(Base):
     email      = Column(String(254), nullable=False, index=True)
     phone      = Column(String(30), nullable=True)
     message    = Column(Text, nullable=False)
+    # Multi-tenant (Feature 15)
+    tenant_id       = Column(String(60), nullable=True, index=True, default='default')
+
     created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
 
     def __repr__(self) -> str:
@@ -134,6 +155,9 @@ class Customer(Base):
     notes           = Column(Text, nullable=True)
     tags            = Column(String(500), nullable=True)               # comma-separated tags
 
+    # Multi-tenant (Feature 15)
+    tenant_id       = Column(String(60), nullable=True, index=True, default='default')
+
     created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
     updated_at      = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
 
@@ -173,6 +197,9 @@ class ServiceHistory(Base):
     dropbox_url     = Column(String(500), nullable=True)
     photos_url      = Column(String(500), nullable=True)
 
+    # Multi-tenant (Feature 15)
+    tenant_id         = Column(String(60), nullable=True, index=True, default='default')
+
     created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
 
     def __repr__(self) -> str:
@@ -204,5 +231,168 @@ class HumanReviewQueue(Base):
     created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
     reviewed_at     = Column(DateTime(timezone=True), nullable=True)
 
+    # Multi-tenant (Feature 15)
+    tenant_id       = Column(String(60), nullable=True, index=True, default='default')
+
     def __repr__(self) -> str:
         return f"<HumanReviewQueue id={self.id} type={self.decision_type!r} confidence={self.confidence:.2f} status={self.status!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Feature 1: Conversation Memory (Multi-Turn Context)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ChatSession(Base):
+    """
+    Persistent multi-turn chat session.  Stores conversation history as JSON.
+    Used when Redis is unavailable (fallback to DB).
+    """
+    __tablename__ = "chat_sessions"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    session_id     = Column(String(100), nullable=False, index=True, unique=True)
+    messages_json  = Column(Text, nullable=False, default="[]")
+    customer_name  = Column(String(120), nullable=True)
+    customer_email = Column(String(254), nullable=True)
+    state_code     = Column(String(2), nullable=True)
+    last_service   = Column(String(60), nullable=True)
+    # Multi-tenant (Feature 15)
+    tenant_id      = Column(String(60), nullable=True, index=True, default='default')
+    created_at     = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at     = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ChatSession session_id={self.session_id!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Feature 2: Human Review → Learning Loop
+# ══════════════════════════════════════════════════════════════════════════════
+
+class AICorrection(Base):
+    """
+    Stores human corrections to AI decisions as few-shot examples.
+    Used by the AI engine to improve responses over time.
+    """
+    __tablename__ = "ai_corrections"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    decision_type    = Column(String(60), nullable=False, index=True)
+    input_pattern    = Column(Text, nullable=False)
+    corrected_answer = Column(Text, nullable=False)
+    reviewer_notes   = Column(Text, nullable=True)
+    usage_count      = Column(Integer, default=0, nullable=False)
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at       = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<AICorrection id={self.id} type={self.decision_type!r} uses={self.usage_count}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Feature 4: Automated Follow-Up Sequences
+# ══════════════════════════════════════════════════════════════════════════════
+
+class FollowUpTask(Base):
+    """
+    Tracks scheduled follow-up messages for leads.
+    Celery beat tasks read from this table to send timed follow-ups.
+    """
+    __tablename__ = "follow_up_tasks"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    lead_id      = Column(Integer, nullable=False, index=True)
+    task_type    = Column(String(20), nullable=False)   # hot_1h | warm_3d | cool_7d
+    scheduled_at = Column(DateTime(timezone=True), nullable=False)
+    sent_at      = Column(DateTime(timezone=True), nullable=True)
+    status       = Column(String(20), default='pending', nullable=False)  # pending | sent | cancelled
+    created_at   = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<FollowUpTask lead_id={self.lead_id} type={self.task_type!r} status={self.status!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Feature 12: Mechanics Lien Deadline Tracker
+# ══════════════════════════════════════════════════════════════════════════════
+
+class LienCalendarEntry(Base):
+    """
+    Tracks mechanics lien deadlines for active construction projects.
+    Sends automated reminders before deadlines expire.
+    """
+    __tablename__ = "lien_calendar_entries"
+
+    id                          = Column(Integer, primary_key=True, index=True)
+    customer_name               = Column(String(120), nullable=False)
+    project_address             = Column(String(300), nullable=False)
+    state_code                  = Column(String(2), nullable=False, index=True)
+    project_start_date          = Column(DateTime(timezone=True), nullable=False)
+    last_furnishing_date        = Column(DateTime(timezone=True), nullable=False)
+    preliminary_notice_deadline = Column(DateTime(timezone=True), nullable=True)
+    lien_filing_deadline        = Column(DateTime(timezone=True), nullable=True)
+    foreclosure_deadline        = Column(DateTime(timezone=True), nullable=True)
+    reminder_sent_at            = Column(DateTime(timezone=True), nullable=True)
+    notes                       = Column(Text, nullable=True)
+    created_at                  = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<LienCalendarEntry id={self.id} state={self.state_code!r} customer={self.customer_name!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Feature 14: Subcontractor Insurance/Bond Monitor
+# ══════════════════════════════════════════════════════════════════════════════
+
+class SubcontractorRoster(Base):
+    """
+    Roster of subcontractors with license, insurance, and bond expiry tracking.
+    Alerts are sent when certificates are about to expire.
+    """
+    __tablename__ = "subcontractor_roster"
+
+    id                 = Column(Integer, primary_key=True, index=True)
+    name               = Column(String(120), nullable=False)
+    company            = Column(String(120), nullable=False)
+    email              = Column(String(254), nullable=True)
+    phone              = Column(String(30), nullable=True)
+    state_code         = Column(String(2), nullable=False)
+    license_number     = Column(String(60), nullable=True)
+    license_expiry     = Column(DateTime(timezone=True), nullable=True)
+    insurance_expiry   = Column(DateTime(timezone=True), nullable=True)
+    bond_expiry        = Column(DateTime(timezone=True), nullable=True)
+    bond_amount        = Column(Float, nullable=True)
+    insurance_carrier  = Column(String(120), nullable=True)
+    notes              = Column(Text, nullable=True)
+    is_active          = Column(Integer, default=1, nullable=False)
+    created_at         = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at         = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<SubcontractorRoster id={self.id} name={self.name!r} company={self.company!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Feature 15: White-Label / Multi-Tenant Mode
+# ══════════════════════════════════════════════════════════════════════════════
+
+class Tenant(Base):
+    """
+    Tenant configuration for white-label / multi-tenant SaaS mode.
+    Each tenant can override the AI system prompt, branding, and contact info.
+    """
+    __tablename__ = "tenants"
+
+    id                     = Column(Integer, primary_key=True, index=True)
+    tenant_id              = Column(String(60), nullable=False, unique=True, index=True)
+    company_name           = Column(String(120), nullable=False)
+    system_prompt_override = Column(Text, nullable=True)
+    primary_color          = Column(String(20), default='#f5a623', nullable=False)
+    logo_url               = Column(String(500), nullable=True)
+    contact_email          = Column(String(254), nullable=True)
+    contact_phone          = Column(String(30), nullable=True)
+    is_active              = Column(Integer, default=1, nullable=False)
+    created_at             = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Tenant tenant_id={self.tenant_id!r} company={self.company_name!r}>"
