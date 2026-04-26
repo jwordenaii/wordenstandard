@@ -5,6 +5,7 @@ import { trackEvent } from '../api/client'
 import CountUp from '../components/CountUp'
 import FAQAccordion from '../components/FAQAccordion'
 import SocialLinks from '../components/SocialLinks'
+import EstimateWidget from '../components/EstimateWidget'
 
 const SERVICES = [
   {
@@ -279,11 +280,109 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Estimate Calculator ──────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
+                Instant Ballpark
+              </span>
+              <h2 className="section-heading mt-2 mb-4">
+                How Much Will My
+                <span className="text-brand-amber block">Project Cost?</span>
+              </h2>
+              <p className="text-brand-navy/60 leading-relaxed mb-6">
+                Use our quick calculator to get a ballpark estimate in seconds — 50-state
+                pricing data, adjusted for your region. Then submit the quote form for a
+                precise, no-obligation number from our team.
+              </p>
+              <ul className="space-y-3 text-sm text-brand-navy/70">
+                {[
+                  'Residential &amp; commercial pricing',
+                  'Adjusted for your state\'s labor &amp; material costs',
+                  'All major services covered',
+                  'Free on-site estimate always included',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3">
+                    <span className="w-5 h-5 rounded-full bg-brand-amber/20 flex items-center justify-center text-brand-amber font-bold text-xs">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <EstimateWidget />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Service Areas strip ──────────────────────────────────────── */}
+      <section className="py-16 bg-brand-charcoal text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+            <div>
+              <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">Where We Work</span>
+              <h2 className="font-display font-black text-2xl mt-1">Serving 20+ Virginia Cities</h2>
+            </div>
+            <Link to="/service-areas" className="btn-outline text-sm flex-shrink-0">
+              View All Service Areas →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {['Chester', 'Richmond', 'Chesterfield', 'Henrico', 'Colonial Heights',
+              'Petersburg', 'Hopewell', 'Midlothian', 'Mechanicsville', 'Glen Allen',
+              'Ashland', 'Powhatan', 'Virginia Beach', 'Norfolk', 'Fredericksburg'].map((city) => (
+              <Link
+                key={city}
+                to={`/service-areas/${city.toLowerCase().replace(/\s+/g, '-')}-va`}
+                className="bg-white/10 hover:bg-brand-amber hover:text-brand-navy text-white/80 text-sm px-4 py-2 rounded-full transition-all"
+                onClick={() => trackEvent('city_pill_click', { city })}
+              >
+                📍 {city}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Award badges / trust strip ───────────────────────────────── */}
+      <section className="py-16 bg-white border-y border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-brand-navy/40 text-xs font-bold uppercase tracking-widest mb-8">
+            Trusted By Industry Leaders &amp; National Franchise Programs
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 text-center">
+            {[
+              { emoji: '🍗', name: 'KFC',             sub: '12+ states' },
+              { emoji: '🥩', name: "Arby's",           sub: 'Regional ops' },
+              { emoji: '🌮', name: 'Taco Bell',        sub: 'QSR program' },
+              { emoji: '🏆', name: 'Pavement Mag',     sub: 'Top 75 · 4 cats' },
+              { emoji: '🏠', name: 'Best of Houzz',    sub: 'Multi-year' },
+              { emoji: '⭐', name: '2026 Nominee',      sub: 'Top Contractor' },
+            ].map(({ emoji, name, sub }) => (
+              <div key={name} className="flex flex-col items-center gap-1">
+                <span className="text-3xl">{emoji}</span>
+                <div className="font-display font-black text-brand-navy text-sm">{name}</div>
+                <div className="text-brand-navy/40 text-xs">{sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ──────────────────────────────────────────────────────── */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="section-heading text-center mb-12">Common Questions</h2>
+          <div className="text-center mb-12">
+            <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">Got Questions?</span>
+            <h2 className="section-heading mt-2">Common Questions</h2>
+          </div>
           <FAQAccordion items={HOME_FAQS} />
+          <div className="text-center mt-10">
+            <Link to="/contact" className="text-brand-amber font-semibold hover:underline text-sm">
+              Have a different question? Contact us →
+            </Link>
+          </div>
         </div>
       </section>
 

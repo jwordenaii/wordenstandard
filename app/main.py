@@ -49,6 +49,8 @@ from .routers import subcontractors as subcontractors_router
 from .routers import market_intelligence as market_intelligence_router
 from .routers import materials as materials_router
 from .routers import tenants as tenants_router
+from .routers import blog as blog_router
+from .routers import seo as seo_router
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +123,8 @@ app.include_router(subcontractors_router.router)
 app.include_router(market_intelligence_router.router)
 app.include_router(materials_router.router)
 app.include_router(tenants_router.router)
+app.include_router(blog_router.router)
+app.include_router(seo_router.router)
 
 
 # ── Legacy endpoints (kept for backward compatibility) ────────────────────────

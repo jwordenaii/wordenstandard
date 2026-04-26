@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom'
 import SocialLinks from './SocialLinks'
 
 const LINKS = [
-  { to: '/',          label: 'Home' },
-  { to: '/services',  label: 'Services' },
-  { to: '/projects',  label: 'Projects' },
-  { to: '/about',     label: 'About' },
-  { to: '/reviews',   label: 'Reviews' },
-  { to: '/advisory',  label: 'Advisory Board' },
-  { to: '/quote',     label: 'Free Quote' },
-  { to: '/contact',   label: 'Contact' },
+  { to: '/',               label: 'Home' },
+  { to: '/services',       label: 'Services' },
+  { to: '/projects',       label: 'Projects' },
+  { to: '/service-areas',  label: 'Service Areas' },
+  { to: '/blog',           label: 'Blog & Resources' },
+  { to: '/about',          label: 'About' },
+  { to: '/reviews',        label: 'Reviews' },
+  { to: '/advisory',       label: 'Advisory Board' },
+  { to: '/quote',          label: 'Free Quote' },
+  { to: '/contact',        label: 'Contact' },
 ]
 
 const SERVICES = [

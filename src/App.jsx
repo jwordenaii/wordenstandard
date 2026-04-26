@@ -8,15 +8,23 @@ import ScrollToTop from './components/ScrollToTop'
 import ErrorBoundary from './components/ErrorBoundary'
 
 // Lazy-loaded pages for code splitting
-const Home         = lazy(() => import('./pages/Home'))
-const Services     = lazy(() => import('./pages/Services'))
-const About        = lazy(() => import('./pages/About'))
-const Contact      = lazy(() => import('./pages/Contact'))
-const Quote        = lazy(() => import('./pages/Quote'))
-const Reviews      = lazy(() => import('./pages/Reviews'))
-const NotFound     = lazy(() => import('./pages/NotFound'))
+const Home          = lazy(() => import('./pages/Home'))
+const Services      = lazy(() => import('./pages/Services'))
+const About         = lazy(() => import('./pages/About'))
+const Contact       = lazy(() => import('./pages/Contact'))
+const Quote         = lazy(() => import('./pages/Quote'))
+const Reviews       = lazy(() => import('./pages/Reviews'))
+const NotFound      = lazy(() => import('./pages/NotFound'))
 const CommandCenter = lazy(() => import('./pages/CommandCenter'))
 const Projects      = lazy(() => import('./pages/Projects'))
+
+// Service area pages
+const ServiceAreas  = lazy(() => import('./pages/ServiceAreas'))
+const CityPage      = lazy(() => import('./pages/CityPage'))
+
+// Blog / knowledge center
+const Blog          = lazy(() => import('./pages/Blog'))
+const BlogPost      = lazy(() => import('./pages/BlogPost'))
 
 // Advisory pages — lazy-loaded so the 512KB legal dataset never hits the main bundle
 const AdvisoryHub          = lazy(() => import('./pages/advisory/AdvisoryHub'))
@@ -45,16 +53,22 @@ export default function App() {
           <main className="flex-1">
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/"         element={<Home />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/about"    element={<About />} />
-                <Route path="/contact"  element={<Contact />} />
-                <Route path="/quote"    element={<Quote />} />
-                <Route path="/reviews"  element={<Reviews />} />
+                <Route path="/"              element={<Home />} />
+                <Route path="/services"      element={<Services />} />
+                <Route path="/about"         element={<About />} />
+                <Route path="/contact"       element={<Contact />} />
+                <Route path="/quote"         element={<Quote />} />
+                <Route path="/reviews"       element={<Reviews />} />
+                {/* Service areas */}
+                <Route path="/service-areas"             element={<ServiceAreas />} />
+                <Route path="/service-areas/:citySlug"   element={<CityPage />} />
+                {/* Blog / Knowledge Center */}
+                <Route path="/blog"          element={<Blog />} />
+                <Route path="/blog/:slug"    element={<BlogPost />} />
                 {/* Command Center — operations dashboard */}
                 <Route path="/command-center" element={<CommandCenter />} />
                 {/* Projects / Portfolio */}
-                <Route path="/projects" element={<Projects />} />
+                <Route path="/projects"      element={<Projects />} />
                 {/* Advisory Board routes */}
                 <Route path="/advisory"                            element={<AdvisoryHub />} />
                 <Route path="/advisory/state/:stateCode"           element={<StateDetail />} />
@@ -64,7 +78,7 @@ export default function App() {
                 <Route path="/advisory/contractor-ranker"          element={<ContractorRanker />} />
                 {/* Generic category hub — handles licensing, construction-law, safety, etc. */}
                 <Route path="/advisory/:category"                  element={<CategoryHub />} />
-                <Route path="*"         element={<NotFound />} />
+                <Route path="*"              element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>
