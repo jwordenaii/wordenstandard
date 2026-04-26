@@ -38,7 +38,7 @@ export const LOCAL_BUSINESS_SCHEMA = {
   foundingDate: '1984',
   sameAs: SAME_AS_URLS,
   telephone: '+18044461296',
-  email: 'contact@jwordenasphalt.com',
+  email: 'contact@jwordenasphaltpaving.com',
   url: SITE_URL,
   logo: `${SITE_URL}/logo.png`,
   address: {
