@@ -130,6 +130,69 @@ export const api = {
   generateCityPageCopy: (data) => request('POST', '/api/v1/seo/city-page', data),
   generateMetaTags:     (data) => request('POST', '/api/v1/seo/meta-tags', data),
   generateFAQ:          (data) => request('POST', '/api/v1/seo/faq', data),
+
+  // Retrospectives (Module 1)
+  listRetrospectives:  (params = {}) => request('GET', `/api/v1/retrospectives${buildQS(params)}`),
+  createRetrospective: (data) => request('POST', '/api/v1/retrospectives', data),
+  updateRetrospective: (id, data) => request('PUT', `/api/v1/retrospectives/${id}`, data),
+  deleteRetrospective: (id) => request('DELETE', `/api/v1/retrospectives/${id}`),
+  tagRetrospective:    (id) => request('POST', `/api/v1/retrospectives/${id}/tag`),
+  surfaceLessons:      (params = {}) => request('GET', `/api/v1/retrospectives/surface${buildQS(params)}`),
+
+  // Safety (Module 2)
+  listToolboxTalks:  (params = {}) => request('GET', `/api/v1/safety/toolbox${buildQS(params)}`),
+  createToolboxTalk: (data) => request('POST', '/api/v1/safety/toolbox', data),
+  listIncidents:     (params = {}) => request('GET', `/api/v1/safety/incidents${buildQS(params)}`),
+  createIncident:    (data) => request('POST', '/api/v1/safety/incidents', data),
+  getOshaRate:       (params = {}) => request('GET', `/api/v1/safety/osha-rate${buildQS(params)}`),
+  getSafetyScores:   () => request('GET', '/api/v1/safety/scores'),
+
+  // Cash Flow (Module 3)
+  listCashFlowEntries: (params = {}) => request('GET', `/api/v1/cashflow/entries${buildQS(params)}`),
+  createCashFlowEntry: (data) => request('POST', '/api/v1/cashflow/entries', data),
+  deleteCashFlowEntry: (id) => request('DELETE', `/api/v1/cashflow/entries/${id}`),
+  getCashFlowForecast: () => request('GET', '/api/v1/cashflow/forecast'),
+  getCashFlowAlert:    () => request('GET', '/api/v1/cashflow/alert'),
+  setCashFlowAlert:    (data) => request('POST', '/api/v1/cashflow/alert', data),
+
+  // Project Metrics / Scorecard (Module 4)
+  listProjectMetrics:     () => request('GET', '/api/v1/project-metrics'),
+  createProjectMetric:    (data) => request('POST', '/api/v1/project-metrics', data),
+  updateProjectMetric:    (id, data) => request('PUT', `/api/v1/project-metrics/${id}`, data),
+  deleteProjectMetric:    (id) => request('DELETE', `/api/v1/project-metrics/${id}`),
+  getProjectMetricTrends: () => request('GET', '/api/v1/project-metrics/trends'),
+  generateCaseStudy:      (id) => request('POST', `/api/v1/project-metrics/${id}/case-study`),
+
+  // Workforce / Skills Matrix (Module 5)
+  listWorkforce:             (params = {}) => request('GET', `/api/v1/workforce${buildQS(params)}`),
+  addWorkforceMember:        (data) => request('POST', '/api/v1/workforce', data),
+  updateWorkforceMember:     (id, data) => request('PUT', `/api/v1/workforce/${id}`, data),
+  deleteWorkforceMember:     (id) => request('DELETE', `/api/v1/workforce/${id}`),
+  queryAvailableWorkforce:   (scope) => request('GET', `/api/v1/workforce/available${buildQS({ scope })}`),
+  getExpiringWorkforceCerts: (daysAhead = 90) => request('GET', `/api/v1/workforce/expiring-certs?days_ahead=${daysAhead}`),
+
+  // Subcontractor Performance (Module 6)
+  getSubcontractorPerformance: (subId) => request('GET', `/api/v1/subcontractors/${subId}/performance`),
+  addSubcontractorPerformance: (subId, data) => request('POST', `/api/v1/subcontractors/${subId}/performance`, data),
+  deleteSubcontractorPerf:     (perfId) => request('DELETE', `/api/v1/subcontractors/performance/${perfId}`),
+
+  // Bid Intelligence / Win-Rate (Module 7)
+  listBidOutcomes:   () => request('GET', '/api/v1/bid-intelligence/outcomes'),
+  recordBidOutcome:  (data) => request('POST', '/api/v1/bid-intelligence/outcomes', data),
+  updateBidOutcome:  (id, data) => request('PUT', `/api/v1/bid-intelligence/outcomes/${id}`, data),
+  deleteBidOutcome:  (id) => request('DELETE', `/api/v1/bid-intelligence/outcomes/${id}`),
+  getBidSummary:     () => request('GET', '/api/v1/bid-intelligence/summary'),
+  getBidWinAnalysis: () => request('GET', '/api/v1/bid-intelligence/win-analysis'),
+
+  // KPI Wall (Module 8)
+  getKPIWall: () => request('GET', '/api/v1/kpi-wall'),
+
+  // Innovations (Module 10)
+  listInnovations:   (params = {}) => request('GET', `/api/v1/innovations${buildQS(params)}`),
+  createInnovation:  (data) => request('POST', '/api/v1/innovations', data),
+  updateInnovation:  (id, data) => request('PUT', `/api/v1/innovations/${id}`, data),
+  deleteInnovation:  (id) => request('DELETE', `/api/v1/innovations/${id}`),
+  getAdoptedMethods: () => request('GET', '/api/v1/innovations/adopted'),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

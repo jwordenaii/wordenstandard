@@ -449,3 +449,257 @@ class BlogPost(Base):
 
     def __repr__(self) -> str:
         return f"<BlogPost slug={self.slug!r} status={self.status!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 1: Post-Project Lessons Learned Engine
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ProjectRetrospective(Base):
+    """Structured project closeout capturing lessons learned per build."""
+
+    __tablename__ = "project_retrospectives"
+
+    id                    = Column(Integer, primary_key=True, index=True)
+    project_name          = Column(String(200), nullable=False)
+    project_type          = Column(String(60),  nullable=True)   # paving | sealcoating | etc.
+    region                = Column(String(100), nullable=True)
+    closed_date           = Column(DateTime(timezone=True), nullable=True)
+    schedule_variance_days = Column(Integer, nullable=True)      # positive = late
+    cost_variance_pct     = Column(Float,   nullable=True)       # positive = over budget
+    supply_chain_issues   = Column(Text,    nullable=True)
+    soil_conditions       = Column(Text,    nullable=True)
+    design_conflicts      = Column(Text,    nullable=True)
+    lessons_learned       = Column(Text,    nullable=True)
+    ai_tags               = Column(Text,    nullable=True)       # JSON-encoded list
+    tenant_id             = Column(String(60), nullable=True, index=True, default='default')
+    created_at            = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at            = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ProjectRetrospective id={self.id} project={self.project_name!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 2: Safety Culture Dashboard
+# ══════════════════════════════════════════════════════════════════════════════
+
+class SafetyToolboxTalk(Base):
+    """Daily toolbox talk record per job site."""
+
+    __tablename__ = "safety_toolbox_talks"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    job_site    = Column(String(200), nullable=False, index=True)
+    talk_date   = Column(DateTime(timezone=True), nullable=False)
+    topic       = Column(String(300), nullable=False)
+    foreman     = Column(String(120), nullable=True)
+    crew_count  = Column(Integer, default=0, nullable=False)
+    signed_off  = Column(Integer, default=0, nullable=False)  # 1 = crew signed off
+    notes       = Column(Text, nullable=True)
+    tenant_id   = Column(String(60), nullable=True, index=True, default='default')
+    created_at  = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<SafetyToolboxTalk id={self.id} site={self.job_site!r} date={self.talk_date}>"
+
+
+class SafetyIncident(Base):
+    """Near-miss, first-aid, or recordable incident log."""
+
+    __tablename__ = "safety_incidents"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    job_site          = Column(String(200), nullable=False, index=True)
+    incident_date     = Column(DateTime(timezone=True), nullable=False)
+    incident_type     = Column(String(30),  nullable=False)   # near-miss | first-aid | recordable
+    root_cause        = Column(String(200), nullable=True)
+    description       = Column(Text, nullable=True)
+    corrective_action = Column(Text, nullable=True)
+    osha_recordable   = Column(Integer, default=0, nullable=False)  # 1 = OSHA 300 recordable
+    days_away         = Column(Integer, default=0, nullable=False)
+    tenant_id         = Column(String(60), nullable=True, index=True, default='default')
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<SafetyIncident id={self.id} site={self.job_site!r} type={self.incident_type!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 3: Cash Flow Projection
+# ══════════════════════════════════════════════════════════════════════════════
+
+class CashFlowEntry(Base):
+    """Manual or system-generated cash flow entry for 13-week rolling forecast."""
+
+    __tablename__ = "cashflow_entries"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    entry_type    = Column(String(10),  nullable=False)   # income | expense
+    amount        = Column(Float,       nullable=False)
+    expected_date = Column(DateTime(timezone=True), nullable=False)
+    category      = Column(String(60),  nullable=True)    # payroll | materials | contract | equipment | other
+    description   = Column(String(300), nullable=True)
+    source        = Column(String(60),  nullable=True)    # manual | proposal | job_costing
+    source_id     = Column(Integer,     nullable=True)    # FK to source record
+    tenant_id     = Column(String(60),  nullable=True, index=True, default='default')
+    created_at    = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<CashFlowEntry id={self.id} type={self.entry_type!r} amount={self.amount}>"
+
+
+class CashFlowAlert(Base):
+    """Configurable alert threshold for cash position warning."""
+
+    __tablename__ = "cashflow_alerts"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    threshold_amount = Column(Float, default=10000.0, nullable=False)
+    alert_email      = Column(String(254), nullable=True)
+    is_active        = Column(Integer, default=1, nullable=False)
+    tenant_id        = Column(String(60), nullable=True, index=True, default='default')
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at       = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<CashFlowAlert threshold={self.threshold_amount}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 4: Project Performance Scorecard
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ProjectMetric(Base):
+    """Per-project performance scorecard linking actuals to estimates."""
+
+    __tablename__ = "project_metrics"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    project_name        = Column(String(200), nullable=False)
+    lead_id             = Column(Integer, nullable=True, index=True)  # FK to leads.id
+    actual_cost         = Column(Float,   nullable=True)
+    estimated_cost      = Column(Float,   nullable=True)
+    scheduled_days      = Column(Integer, nullable=True)
+    actual_days         = Column(Integer, nullable=True)
+    client_nps          = Column(Integer, nullable=True)  # 0-10
+    punch_list_items    = Column(Integer, default=0, nullable=False)
+    punch_list_closed   = Column(Integer, default=0, nullable=False)
+    case_study_published = Column(Integer, default=0, nullable=False)
+    case_study_text     = Column(Text,    nullable=True)
+    completion_date     = Column(DateTime(timezone=True), nullable=True)
+    tenant_id           = Column(String(60), nullable=True, index=True, default='default')
+    created_at          = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at          = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ProjectMetric id={self.id} project={self.project_name!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 5: Crew & Skills Matrix
+# ══════════════════════════════════════════════════════════════════════════════
+
+class WorkforceMember(Base):
+    """Employee or subcontractor with certifications and skill ratings."""
+
+    __tablename__ = "workforce"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    name              = Column(String(120), nullable=False)
+    member_type       = Column(String(20),  nullable=False)  # employee | sub
+    trade             = Column(String(60),  nullable=True)   # operator | laborer | paving | milling | etc.
+    certifications    = Column(Text,        nullable=True)   # JSON: [{cert, expiry_date}]
+    skill_ratings     = Column(Text,        nullable=True)   # JSON: {trade: 1-5}
+    available         = Column(Integer, default=1, nullable=False)
+    subcontractor_id  = Column(Integer, nullable=True, index=True)  # FK to subcontractor_roster
+    phone             = Column(String(30),  nullable=True)
+    email             = Column(String(254), nullable=True)
+    notes             = Column(Text,        nullable=True)
+    tenant_id         = Column(String(60),  nullable=True, index=True, default='default')
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at        = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<WorkforceMember id={self.id} name={self.name!r} trade={self.trade!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 6: Subcontractor Performance History
+# ══════════════════════════════════════════════════════════════════════════════
+
+class SubcontractorPerformance(Base):
+    """Per-project performance record for a subcontractor."""
+
+    __tablename__ = "subcontractor_performance"
+
+    id                   = Column(Integer, primary_key=True, index=True)
+    subcontractor_id     = Column(Integer, nullable=False, index=True)  # FK to subcontractor_roster
+    project_name         = Column(String(200), nullable=False)
+    scope                = Column(String(100), nullable=True)
+    on_time              = Column(Integer, default=1, nullable=False)    # 1 = on time
+    quality_rating       = Column(Integer, nullable=True)               # 1-5
+    payment_dispute      = Column(Integer, default=0, nullable=False)   # 1 = dispute occurred
+    rehire_recommended   = Column(Integer, default=1, nullable=False)   # 1 = yes
+    notes                = Column(Text, nullable=True)
+    project_date         = Column(DateTime(timezone=True), nullable=True)
+    tenant_id            = Column(String(60), nullable=True, index=True, default='default')
+    created_at           = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<SubcontractorPerformance sub={self.subcontractor_id} project={self.project_name!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 7: AI Bid Win-Rate Optimizer — proposal outcome columns added via
+#           extend on proposals table at router level (Alembic not used;
+#           new columns added here via a companion ProposalOutcome table)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ProposalOutcome(Base):
+    """Records win/loss outcomes for proposals to power bid intelligence."""
+
+    __tablename__ = "proposal_outcomes"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    lead_id             = Column(Integer, nullable=False, index=True)  # FK to leads.id
+    lead_name           = Column(String(120), nullable=True)
+    service_type        = Column(String(60),  nullable=True)
+    region              = Column(String(100), nullable=True)
+    proposal_amount_low = Column(Float,       nullable=True)
+    proposal_amount_high= Column(Float,       nullable=True)
+    outcome             = Column(String(20),  nullable=False)  # won | lost | no-decision
+    competitor_name     = Column(String(120), nullable=True)
+    competitor_price    = Column(Float,       nullable=True)
+    notes               = Column(Text,        nullable=True)
+    outcome_recorded_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    tenant_id           = Column(String(60),  nullable=True, index=True, default='default')
+    created_at          = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ProposalOutcome lead={self.lead_id} outcome={self.outcome!r}>"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Module 10: Innovation Lab Tracker
+# ══════════════════════════════════════════════════════════════════════════════
+
+class Innovation(Base):
+    """Log of new methods and tools tested on job sites."""
+
+    __tablename__ = "innovations"
+
+    id            = Column(Integer, primary_key=True, index=True)
+    method_name   = Column(String(200), nullable=False)
+    job_site      = Column(String(200), nullable=True)
+    date_tested   = Column(DateTime(timezone=True), nullable=True)
+    cost_to_test  = Column(Float,       nullable=True)
+    result        = Column(String(20),  nullable=False)  # pass | fail | adopted
+    category      = Column(String(40),  nullable=True)   # drone | materials | robotics | process
+    notes         = Column(Text,        nullable=True)
+    tenant_id     = Column(String(60),  nullable=True, index=True, default='default')
+    created_at    = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at    = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Innovation id={self.id} method={self.method_name!r} result={self.result!r}>"
