@@ -6,6 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { api } from '../../api/client'
+import { downloadPdf } from '../../lib/pdfUtils'
 
 function Badge({ children, color = 'gray' }) {
   const cls = {
@@ -79,15 +80,7 @@ export default function ProposalsPanel() {
 
   const handleDownload = () => {
     if (!proposal?.pdf_b64) return
-    const byteChars  = atob(proposal.pdf_b64)
-    const byteNums   = Array.from(byteChars, (c) => c.charCodeAt(0))
-    const blob       = new Blob([new Uint8Array(byteNums)], { type: 'application/pdf' })
-    const url        = URL.createObjectURL(blob)
-    const a          = document.createElement('a')
-    a.href           = url
-    a.download       = `proposal-lead-${selectedLeadId}.pdf`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadPdf(proposal.pdf_b64, `proposal-lead-${selectedLeadId}.pdf`)
   }
 
   const selectedLead = leads.find((l) => String(l.id) === String(selectedLeadId))

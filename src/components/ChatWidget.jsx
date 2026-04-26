@@ -14,7 +14,11 @@ function getOrCreateSessionId() {
   const key = 'jworden_chat_session_id'
   let sid = sessionStorage.getItem(key)
   if (!sid) {
-    sid = `web-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+    // Use crypto.randomUUID() when available (all modern browsers); fall back
+    // to a time-based ID only in environments where the Web Crypto API is absent.
+    sid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? `web-${crypto.randomUUID()}`
+      : `web-${Date.now()}-${Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => b.toString(16).padStart(2, '0')).join('')}`
     sessionStorage.setItem(key, sid)
   }
   return sid

@@ -56,6 +56,8 @@ function ResultBlock({ data }) {
 }
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
+// Document AI analysis may take longer than the default timeout for larger files
+const UPLOAD_TIMEOUT_MS = 60_000
 
 export default function DocumentsPanel() {
   const [mode, setMode]       = useState('contract')
@@ -84,7 +86,7 @@ export default function DocumentsPanel() {
 
     try {
       const controller = new AbortController()
-      const tid = setTimeout(() => controller.abort(), 60_000)
+      const tid = setTimeout(() => controller.abort(), UPLOAD_TIMEOUT_MS)
       const res = await fetch(`${BASE}${currentMode.endpoint}`, {
         method: 'POST',
         body: form,
@@ -97,7 +99,7 @@ export default function DocumentsPanel() {
       }
       setResult(await res.json())
     } catch (e) {
-      setError(e.name === 'AbortError' ? 'Upload timed out.' : e.message)
+      setError(e.name === 'AbortError' ? `Upload timed out (${UPLOAD_TIMEOUT_MS / 1000} s).` : e.message)
     } finally {
       setUploading(false)
     }

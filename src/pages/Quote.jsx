@@ -3,6 +3,7 @@ import SchemaMarkup from '../components/SchemaMarkup'
 import { api, trackEvent } from '../api/client'
 import { estimatePrice } from '../lib/pricing'
 import { STATE_OPTIONS, getStateSummary } from '../lib/states50'
+import { downloadPdf } from '../lib/pdfUtils'
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -101,7 +102,7 @@ export default function Quote() {
   const [errorMsg, setErrorMsg] = useState('')
 
   // Proposal pipeline state (shown after successful quote submission)
-  const [proposalStatus, setProposalStatus]  = useState('idle')  // idle | generating | done | error
+  const [proposalStatus, setProposalStatus] = useState('idle')  // idle | generating | done | error
   const [proposal, setProposal]             = useState(null)
   const [proposalError, setProposalError]   = useState('')
   const [sendStatus, setSendStatus]         = useState('idle')
@@ -155,15 +156,7 @@ export default function Quote() {
 
   const handleDownloadProposal = () => {
     if (!proposal?.pdf_b64) return
-    const bytes = atob(proposal.pdf_b64)
-    const arr   = new Uint8Array(Array.from(bytes, (c) => c.charCodeAt(0)))
-    const blob  = new Blob([arr], { type: 'application/pdf' })
-    const url   = URL.createObjectURL(blob)
-    const a     = document.createElement('a')
-    a.href      = url
-    a.download  = `proposal-lead-${result.lead_id}.pdf`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadPdf(proposal.pdf_b64, `proposal-lead-${result.lead_id}.pdf`)
   }
 
   const handleSendProposal = async () => {

@@ -9,6 +9,7 @@ import { useState, useRef } from 'react'
 
 const ACCEPTED = '.mp3,.wav,.m4a,.ogg,.webm,audio/mpeg,audio/wav,audio/mp4,audio/ogg,audio/webm'
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
+const UPLOAD_TIMEOUT_MS = 90_000  // Whisper transcription may take up to ~90 s for long audio
 
 export default function VoicePanel() {
   const [file, setFile]           = useState(null)
@@ -34,7 +35,7 @@ export default function VoicePanel() {
 
     try {
       const controller = new AbortController()
-      const tid = setTimeout(() => controller.abort(), 90_000)
+      const tid = setTimeout(() => controller.abort(), UPLOAD_TIMEOUT_MS)
       const res = await fetch(`${BASE}/api/v1/voice/transcribe`, {
         method: 'POST',
         body: form,
@@ -47,7 +48,7 @@ export default function VoicePanel() {
       }
       setResult(await res.json())
     } catch (e) {
-      setError(e.name === 'AbortError' ? 'Upload timed out (90 s).' : e.message)
+      setError(e.name === 'AbortError' ? `Upload timed out (${UPLOAD_TIMEOUT_MS / 1000} s).` : e.message)
     } finally {
       setUploading(false)
     }
