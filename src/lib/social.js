@@ -75,7 +75,7 @@ export function buildShareUrl(
     utm_campaign = 'share',
   } = {}
 ) {
-  const base   = import.meta.env.VITE_SITE_URL || 'https://jwordenasphalt.com'
+  const base   = import.meta.env.VITE_SITE_URL || 'https://jwordenasphaltpaving.com'
   const params = new URLSearchParams({ utm_source, utm_medium, utm_campaign })
   return `${base}${path}?${params.toString()}`
 }
