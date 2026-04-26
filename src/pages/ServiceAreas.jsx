@@ -154,12 +154,12 @@ export default function ServiceAreas() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="font-display font-black text-2xl text-brand-navy mb-3">
-            Don't see your city?
+            Don&apos;t see your city?
           </h2>
           <p className="text-brand-navy/60 mb-6">
-            We travel for the right commercial project. If you're in Virginia or a
+            We travel for the right commercial project. If you&apos;re in Virginia or a
             neighboring state and need a professional asphalt contractor, reach out —
-            we'll let you know if we can make it work.
+            we&apos;ll let you know if we can make it work.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/contact" className="btn-primary">

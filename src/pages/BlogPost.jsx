@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import SchemaMarkup, { faqSchema } from '../components/SchemaMarkup'
+import SchemaMarkup from '../components/SchemaMarkup'
 import SocialShare from '../components/SocialShare'
 import BLOG_POSTS, { BLOG_CATEGORIES } from '../data/blogPosts'
 import { SITE_URL } from '../lib/schemas'
@@ -214,7 +214,6 @@ export default function BlogPost() {
 
   if (!post) return <NotFound />
 
-  const currentIndex = BLOG_POSTS.indexOf(post)
   const relatedPosts = BLOG_POSTS
     .filter((p) => p.slug !== slug && (p.category === post.category || p.featured))
     .slice(0, 3)
