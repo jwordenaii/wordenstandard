@@ -6,6 +6,7 @@ import CountUp from '../components/CountUp'
 import FAQAccordion from '../components/FAQAccordion'
 import SocialLinks from '../components/SocialLinks'
 import EstimateWidget from '../components/EstimateWidget'
+import InspirationGallery from '../components/InspirationGallery'
 
 const SERVICES = [
   {
@@ -44,15 +45,41 @@ const SERVICES = [
     desc: 'Annual maintenance programs for commercial properties — sealcoat, crack fill, and touch-up on a schedule.',
     href: '/services#maintenance',
   },
+  {
+    icon: '🏗',
+    title: 'General Contracting',
+    desc: 'Full GC services — permits, subcontractor management, budget control, and turnkey delivery for commercial and residential builds.',
+    href: '/services#general-contracting',
+  },
+  {
+    icon: '🎨',
+    title: 'Interior Design',
+    desc: 'Best of Houzz–recognized design team. Mood boards, 3D renders, FF&E procurement, and full project management.',
+    href: '/services#interior-design',
+  },
+  {
+    icon: '🪨',
+    title: 'Cobblestone & Brick Paver Patios',
+    desc: 'Timeless hardscapes — herringbone, fan pattern, and custom cobblestone or brick installations with engineered bases.',
+    href: '/services#cobblestone-pavers',
+  },
+  {
+    icon: '🧱',
+    title: 'Stone Masonry',
+    desc: 'Natural fieldstone walls, flagstone patios, stone steps, retaining walls, and outdoor fireplace surrounds.',
+    href: '/services#stone-masonry',
+  },
 ]
 
 const TRUST_BADGES = [
   { label: 'KFC',              desc: 'National QSR vendor'       },
   { label: 'Pavement Mag',     desc: 'Top 75 · 4 categories'     },
-  { label: 'Best of Houzz',    desc: 'Multiple years'            },
+  { label: 'Best of Houzz',    desc: 'Interior design award'     },
   { label: '2026 Nominee',     desc: 'Top Contractor Award'      },
   { label: '12+ States',       desc: 'Verified QSR work'         },
   { label: 'Est. 1984',        desc: 'Family owned'              },
+  { label: 'VA Class A GC',    desc: 'Licensed & Insured'        },
+  { label: 'Stone Masonry',    desc: 'Patio · Wall · Fireplace'  },
 ]
 
 const HOME_FAQS = [
@@ -74,7 +101,17 @@ const HOME_FAQS = [
   {
     question: 'Are you licensed and insured?',
     answer:
-      "Yes. J. Worden & Sons is fully licensed and carries general liability and workers' compensation insurance.",
+      "Yes. J. Worden & Sons is fully licensed as a VA Class A General Contractor and carries general liability and workers' compensation insurance.",
+  },
+  {
+    question: 'Do you do interior design as well as construction?',
+    answer:
+      'Yes — our Best of Houzz–recognized interior design team handles everything from mood boards and material selection to full FF&E procurement and install coordination. We are a true one-stop shop from the foundation up to the finishing touches.',
+  },
+  {
+    question: 'What outdoor hardscape options do you offer?',
+    answer:
+      'We install cobblestone and brick paver patios, natural stone masonry walls, flagstone paths, stone steps, retaining walls, and outdoor fireplace surrounds. Every hardscape project starts with a properly engineered base for lasting stability.',
   },
 ]
 
@@ -138,9 +175,11 @@ export default function Home() {
             custom={2}
             variants={fadeUp}
           >
-            J. Worden &amp; Sons has been laying down quality asphalt for four
+            J. Worden &amp; Sons has been building and beautifying properties for four
             generations. Trusted by KFC, Arby&apos;s, Taco Bell, and hundreds of
-            homeowners — we show up, we do it right, and we stand behind every job.
+            homeowners — asphalt paving, stone masonry, cobblestone patios, interior
+            design, and full GC services. We show up, we do it right, and we stand
+            behind every job.
           </motion.p>
 
           <motion.div
@@ -196,8 +235,8 @@ export default function Home() {
           <div className="text-center mb-14">
             <h2 className="section-heading mb-4">Our Services</h2>
             <p className="text-brand-navy/60 max-w-xl mx-auto">
-              From new construction to annual maintenance — we handle every phase of
-              commercial and residential asphalt work.
+              Full-service General Contractor — from asphalt paving and stone masonry to interior
+              design and ground-up commercial builds. One call handles it all.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -224,6 +263,23 @@ export default function Home() {
               View All Services
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ── Project Inspiration Gallery (Houzz-style) ─────────────────── */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
+              Project Inspiration
+            </span>
+            <h2 className="section-heading mt-2 mb-4">Browse by Style &amp; Service</h2>
+            <p className="text-brand-navy/60 max-w-xl mx-auto">
+              From Houzz-award–winning interior spaces to hand-laid cobblestone courtyards
+              and natural stone masonry — explore the range of work we deliver.
+            </p>
+          </div>
+          <InspirationGallery maxItems={8} />
         </div>
       </section>
 
