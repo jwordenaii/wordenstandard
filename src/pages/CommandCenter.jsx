@@ -39,6 +39,14 @@ import FollowUpsPanel from '../components/commandCenter/FollowUpsPanel'
 import SchedulingPanel from '../components/commandCenter/SchedulingPanel'
 import JobCostingPanel from '../components/commandCenter/JobCostingPanel'
 import RFIChangeOrderPanel from '../components/commandCenter/RFIChangeOrderPanel'
+import RetrospectivesPanel from '../components/commandCenter/RetrospectivesPanel'
+import SafetyPanel from '../components/commandCenter/SafetyPanel'
+import CashFlowPanel from '../components/commandCenter/CashFlowPanel'
+import ScorecardPanel from '../components/commandCenter/ScorecardPanel'
+import WorkforcePanel from '../components/commandCenter/WorkforcePanel'
+import BidIntelPanel from '../components/commandCenter/BidIntelPanel'
+import KPIWallPanel from '../components/commandCenter/KPIWallPanel'
+import InnovationPanel from '../components/commandCenter/InnovationPanel'
 
 // Lazy-load TakeoffMap because @vis.gl/react-google-maps is a heavier dep
 const TakeoffMap = lazy(() => import('../components/TakeoffMap'))
@@ -147,6 +155,14 @@ const PANELS = [
   { id: 'scheduling',    label: '🗓 Scheduling' },
   { id: 'job-costing',   label: '💰 Job Costing' },
   { id: 'rfi-co',        label: '📝 RFI / Change Orders' },
+  { id: 'retrospectives',label: '📚 Lessons Learned' },
+  { id: 'safety',        label: '🦺 Safety' },
+  { id: 'cashflow',      label: '💵 Cash Flow' },
+  { id: 'scorecard',     label: '🏆 Scorecard' },
+  { id: 'workforce',     label: '👷 Workforce' },
+  { id: 'bid-intel',     label: '🎯 Bid Intel' },
+  { id: 'kpi-wall',      label: '📈 KPI Wall' },
+  { id: 'innovations',   label: '🔬 Innovation Lab' },
 ]
 
 export default function CommandCenter() {
@@ -397,6 +413,30 @@ function CommandCenterInner() {
 
         {/* ── RFI / Change Orders panel ── */}
         {activePanel === 'rfi-co' && <RFIChangeOrderPanel />}
+
+        {/* ── Lessons Learned / Retrospectives panel ── */}
+        {activePanel === 'retrospectives' && <RetrospectivesPanel />}
+
+        {/* ── Safety Culture Dashboard panel ── */}
+        {activePanel === 'safety' && <SafetyPanel />}
+
+        {/* ── Cash Flow Projection panel ── */}
+        {activePanel === 'cashflow' && <CashFlowPanel />}
+
+        {/* ── Project Scorecard panel ── */}
+        {activePanel === 'scorecard' && <ScorecardPanel />}
+
+        {/* ── Workforce / Crew Skills Matrix panel ── */}
+        {activePanel === 'workforce' && <WorkforcePanel />}
+
+        {/* ── Bid Intelligence / Win-Rate Optimizer panel ── */}
+        {activePanel === 'bid-intel' && <BidIntelPanel />}
+
+        {/* ── KPI Wall panel ── */}
+        {activePanel === 'kpi-wall' && <KPIWallPanel />}
+
+        {/* ── Innovation Lab panel ── */}
+        {activePanel === 'innovations' && <InnovationPanel />}
 
         {/* ── Bottom CTA ── */}
         <section className="mt-12 bg-brand-navy rounded-2xl p-8 text-center text-white">

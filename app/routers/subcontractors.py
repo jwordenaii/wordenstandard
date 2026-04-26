@@ -24,12 +24,22 @@ from sqlalchemy.orm import Session
 from ..core.limiter import limiter
 from ..core.security import verify_premium_security
 from ..database import get_db
-from ..models import SubcontractorRoster
-from ..services.subcontractor_monitor import get_expiring_certs, get_compliance_summary
+from ..models import SubcontractorPerformance, SubcontractorRoster
+from ..services.subcontractor_monitor import get_compliance_summary, get_expiring_certs
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/subcontractors", tags=["subcontractors"])
+
+
+def _parse_dt(s: Optional[str]) -> Optional[datetime]:
+    if not s:
+        return None
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+    except Exception:  # noqa: BLE001
+        return None
 
 
 class SubcontractorCreate(BaseModel):
@@ -199,3 +209,109 @@ async def expiring_certs(
         "days_ahead": days_ahead,
         "expiring": expiring,
     }
+
+
+# ── Performance history endpoints ─────────────────────────────────────────────
+
+class PerformanceCreate(BaseModel):
+    subcontractor_id: Optional[int] = None
+    project_name: str
+    scope: Optional[str] = None
+    on_time: int = 1
+    quality_rating: Optional[int] = None   # 1-5
+    payment_dispute: int = 0
+    rehire_recommended: int = 1
+    notes: Optional[str] = None
+    project_date: Optional[str] = None
+
+
+def _perf_dict(p: SubcontractorPerformance) -> dict:
+    return {
+        "id": p.id,
+        "subcontractor_id": p.subcontractor_id,
+        "project_name": p.project_name,
+        "scope": p.scope,
+        "on_time": bool(p.on_time),
+        "quality_rating": p.quality_rating,
+        "payment_dispute": bool(p.payment_dispute),
+        "rehire_recommended": bool(p.rehire_recommended),
+        "notes": p.notes,
+        "project_date": p.project_date.isoformat() if p.project_date else None,
+        "created_at": p.created_at.isoformat(),
+    }
+
+
+@router.get("/{sub_id}/performance", summary="Get performance history for a subcontractor")
+@limiter.limit("60/minute")
+async def get_performance(
+    request: Request,
+    sub_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_premium_security),
+):
+    rows = (
+        db.query(SubcontractorPerformance)
+        .filter(SubcontractorPerformance.subcontractor_id == sub_id)
+        .order_by(SubcontractorPerformance.project_date.desc())
+        .all()
+    )
+    total = len(rows)
+    on_time_pct = round(sum(1 for r in rows if r.on_time) / total * 100, 1) if total else None
+    avg_quality = (
+        round(sum(r.quality_rating for r in rows if r.quality_rating) / sum(1 for r in rows if r.quality_rating), 1)
+        if any(r.quality_rating for r in rows) else None
+    )
+    disputes = sum(1 for r in rows if r.payment_dispute)
+    rehire_pct = round(sum(1 for r in rows if r.rehire_recommended) / total * 100, 1) if total else None
+    return {
+        "subcontractor_id": sub_id,
+        "total_projects": total,
+        "on_time_pct": on_time_pct,
+        "avg_quality_rating": avg_quality,
+        "payment_disputes": disputes,
+        "rehire_pct": rehire_pct,
+        "history": [_perf_dict(r) for r in rows],
+    }
+
+
+@router.post("/{sub_id}/performance", summary="Add a performance record for a subcontractor")
+@limiter.limit("30/minute")
+async def add_performance(
+    request: Request,
+    sub_id: int,
+    req: PerformanceCreate,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_premium_security),
+):
+    perf = SubcontractorPerformance(
+        subcontractor_id=sub_id,
+        project_name=req.project_name,
+        scope=req.scope,
+        on_time=req.on_time,
+        quality_rating=req.quality_rating,
+        payment_dispute=req.payment_dispute,
+        rehire_recommended=req.rehire_recommended,
+        notes=req.notes,
+        project_date=_parse_dt(req.project_date),
+    )
+    db.add(perf)
+    db.commit()
+    db.refresh(perf)
+    return {"status": "created", **_perf_dict(perf)}
+
+
+@router.delete("/performance/{perf_id}", summary="Delete a performance record")
+@limiter.limit("30/minute")
+async def delete_performance(
+    request: Request,
+    perf_id: int,
+    db: Session = Depends(get_db),
+    _: dict = Depends(verify_premium_security),
+):
+    perf = db.get(SubcontractorPerformance, perf_id)
+    if not perf:
+        raise HTTPException(status_code=404, detail="Performance record not found")
+    db.delete(perf)
+    db.commit()
+    return {"status": "deleted", "id": perf_id}
+

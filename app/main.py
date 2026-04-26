@@ -51,6 +51,14 @@ from .routers import materials as materials_router
 from .routers import tenants as tenants_router
 from .routers import blog as blog_router
 from .routers import seo as seo_router
+from .routers import retrospectives as retrospectives_router
+from .routers import safety as safety_router
+from .routers import cashflow as cashflow_router
+from .routers import project_metrics as project_metrics_router
+from .routers import workforce as workforce_router
+from .routers import bid_intelligence as bid_intelligence_router
+from .routers import kpi_wall as kpi_wall_router
+from .routers import innovations as innovations_router
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +133,14 @@ app.include_router(materials_router.router)
 app.include_router(tenants_router.router)
 app.include_router(blog_router.router)
 app.include_router(seo_router.router)
+app.include_router(retrospectives_router.router)
+app.include_router(safety_router.router)
+app.include_router(cashflow_router.router)
+app.include_router(project_metrics_router.router)
+app.include_router(workforce_router.router)
+app.include_router(bid_intelligence_router.router)
+app.include_router(kpi_wall_router.router)
+app.include_router(innovations_router.router)
 
 
 # ── Legacy endpoints (kept for backward compatibility) ────────────────────────

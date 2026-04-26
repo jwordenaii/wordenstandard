@@ -46,6 +46,17 @@ export default function SubcontractorPanel() {
   const [saving, setSaving] = useState(false)
   const [tab, setTab] = useState('all')
 
+  // Performance history state
+  const [selectedSubId, setSelectedSubId] = useState(null)
+  const [perfData, setPerfData] = useState(null)
+  const [perfLoading, setPerfLoading] = useState(false)
+  const [showPerfAdd, setShowPerfAdd] = useState(false)
+  const [perfForm, setPerfForm] = useState({
+    project_name: '', scope: '', on_time: '1', quality_rating: '4',
+    payment_dispute: '0', rehire_recommended: '1', notes: '', project_date: '',
+  })
+  const [perfSaving, setPerfSaving] = useState(false)
+
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -65,6 +76,25 @@ export default function SubcontractorPanel() {
 
   useEffect(() => { load() }, [load])
 
+  const loadPerf = useCallback(async (subId) => {
+    setPerfLoading(true)
+    setPerfData(null)
+    try {
+      const d = await api.getSubcontractorPerformance(subId)
+      setPerfData(d)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setPerfLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (tab === 'performance' && selectedSubId) {
+      loadPerf(selectedSubId)
+    }
+  }, [tab, selectedSubId, loadPerf])
+
   const handleAdd = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -80,7 +110,25 @@ export default function SubcontractorPanel() {
     }
   }
 
+  const handlePerfSave = async (e) => {
+    e.preventDefault()
+    setPerfSaving(true)
+    try {
+      await api.addSubcontractorPerformance(selectedSubId, {
+        ...perfForm,
+        on_time: Number(perfForm.on_time),
+        quality_rating: Number(perfForm.quality_rating),
+        payment_dispute: Number(perfForm.payment_dispute),
+        rehire_recommended: Number(perfForm.rehire_recommended),
+      })
+      setPerfForm({ project_name: '', scope: '', on_time: '1', quality_rating: '4', payment_dispute: '0', rehire_recommended: '1', notes: '', project_date: '' })
+      setShowPerfAdd(false)
+      loadPerf(selectedSubId)
+    } catch (err) { setError(err.message) } finally { setPerfSaving(false) }
+  }
+
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
+  const setP = (k, v) => setPerfForm((f) => ({ ...f, [k]: v }))
 
   const displayed = tab === 'expiring' ? expiring : subs
 
@@ -88,7 +136,7 @@ export default function SubcontractorPanel() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             type="button"
             onClick={() => setTab('all')}
@@ -109,14 +157,25 @@ export default function SubcontractorPanel() {
           >
             ⚠️ Expiring Soon ({expiring.length})
           </button>
+          <button
+            type="button"
+            onClick={() => setTab('performance')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+              tab === 'performance' ? 'bg-brand-navy text-white border-brand-navy' : 'border-gray-200 text-brand-navy/60'
+            }`}
+          >
+            📊 Performance
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAdd(!showAdd)}
-          className="btn-primary text-xs !py-1.5"
-        >
-          + Add Subcontractor
-        </button>
+        {tab !== 'performance' && (
+          <button
+            type="button"
+            onClick={() => setShowAdd(!showAdd)}
+            className="btn-primary text-xs !py-1.5"
+          >
+            + Add Subcontractor
+          </button>
+        )}
       </div>
 
       {/* Add form */}
@@ -183,46 +242,201 @@ export default function SubcontractorPanel() {
         </div>
       )}
 
-      <div className="card p-6">
-        {loading ? (
-          <div className="flex items-center justify-center h-32 text-brand-navy/40 text-sm gap-3">
-            <span className="w-5 h-5 border-2 border-brand-amber border-t-transparent rounded-full animate-spin" />
-            Loading…
-          </div>
-        ) : displayed.length === 0 ? (
-          <div className="text-center text-brand-navy/40 py-10 text-sm">
-            {tab === 'expiring' ? 'No certifications expiring in the next 45 days. ✅' : 'No subcontractors added yet.'}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-brand-navy/10 text-xs text-brand-navy/50 font-semibold text-left">
-                  <th className="pb-2 pr-3">Name / Company</th>
-                  <th className="pb-2 pr-3 hidden sm:table-cell">State</th>
-                  <th className="pb-2 pr-3">Insurance</th>
-                  <th className="pb-2 pr-3 hidden md:table-cell">Bond</th>
-                  <th className="pb-2">License</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayed.map((s) => (
-                  <tr key={s.id} className="border-b border-brand-navy/5">
-                    <td className="py-2.5 pr-3">
-                      <div className="font-semibold text-brand-navy">{s.name}</div>
-                      <div className="text-brand-navy/40 text-xs">{s.company}</div>
-                    </td>
-                    <td className="py-2.5 pr-3 hidden sm:table-cell text-brand-navy/60">{s.state_code}</td>
-                    <td className="py-2.5 pr-3"><ExpiryBadge date={s.insurance_expiry} /></td>
-                    <td className="py-2.5 pr-3 hidden md:table-cell"><ExpiryBadge date={s.bond_expiry} /></td>
-                    <td className="py-2.5"><ExpiryBadge date={s.license_expiry} /></td>
+      {tab !== 'performance' && (
+        <div className="card p-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-32 text-brand-navy/40 text-sm gap-3">
+              <span className="w-5 h-5 border-2 border-brand-amber border-t-transparent rounded-full animate-spin" />
+              Loading…
+            </div>
+          ) : displayed.length === 0 ? (
+            <div className="text-center text-brand-navy/40 py-10 text-sm">
+              {tab === 'expiring' ? 'No certifications expiring in the next 45 days. ✅' : 'No subcontractors added yet.'}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-brand-navy/10 text-xs text-brand-navy/50 font-semibold text-left">
+                    <th className="pb-2 pr-3">Name / Company</th>
+                    <th className="pb-2 pr-3 hidden sm:table-cell">State</th>
+                    <th className="pb-2 pr-3">Insurance</th>
+                    <th className="pb-2 pr-3 hidden md:table-cell">Bond</th>
+                    <th className="pb-2">License</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {displayed.map((s) => (
+                    <tr
+                      key={s.id}
+                      className="border-b border-brand-navy/5 cursor-pointer hover:bg-gray-50"
+                      onClick={() => { setSelectedSubId(s.id); setTab('performance') }}
+                    >
+                      <td className="py-2.5 pr-3">
+                        <div className="font-semibold text-brand-navy">{s.name}</div>
+                        <div className="text-brand-navy/40 text-xs">{s.company}</div>
+                      </td>
+                      <td className="py-2.5 pr-3 hidden sm:table-cell text-brand-navy/60">{s.state_code}</td>
+                      <td className="py-2.5 pr-3"><ExpiryBadge date={s.insurance_expiry} /></td>
+                      <td className="py-2.5 pr-3 hidden md:table-cell"><ExpiryBadge date={s.bond_expiry} /></td>
+                      <td className="py-2.5"><ExpiryBadge date={s.license_expiry} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="text-xs text-brand-navy/30 mt-2">Click a row to view performance history.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Performance History Tab ── */}
+      {tab === 'performance' && (
+        <div className="space-y-4">
+          {/* Sub selector */}
+          <div className="card p-4 flex items-center gap-3 flex-wrap">
+            <label className="text-xs font-semibold text-brand-navy/60">Subcontractor:</label>
+            <select
+              value={selectedSubId || ''}
+              onChange={(e) => {
+                const { value } = e.target
+                setSelectedSubId(value === '' ? null : Number(value))
+              }}
+              className="input text-sm flex-1 max-w-xs"
+            >
+              <option value="">— select subcontractor —</option>
+              {subs.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.company}</option>)}
+            </select>
+            {selectedSubId && (
+              <button onClick={() => setShowPerfAdd(!showPerfAdd)} className="btn-primary text-xs !py-1.5">
+                + Add Record
+              </button>
+            )}
           </div>
-        )}
-      </div>
+
+          {showPerfAdd && selectedSubId && (
+            <div className="card p-6">
+              <h4 className="font-semibold text-brand-navy mb-4">Add Performance Record</h4>
+              <form onSubmit={handlePerfSave} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Project Name</label>
+                  <input type="text" value={perfForm.project_name} onChange={(e) => setP('project_name', e.target.value)} required className="input text-sm w-full" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Scope</label>
+                  <input type="text" value={perfForm.scope} onChange={(e) => setP('scope', e.target.value)} placeholder="milling, paving…" className="input text-sm w-full" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">On Time?</label>
+                  <select value={perfForm.on_time} onChange={(e) => setP('on_time', e.target.value)} className="input text-sm w-full">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Quality (1–5)</label>
+                  <select value={perfForm.quality_rating} onChange={(e) => setP('quality_rating', e.target.value)} className="input text-sm w-full">
+                    {[5,4,3,2,1].map((n) => <option key={n} value={n}>{n} {'★'.repeat(n)}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Payment Dispute?</label>
+                  <select value={perfForm.payment_dispute} onChange={(e) => setP('payment_dispute', e.target.value)} className="input text-sm w-full">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Re-hire?</label>
+                  <select value={perfForm.rehire_recommended} onChange={(e) => setP('rehire_recommended', e.target.value)} className="input text-sm w-full">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Project Date</label>
+                  <input type="date" value={perfForm.project_date} onChange={(e) => setP('project_date', e.target.value)} className="input text-sm w-full" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-brand-navy/60 mb-1">Notes</label>
+                  <input type="text" value={perfForm.notes} onChange={(e) => setP('notes', e.target.value)} className="input text-sm w-full" />
+                </div>
+                <div className="sm:col-span-2 flex gap-3">
+                  <button type="submit" disabled={perfSaving} className="btn-primary text-sm !py-2 disabled:opacity-50">
+                    {perfSaving ? 'Saving…' : 'Save Record'}
+                  </button>
+                  <button type="button" onClick={() => setShowPerfAdd(false)} className="btn-outline text-sm !py-2">Cancel</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {selectedSubId && (
+            <div className="card p-6">
+              {perfLoading ? (
+                <div className="flex items-center justify-center h-20 text-brand-navy/40 text-sm gap-3">
+                  <span className="w-5 h-5 border-2 border-brand-amber border-t-transparent rounded-full animate-spin" /> Loading…
+                </div>
+              ) : !perfData ? null : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      ['Projects', perfData.total_projects],
+                      ['On-Time', perfData.on_time_pct != null ? `${perfData.on_time_pct}%` : '—'],
+                      ['Avg Quality', perfData.avg_quality_rating ? `${perfData.avg_quality_rating}/5` : '—'],
+                      ['Disputes', perfData.payment_disputes],
+                    ].map(([l, v]) => (
+                      <div key={l} className="text-center bg-gray-50 rounded-xl py-3">
+                        <div className="font-display font-bold text-xl text-brand-navy">{v ?? '—'}</div>
+                        <div className="text-xs text-brand-navy/50 mt-0.5">{l}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {perfData.rehire_pct != null && (
+                    <div className={`text-sm font-semibold px-4 py-2 rounded-lg ${perfData.rehire_pct >= 80 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {perfData.rehire_pct >= 80 ? '✅' : '⚠️'} Re-hire recommended on {perfData.rehire_pct}% of projects
+                    </div>
+                  )}
+                  {perfData.history.length > 0 && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-brand-navy/10 text-xs text-brand-navy/50 font-semibold text-left">
+                            <th className="pb-2 pr-3">Project</th>
+                            <th className="pb-2 pr-3 hidden sm:table-cell">Scope</th>
+                            <th className="pb-2 pr-3">On Time</th>
+                            <th className="pb-2 pr-3">Quality</th>
+                            <th className="pb-2">Re-hire</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {perfData.history.map((p) => (
+                            <tr key={p.id} className="border-b border-brand-navy/5">
+                              <td className="py-2.5 pr-3 font-semibold text-brand-navy">{p.project_name}</td>
+                              <td className="py-2.5 pr-3 text-xs text-brand-navy/60 hidden sm:table-cell">{p.scope || '—'}</td>
+                              <td className="py-2.5 pr-3">
+                                <span className={`text-xs font-bold ${p.on_time ? 'text-green-600' : 'text-red-600'}`}>
+                                  {p.on_time ? '✓' : '✗'}
+                                </span>
+                              </td>
+                              <td className="py-2.5 pr-3 text-xs">{p.quality_rating ? '★'.repeat(p.quality_rating) : '—'}</td>
+                              <td className="py-2.5">
+                                <span className={`text-xs font-bold ${p.rehire_recommended ? 'text-green-600' : 'text-red-600'}`}>
+                                  {p.rehire_recommended ? '✓ Yes' : '✗ No'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
