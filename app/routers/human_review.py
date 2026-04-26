@@ -95,6 +95,21 @@ async def approve_item(
     item.corrected_answer = body.corrected_answer
     item.reviewed_at      = datetime.now(timezone.utc)
     db.commit()
+
+    # Feature 2: Save correction to learning loop
+    if body.corrected_answer:
+        try:
+            from ..services.corrections_engine import save_correction  # noqa: PLC0415
+            save_correction(
+                decision_type=item.decision_type,
+                input_summary=item.input_summary or "",
+                corrected_answer=body.corrected_answer,
+                reviewer_notes=body.reviewer_notes,
+                db=db,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Could not save correction: %s", exc)
+
     logger.info("Review item %d approved", item_id)
     return {"status": "approved", "id": item_id}
 

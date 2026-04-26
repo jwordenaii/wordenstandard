@@ -8,6 +8,19 @@ from dotenv import load_dotenv  # noqa: E402 — must run before other imports
 # In production (Railway/Render) env vars are injected directly.
 load_dotenv()
 
+# ── Sentry (Feature: observability) ──────────────────────────────────────────
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if _SENTRY_DSN:
+    try:
+        import sentry_sdk  # noqa: PLC0415
+        sentry_sdk.init(
+            dsn=_SENTRY_DSN,
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        )
+        logging.getLogger(__name__).info("Sentry initialised")
+    except Exception as _se:  # noqa: BLE001
+        logging.getLogger(__name__).warning("Sentry init failed: %s", _se)
+
 from fastapi import FastAPI, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -24,6 +37,18 @@ from .routers import leads, reviews, schema_ld, ai as ai_router
 from .routers import admin as admin_router, content as content_router
 from .routers import advisor as advisor_router
 from .routers import permits as permits_router, takeoff as takeoff_router
+from .routers import crm as crm_router
+from .routers import follow_ups as follow_ups_router
+from .routers import proposals as proposals_router
+from .routers import weather as weather_router
+from .routers import documents as documents_router
+from .routers import analytics as analytics_router
+from .routers import voice as voice_router
+from .routers import lien_calendar as lien_calendar_router
+from .routers import subcontractors as subcontractors_router
+from .routers import market_intelligence as market_intelligence_router
+from .routers import materials as materials_router
+from .routers import tenants as tenants_router
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +93,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -82,6 +107,20 @@ app.include_router(advisor_router.router)
 app.include_router(admin_router.router)
 app.include_router(permits_router.router)
 app.include_router(takeoff_router.router)
+
+# Enterprise feature routers
+app.include_router(crm_router.router)
+app.include_router(follow_ups_router.router)
+app.include_router(proposals_router.router)
+app.include_router(weather_router.router)
+app.include_router(documents_router.router)
+app.include_router(analytics_router.router)
+app.include_router(voice_router.router)
+app.include_router(lien_calendar_router.router)
+app.include_router(subcontractors_router.router)
+app.include_router(market_intelligence_router.router)
+app.include_router(materials_router.router)
+app.include_router(tenants_router.router)
 
 
 # ── Legacy endpoints (kept for backward compatibility) ────────────────────────

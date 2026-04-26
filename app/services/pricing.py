@@ -44,26 +44,29 @@ def estimate_price(
     property_type: str,
     project_size_sqft: float,
     state_code: str | None = None,
+    include_material_adjustment: bool = True,
 ) -> dict | None:
     """
     Return a ballpark cost range or None if the service is not recognised.
 
     Parameters
     ----------
-    service_type      : one of the keys in _RATES
-    property_type     : 'residential' | 'commercial'
-    project_size_sqft : positive float
-    state_code        : optional 2-letter state abbreviation for regional adjustment
+    service_type               : one of the keys in _RATES
+    property_type              : 'residential' | 'commercial'
+    project_size_sqft          : positive float
+    state_code                 : optional 2-letter state abbreviation for regional adjustment
+    include_material_adjustment: when True, applies live EIA asphalt price multiplier (Feature 7)
 
     Returns
     -------
     {
-        "low_usd":    int,
-        "high_usd":   int,
-        "low_fmt":    str,
-        "high_fmt":   str,
-        "multiplier": float,   # state adjustment applied (1.0 = national average)
-        "disclaimer": str,
+        "low_usd":       int,
+        "high_usd":      int,
+        "low_fmt":       str,
+        "high_fmt":      str,
+        "multiplier":    float,   # state adjustment applied (1.0 = national average)
+        "material_note": str,     # live material price note (Feature 7)
+        "disclaimer":    str,
     }
     """
     from .state_data import get_price_multiplier  # noqa: PLC0415
@@ -80,8 +83,22 @@ def estimate_price(
         return None
 
     multiplier = get_price_multiplier(state_code) if state_code else 1.0
-    low_raw  = rates[0] * sqft * multiplier
-    high_raw = rates[1] * sqft * multiplier
+
+    # Feature 7: Apply live material price multiplier
+    material_note = ""
+    material_multiplier = 1.0
+    if include_material_adjustment:
+        try:
+            from .material_prices import get_price_multiplier_with_materials  # noqa: PLC0415
+            mat_result = get_price_multiplier_with_materials(state_code or "US", service)
+            material_multiplier = mat_result.get("multiplier", 1.0)
+            material_note = mat_result.get("note", "")
+        except Exception:  # noqa: BLE001
+            pass
+
+    combined = multiplier * material_multiplier
+    low_raw  = rates[0] * sqft * combined
+    high_raw = rates[1] * sqft * combined
 
     low  = max(_round_to_nearest(low_raw,  _ROUND_TO), int(_MOBILISATION_FLOOR_LOW))
     high = max(_round_to_nearest(high_raw, _ROUND_TO), int(_MOBILISATION_FLOOR_HIGH))
@@ -90,11 +107,12 @@ def estimate_price(
         return f"${n:,}"
 
     return {
-        "low_usd":   low,
-        "high_usd":  high,
-        "low_fmt":   fmt(low),
-        "high_fmt":  fmt(high),
-        "multiplier": round(multiplier, 3),
+        "low_usd":        low,
+        "high_usd":       high,
+        "low_fmt":        fmt(low),
+        "high_fmt":       fmt(high),
+        "multiplier":     round(multiplier, 3),
+        "material_note":  material_note,
         "disclaimer": (
             "Ballpark estimate only — final price depends on site conditions, "
             "material costs, and access. A free on-site quote is always included."
