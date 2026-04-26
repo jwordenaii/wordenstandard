@@ -193,6 +193,11 @@ export const api = {
   updateInnovation:  (id, data) => request('PUT', `/api/v1/innovations/${id}`, data),
   deleteInnovation:  (id) => request('DELETE', `/api/v1/innovations/${id}`),
   getAdoptedMethods: () => request('GET', '/api/v1/innovations/adopted'),
+
+  // ── 3-D Property Visualizer ────────────────────────────────────────────
+  scanParcel:            (data)  => request('POST', '/api/v1/visualizer/parcel',         data),
+  submitVisualProposal:  (data)  => request('POST', '/api/v1/visualizer/proposal',       data),
+  getAIDesignSuggestions:(data)  => request('POST', '/api/v1/visualizer/ai-suggestions', data),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

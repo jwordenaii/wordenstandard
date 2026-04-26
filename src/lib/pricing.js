@@ -75,6 +75,31 @@ const RATES = {
     commercial:  { low: 35.0, high: 100.0 },
     default:     { low: 30.0, high: 90.0 },
   },
+  // ── 3D Visualizer build types ─────────────────────────────────────────
+  // New Construction — full build cost per sq ft (site, foundation, structure, finish)
+  new_construction_residential: {
+    residential: { low: 120.0, high: 320.0 },
+    commercial:  { low: 110.0, high: 280.0 },
+    default:     { low: 120.0, high: 320.0 },
+  },
+  // Addition / Remodel — per sq ft of new added/renovated space
+  addition: {
+    residential: { low: 90.0, high: 250.0 },
+    commercial:  { low: 100.0, high: 275.0 },
+    default:     { low: 90.0, high: 250.0 },
+  },
+  // ADU (Accessory Dwelling Unit) — detached or attached unit, turnkey
+  adu: {
+    residential: { low: 150.0, high: 400.0 },
+    commercial:  { low: 140.0, high: 350.0 },
+    default:     { low: 150.0, high: 400.0 },
+  },
+  // Commercial New Build — shell + TI per sq ft
+  commercial_build: {
+    residential: { low: 100.0, high: 260.0 },
+    commercial:  { low: 90.0, high: 240.0 },
+    default:     { low: 90.0, high: 260.0 },
+  },
 }
 
 /** Format a dollar value: round to nearest $50 for clarity */

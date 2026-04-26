@@ -42,6 +42,15 @@ _RATES: dict[str, dict[str, tuple[float, float]]] = {
     "cobblestone_pavers":   {"residential": (15.00, 55.00), "commercial": (18.00, 60.00)},
     # Stone Masonry — installed surface sq ft (wall face or patio)
     "stone_masonry":        {"residential": (30.00, 85.00), "commercial": (35.00, 100.00)},
+    # ── 3D Visualizer build types ─────────────────────────────────────────────
+    # New Construction — full turnkey build cost per sq ft
+    "new_construction_residential": {"residential": (120.00, 320.00), "commercial": (110.00, 280.00)},
+    # Addition / Remodel — per sq ft of added/renovated space
+    "addition":             {"residential": (90.00, 250.00),  "commercial": (100.00, 275.00)},
+    # ADU — detached or attached accessory dwelling unit, turnkey
+    "adu":                  {"residential": (150.00, 400.00), "commercial": (140.00, 350.00)},
+    # Commercial New Build — shell + tenant improvements per sq ft
+    "commercial_build":     {"residential": (100.00, 260.00), "commercial": (90.00, 240.00)},
 }
 
 _MOBILISATION_FLOOR_LOW  = 300.0   # minimum low-end job cost

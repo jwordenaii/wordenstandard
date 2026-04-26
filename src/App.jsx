@@ -17,6 +17,7 @@ const Reviews       = lazy(() => import('./pages/Reviews'))
 const NotFound      = lazy(() => import('./pages/NotFound'))
 const CommandCenter = lazy(() => import('./pages/CommandCenter'))
 const Projects      = lazy(() => import('./pages/Projects'))
+const Visualizer    = lazy(() => import('./pages/Visualizer'))
 
 // Service area pages
 const ServiceAreas  = lazy(() => import('./pages/ServiceAreas'))
@@ -69,6 +70,8 @@ export default function App() {
                 <Route path="/command-center" element={<CommandCenter />} />
                 {/* Projects / Portfolio */}
                 <Route path="/projects"      element={<Projects />} />
+                {/* 3-D Property Visualizer */}
+                <Route path="/visualizer"    element={<Visualizer />} />
                 {/* Advisory Board routes */}
                 <Route path="/advisory"                            element={<AdvisoryHub />} />
                 <Route path="/advisory/state/:stateCode"           element={<StateDetail />} />
