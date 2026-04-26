@@ -1,11 +1,18 @@
 /**
  * CommandCenter — JWordenAI proprietary operations dashboard.
  *
- * Two main panels:
- *  1. Permit Feed  — live Virginia VPT / DEQ permit leads
- *  2. Takeoff Tool — Google Maps + Solar API + OpenCV photo measurement
+ * Panels:
+ *  1. Permit Feed       — live Virginia VPT / DEQ permit leads
+ *  2. Takeoff Tool      — Google Maps + Solar API + OpenCV photo measurement
+ *  3. Analytics         — BI dashboard (leads, funnel, revenue forecast)
+ *  4. CRM Pipeline      — lead stage management
+ *  5. Weather           — 7-day paving suitability forecast
+ *  6. Material Prices   — EIA asphalt price index
+ *  7. Lien Calendar     — mechanics lien deadline tracker
+ *  8. Subcontractors    — insurance/bond compliance monitor
+ *  9. Market Intel      — competitor radar + market signals
  *
- * Mirrors the advisory page layout (brand-navy header, card grid).
+ * Mirrors the advisory page layout (brand-navy header, scrollable tab bar).
  * Access is intentionally unguarded on the frontend; protect via server
  * auth or deploy behind a private URL for production use.
  */
@@ -14,6 +21,13 @@ import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SchemaMarkup from '../components/SchemaMarkup'
 import PermitFeed from '../components/PermitFeed'
+import AnalyticsPanel from '../components/commandCenter/AnalyticsPanel'
+import CRMPanel from '../components/commandCenter/CRMPanel'
+import WeatherPanel from '../components/commandCenter/WeatherPanel'
+import MaterialsPanel from '../components/commandCenter/MaterialsPanel'
+import LienCalendarPanel from '../components/commandCenter/LienCalendarPanel'
+import SubcontractorPanel from '../components/commandCenter/SubcontractorPanel'
+import MarketIntelPanel from '../components/commandCenter/MarketIntelPanel'
 
 // Lazy-load TakeoffMap because @vis.gl/react-google-maps is a heavier dep
 const TakeoffMap = lazy(() => import('../components/TakeoffMap'))
@@ -48,6 +62,18 @@ const FEED_TABS = [
   { id: 'deq',  label: '💧 DEQ Permits',  source: 'deq', keyword: '' },
 ]
 
+const PANELS = [
+  { id: 'permits',       label: '📋 Permit Feed' },
+  { id: 'takeoff',       label: '📐 Takeoff Tool' },
+  { id: 'analytics',     label: '📊 Analytics' },
+  { id: 'crm',           label: '👥 CRM Pipeline' },
+  { id: 'weather',       label: '🌤 Weather' },
+  { id: 'materials',     label: '💰 Materials' },
+  { id: 'lien-calendar', label: '📅 Lien Calendar' },
+  { id: 'subcontractors',label: '🏗 Subs' },
+  { id: 'market-intel',  label: '🔍 Market Intel' },
+]
+
 export default function CommandCenter() {
   const [activePanel, setActivePanel] = useState('permits')
   const [activeFeed, setActiveFeed]   = useState('vpt')
@@ -59,7 +85,7 @@ export default function CommandCenter() {
     <>
       <SchemaMarkup
         title="JWordenAI Command Center"
-        description="Proprietary operations dashboard for J. Worden & Sons — live Virginia permit leads, area takeoffs, and 3D aerial visualization."
+        description="Proprietary operations dashboard for J. Worden & Sons — live Virginia permit leads, area takeoffs, analytics, CRM, weather, material prices, lien calendar, subcontractor monitor, and market intelligence."
         canonical="/command-center"
         breadcrumb={[
           { name: 'Home', path: '/' },
@@ -68,30 +94,29 @@ export default function CommandCenter() {
       />
 
       {/* ── Header ── */}
-      <div className="bg-brand-navy pt-32 pb-12 text-white">
+      <div className="bg-brand-navy pt-32 pb-10 text-white">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            <div>
-              <span className="inline-block bg-brand-amber/20 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
-                JWordenAI · Command Center
-              </span>
-              <h1 className="font-display font-black text-4xl md:text-5xl">
-                Operations{' '}
-                <span className="text-brand-amber">Dashboard</span>
-              </h1>
-              <p className="text-white/60 mt-2 max-w-xl">
-                Live Virginia permit leads, site takeoffs, and aerial visualization — all in one place.
-              </p>
-            </div>
+          <div className="mb-6">
+            <span className="inline-block bg-brand-amber/20 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
+              JWordenAI · Command Center
+            </span>
+            <h1 className="font-display font-black text-4xl md:text-5xl">
+              Operations{' '}
+              <span className="text-brand-amber">Dashboard</span>
+            </h1>
+            <p className="text-white/60 mt-2 max-w-xl">
+              Permit leads, site takeoffs, analytics, CRM, weather, material prices, lien deadlines, and market intelligence — all in one place.
+            </p>
+          </div>
 
-            {/* Panel switcher */}
-            <div className="flex gap-2 bg-white/10 p-1 rounded-full">
-              <TabButton active={activePanel === 'permits'} onClick={() => setActivePanel('permits')}>
-                📋 Permit Feed
-              </TabButton>
-              <TabButton active={activePanel === 'takeoff'} onClick={() => setActivePanel('takeoff')}>
-                📐 Takeoff Tool
-              </TabButton>
+          {/* Scrollable panel tab bar */}
+          <div className="overflow-x-auto pb-1">
+            <div className="flex gap-1 bg-white/10 p-1 rounded-2xl w-max">
+              {PANELS.map((p) => (
+                <TabButton key={p.id} active={activePanel === p.id} onClick={() => setActivePanel(p.id)}>
+                  {p.label}
+                </TabButton>
+              ))}
             </div>
           </div>
         </div>
@@ -221,6 +246,27 @@ export default function CommandCenter() {
             </div>
           </div>
         )}
+
+        {/* ── Analytics panel ── */}
+        {activePanel === 'analytics' && <AnalyticsPanel />}
+
+        {/* ── CRM Pipeline panel ── */}
+        {activePanel === 'crm' && <CRMPanel />}
+
+        {/* ── Weather panel ── */}
+        {activePanel === 'weather' && <WeatherPanel />}
+
+        {/* ── Material Prices panel ── */}
+        {activePanel === 'materials' && <MaterialsPanel />}
+
+        {/* ── Lien Calendar panel ── */}
+        {activePanel === 'lien-calendar' && <LienCalendarPanel />}
+
+        {/* ── Subcontractor Monitor panel ── */}
+        {activePanel === 'subcontractors' && <SubcontractorPanel />}
+
+        {/* ── Market Intelligence panel ── */}
+        {activePanel === 'market-intel' && <MarketIntelPanel />}
 
         {/* ── Bottom CTA ── */}
         <section className="mt-12 bg-brand-navy rounded-2xl p-8 text-center text-white">
