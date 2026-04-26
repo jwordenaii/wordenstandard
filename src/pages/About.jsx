@@ -179,10 +179,6 @@ const VALUES = [
   },
 ]
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } }),
-}
 
 export default function About() {
   return (
@@ -387,7 +383,7 @@ export default function About() {
               <h3 className="font-display font-bold text-xl text-brand-amber">The Founder</h3>
               <p className="text-white/50 text-sm mt-1">Est. 1984 · In Memoriam</p>
               <p className="text-white/70 text-sm mt-4 leading-relaxed">
-                Spent 30 years in roofing before founding J. Worden & Sons. Built the company\'s
+                Spent 30 years in roofing before founding J. Worden & Sons. Built the company&apos;s
                 reputation from Virginia Beach to Chester by doing the work right, every time.
                 Passed away in 2015. The standard he set has never been lowered.
               </p>
