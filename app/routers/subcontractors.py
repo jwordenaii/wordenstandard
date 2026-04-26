@@ -211,7 +211,7 @@ async def expiring_certs(
 # ── Performance history endpoints ─────────────────────────────────────────────
 
 class PerformanceCreate(BaseModel):
-    subcontractor_id: int
+    subcontractor_id: Optional[int] = None
     project_name: str
     scope: Optional[str] = None
     on_time: int = 1
