@@ -19,6 +19,8 @@ PostGIS spatial queries:
   columns + GIST indexes to project_sites and permit_leads.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import math
@@ -111,11 +113,11 @@ class TruckOut(BaseModel):
 
 def _haversine_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Return great-circle distance in miles between two WGS84 coordinates."""
-    EARTH_RADIUS_MILES = 3_958.8   # Earth radius in miles
+    R = 3_958.8   # Earth radius in miles
     dlat = math.radians(lat2 - lat1)
     dlng = math.radians(lng2 - lng1)
     a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng / 2) ** 2
-    return EARTH_RADIUS_MILES * 2 * math.asin(math.sqrt(a))
+    return R * 2 * math.asin(math.sqrt(a))
 
 
 # ── Project Sites ─────────────────────────────────────────────────────────────

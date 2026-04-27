@@ -61,161 +61,22 @@ export const api = {
   // in place if a block is missing (graceful degradation).
   getContent:     ()     => request('GET',  '/api/v1/content'),
   getContentBlock:(key)  => request('GET',  `/api/v1/content/${key}`),
-
-  // ── Analytics (Feature 10) ─────────────────────────────────────────
-  getAnalyticsDashboard: () => request('GET', '/api/v1/analytics/dashboard'),
-  getAnalyticsFunnel:    () => request('GET', '/api/v1/analytics/funnel'),
-  getRevenueForecast:    () => request('GET', '/api/v1/analytics/revenue-forecast'),
-  getMonthlyVolume:      () => request('GET', '/api/v1/analytics/monthly-volume'),
-
-  // ── CRM Pipeline (Feature 3) ───────────────────────────────────────
-  getCRMLeads:    (params = {}) => request('GET', `/api/v1/crm/leads${buildQS(params)}`),
-  updateLeadStage: (leadId, stage, closedReason) =>
-    request('PATCH', `/api/v1/crm/leads/${leadId}/stage`, { pipeline_stage: stage, closed_reason: closedReason }),
-  getCRMFunnel:   () => request('GET', '/api/v1/crm/funnel'),
-
-  // ── Weather (Feature 8) ────────────────────────────────────────────
-  getPavingForecast: (address) => request('POST', '/api/v1/weather/paving-forecast', { address }),
-  getStateWeatherRisk: (stateCode) => request('GET', `/api/v1/weather/risk/${stateCode}`),
-
-  // ── Material Prices (Feature 7) ────────────────────────────────────
-  getMaterialPrices: () => request('GET', '/api/v1/materials/price-index'),
-
-  // ── Lien Calendar (Feature 12) ─────────────────────────────────────
-  calculateLienDeadlines: (data) => request('POST', '/api/v1/liens/calculate', data),
-  trackLienProject:       (data) => request('POST', '/api/v1/liens/track',     data),
-  getUpcomingLiens:       (daysAhead = 30) => request('GET', `/api/v1/liens/upcoming?days_ahead=${daysAhead}`),
-  getLienEntries:         () => request('GET', '/api/v1/liens/entries'),
-
-  // ── Subcontractors (Feature 14) ────────────────────────────────────
-  getSubcontractors:    () => request('GET',  '/api/v1/subcontractors'),
-  getExpiringCerts:     (daysAhead = 30) => request('GET', `/api/v1/subcontractors/expiring?days_ahead=${daysAhead}`),
-  addSubcontractor:     (data) => request('POST',   '/api/v1/subcontractors',     data),
-  updateSubcontractor:  (id, data) => request('PUT', `/api/v1/subcontractors/${id}`, data),
-
-  // ── Market Intelligence (Feature 13) ───────────────────────────────
-  getCompetitors:     (location, service = 'asphalt paving') =>
-    request('GET', `/api/v1/market/competitors?location=${encodeURIComponent(location)}&service=${encodeURIComponent(service)}`),
-  getMarketSignals:   (stateCode) => request('GET', `/api/v1/market/signals/${stateCode}`),
-  getSeasonalDemand:  (stateCode) => request('GET', `/api/v1/market/seasonal/${stateCode}`),
-
-  // ── Proposals (Feature 1) ──────────────────────────────────────────
-  generateProposal: (leadId) => request('POST', `/api/v1/proposals/generate`, { lead_id: leadId }),
-  sendProposal:     (proposalId) => request('POST', `/api/v1/proposals/${proposalId}/send`),
-
-
-  // ── Payments (Stripe) ───────────────────────────────────────────────
-  createCheckoutSession: (leadId, success_url, cancel_url) => request('POST', '/api/v1/payments/checkout-session', { lead_id: leadId, success_url, cancel_url }),
-  getPaymentStatus:      (leadId) => request('GET', `/api/v1/payments/status/${leadId}`),
-  // ── Human Review Queue (Feature 5) ────────────────────────────────
-  listReviewQueue:   (params = {}) => request('GET', `/api/v1/review/queue${buildQS(params)}`),
-  getReviewStats:    () => request('GET', '/api/v1/review/stats'),
-  approveReviewItem: (id, correction) =>
-    request('POST', `/api/v1/review/queue/${id}/approve`, { correction: correction || null }),
-  rejectReviewItem:  (id, correction) =>
-    request('POST', `/api/v1/review/queue/${id}/reject`, { correction: correction || null }),
-
-  // ── Follow-Ups (Feature 4) ─────────────────────────────────────────
-  listFollowUps:  (params = {}) => request('GET', `/api/v1/followups${buildQS(params)}`),
-  cancelFollowUp: (taskId) => request('POST', `/api/v1/followups/${taskId}/cancel`),
-
-  // ── National Permits (Feature 6) ──────────────────────────────────
-  getNationalPermits: (states, keyword = 'asphalt', limit = 25) =>
-    request('GET', `/api/v1/permits/national?states=${encodeURIComponent(states)}&keyword=${encodeURIComponent(keyword)}&limit=${limit}`),
-
-  // ── Blog (Feature: blog & knowledge center) ────────────────────────
-  listBlogPosts:        (params = {}) => request('GET', `/api/v1/blog${buildQS(params)}`),
-  getBlogPost:          (slug) => request('GET', `/api/v1/blog/${slug}`),
-  generateBlogDraft:    (data) => request('POST', '/api/v1/blog/draft', data),
-  createBlogPost:       (data) => request('POST', '/api/v1/blog', data),
-  updateBlogPost:       (slug, data) => request('PUT', `/api/v1/blog/${slug}`, data),
-  publishBlogPost:      (slug) => request('POST', `/api/v1/blog/${slug}/publish`),
-
-  // ── Review AI Response ──────────────────────────────────────────────
-  generateReviewResponse: (data) => request('POST', '/api/v1/reviews/respond', data),
-
-  // ── SEO Generation ──────────────────────────────────────────────────
-  generateCityPageCopy: (data) => request('POST', '/api/v1/seo/city-page', data),
-  generateMetaTags:     (data) => request('POST', '/api/v1/seo/meta-tags', data),
-  generateFAQ:          (data) => request('POST', '/api/v1/seo/faq', data),
-
-  // Retrospectives (Module 1)
-  listRetrospectives:  (params = {}) => request('GET', `/api/v1/retrospectives${buildQS(params)}`),
-  createRetrospective: (data) => request('POST', '/api/v1/retrospectives', data),
-  updateRetrospective: (id, data) => request('PUT', `/api/v1/retrospectives/${id}`, data),
-  deleteRetrospective: (id) => request('DELETE', `/api/v1/retrospectives/${id}`),
-  tagRetrospective:    (id) => request('POST', `/api/v1/retrospectives/${id}/tag`),
-  surfaceLessons:      (params = {}) => request('GET', `/api/v1/retrospectives/surface${buildQS(params)}`),
-
-  // Safety (Module 2)
-  listToolboxTalks:  (params = {}) => request('GET', `/api/v1/safety/toolbox${buildQS(params)}`),
-  createToolboxTalk: (data) => request('POST', '/api/v1/safety/toolbox', data),
-  listIncidents:     (params = {}) => request('GET', `/api/v1/safety/incidents${buildQS(params)}`),
-  createIncident:    (data) => request('POST', '/api/v1/safety/incidents', data),
-  getOshaRate:       (params = {}) => request('GET', `/api/v1/safety/osha-rate${buildQS(params)}`),
-  getSafetyScores:   () => request('GET', '/api/v1/safety/scores'),
-
-  // Cash Flow (Module 3)
-  listCashFlowEntries: (params = {}) => request('GET', `/api/v1/cashflow/entries${buildQS(params)}`),
-  createCashFlowEntry: (data) => request('POST', '/api/v1/cashflow/entries', data),
-  deleteCashFlowEntry: (id) => request('DELETE', `/api/v1/cashflow/entries/${id}`),
-  getCashFlowForecast: () => request('GET', '/api/v1/cashflow/forecast'),
-  getCashFlowAlert:    () => request('GET', '/api/v1/cashflow/alert'),
-  setCashFlowAlert:    (data) => request('POST', '/api/v1/cashflow/alert', data),
-
-  // Project Metrics / Scorecard (Module 4)
-  listProjectMetrics:     () => request('GET', '/api/v1/project-metrics'),
-  createProjectMetric:    (data) => request('POST', '/api/v1/project-metrics', data),
-  updateProjectMetric:    (id, data) => request('PUT', `/api/v1/project-metrics/${id}`, data),
-  deleteProjectMetric:    (id) => request('DELETE', `/api/v1/project-metrics/${id}`),
-  getProjectMetricTrends: () => request('GET', '/api/v1/project-metrics/trends'),
-  generateCaseStudy:      (id) => request('POST', `/api/v1/project-metrics/${id}/case-study`),
-
-  // Workforce / Skills Matrix (Module 5)
-  listWorkforce:             (params = {}) => request('GET', `/api/v1/workforce${buildQS(params)}`),
-  addWorkforceMember:        (data) => request('POST', '/api/v1/workforce', data),
-  updateWorkforceMember:     (id, data) => request('PUT', `/api/v1/workforce/${id}`, data),
-  deleteWorkforceMember:     (id) => request('DELETE', `/api/v1/workforce/${id}`),
-  queryAvailableWorkforce:   (scope) => request('GET', `/api/v1/workforce/available${buildQS({ scope })}`),
-  getExpiringWorkforceCerts: (daysAhead = 90) => request('GET', `/api/v1/workforce/expiring-certs?days_ahead=${daysAhead}`),
-
-  // Subcontractor Performance (Module 6)
-  getSubcontractorPerformance: (subId) => request('GET', `/api/v1/subcontractors/${subId}/performance`),
-  addSubcontractorPerformance: (subId, data) => request('POST', `/api/v1/subcontractors/${subId}/performance`, data),
-  deleteSubcontractorPerf:     (perfId) => request('DELETE', `/api/v1/subcontractors/performance/${perfId}`),
-
-  // Bid Intelligence / Win-Rate (Module 7)
-  listBidOutcomes:   () => request('GET', '/api/v1/bid-intelligence/outcomes'),
-  recordBidOutcome:  (data) => request('POST', '/api/v1/bid-intelligence/outcomes', data),
-  updateBidOutcome:  (id, data) => request('PUT', `/api/v1/bid-intelligence/outcomes/${id}`, data),
-  deleteBidOutcome:  (id) => request('DELETE', `/api/v1/bid-intelligence/outcomes/${id}`),
-  getBidSummary:     () => request('GET', '/api/v1/bid-intelligence/summary'),
-  getBidWinAnalysis: () => request('GET', '/api/v1/bid-intelligence/win-analysis'),
-
-  // KPI Wall (Module 8)
-  getKPIWall: () => request('GET', '/api/v1/kpi-wall'),
-
-  // Innovations (Module 10)
-  listInnovations:   (params = {}) => request('GET', `/api/v1/innovations${buildQS(params)}`),
-  createInnovation:  (data) => request('POST', '/api/v1/innovations', data),
-  updateInnovation:  (id, data) => request('PUT', `/api/v1/innovations/${id}`, data),
-  deleteInnovation:  (id) => request('DELETE', `/api/v1/innovations/${id}`),
-  getAdoptedMethods: () => request('GET', '/api/v1/innovations/adopted'),
-
-  // ── 3-D Property Visualizer ────────────────────────────────────────────
-  scanParcel:            (data)  => request('POST', '/api/v1/visualizer/parcel',         data),
-  submitVisualProposal:  (data)  => request('POST', '/api/v1/visualizer/proposal',       data),
-  getAIDesignSuggestions:(data)  => request('POST', '/api/v1/visualizer/ai-suggestions', data),
-
-  // ── iGrade Engine ─────────────────────────────────────────────────────
-  getIGradeStats:         ()            => request('GET',    '/api/v1/igrade/stats'),
-  listGradeLogs:          (params = {}) => request('GET',    `/api/v1/igrade/logs${buildQS(params)}`),
-  runSelfCorrectionSweep: ()            => request('POST',   '/api/v1/igrade/sweep'),
-
-  // Media File Storage Registry
-  listMediaFiles:         (params = {}) => request('GET',    `/api/v1/igrade/media${buildQS(params)}`),
-  registerMediaFile:      (data)        => request('POST',   '/api/v1/igrade/media', data),
-  deleteMediaFile:        (id)          => request('DELETE', `/api/v1/igrade/media/${id}`),
+  // ── Geospatial ─────────────────────────────────────────────────────────────
+  getSites:       ()     => request('GET',  '/api/v1/geo/sites'),
+  createSite:     (data) => request('POST', '/api/v1/geo/sites',     data),
+  updateSite:     (id, data) => request('PUT', `/api/v1/geo/sites/${id}`, data),
+  getPermitLeads: (params = {}) => {
+    const q = new URLSearchParams(params).toString()
+    return request('GET', `/api/v1/geo/permit-leads${q ? '?' + q : ''}`)
+  },
+  triggerScrape:  (maxPages = 5) => request('POST', `/api/v1/geo/permit-leads/scrape?max_pages=${maxPages}`),
+  radiusQuery:    (lat, lng, miles = 20) => request('GET', `/api/v1/geo/radius-query?lat=${lat}&lng=${lng}&radius_miles=${miles}`),
+  getTrucks:      ()     => request('GET',  '/api/v1/geo/trucks'),
+  pingTruck:      (id, data) => request('POST', `/api/v1/geo/trucks/${id}`, data),
+  // ── Virtual Foreman ────────────────────────────────────────────────────────
+  askForeman:     (data) => request('POST', '/api/v1/foreman/chat',  data),
+  getForemanStatus: ()   => request('GET',  '/api/v1/foreman/status'),
+  getVisionResult: (jobId) => request('GET', `/api/v1/ai/vision-result/${jobId}`),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

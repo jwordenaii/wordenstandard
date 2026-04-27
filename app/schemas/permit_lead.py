@@ -13,6 +13,8 @@ Schema design notes:
   - The ``raw_json`` field preserves the original source payload for auditing.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Literal, Optional
 

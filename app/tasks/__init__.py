@@ -1,1 +1,1 @@
-"""Background task modules for JWordenAI Celery workers."""
+"""Celery tasks package for JWordenAI."""

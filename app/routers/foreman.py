@@ -21,6 +21,8 @@ WebSocket dashboard:
   For multi-worker setups, use Redis Pub/Sub as the broadcast backend.
 """
 
+from __future__ import annotations
+
 import asyncio
 import base64
 import json
@@ -28,7 +30,7 @@ import logging
 import os
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, Set
+from typing import Set
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
@@ -135,7 +137,7 @@ When answering about specific sites or leads, be precise and data-driven. When a
 
 class ForemanChatRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=1500, strip_whitespace=True)
-    context: Optional[str] = Field(default=None, max_length=500, description="Optional context hint, e.g. 'site_id:42' or 'truck_id:T-01'")
+    context: str | None = Field(default=None, max_length=500, description="Optional context hint, e.g. 'site_id:42' or 'truck_id:T-01'")
 
 
 class ForemanChatResponse(BaseModel):
@@ -185,7 +187,7 @@ def _stub_foreman_chat(question: str) -> str:
     )
 
 
-def _rag_foreman_chat(question: str, context: Optional[str]) -> tuple[str, list[str]]:
+def _rag_foreman_chat(question: str, context: str | None) -> tuple[str, list[str]]:
     """
     LangChain RAG-powered Virtual Foreman chat.
 
@@ -209,6 +211,8 @@ def _rag_foreman_chat(question: str, context: Optional[str]) -> tuple[str, list[
             return _stub_foreman_chat(question), []
 
         # Build in-memory Chroma store from seed documents
+        # In production, persist the store to disk or pgvector and index
+        # project documents, permit history, and site notes via the admin panel.
         _seed_docs = [
             Document(
                 page_content=(
@@ -375,7 +379,7 @@ _MAX_IMAGE_BYTES = 20 * 1024 * 1024   # 20 MB
 )
 async def vision_measure(
     file: UploadFile = File(...),
-    site_id: Optional[int] = None,
+    site_id: int | None = None,
 ):
     """
     Upload a project photo and enqueue it for AI lot-measurement inference.

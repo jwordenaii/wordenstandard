@@ -36,6 +36,9 @@ const CategoryHub          = lazy(() => import('./pages/advisory/CategoryHub'))
 const LegalStrategyAdvisor = lazy(() => import('./pages/advisory/LegalStrategyAdvisor'))
 const ContractorRanker     = lazy(() => import('./pages/advisory/ContractorRanker'))
 
+// Command Center — lazy-loaded (pulls Leaflet + TF.js only when visited)
+const CommandCenter = lazy(() => import('./pages/CommandCenter'))
+
 function PageLoader() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-brand-navy">
@@ -81,7 +84,9 @@ export default function App() {
                 <Route path="/advisory/contractor-ranker"          element={<ContractorRanker />} />
                 {/* Generic category hub — handles licensing, construction-law, safety, etc. */}
                 <Route path="/advisory/:category"                  element={<CategoryHub />} />
-                <Route path="*"              element={<NotFound />} />
+                {/* Command Center — 4D Virtual Foreman */}
+                <Route path="/command-center"                      element={<CommandCenter />} />
+                <Route path="*"         element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>
