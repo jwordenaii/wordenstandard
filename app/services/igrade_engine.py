@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 
 _GRADE_A_KEYWORDS = {
     # Legal / compliance
-    "lien", "license", "licens", "permit", "osha", "prevailing wage", "bond",
+    "lien", "license", "permit", "osha", "prevailing wage", "bond",
     "insurance", "compliance", "dot", "regulation", "statute", "code",
     # High-complexity project types
     "qsr", "franchise", "kfc", "arby", "taco bell", "multi-state", "federal",
@@ -309,7 +309,7 @@ def run_self_correction_sweep(db=None) -> dict:
                 type_word_freq[dtype] = {}
             words = c.input_pattern.lower().split()
             for w in words:
-                if len(w) > 3:  # skip stop words
+                if len(w) > 3:  # skip very short words (articles, prepositions)
                     type_word_freq[dtype][w] = type_word_freq[dtype].get(w, 0) + 1
 
         suggestions = []
@@ -329,12 +329,12 @@ def run_self_correction_sweep(db=None) -> dict:
                         ),
                     })
 
-        # Also check high-correction-rate grades from GradeLog
-        grade_rows = db.query(GradeLog).filter(GradeLog.was_corrected == 1).all()
-        for row in grade_rows:
-            db.query(GradeLog).filter(
-                GradeLog.id == row.id
-            ).update({"correction_applied": 1})
+        # Also check high-correction-rate grades from GradeLog and mark them as
+        # having had a correction applied in this sweep (single bulk update).
+        db.query(GradeLog).filter(
+            GradeLog.was_corrected == 1,
+            GradeLog.correction_applied == 0,
+        ).update({"correction_applied": 1}, synchronize_session=False)
         db.commit()
 
         summary_parts = [f"Sweep complete. Analyzed {len(corrections)} correction records."]

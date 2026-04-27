@@ -78,11 +78,10 @@ export default function IGradePanel() {
     e.preventDefault()
     setSavingMedia(true)
     try {
-      await api.registerMediaFile(mediaForm)
+      const created = await api.registerMediaFile(mediaForm)
+      setMediaFiles((prev) => [created, ...prev])
       setMediaForm(BLANK_MEDIA)
       setShowAddMedia(false)
-      const m = await api.listMediaFiles({ limit: 50 })
-      setMediaFiles(m.files || [])
     } catch (err) { setError(err.message) } finally { setSavingMedia(false) }
   }
 
@@ -467,8 +466,8 @@ export default function IGradePanel() {
                         <td className="py-2.5 pr-3 text-xs text-brand-navy/60 hidden sm:table-cell">{f.project_name || '—'}</td>
                         <td className="py-2.5 pr-3 text-xs text-brand-navy/40 hidden md:table-cell">{f.storage_provider || 'local'}</td>
                         <td className="py-2.5 pr-3 text-xs text-brand-navy/40 hidden md:table-cell">
-                          {f.tags ? f.tags.split(',').slice(0, 3).map((t) => (
-                            <span key={t} className="inline-block bg-gray-100 rounded px-1.5 mr-1">{t.trim()}</span>
+                          {f.tags ? f.tags.split(',').slice(0, 3).map((t, idx) => (
+                            <span key={`${t.trim()}-${idx}`} className="inline-block bg-gray-100 rounded px-1.5 mr-1">{t.trim()}</span>
                           )) : '—'}
                         </td>
                         <td className="py-2.5">
