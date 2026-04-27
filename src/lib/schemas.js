@@ -12,7 +12,7 @@ import { SAME_AS_URLS } from './social'
 import STATES, { WORDEN_ACTIVE_STATES } from './states50'
 
 export const SITE_URL =
-  import.meta.env.VITE_SITE_URL || 'https://jworden.netlify.app'
+  import.meta.env.VITE_SITE_URL || 'https://www.jwordenasphaltpaving.com'
 
 // National area served — all 50 states + DC via Schema.org State objects.
 // Google uses this to understand the contractor's service geography.
@@ -36,17 +36,21 @@ export const LOCAL_BUSINESS_SCHEMA = {
     'Family-owned asphalt paving contractor est. 1984. KFC national QSR new-build and remodel program across 12+ states. ' +
     'Pavement Magazine Top 75 (4 categories). Best of Houzz. 2026 Top Contractor Nominee.',
   foundingDate: '1984',
-  sameAs: SAME_AS_URLS,
-  telephone: '+18044461296',
-  email: 'contact@jwordenasphaltpaving.com',
+  telephone: '+1-804-446-1296',
+  email: 'contact@jworden.com',
   url: SITE_URL,
   logo: `${SITE_URL}/logo.png`,
+  sameAs: [
+    'https://www.facebook.com/jwordenpaving/',
+    'https://www.linkedin.com/showcase/j.-worden-%26-sons-paving-l.l.c./',
+    'https://nextdoor.com/pages/nashville-asphalt-paving-pros-chester-va/photos/',
+    'https://www.alignable.com/chester-va/j-worden-sons-paving',
+    'https://www.houzz.com/professionals/stone-pavers-and-concrete/j-worden-and-sons-paving-l-l-c-pfvwus-pf~663227484',
+  ],
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '1601 Ware Bottom Springs Rd Suite 214',
     addressLocality: 'Chester',
     addressRegion: 'VA',
-    postalCode: '23836',
     addressCountry: 'US',
   },
   geo: {
