@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { SITE_URL } from '../lib/schemas'
 
 // Re-export schema helpers so existing page imports still work via this path.
@@ -51,7 +51,8 @@ export default function SchemaMarkup({
   }
 
   return (
-    <Helmet>
+    <HelmetProvider>
+      <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
@@ -77,6 +78,7 @@ export default function SchemaMarkup({
           {JSON.stringify(s)}
         </script>
       ))}
-    </Helmet>
+      </Helmet>
+    </HelmetProvider>
   )
 }
