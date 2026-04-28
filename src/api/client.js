@@ -9,14 +9,12 @@
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
 const DEFAULT_TIMEOUT_MS = 10_000
-const MASTER_KEY = import.meta.env.VITE_MASTER_API_KEY || ''
 
 async function request(method, path, body) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
 
   const headers = { 'Content-Type': 'application/json' }
-  if (MASTER_KEY) headers.Authorization = `Bearer ${MASTER_KEY}`
 
   const opts = {
     method,
@@ -66,8 +64,7 @@ export const api = {
   createSite:     (data) => request('POST', '/api/v1/geo/sites',     data),
   updateSite:     (id, data) => request('PUT', `/api/v1/geo/sites/${id}`, data),
   getPermitLeads: (params = {}) => {
-    const q = new URLSearchParams(params).toString()
-    return request('GET', `/api/v1/geo/permit-leads${q ? '?' + q : ''}`)
+    return request('GET', `/api/v1/geo/permit-leads${buildQS(params)}`)
   },
   triggerScrape:  (maxPages = 5) => request('POST', `/api/v1/geo/permit-leads/scrape?max_pages=${maxPages}`),
   radiusQuery:    (lat, lng, miles = 20) => request('GET', `/api/v1/geo/radius-query?lat=${lat}&lng=${lng}&radius_miles=${miles}`),
