@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
@@ -48,9 +49,11 @@ _DEFAULT_RADIUS_MILES = 20.0
 # ── Pydantic request/response models ─────────────────────────────────────────
 
 class ProjectSiteIn(BaseModel):
-    name: str = Field(..., min_length=1, max_length=200, strip_whitespace=True)
-    address: Optional[str] = Field(default=None, max_length=300, strip_whitespace=True)
-    city: Optional[str] = Field(default=None, max_length=100, strip_whitespace=True)
+    model_config = {"str_strip_whitespace": True}
+
+    name: str = Field(..., min_length=1, max_length=200)
+    address: Optional[str] = Field(default=None, max_length=300)
+    city: Optional[str] = Field(default=None, max_length=100)
     state: Optional[str] = Field(default="VA", max_length=2)
     status: str = Field(default="active", max_length=30)
     service_type: Optional[str] = Field(default=None, max_length=60)
@@ -85,12 +88,18 @@ class ProjectSiteOut(BaseModel):
 
 
 class TruckPingIn(BaseModel):
-    driver_name: Optional[str] = Field(default=None, max_length=120, strip_whitespace=True)
+    model_config = {"str_strip_whitespace": True}
+
+    driver_name: Optional[str] = Field(default=None, max_length=120)
     lat: float = Field(..., ge=-90, le=90)
     lng: float = Field(..., ge=-180, le=180)
     speed_mph: Optional[float] = Field(default=None, ge=0, le=200)
     heading_deg: Optional[float] = Field(default=None, ge=0, le=360)
     asphalt_temp_f: Optional[float] = Field(default=None, ge=0, le=600)
+    mix_type: Optional[str] = Field(default=None, max_length=60, description="HMA/WMA mix or job mix formula label")
+    plant_departed_at: Optional[str] = Field(default=None, max_length=40, description="ISO timestamp when the load left the plant")
+    target_delivery_temp_f: Optional[float] = Field(default=None, ge=0, le=600)
+    estimated_arrival_minutes: Optional[float] = Field(default=None, ge=0, le=24 * 60)
     status: Optional[str] = Field(default="en_route", max_length=30)
     site_id: Optional[int] = None
 
@@ -105,8 +114,13 @@ class TruckOut(BaseModel):
     speed_mph: Optional[float]
     heading_deg: Optional[float]
     asphalt_temp_f: Optional[float]
+    mix_type: Optional[str]
+    plant_departed_at: Optional[datetime]
+    target_delivery_temp_f: Optional[float]
+    estimated_arrival_minutes: Optional[float]
     status: Optional[str]
     site_id: Optional[int]
+    updated_at: Optional[datetime] = None
 
 
 # ── Helper: Haversine distance (miles) ───────────────────────────────────────
@@ -118,6 +132,21 @@ def _haversine_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> floa
     dlng = math.radians(lng2 - lng1)
     a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng / 2) ** 2
     return R * 2 * math.asin(math.sqrt(a))
+
+
+def _parse_optional_dt(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid datetime: {value}. Use ISO 8601 format, e.g. 2026-04-28T21:30:00Z.",
+        ) from exc
 
 
 # ── Project Sites ─────────────────────────────────────────────────────────────
@@ -324,11 +353,14 @@ def upsert_truck(
     db: Session = Depends(get_db),
 ):
     truck = db.query(TruckPosition).filter(TruckPosition.truck_id == truck_id).first()
+    data = ping.model_dump(exclude_unset=True)
+    if "plant_departed_at" in data:
+        data["plant_departed_at"] = _parse_optional_dt(data["plant_departed_at"])
     if truck:
-        for field, value in ping.model_dump(exclude_unset=True).items():
+        for field, value in data.items():
             setattr(truck, field, value)
     else:
-        truck = TruckPosition(truck_id=truck_id, **ping.model_dump())
+        truck = TruckPosition(truck_id=truck_id, **data)
         db.add(truck)
 
     db.commit()

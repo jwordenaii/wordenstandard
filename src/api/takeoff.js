@@ -7,7 +7,7 @@
  */
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
-const DEFAULT_TIMEOUT_MS = 30_000  // image processing can take a moment
+const DEFAULT_TIMEOUT_MS = 30_000 // image processing can take a moment
 
 async function request(method, path, body, isFormData = false) {
   const controller = new AbortController()
@@ -66,4 +66,28 @@ export function measureImage(file, pixelsPerFoot = 10, minAreaSqft = 10) {
 export function getAerialView(address) {
   const params = new URLSearchParams({ address })
   return request('GET', `/api/v1/takeoff/aerial?${params}`)
+}
+
+/**
+ * Analyze 811 + civil-tech utility locating data before digging.
+ * @param {object} payload
+ */
+export function analyzeGroundScan(payload) {
+  return request('POST', '/api/v1/takeoff/ground-scan', payload)
+}
+
+/**
+ * Simulate pavement age decay for roads, parking lots, and driveways.
+ * @param {object} payload
+ */
+export function simulatePavementDecay(payload) {
+  return request('POST', '/api/v1/takeoff/pavement-decay', payload)
+}
+
+/**
+ * Run the seven-module premium civil-tech stack.
+ * @param {object} payload
+ */
+export function runPremiumCivilStack(payload) {
+  return request('POST', '/api/v1/takeoff/premium-civil-stack', payload)
 }

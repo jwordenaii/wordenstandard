@@ -13,6 +13,7 @@
 import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-draw'
 import 'leaflet-draw/dist/leaflet.draw.css'
 
 // Fix default marker icon paths broken by Vite/webpack bundling
@@ -76,13 +77,17 @@ function polygonPerimeterFt(latlngs) {
 export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSaved }) {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
-  const [drawing, setDrawing] = useState(null)     // { area_sqft, perimeter_ft, geojson }
+  const [drawing, setDrawing] = useState(null) // { area_sqft, perimeter_ft, geojson }
   const [saving, setSaving] = useState(false)
   const [saveName, setSaveName] = useState('')
   const [saveMsg, setSaveMsg] = useState(null)
 
   useEffect(() => {
-    if (mapInstanceRef.current) return  // Already initialised
+    if (mapInstanceRef.current) return // Already initialised
+    if (!mapRef.current) return
+    if (mapRef.current._leaflet_id) {
+      delete mapRef.current._leaflet_id
+    }
 
     const map = L.map(mapRef.current, {
       center: RICHMOND,
@@ -91,10 +96,10 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
     })
 
     // ── Tile layers ──────────────────────────────────────────────────────────
-    const streets = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      { attribution: '© OpenStreetMap contributors', maxZoom: 19 }
-    )
+    const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    })
     const satellite = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       { attribution: 'Tiles © Esri — Source: Esri, USGS', maxZoom: 19 }
@@ -102,11 +107,9 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
 
     satellite.addTo(map)
 
-    L.control.layers(
-      { 'Satellite': satellite, 'Street Map': streets },
-      {},
-      { position: 'topright' }
-    ).addTo(map)
+    L.control
+      .layers({ Satellite: satellite, 'Street Map': streets }, {}, { position: 'topright' })
+      .addTo(map)
 
     // ── Service radius ────────────────────────────────────────────────────────
     L.circle(RICHMOND, {
@@ -120,9 +123,7 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
       .addTo(map)
 
     // HQ marker
-    L.marker(RICHMOND)
-      .bindPopup('<b>J. Worden &amp; Sons HQ</b><br>Chester, VA')
-      .addTo(map)
+    L.marker(RICHMOND).bindPopup('<b>J. Worden &amp; Sons HQ</b><br>Chester, VA').addTo(map)
 
     // ── Site markers ─────────────────────────────────────────────────────────
     sites.forEach((site) => {
@@ -137,9 +138,9 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
       L.marker([site.lat, site.lng], { icon })
         .bindPopup(
           `<b>${site.name}</b><br>` +
-          `${site.address || ''}<br>` +
-          `Status: <b>${site.status}</b><br>` +
-          (site.area_sqft ? `Area: <b>${site.area_sqft.toLocaleString()} sqft</b>` : '')
+            `${site.address || ''}<br>` +
+            `Status: <b>${site.status}</b><br>` +
+            (site.area_sqft ? `Area: <b>${site.area_sqft.toLocaleString()} sqft</b>` : '')
         )
         .addTo(map)
     })
@@ -157,9 +158,9 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
       L.marker([lead.lat, lead.lng], { icon })
         .bindPopup(
           `<b>${lead.permit_type}</b><br>` +
-          `${lead.address}<br>` +
-          `Priority: <b>${lead.priority_label}</b><br>` +
-          (lead.distance_miles != null ? `Distance: <b>${lead.distance_miles} mi</b>` : '')
+            `${lead.address}<br>` +
+            `Priority: <b>${lead.priority_label}</b><br>` +
+            (lead.distance_miles != null ? `Distance: <b>${lead.distance_miles} mi</b>` : '')
         )
         .addTo(map)
     })
@@ -168,25 +169,27 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
     const drawnItems = new L.FeatureGroup()
     map.addLayer(drawnItems)
 
-    const drawControl = new L.Control.Draw({
-      edit: { featureGroup: drawnItems, remove: true },
-      draw: {
-        polygon: {
-          allowIntersection: false,
-          showArea: true,
-          shapeOptions: { color: '#f5a623', weight: 2 },
+    if (L.Control.Draw) {
+      const drawControl = new L.Control.Draw({
+        edit: { featureGroup: drawnItems, remove: true },
+        draw: {
+          polygon: {
+            allowIntersection: false,
+            showArea: true,
+            shapeOptions: { color: '#f5a623', weight: 2 },
+          },
+          rectangle: {
+            shapeOptions: { color: '#f5a623', weight: 2 },
+          },
+          // Disable tools we don't need
+          polyline: false,
+          circle: false,
+          circlemarker: false,
+          marker: false,
         },
-        rectangle: {
-          shapeOptions: { color: '#f5a623', weight: 2 },
-        },
-        // Disable tools we don't need
-        polyline: false,
-        circle: false,
-        circlemarker: false,
-        marker: false,
-      },
-    })
-    map.addControl(drawControl)
+      })
+      map.addControl(drawControl)
+    }
 
     map.on(L.Draw.Event.CREATED, (e) => {
       drawnItems.clearLayers()
@@ -206,7 +209,7 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
       map.remove()
       mapInstanceRef.current = null
     }
-  }, [])   // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSavePolygon = async () => {
     if (!drawing || !saveName.trim()) return
@@ -251,12 +254,16 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
       {/* Draw measurement panel */}
       {drawing && (
         <div className="bg-brand-navy/80 border border-brand-amber/30 rounded-xl p-4 space-y-3">
-          <h3 className="text-brand-amber font-bold text-sm uppercase tracking-wide">📐 Polygon Measurement</h3>
+          <h3 className="text-brand-amber font-bold text-sm uppercase tracking-wide">
+            📐 Polygon Measurement
+          </h3>
           <div className="grid grid-cols-3 gap-4 text-white/80 text-sm">
             <div>
               <div className="text-xs text-white/40 mb-0.5">Area</div>
               <div className="font-bold text-white">{drawing.area_sqft.toLocaleString()} sqft</div>
-              <div className="text-xs text-white/40">{(drawing.area_sqft / 43_560).toFixed(3)} acres</div>
+              <div className="text-xs text-white/40">
+                {(drawing.area_sqft / 43_560).toFixed(3)} acres
+              </div>
             </div>
             <div>
               <div className="text-xs text-white/40 mb-0.5">Perimeter</div>
@@ -265,7 +272,7 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
             <div>
               <div className="text-xs text-white/40 mb-0.5">Est. Material</div>
               <div className="font-bold text-white">
-                {Math.ceil(drawing.area_sqft * 0.08 / 2000).toLocaleString()} tons
+                {Math.ceil((drawing.area_sqft * 0.08) / 2000).toLocaleString()} tons
               </div>
               <div className="text-xs text-white/40">@ 2&quot; HMA</div>
             </div>
@@ -289,7 +296,9 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
           </div>
 
           {saveMsg && (
-            <p className={`text-xs ${saveMsg.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+            <p
+              className={`text-xs ${saveMsg.type === 'success' ? 'text-green-400' : 'text-red-400'}`}
+            >
               {saveMsg.text}
             </p>
           )}
