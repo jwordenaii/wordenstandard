@@ -51,9 +51,13 @@ export default function Navbar() {
             className="flex items-center gap-2 group"
             aria-label="J. Worden & Sons — Home"
           >
-            <div className="w-8 h-8 bg-brand-amber rounded-md flex items-center justify-center font-display font-black text-brand-navy text-sm">
-              JW
-            </div>
+            <img
+              src="/logo.svg"
+              alt="J. Worden & Sons logo"
+              width="32"
+              height="32"
+              className="w-8 h-8 rounded-md"
+            />
             <span className="font-display font-black text-white text-lg leading-tight">
               J. Worden <span className="text-brand-amber">&amp; Sons</span>
             </span>
