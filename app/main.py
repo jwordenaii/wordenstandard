@@ -211,8 +211,7 @@ from .routers import metrics as metrics_router
 from .routers import gallery as gallery_router
 from .routers import chat as chat_router
 from .routers import email as email_router
-from .routers import monitoring as monitoring_router
-from .routers import search as search_router
+from .routers import admin_2fa as admin_2fa_router
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
 
@@ -418,8 +417,8 @@ app.include_router(chat_router.router)
 # Email management (SendGrid transactional + follow-up)
 app.include_router(email_router.router)
 
-# Full-text search (Elasticsearch)
-app.include_router(search_router.router)
+# Admin 2FA (TOTP setup, verify, disable, status)
+app.include_router(admin_2fa_router.router)
 
 
 # ── Socket.IO ASGI mount ──────────────────────────────────────────────────────
