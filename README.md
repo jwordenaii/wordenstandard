@@ -62,7 +62,36 @@ alembic stamp bc2d5f75bee4
 
 Set `AUTO_CREATE_TABLES=false` in production.
 
-## Payments (Stripe)
+## Command Center — Security Notes
+
+The `/command-center` route is an internal operations dashboard.
+
+### Client-side PIN gate (`VITE_CC_PASSWORD`)
+
+Setting `VITE_CC_PASSWORD` in Netlify environment variables enables a PIN gate on
+the `/command-center` page.  **This is a convenience deterrent only — it is NOT
+real security.**  `VITE_` variables are compiled into the browser JavaScript bundle
+and are visible to anyone who inspects the page source or network traffic.
+
+- When `VITE_CC_PASSWORD` is **not set or empty**, the page displays a "Not
+  Available" notice and **never auto-unlocks** — content stays hidden.
+- When `VITE_CC_PASSWORD` **is set**, users must enter the correct PIN before
+  content is shown.
+
+### Recommended edge-level protection (production)
+
+For genuine access control, add one of the following:
+
+| Option | Description | Cost |
+|---|---|---|
+| **Netlify Password Protection** | Site-wide gate at the CDN edge (Site Settings → Access control) | Pro plan |
+| **Netlify Edge Function** | Custom auth for `/command-center` only; reads a `COMMAND_CENTER_SECRET` env var | Free tier |
+| **Netlify Identity** | Full user/password management | Free tier (limited) |
+
+See the `netlify.toml` file for commented-out Edge Function scaffolding.
+
+Do NOT store sensitive business data in frontend state — assume a determined user
+can always bypass the client-side gate.
 
 - Backend checkout session endpoint: `POST /api/v1/payments/checkout-session`
 - Backend webhook endpoint: `POST /api/v1/payments/webhook`
