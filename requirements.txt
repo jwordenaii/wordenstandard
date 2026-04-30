@@ -26,6 +26,9 @@ qrcode==7.4.2
 #   pip install geoalchemy2==0.15.2
 # geoalchemy2==0.15.2   # uncomment for production PostGIS support
 
+# ── Vector search: Pinecone ───────────────────────────────────────────────────
+pinecone-client==3.2.0
+
 # ── Background tasks: Celery + Redis ────────────────────────────────────────
 celery[redis]==5.4.0
 redis==5.2.1
