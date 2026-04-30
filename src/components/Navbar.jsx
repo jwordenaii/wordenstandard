@@ -53,7 +53,8 @@ export default function Navbar() {
           >
             <img
               src="/logo.svg"
-              alt="J. Worden & Sons logo"
+              alt=""
+              aria-hidden="true"
               width="32"
               height="32"
               className="w-8 h-8 rounded-md"

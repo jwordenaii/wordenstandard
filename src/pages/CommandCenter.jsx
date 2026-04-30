@@ -2,7 +2,14 @@ import { lazy, Suspense, useState, useCallback } from 'react'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 
-const CC_PASSWORD = import.meta.env.VITE_CC_PASSWORD || ''
+// ⚠️  SECURITY NOTE — client-side PIN is NOT real access control.
+// VITE_ variables are bundled into the browser JavaScript bundle and are
+// visible to anyone who inspects the page source or network requests.
+// This PIN gate is a convenience deterrent only.
+// For genuine protection, enable Netlify Password Protection (Pro plan) or
+// deploy a Netlify Edge Function that validates a secret before serving the page.
+// See the "Command Center — Edge Protection" section in netlify.toml for guidance.
+const CC_PASSWORD = import.meta.env.VITE_CC_PASSWORD
 
 const TABS = [
   { id: 'richmond-grid', label: 'Richmond Grid' },
@@ -59,9 +66,29 @@ function PinGate({ onUnlock }) {
   )
 }
 
+function DisabledNotice() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+        <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-white/40 text-2xl mx-auto mb-6">
+          🚫
+        </div>
+        <h2 className="font-display font-bold text-xl text-white mb-2">Not Available</h2>
+        <p className="text-white/50 text-sm">
+          Command Center is not configured in this environment.
+          <br />
+          Set <code className="bg-white/10 px-1 rounded text-xs">VITE_CC_PASSWORD</code> to enable access.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export default function CommandCenter() {
   const [activeTab, setActiveTab] = useState('richmond-grid')
-  const [unlocked, setUnlocked] = useState(!CC_PASSWORD)
+  // Never auto-unlock — require an explicit PIN entry every session.
+  // When CC_PASSWORD is not configured the body renders DisabledNotice instead.
+  const [unlocked, setUnlocked] = useState(false)
 
   const handleUnlock = useCallback(() => setUnlocked(true), [])
 
@@ -103,7 +130,9 @@ export default function CommandCenter() {
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
-        {!unlocked ? (
+        {!CC_PASSWORD ? (
+          <DisabledNotice />
+        ) : !unlocked ? (
           <PinGate onUnlock={handleUnlock} />
         ) : (
           <>

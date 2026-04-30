@@ -1,3 +1,28 @@
+# ── Command Center — Edge Protection ───────────────────────────────────────
+# VITE_CC_PASSWORD is a client-side convenience deterrent only (see CommandCenter.jsx).
+# For genuine access control, add one of these layers:
+#
+# Option A — Netlify Password Protection (Pro plan, site-wide):
+#   Enable in Site Settings → Access control → Password protection.
+#   No toml changes required; all routes are protected at the CDN edge.
+#
+# Option B — Netlify Edge Functions (granular, free tier):
+#   Create netlify/edge-functions/command-center-auth.ts to intercept requests
+#   to /command-center, read a COMMAND_CENTER_SECRET environment variable, and
+#   validate a cookie or header before forwarding to the SPA.
+#   Declare the edge function below (currently disabled — uncomment to activate):
+#
+# [[edge_functions]]
+#   path = "/command-center"
+#   function = "command-center-auth"
+#
+# Option C — Block via HTTP Basic Auth (Netlify Enterprise / Netlify Identity):
+#   Use Netlify Identity to require authentication on the whole site or specific paths.
+#
+# Until one of the above is enabled, /command-center is protected only by the
+# client-side PIN gate (VITE_CC_PASSWORD). Do NOT store sensitive operations data
+# in the frontend when relying solely on this gate.
+
 [build]
   command = "npm run build"
   publish = "dist"
