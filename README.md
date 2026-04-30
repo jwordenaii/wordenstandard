@@ -93,8 +93,6 @@ See the `netlify.toml` file for commented-out Edge Function scaffolding.
 Do NOT store sensitive business data in frontend state — assume a determined user
 can always bypass the client-side gate.
 
-
-
 - Backend checkout session endpoint: `POST /api/v1/payments/checkout-session`
 - Backend webhook endpoint: `POST /api/v1/payments/webhook`
 - Lead payment status endpoint: `GET /api/v1/payments/status/{lead_id}`
