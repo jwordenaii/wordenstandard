@@ -214,10 +214,14 @@ from .routers import customers as customers_router
 from .routers import auth as auth_router
 from .routers import health as health_router
 from .routers import metrics as metrics_router
+from .routers import monitoring as monitoring_router
 from .routers import gallery as gallery_router
 from .routers import chat as chat_router
 from .routers import email as email_router
 from .routers import math_ai as math_ai_router
+from .routers import admin_2fa as admin_2fa_router
+from .routers import human_review as human_review_router
+from .routers import search as search_router
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
 
@@ -428,6 +432,14 @@ app.include_router(email_router.router)
 # Mathematical AI (pavement scoring, cost estimation, lead quality, maintenance)
 app.include_router(math_ai_router.router)
 
+# Admin 2FA (TOTP enrollment, verify, disable, status)
+app.include_router(admin_2fa_router.router)
+
+# Human-in-the-loop review queue
+app.include_router(human_review_router.router)
+
+# Full-text search (Elasticsearch-backed)
+app.include_router(search_router.router)
 
 # ── Socket.IO ASGI mount ──────────────────────────────────────────────────────
 # Mount the Socket.IO server at /sio so it doesn't conflict with FastAPI routes.

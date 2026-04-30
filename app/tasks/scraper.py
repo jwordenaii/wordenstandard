@@ -56,11 +56,24 @@ def scrape_and_persist(max_pages: int = 5) -> dict:
     """
     Run the Virginia LIS scrape, validate each row, and upsert to the DB.
     Returns a summary dict with counts of persisted / skipped records.
+
+    The current scrape implementation is a stub that returns synthetic
+    rows. To prevent fake permit leads from polluting production data,
+    the stub only runs when ``ENABLE_LIS_SCRAPER_STUB`` is truthy. Once a
+    real scraper is wired in ``_stub_scrape``'s place, this gate can be
+    removed.
     """
     from ..database import SessionLocal
     from ..models import PermitLead
     from ..schemas.permit_lead import PermitLeadIn
     from pydantic import ValidationError
+
+    if os.getenv("ENABLE_LIS_SCRAPER_STUB", "").strip().lower() not in ("1", "true", "yes", "on"):
+        logger.info(
+            "Virginia LIS scraper stub disabled (ENABLE_LIS_SCRAPER_STUB not set); "
+            "skipping run to avoid injecting synthetic permit leads."
+        )
+        return {"persisted": 0, "skipped": 0, "skipped_reason": "stub_disabled"}
 
     rows = _stub_scrape(max_pages)
     persisted = 0

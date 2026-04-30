@@ -81,8 +81,20 @@ _STUB_REVIEWS = [
 
 @router.get("", summary="Get reviews with aggregate rating")
 def get_reviews():
+    import os  # noqa: PLC0415
+
     ratings = [r["rating"] for r in _STUB_REVIEWS]
     average = round(sum(ratings) / len(ratings), 1) if ratings else 0.0
+
+    # Surface the stub vs. live status so operators (and the frontend) can
+    # tell at a glance whether real Google Places data is being served.
+    if not os.getenv("GOOGLE_PLACES_API_KEY", "").strip():
+        logger.warning(
+            "GOOGLE_PLACES_API_KEY not set — /api/v1/reviews is serving "
+            "curated stub data. Set the key (and wire the Places Details "
+            "API) to return live Google reviews."
+        )
+
     return {
         "aggregate_rating": average,
         "total_reviews": 87,       # full Google count — stubs show a sample

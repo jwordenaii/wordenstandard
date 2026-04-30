@@ -7,13 +7,25 @@ Uvicorn worker class bridges Gunicorn's process management with ASGI.
 """
 
 import multiprocessing
+import os
 
 # ── Server socket ─────────────────────────────────────────────────────────────
 bind = "0.0.0.0:8000"
 
 # ── Workers ───────────────────────────────────────────────────────────────────
 # Formula: (2 × CPU count) + 1 is a common starting point for I/O-bound apps.
-workers = multiprocessing.cpu_count() * 2 + 1
+# Honour the standard ``WEB_CONCURRENCY`` env var so operators can cap the
+# worker count on small / managed instances. This matters because each worker
+# opens its own SQLAlchemy connection pool (DB_POOL_SIZE), and the product
+# of (workers × pool_size) can quickly exhaust managed Postgres connection
+# limits on platforms like Railway / Render.
+_default_workers = multiprocessing.cpu_count() * 2 + 1
+try:
+    workers = int(os.getenv("WEB_CONCURRENCY", "").strip() or _default_workers)
+except ValueError:
+    workers = _default_workers
+if workers < 1:
+    workers = 1
 worker_class = "uvicorn.workers.UvicornWorker"
 worker_connections = 1000
 threads = 1
