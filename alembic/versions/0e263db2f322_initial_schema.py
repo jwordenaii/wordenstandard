@@ -1,7 +1,13 @@
 """initial_schema
 
+Real initial schema migration. Creates every table in ``app/models.py``
+on a fresh database. Inserted as the new root of the migration chain so
+that fresh deployments get a real schema while existing deployments
+already stamped at ``bc2d5f75bee4`` (the previous no-op baseline) remain
+backward compatible — see ``bc2d5f75bee4_baseline_schema.py``.
+
 Revision ID: 0e263db2f322
-Revises: bc2d5f75bee4
+Revises: (root)
 Create Date: 2026-04-30 22:22:30.634840
 
 """
