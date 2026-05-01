@@ -1,14 +1,22 @@
 User-agent: *
 Allow: /
 
-# Keep admin and API endpoints out of crawl index
+# Keep admin, internal operator tools, and API endpoints out of crawl index
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
 Disallow: /command-center
+Disallow: /advisory
+Disallow: /advisory/
 
-# Allow Googlebot full access to pages
+# Allow Googlebot full access to public pages
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /command-center
+Disallow: /advisory
+Disallow: /advisory/
 
 Sitemap: https://www.jwordenasphaltpaving.com/sitemap.xml

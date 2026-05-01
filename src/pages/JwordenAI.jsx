@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import SchemaMarkup from '../components/SchemaMarkup'
 
 const FEATURES = [
   {
@@ -58,6 +59,15 @@ const fadeUp = {
 export default function JwordenAI() {
   return (
     <div className="min-h-screen bg-white">
+      <SchemaMarkup
+        title="JWORDENAI™ — Predictive Paving Technology & Automation"
+        description="JWORDENAI™ delivers AI-powered project insights, automation tools, and predictive maintenance forecasting for paving contractors and property owners."
+        canonical="/jwordenai"
+        breadcrumb={[
+          { name: 'Home', path: '/' },
+          { name: 'JWORDENAI™', path: '/jwordenai' },
+        ]}
+      />
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="bg-brand-navy pt-32 pb-24 text-white relative overflow-hidden">
         {/* Subtle grid texture */}

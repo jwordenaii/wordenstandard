@@ -114,6 +114,14 @@ export default function Gallery() {
   const [tokenInput, setTokenInput] = useState('')
   const [showTokenForm, setShowTokenForm] = useState(false)
 
+  // Admin/upload UI is hidden from the public-facing gallery.
+  // Operators reveal it by visiting /gallery?admin=1 (or with ?admin=1 in the
+  // hash). This keeps the public page clean while still allowing internal use.
+  const adminUiVisible =
+    typeof window !== 'undefined' &&
+    (new URLSearchParams(window.location.search).get('admin') === '1' ||
+      window.location.hash.includes('admin=1'))
+
   const fetchImages = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -166,34 +174,36 @@ export default function Gallery() {
         </div>
       </section>
 
-      {/* Controls */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 flex flex-wrap items-center gap-3">
-        <button
-          onClick={() => setShowUpload((v) => !v)}
-          className="btn-primary text-sm !py-2"
-        >
-          {showUpload ? '✕ Cancel Upload' : '+ Upload Photo'}
-        </button>
+      {/* Controls — hidden from public visitors. Operators access via ?admin=1 */}
+      {adminUiVisible && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setShowUpload((v) => !v)}
+            className="btn-primary text-sm !py-2"
+          >
+            {showUpload ? '✕ Cancel Upload' : '+ Upload Photo'}
+          </button>
 
-        {!token ? (
-          <button
-            onClick={() => setShowTokenForm((v) => !v)}
-            className="text-sm text-white/50 hover:text-white/80 transition-colors underline underline-offset-2"
-          >
-            Admin login
-          </button>
-        ) : (
-          <button
-            onClick={() => { setToken(''); setTokenInput('') }}
-            className="text-sm text-brand-amber hover:text-amber-400 transition-colors"
-          >
-            ✓ Admin mode — log out
-          </button>
-        )}
-      </div>
+          {!token ? (
+            <button
+              onClick={() => setShowTokenForm((v) => !v)}
+              className="text-sm text-white/50 hover:text-white/80 transition-colors underline underline-offset-2"
+            >
+              Admin login
+            </button>
+          ) : (
+            <button
+              onClick={() => { setToken(''); setTokenInput('') }}
+              className="text-sm text-brand-amber hover:text-amber-400 transition-colors"
+            >
+              ✓ Admin mode — log out
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Admin token form */}
-      {showTokenForm && !token && (
+      {adminUiVisible && showTokenForm && !token && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
           <form
             onSubmit={handleTokenSubmit}
@@ -216,7 +226,7 @@ export default function Gallery() {
       )}
 
       {/* Upload form */}
-      {showUpload && (
+      {adminUiVisible && showUpload && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
           <div className="max-w-lg">
             <GalleryUploadForm onUploaded={handleUploaded} />
