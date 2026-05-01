@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
 import { trackPhoneClick } from '@/lib/analytics'
+import { getRichmondRadiusLocations, RICHMOND_RADIUS_MILES } from '@/lib/locations'
 
 const HOME_SERVICE_ITEMS = [
   {
@@ -54,6 +55,8 @@ export default function HomeServices() {
   const description =
     'Asphalt home services for Virginia homeowners: sealcoating, crack filling, patch repairs, widening, and drainage corrections to extend driveway life.'
 
+  const richmondRadiusMarkets = getRichmondRadiusLocations()
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -68,8 +71,13 @@ export default function HomeServices() {
           telephone: '+18044461296',
         },
         areaServed: {
-          '@type': 'State',
-          name: 'Virginia',
+          '@type': 'GeoCircle',
+          geoMidpoint: {
+            '@type': 'GeoCoordinates',
+            latitude: 37.5407,
+            longitude: -77.4360,
+          },
+          geoRadius: 144841,
         },
         serviceType: [
           'Driveway sealcoating',
@@ -152,6 +160,27 @@ export default function HomeServices() {
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mt-3">{item.detail}</p>
               </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-16 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Richmond Radius Coverage</p>
+          <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95] mb-8">
+            Home Services Within {RICHMOND_RADIUS_MILES} Miles Of Richmond
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {richmondRadiusMarkets.map((loc) => (
+              <Link
+                key={loc.slug}
+                to={`/locations/${loc.slug}`}
+                className="border border-border bg-card p-4 flex items-center gap-2.5 hover:border-primary/40 transition-colors"
+              >
+                <House className="w-4 h-4 text-primary shrink-0" />
+                <span className="font-display font-bold text-foreground text-sm tracking-wide">{loc.city}</span>
+              </Link>
             ))}
           </div>
         </div>

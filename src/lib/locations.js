@@ -3,6 +3,8 @@
 // Each entry produces /locations/[slug]
 
 export const PRIMARY_DOMAIN = 'https://www.jwordenasphaltpaving.com';
+export const RICHMOND_CENTER = { lat: 37.5407, lng: -77.4360 };
+export const RICHMOND_RADIUS_MILES = 90;
 
 export const LOCATIONS = [
   // ──────── VIRGINIA ────────
@@ -499,3 +501,35 @@ export const getLocationsByRegion = () => {
   });
   return grouped;
 };
+
+const toRadians = (value) => (value * Math.PI) / 180;
+
+export const haversineMiles = (a, b) => {
+  const earthRadiusMiles = 3958.8;
+  const dLat = toRadians(b.lat - a.lat);
+  const dLng = toRadians(b.lng - a.lng);
+
+  const sinLat = Math.sin(dLat / 2);
+  const sinLng = Math.sin(dLng / 2);
+
+  const aTerm =
+    sinLat * sinLat +
+    Math.cos(toRadians(a.lat)) * Math.cos(toRadians(b.lat)) * sinLng * sinLng;
+
+  const c = 2 * Math.atan2(Math.sqrt(aTerm), Math.sqrt(1 - aTerm));
+  return earthRadiusMiles * c;
+};
+
+export const getLocationsWithinRadius = (center, radiusMiles) => {
+  return LOCATIONS
+    .filter((loc) => loc?.geo?.lat && loc?.geo?.lng)
+    .map((loc) => ({
+      ...loc,
+      distanceMiles: haversineMiles(center, loc.geo),
+    }))
+    .filter((loc) => loc.distanceMiles <= radiusMiles)
+    .sort((a, b) => a.distanceMiles - b.distanceMiles);
+};
+
+export const getRichmondRadiusLocations = () =>
+  getLocationsWithinRadius(RICHMOND_CENTER, RICHMOND_RADIUS_MILES);

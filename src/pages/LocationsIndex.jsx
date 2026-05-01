@@ -2,7 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, ArrowUpRight, Star } from 'lucide-react';
-import { LOCATIONS, getLocationsByRegion, PRIMARY_DOMAIN } from '@/lib/locations';
+import {
+  LOCATIONS,
+  getLocationsByRegion,
+  getRichmondRadiusLocations,
+  PRIMARY_DOMAIN,
+  RICHMOND_RADIUS_MILES,
+} from '@/lib/locations';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
@@ -50,6 +56,7 @@ const REGION_META = {
 export default function LocationsIndex() {
   const grouped = getLocationsByRegion();
   const cityCount = LOCATIONS.length;
+  const richmondRadiusMarkets = getRichmondRadiusLocations();
 
   // ── SEO copy ────────────────────────────────────────────────
   const title = `Virginia Asphalt Paving Service Areas | ${cityCount} Cities | J. Worden & Sons`;
@@ -111,6 +118,31 @@ export default function LocationsIndex() {
 
       <LocationsHero cityCount={cityCount} />
       <LocationsServicesStrip />
+
+      <section className="border-t border-border py-12 bg-muted/20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-[10px] tracking-[0.3em] uppercase mb-4">
+            // Richmond Core Cluster
+          </p>
+          <h2 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight mb-4">
+            Cities Within {RICHMOND_RADIUS_MILES} Miles Of Richmond, VA
+          </h2>
+          <p className="font-body text-muted-foreground text-sm leading-relaxed max-w-3xl mb-6">
+            Local pages in this radius are prioritized for fast scheduling, focused content depth, and stronger internal linking around the Richmond metro hub.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {richmondRadiusMarkets.map((loc) => (
+              <Link
+                key={loc.slug}
+                to={`/locations/${loc.slug}`}
+                className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors"
+              >
+                {loc.city}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* City grid grouped by region */}
       <section className="py-16 md:py-20">

@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
 import { trackPhoneClick } from '@/lib/analytics'
-import { LOCATIONS } from '@/lib/locations'
+import { getRichmondRadiusLocations, RICHMOND_RADIUS_MILES } from '@/lib/locations'
 
 const RESIDENTIAL_SERVICES = [
   {
@@ -55,7 +55,7 @@ export default function ResidentialAsphalt() {
   const description =
     'Residential driveway paving, resurfacing, remove-and-replace, and asphalt maintenance across Virginia. Family-run crew with clear scope, strong prep, and long-life results.'
 
-  const topCities = LOCATIONS.slice(0, 12).map((loc) => loc.city)
+  const richmondRadiusMarkets = getRichmondRadiusLocations()
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -71,8 +71,13 @@ export default function ResidentialAsphalt() {
           telephone: '+18044461296',
         },
         areaServed: {
-          '@type': 'State',
-          name: 'Virginia',
+          '@type': 'GeoCircle',
+          geoMidpoint: {
+            '@type': 'GeoCoordinates',
+            latitude: 37.5407,
+            longitude: -77.4360,
+          },
+          geoRadius: 144841,
         },
         serviceType: [
           'Residential driveway paving',
@@ -208,17 +213,21 @@ export default function ResidentialAsphalt() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Service Coverage</p>
           <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95] mb-8">
-            Residential Paving Across Virginia Markets
+            Residential Paving Within A {RICHMOND_RADIUS_MILES}-Mile Radius Of Richmond
           </h2>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl mb-8">
+            These are active service markets we cover around Richmond with dedicated local pages and city-specific scope details.
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {topCities.map((city) => (
-              <div
-                key={city}
+            {richmondRadiusMarkets.map((loc) => (
+              <Link
+                key={loc.slug}
+                to={`/locations/${loc.slug}`}
                 className="border border-border bg-card p-4 flex items-center gap-2.5 hover:border-primary/40 transition-colors"
               >
                 <Home className="w-4 h-4 text-primary shrink-0" />
-                <span className="font-display font-bold text-foreground text-sm tracking-wide">{city}</span>
-              </div>
+                <span className="font-display font-bold text-foreground text-sm tracking-wide">{loc.city}</span>
+              </Link>
             ))}
           </div>
         </div>
