@@ -25,6 +25,9 @@ const SERVICES = [
   { value: 'interior_design', label: '🎨 Interior Design & Decorating' },
   { value: 'cobblestone_pavers', label: '🪨 Cobblestone / Brick Paver Patio' },
   { value: 'stone_masonry', label: '🧱 Stone Masonry' },
+  { value: 'concrete', label: '⬜ Concrete (Slabs / Flatwork)' },
+  { value: 'civil_site_work', label: '🚜 Civil Site Work (Grading / Drainage)' },
+  { value: 'drone_survey', label: '🛰 Drone Survey / Aerial Mapping' },
 ]
 
 const URGENCIES = [

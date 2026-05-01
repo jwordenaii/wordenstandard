@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 _COMPANY_NAME = "J. Worden & Sons Asphalt Paving"
 _COMPANY_ADDRESS = "1601 Ware Bottom Springs Rd Suite 214, Chester, VA 23836"
 _COMPANY_PHONE = "(804) 446-1296"
-_COMPANY_EMAIL = os.getenv("NOTIFY_TO_EMAIL", "").split(",")[0].strip() or "info@jwordenasphalt.com"
+_COMPANY_EMAIL = os.getenv("NOTIFY_TO_EMAIL", "").split(",")[0].strip() or "j.wordenandsonspaving@gmail.com"
 _COMPANY_LICENSE = "Licensed & Insured | VA Class A General Contractor"
 _DEFAULT_SERVICE_TYPE = "paving"
 
@@ -116,19 +116,42 @@ _SERVICE_SCOPE_HINTS: dict[str, str] = {
         "Include: annual inspection schedule, priority mobilization commitment, multi-year "
         "volume pricing, and documentation for property records."
     ),
+    "concrete": (
+        "Include: subgrade prep and compaction (95% Proctor), formwork, fiber-mesh or rebar "
+        "reinforcement schedule, mix design (typ. 4,000 psi w/ air entrainment in freeze zones), "
+        "pour and finish (broom / trowel / stamped), control joint layout (~2.5× slab thickness "
+        "in feet, max 10 ft o.c.), and 7-day cure protection. Note ACI 332 residential and ACI "
+        "330 parking-lot standards as applicable."
+    ),
+    "drone_survey": (
+        "Include: FAA Part 107 licensed pilot, pre-flight airspace check / LAANC authorization "
+        "where required, ground control points for survey-grade accuracy, flight plan and "
+        "altitude (typ. 200–400 ft AGL), deliverables (orthomosaic GeoTIFF, DSM/DEM, contour "
+        "shapefile, point cloud, annotated PDF report), and turnaround SLA. BVLOS / night ops "
+        "quoted separately."
+    ),
+    "civil_site_work": (
+        "Include: clearing and grubbing, cut/fill earthwork balance, rough and fine grading to "
+        "design subgrade, basic storm conveyance (inlets + shallow pipe), erosion and sediment "
+        "control (silt fence, inlet protection, stabilized construction entrance) per state "
+        "ESC handbook, and final stabilization. Engineer-stamped grading and SWPPP available "
+        "as a separate deliverable when required by the AHJ."
+    ),
 }
 
 
 def _build_gpt_prompt(lead: dict) -> str:
     service_key = (lead.get("service_type") or _DEFAULT_SERVICE_TYPE).lower().strip()
     scope_hint = _SERVICE_SCOPE_HINTS.get(service_key, "")
+    state_code = (lead.get("state_code") or lead.get("state") or "").upper().strip()[:2]
+    state_block = _state_proposal_block(state_code)
 
     return f"""Write a professional project proposal for the following client.
 
 CLIENT INFO:
   Name: {lead.get('name', 'Valued Customer')}
   Address: {lead.get('address', 'N/A')}
-  State: {lead.get('state_code') or lead.get('state', 'N/A')}
+  State: {state_code or 'N/A'}
   Email: {lead.get('email', 'N/A')}
   Phone: {lead.get('phone', 'N/A')}
 
@@ -143,6 +166,9 @@ PRICING RANGE: ${lead.get('price_low', 'TBD')} – ${lead.get('price_high', 'TBD
 
 SERVICE-SPECIFIC SCOPE GUIDANCE:
 {scope_hint}
+
+STATE-SPECIFIC COMPLIANCE CONTEXT (reference these requirements when writing scope, permits, and pricing notes):
+{state_block}
 
 Please write a complete proposal including:
 1. Professional greeting and project overview
@@ -202,6 +228,47 @@ _DEFAULT_WORK_ITEMS = [
 ]
 
 
+def _state_proposal_block(state_code: str) -> str:
+    """
+    Build a compact state-specific compliance + pricing block sourced from the
+    canonical 51-state tables (state_data.py + ai_brain._STATE_COMPLIANCE).
+    Returned text is suitable for embedding in either the GPT prompt or the
+    deterministic template fallback.
+    """
+    abbr = (state_code or "").upper().strip()[:2]
+    if not abbr:
+        return "  (No state provided — defaulting to national-average baseline.)"
+
+    try:
+        from .state_data import get_state_summary  # noqa: PLC0415
+        from .ai_brain import _STATE_COMPLIANCE  # noqa: PLC0415
+    except ImportError:
+        return f"  State: {abbr} (state data layer unavailable)."
+
+    summary = get_state_summary(abbr)
+    compliance = _STATE_COMPLIANCE.get(abbr)
+    if not summary or compliance is None:
+        return f"  State '{abbr}' not recognized — verify local requirements."
+
+    lic, prev_wage, osha_plan, swppp_acres = compliance
+    lines = [
+        f"  State: {summary['name']} ({abbr}) — {summary['region']} region",
+        f"  Price index: {summary['priceMultiplier']:.2f}x national avg ({summary['pricingNote']})",
+        f"  Paving season: ~{summary['asphaltMonths']} months/year",
+        f"  Contractor license required: {'YES' if lic else 'NO'}",
+        f"  Prevailing wage on public work: {'YES' if prev_wage else 'NO'}",
+        f"  State OSHA plan: {'YES (may exceed federal)' if osha_plan else 'NO (federal OSHA applies)'}",
+        f"  SWPPP threshold: ≥ {swppp_acres} acre disturbed",
+    ]
+    return "\n".join(lines)
+
+
+def _state_proposal_lines(state_code: str) -> list[str]:
+    """Bulletized version of the state block for the deterministic template."""
+    block = _state_proposal_block(state_code)
+    return [f"• {line.strip()}" for line in block.splitlines() if line.strip()]
+
+
 def _template_proposal(lead: dict) -> str:
     today = datetime.now(timezone.utc).strftime("%B %d, %Y")
     name = lead.get("name", "Valued Customer")
@@ -216,6 +283,13 @@ def _template_proposal(lead: dict) -> str:
 
     work_items = _SERVICE_WORK_ITEMS.get(service_key, _DEFAULT_WORK_ITEMS)
     work_block = "\n".join(work_items)
+
+    state_code = (lead.get("state_code") or lead.get("state") or "").upper().strip()[:2]
+    state_lines = _state_proposal_lines(state_code)
+    state_block = (
+        "\nSTATE COMPLIANCE & MARKET CONTEXT:\n" + "\n".join(state_lines) + "\n"
+        if state_lines else ""
+    )
 
     return f"""J. WORDEN & SONS
 Project Proposal
@@ -238,7 +312,7 @@ necessary to complete the {service.lower()} project at the above-referenced loca
 
 WORK INCLUDES:
 {work_block}
-
+{state_block}
 PRICING SUMMARY:
 Estimated Total: {price_str}
 (Final price subject to site inspection and material costs at time of work)

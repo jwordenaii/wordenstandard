@@ -328,6 +328,49 @@ OUTDOOR LIVING ROOM INTEGRATION:
 === END STONE MASONRY KNOWLEDGE ===
 """
 
+DRONE_FACTS = """
+=== DRONE SURVEY & AERIAL MAPPING KNOWLEDGE ===
+
+REGULATORY:
+• All commercial flights operated under FAA Part 107 (Remote Pilot Certificate required)
+• Airspace authorization via LAANC (near controlled airports) checked before every flight
+• Default operations: daylight, VLOS (visual line of sight), ≤400 ft AGL, ≤55 lb sUAS
+• BVLOS, night, and operations over people require additional FAA waivers — quoted separately
+• Insurance: $1M aerial liability carried; certificates of insurance available on request
+
+TYPICAL DELIVERABLES:
+• Orthomosaic GeoTIFF (sub-inch GSD at typical mapping altitudes)
+• Digital Surface Model (DSM) and Digital Elevation Model (DEM)
+• Topographic contour shapefile (1 ft or 2 ft intervals)
+• Dense point cloud (LAS/LAZ) for downstream CAD / civil software
+• 3D textured mesh for visualization
+• Annotated progress / inspection PDF report
+• Volumetric calculations (stockpile, cut/fill verification)
+
+USE CASES:
+• Pre-bid site reconnaissance (lot size, slope, access, encroachments)
+• Pre-construction topographic survey input for civil design
+• Monthly progress documentation for owner / lender draws
+• As-built verification against design grade
+• Roof / parapet / facade inspection without lift rental
+• Linear corridor mapping for pipeline / road / utility routing
+• Post-storm damage assessment
+
+PRICING BASIS (national benchmarks, adjust per state index):
+• Orthomosaic mapping: $80–$300 per acre
+• Single-site progress / inspection flight: $400–$1,200 per visit
+• Linear corridor mapping: $300–$800 per linear mile
+• LiDAR-grade survey (RTK + GCPs, sub-cm vertical): premium tier, project-quoted
+
+INTEGRATION WITH OTHER SERVICES:
+• Drone topo feeds the civil_site_work earthwork takeoff directly
+• As-built orthos archived alongside the GC project record for warranty / lien defense
+• Photogrammetry pipeline (premium /premium-civil-stack endpoint) handles the heavy
+  processing — this service line is the data capture and quoting front door
+
+=== END DRONE KNOWLEDGE ===
+"""
+
 _PRICING_KEYWORDS = {
     "cost", "price", "rate", "estimate", "quote", "sqft", "sq ft",
     "per foot", "how much", "expensive", "cheap", "afford", "budget",
@@ -364,6 +407,12 @@ _MASONRY_KEYWORDS = {
     "granite", "limestone", "outdoor fireplace", "fire pit", "stone veneer",
 }
 
+_DRONE_KEYWORDS = {
+    "drone", "uav", "uas", "aerial", "orthomosaic", "ortho", "photogrammetry",
+    "lidar", "topo", "topographic", "dem", "dsm", "point cloud", "part 107",
+    "laanc", "flyover", "fly-over", "survey",
+}
+
 
 def assemble_context(
     question: str,
@@ -394,6 +443,7 @@ def assemble_context(
     gc_match        = bool(q_words & _GC_KEYWORDS) or any(p in q_phrases for p in ("general contractor", "ground up", "change order"))
     design_match    = bool(q_words & _DESIGN_KEYWORDS) or any(p in q_phrases for p in ("mood board", "space planning", "interior design"))
     masonry_match   = bool(q_words & _MASONRY_KEYWORDS) or any(p in q_phrases for p in ("brick paver", "stone wall", "retaining wall", "outdoor fireplace"))
+    drone_match     = bool(q_words & _DRONE_KEYWORDS) or any(p in q_phrases for p in ("point cloud", "part 107", "aerial mapping", "drone survey"))
 
     if include_all or pricing_match:
         context_blocks.append(PRICING_FACTS)
@@ -407,6 +457,8 @@ def assemble_context(
         context_blocks.append(INTERIOR_DESIGN_FACTS)
     if include_all or masonry_match:
         context_blocks.append(MASONRY_FACTS)
+    if include_all or drone_match:
+        context_blocks.append(DRONE_FACTS)
 
     # State-specific fragment
     if state_code:

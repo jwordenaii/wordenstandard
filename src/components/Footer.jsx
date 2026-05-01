@@ -19,7 +19,6 @@ const LINKS = [
   { to: '/blog', label: 'Blog & Resources' },
   { to: '/about', label: 'About' },
   { to: '/reviews', label: 'Reviews' },
-  { to: '/advisory', label: 'Advisory Board' },
   { to: '/quote', label: 'Free Quote' },
   { to: '/contact', label: 'Contact' },
 ]

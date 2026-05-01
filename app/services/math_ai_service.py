@@ -72,6 +72,7 @@ _STATE_COST_MULTIPLIERS: dict[str, float] = {
     "OK": 0.85, "OR": 1.15, "PA": 1.07, "RI": 1.08, "SC": 0.87,
     "SD": 0.85, "TN": 0.87, "TX": 0.95, "UT": 0.93, "VT": 0.97,
     "VA": 1.02, "WA": 1.18, "WV": 0.88, "WI": 0.97, "WY": 0.90,
+    "DC": 1.25,
 }
 
 # Base cost rates ($/sqft) — low, mid, high — for paving service types
@@ -86,6 +87,13 @@ _BASE_RATES: dict[str, tuple[float, float, float]] = {
     "reconstruction":    (5.00,  7.50, 10.00),
     "striping":          (0.10,  0.18,  0.25),
     "patching":          (1.50,  2.75,  4.00),
+    # ── New first-class services (Phase 1 gap fixes) ─────────────────────────
+    # Concrete flatwork: 4–6" slab, broom finish, fiber mesh; stamped/colored at top of range
+    "concrete":          (6.00,  10.00, 16.00),
+    # Drone survey / aerial mapping: $/sf of mapped area (orthomosaic basis)
+    "drone_survey":      (0.003, 0.0065, 0.012),
+    # Civil site work (public budgetary tier): grading + erosion + shallow storm $/sf disturbed
+    "civil_site_work":   (4.00,  9.00,  18.00),
 }
 
 # Traffic load factors (vehicles/day → deterioration multiplier)

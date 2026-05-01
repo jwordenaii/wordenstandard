@@ -82,7 +82,6 @@ const PAGE_CONTEXT = {
   '/service-areas': 'service areas page',
   '/blog': 'blog page',
   '/visualizer': 'property visualizer tool',
-  '/advisory': 'contractor advisory hub',
 }
 
 const PAGE_HELP = {
