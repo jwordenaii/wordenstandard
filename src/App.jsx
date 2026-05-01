@@ -6,6 +6,7 @@ import FloatingCTA from './components/FloatingCTA'
 import ChatWidget from './components/ChatWidget'
 import ScrollToTop from './components/ScrollToTop'
 import ErrorBoundary from './components/ErrorBoundary'
+import AdvisoryGate from './components/AdvisoryGate'
 
 // Lazy-loaded pages for code splitting
 const Home = lazy(() => import('./pages/Home'))
@@ -86,15 +87,16 @@ export default function App() {
                 <Route path="/projects" element={<Projects />} />
                 {/* 3-D Property Visualizer */}
                 <Route path="/visualizer" element={<Visualizer />} />
-                {/* Advisory Board routes */}
-                <Route path="/advisory" element={<AdvisoryHub />} />
-                <Route path="/advisory/state/:stateCode" element={<StateDetail />} />
-                <Route path="/advisory/utilities" element={<UtilitiesHub />} />
-                <Route path="/advisory/compare" element={<StateCompare />} />
-                <Route path="/advisory/legal-strategy" element={<LegalStrategyAdvisor />} />
-                <Route path="/advisory/contractor-ranker" element={<ContractorRanker />} />
+                {/* Advisory Board routes — internal operator tooling, gated by dashboard PIN.
+                    Removed from public navigation; reachable only by direct URL + PIN. */}
+                <Route path="/advisory" element={<AdvisoryGate><AdvisoryHub /></AdvisoryGate>} />
+                <Route path="/advisory/state/:stateCode" element={<AdvisoryGate><StateDetail /></AdvisoryGate>} />
+                <Route path="/advisory/utilities" element={<AdvisoryGate><UtilitiesHub /></AdvisoryGate>} />
+                <Route path="/advisory/compare" element={<AdvisoryGate><StateCompare /></AdvisoryGate>} />
+                <Route path="/advisory/legal-strategy" element={<AdvisoryGate><LegalStrategyAdvisor /></AdvisoryGate>} />
+                <Route path="/advisory/contractor-ranker" element={<AdvisoryGate><ContractorRanker /></AdvisoryGate>} />
                 {/* Generic category hub — handles licensing, construction-law, safety, etc. */}
-                <Route path="/advisory/:category" element={<CategoryHub />} />
+                <Route path="/advisory/:category" element={<AdvisoryGate><CategoryHub /></AdvisoryGate>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

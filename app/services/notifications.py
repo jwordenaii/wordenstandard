@@ -198,5 +198,32 @@ def send_lead_notification(data: dict) -> None:
         label = score.get('label', '') if isinstance(score, dict) else ''
         name = data.get('name', 'Someone')
         phone = data.get('phone', 'N/A')
-        sms_body = f"[{label}] New lead: {name} | {phone} | {data.get('service_type','contact')} | {data.get('urgency','')}"
+        state_code = str(data.get('state_code') or data.get('state') or '').upper().strip()[:2]
+
+        # Append compact state context: price index + license/wage/OSHA flags
+        state_tag = ''
+        if state_code:
+            try:
+                from .state_data import get_price_multiplier  # noqa: PLC0415
+                from .ai_brain import _STATE_COMPLIANCE  # noqa: PLC0415
+                mult = get_price_multiplier(state_code)
+                comp = _STATE_COMPLIANCE.get(state_code)
+                if comp is not None:
+                    lic, prev_wage, osha_plan, _swppp = comp
+                    flags = []
+                    if lic: flags.append('LIC')
+                    if prev_wage: flags.append('PW')
+                    if osha_plan: flags.append('OSHA')
+                    flag_str = ('/' + '+'.join(flags)) if flags else ''
+                    state_tag = f" | {state_code} {mult:.2f}x{flag_str}"
+                else:
+                    state_tag = f" | {state_code}"
+            except Exception:  # noqa: BLE001
+                state_tag = f" | {state_code}"
+
+        sms_body = (
+            f"[{label}] New lead: {name} | {phone} | "
+            f"{data.get('service_type','contact')} | {data.get('urgency','')}"
+            f"{state_tag}"
+        )
         _send_twilio_sms(sms_body, to_phones)

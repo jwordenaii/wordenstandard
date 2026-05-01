@@ -309,6 +309,45 @@ def admin_new_lead(lead: Any) -> tuple[str, str, str]:
     score_value = getattr(lead, "score_value", None) or lead.get("score_value", "—")
     lead_id = getattr(lead, "id", None) or lead.get("id", "—")
     message = getattr(lead, "message", None) or lead.get("message", "")
+    state_code = (
+        getattr(lead, "state_code", None)
+        or getattr(lead, "state", None)
+        or (lead.get("state_code") if isinstance(lead, dict) else None)
+        or (lead.get("state") if isinstance(lead, dict) else None)
+        or ""
+    )
+    state_code = str(state_code).upper().strip()[:2]
+
+    # Pull state context from the canonical 51-state tables
+    state_display = state_code or "—"
+    state_compliance_html = ""
+    state_compliance_text = ""
+    if state_code:
+        try:
+            from .state_data import get_state_summary  # noqa: PLC0415
+            from .ai_brain import _STATE_COMPLIANCE  # noqa: PLC0415
+            summary = get_state_summary(state_code)
+            compliance = _STATE_COMPLIANCE.get(state_code)
+        except ImportError:
+            summary, compliance = None, None
+        if summary and compliance:
+            lic, prev_wage, osha_plan, swppp_acres = compliance
+            flags = [
+                ("License", "required" if lic else "not required"),
+                ("Prevailing wage", "applies (public)" if prev_wage else "n/a"),
+                ("State OSHA", "yes" if osha_plan else "federal only"),
+                ("SWPPP", f"≥{swppp_acres} ac"),
+            ]
+            flag_str = " · ".join(f"{k}: {v}" for k, v in flags)
+            state_display = (
+                f"{summary['name']} ({state_code}) — "
+                f"price index {summary['priceMultiplier']:.2f}x, "
+                f"~{summary['asphaltMonths']} mo paving season"
+            )
+            state_compliance_html = (
+                f"<div style='margin-top:6px;font-size:12px;color:#666;'>{flag_str}</div>"
+            )
+            state_compliance_text = f"State flags: {flag_str}\n"
 
     label_colors = {"HOT": "#e74c3c", "WARM": "#f39c12", "COOL": "#3498db"}
     label_color = label_colors.get(score_label, "#888")
@@ -325,6 +364,7 @@ def admin_new_lead(lead: Any) -> tuple[str, str, str]:
         ("Urgency", urgency.replace("_", " ").title()),
         ("Project Size", f"{sqft:,.0f} sq ft" if sqft else "Not specified"),
         ("Address", address or "Not provided"),
+        ("State Context", f"{state_display}{state_compliance_html}"),
         ("Message", message or "None"),
     ]
 
@@ -359,6 +399,8 @@ def admin_new_lead(lead: Any) -> tuple[str, str, str]:
         f"Service:  {service}\n"
         f"Urgency:  {urgency}\n"
         f"Address:  {address or 'Not provided'}\n"
+        f"State:    {state_display}\n"
+        f"{state_compliance_text}"
         f"Sq Ft:    {sqft or 'Not specified'}\n"
         f"Message:  {message or 'None'}\n\n"
         f"CRM: {COMPANY_WEBSITE}/admin/leads\n"

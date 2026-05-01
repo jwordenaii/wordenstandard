@@ -18,6 +18,10 @@ from ..core.limiter import limiter
 from ..core.security import verify_premium_security
 from ..database import get_db
 from ..models import Lead
+from ..services.estimate_approval import (
+    estimate_requires_approval,
+    stage_proposal_for_approval,
+)
 from ..services.notifications import send_transactional_email
 from ..services.pricing import estimate_price
 from ..services.proposal_generator import generate_proposal_pdf, generate_proposal_text
@@ -135,7 +139,7 @@ def _send_proposal_email(lead_dict: dict, proposal_text: str, pdf_bytes: bytes |
         logger.error('Proposal email send failed for %s', recipient)
 
 
-@router.post('/{lead_id}/send', summary='Generate and email proposal to lead')
+@router.post('/{lead_id}/send', summary='Generate and queue proposal for human approval before customer send')
 @limiter.limit('5/minute')
 async def send_proposal(
     request: Request,
@@ -154,11 +158,62 @@ async def send_proposal(
     proposal_text = generate_proposal_text(lead_dict)
     pdf_bytes = generate_proposal_pdf(lead_dict)
 
-    background_tasks.add_task(_send_proposal_email, lead_dict, proposal_text, pdf_bytes)
+    # Build the fully-rendered email payload up front so it is reproducible
+    # whether dispatched now (legacy / dev) or after approval (default).
+    recipient = lead_dict.get('email', '')
+    subject = 'Your Project Proposal from J. Worden & Sons Asphalt Paving'
+    html_body = f"""
+    <html><body style="font-family: sans-serif; color: #1a1a2e; max-width: 700px;">
+      <div style="background: #f5a623; padding: 20px; text-align: center;">
+        <h1 style="color: #1a1a2e; margin: 0;">J. Worden & Sons Asphalt Paving</h1>
+        <p style="color: #1a1a2e; margin: 4px 0;">Project Proposal</p>
+      </div>
+      <div style="padding: 24px;">
+        <p>Dear {lead_dict.get('name', 'Valued Customer')},</p>
+        <p>Thank you for your interest in our services. Please find your project proposal attached.</p>
+        <pre style="background: #f9f9f9; padding: 16px; border-radius: 4px; white-space: pre-wrap; font-size: 13px;">
+{proposal_text[:3000]}
+        </pre>
+        <p>Please don't hesitate to contact us with any questions.</p>
+      </div>
+    </body></html>
+    """
+    filename = f"proposal_{lead_dict.get('name', 'client').replace(' ', '_')}.pdf"
 
+    payload = {
+        'recipient':    recipient,
+        'subject':      subject,
+        'html_body':    html_body,
+        'plain_text':   proposal_text,
+        'pdf_b64':      base64.b64encode(pdf_bytes).decode() if pdf_bytes else '',
+        'filename':     filename,
+        'lead_id':      lead.id,
+        'lead_name':    lead.name,
+        'service_type': lead.service_type,
+        'price_low':    lead_dict.get('price_low', ''),
+        'price_high':   lead_dict.get('price_high', ''),
+    }
+
+    # Default behavior: stage for Mr. Worden's approval. Customer never sees
+    # an estimate until it's been reviewed in the command center.
+    if estimate_requires_approval():
+        item = stage_proposal_for_approval(db, lead, payload)
+        return {
+            'status':          'pending_approval',
+            'message':         f'Proposal queued for review — approve in command center to release to {recipient}',
+            'review_item_id':  item.id,
+            'lead_id':         lead_id,
+            'lead_name':       lead.name,
+            'recipient':       recipient,
+            'price_low':       payload['price_low'],
+            'price_high':      payload['price_high'],
+        }
+
+    # Auto-send path (only when ESTIMATE_REQUIRES_APPROVAL=false)
+    background_tasks.add_task(_send_proposal_email, lead_dict, proposal_text, pdf_bytes)
     return {
         'status': 'queued',
-        'message': f'Proposal will be emailed to {lead.email}',
+        'message': f'Proposal will be emailed to {lead.email} (auto-send, approval gate disabled)',
         'lead_id': lead_id,
         'lead_name': lead.name,
     }
