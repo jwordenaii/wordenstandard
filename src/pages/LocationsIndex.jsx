@@ -6,6 +6,7 @@ import {
   LOCATIONS,
   getLocationsByRegion,
   getRichmondRadiusLocations,
+  getStrategicCorridorLocations,
   PRIMARY_DOMAIN,
   RICHMOND_RADIUS_MILES,
 } from '@/lib/locations';
@@ -37,19 +38,23 @@ const REGION_META = {
   },
   'I-81 Corridor / Blue Ridge': {
     summary:
-      'Roanoke and Smith Mountain Lake mountain driveways face 40+ freeze-thaw cycles per winter and steep-grade drainage challenges. Our 6-inch structural stone base and PG 70-22 polymer binder are engineered for Blue Ridge conditions.',
+      'Roanoke and Smith Mountain Lake mountain driveways face 40+ freeze-thaw cycles per winter and steep-grade drainage challenges. In these markets, chip-and-tar traction and sealcoating cadence are major lifecycle factors alongside structural base prep.',
   },
   'I-81 Corridor / Shenandoah Valley': {
     summary:
-      'Harrisonburg, Rockingham County, and the Shenandoah Valley agricultural corridor. Karst geology demands subgrade probing; farm and freight loads demand mountain-grade cross-sections.',
+      'Harrisonburg, Rockingham County, and the Shenandoah Valley agricultural corridor. Karst geology demands subgrade probing, while chip-and-tar options and preservation-focused sealcoating are often key in rural and mixed-load surfaces.',
   },
   'I-81 Corridor / Northern Shenandoah': {
     summary:
-      'Winchester, Frederick County, and the Northern Valley commuter corridor. 45+ freeze-thaw cycles paired with Route 7 commuter traffic volumes punish cheap residential driveways. We spec for both.',
+      'Winchester, Frederick County, and the Northern Valley commuter corridor. 45+ freeze-thaw cycles paired with Route 7 commuter traffic volumes punish cheap residential driveways, so traction-focused chip-and-tar use cases and regular sealcoating are major planning inputs.',
   },
   'I-95 Corridor / Rappahannock': {
     summary:
       'Fredericksburg, Stafford, Spotsylvania — Virginia\'s fastest-growing new-construction corridor. Builder-grade virgin soil ruts within 18 months. Our subgrade engineering fixes it at the base, not the surface.',
+  },
+  'Northern Virginia / DMV Fringe': {
+    summary:
+      'Fairfax and nearby NOVA corridors require schedule control, traffic-aware planning, and high-standard execution for both residential and commercial paving scopes.',
   },
   'Coastal North Carolina / Outer Banks': {
     summary:
@@ -61,6 +66,7 @@ export default function LocationsIndex() {
   const grouped = getLocationsByRegion();
   const cityCount = LOCATIONS.length;
   const richmondRadiusMarkets = getRichmondRadiusLocations();
+  const strategicCorridorMarkets = getStrategicCorridorLocations();
 
   // ── SEO copy ────────────────────────────────────────────────
   const title = `Virginia Asphalt Paving Service Areas | ${cityCount} Cities | J. Worden & Sons`;
@@ -136,6 +142,33 @@ export default function LocationsIndex() {
           </p>
           <div className="flex flex-wrap gap-2">
             {richmondRadiusMarkets.map((loc) => (
+              <Link
+                key={loc.slug}
+                to={`/locations/${loc.slug}`}
+                className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors"
+              >
+                {loc.city}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-12 bg-background">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-[10px] tracking-[0.3em] uppercase mb-4">
+            // Strategic Coverage Corridor
+          </p>
+          <h2 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight mb-4">
+            Virginia Beach → Harrisonburg → Fairfax → Outer Banks
+          </h2>
+          <p className="font-body text-muted-foreground text-sm leading-relaxed max-w-4xl mb-6">
+            We organize service pages around major anchor markets and all practical corridor markets between them.
+            If a search originates from a rural or unincorporated area in-between, Google typically resolves intent to
+            the nearest strong city entity page. This structure increases match quality for in-between search demand.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {strategicCorridorMarkets.map((loc) => (
               <Link
                 key={loc.slug}
                 to={`/locations/${loc.slug}`}

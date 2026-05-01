@@ -488,6 +488,44 @@ export const LOCATIONS = [
     rating: 4.9,
   },
 
+  // ──────── NORTHERN VIRGINIA / FAIRFAX CORRIDOR ────────
+  {
+    slug: 'fairfax-va',
+    city: 'Fairfax',
+    state: 'Virginia',
+    stateAbbr: 'VA',
+    region: 'Northern Virginia / DMV Fringe',
+    geo: { lat: 38.8462, lng: -77.3064 },
+    headline: 'Fairfax, VA Asphalt Paving — Residential and Commercial Precision for NOVA Traffic',
+    intro:
+      'Fairfax properties demand disciplined asphalt planning due to commuter load, tight access constraints, and strict property standards. We support driveways, commercial lots, and phased paving programs with documented scope, drainage-first prep, and long-life installation quality.',
+    neighborhoods: [
+      'Fairfax City', 'Fairfax Station', 'Oakton', 'Burke',
+      'Annandale', 'Centreville', 'Chantilly', 'Vienna',
+    ],
+    landmarks: ['Fairfax County Parkway', 'I-66 corridor', 'GMU area', 'Mosaic District', 'Route 50 and Route 29 corridors'],
+    climate: {
+      title: 'NOVA Commuter Load + Freeze-Thaw Wear',
+      body: 'Fairfax asphalt surfaces see dense daily traffic and repeated freeze-thaw movement. We use base-prep discipline, drainage correction, and compaction control to reduce premature cracking and edge failure under NOVA conditions.',
+    },
+    faqs: [
+      {
+        q: 'Do you handle both driveway and parking-lot paving in Fairfax?',
+        a: 'Yes. We support homeowners, HOAs, and commercial operators with driveway installs, resurfacing, lot repair, striping, and phased paving scopes.',
+      },
+      {
+        q: 'Can you stage paving for active Fairfax businesses?',
+        a: 'Yes. We phase work to keep access open while completing paving in controlled sections for safer operations and better schedule reliability.',
+      },
+      {
+        q: 'Do you serve rural and semi-rural areas between Richmond and Fairfax?',
+        a: 'Yes. We regularly service corridor markets and rural areas between major anchors when projects align with route scheduling and scope planning.',
+      },
+    ],
+    reviews: 39,
+    rating: 4.9,
+  },
+
   // ──────── OUTER BANKS / COASTAL NORTH CAROLINA ────────
   {
     slug: 'outer-banks-nc',
@@ -571,3 +609,23 @@ export const getLocationsWithinRadius = (center, radiusMiles) => {
 
 export const getRichmondRadiusLocations = () =>
   getLocationsWithinRadius(RICHMOND_CENTER, RICHMOND_RADIUS_MILES);
+
+export const STRATEGIC_CORRIDOR_SLUGS = [
+  'virginia-beach-va',
+  'chesapeake-va',
+  'williamsburg-va',
+  'richmond-va',
+  'henrico-va',
+  'midlothian-va',
+  'short-pump-va',
+  'chester-va',
+  'fredericksburg-va',
+  'fairfax-va',
+  'harrisonburg-va',
+  'outer-banks-nc',
+];
+
+export const getStrategicCorridorLocations = () =>
+  STRATEGIC_CORRIDOR_SLUGS
+    .map((slug) => getLocationBySlug(slug))
+    .filter(Boolean);

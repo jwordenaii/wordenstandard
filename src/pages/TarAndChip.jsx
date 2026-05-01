@@ -33,6 +33,10 @@ const FAQS = [
     q: 'How long does tar and chip paving last?',
     a: 'With proper prep, drainage, and maintenance, tar and chip surfaces can provide long service life and strong performance in Virginia weather conditions.',
   },
+  {
+    q: 'Why are chip and tar plus sealcoating especially important in the I-81 corridor?',
+    a: 'Mountain weather swings, freeze-thaw cycling, and rural route traffic patterns make traction and surface preservation critical. Chip-and-tar systems plus regular sealcoating can improve durability and reduce lifecycle repair costs in I-81 markets.',
+  },
 ]
 
 export default function TarAndChip() {
@@ -175,6 +179,65 @@ export default function TarAndChip() {
                 <p className="text-sm text-muted-foreground leading-relaxed mt-3">{item.a}</p>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-16 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Coastal Service Areas</p>
+          <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95] mb-6">
+            Virginia Beach And Outer Banks Tar And Chip Coverage
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-3xl mb-6">
+            We support coastal properties where traction, drainage, and weather durability are critical.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/locations/virginia-beach-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Virginia Beach Service Page
+            </Link>
+            <Link
+              to="/locations/outer-banks-nc"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Outer Banks Service Page
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-16 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">I-81 Corridor Focus</p>
+          <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95] mb-6">
+            Chip And Tar Plus Sealcoating Are Major Factors In I-81 Markets
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-4xl mb-6">
+            In Roanoke, Harrisonburg, and nearby I-81 corridors, traction and preservation matter more due to mountain weather, freeze-thaw movement,
+            and mixed rural traffic loads. We prioritize chip-and-tar suitability and sealcoating cadence as part of long-life planning.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/locations/roanoke-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Roanoke Service Page
+            </Link>
+            <Link
+              to="/locations/harrisonburg-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Harrisonburg Service Page
+            </Link>
+            <Link
+              to="/locations/winchester-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Winchester Service Page
+            </Link>
           </div>
         </div>
       </section>
