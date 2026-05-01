@@ -51,6 +51,10 @@ const REGION_META = {
     summary:
       'Fredericksburg, Stafford, Spotsylvania — Virginia\'s fastest-growing new-construction corridor. Builder-grade virgin soil ruts within 18 months. Our subgrade engineering fixes it at the base, not the surface.',
   },
+  'Coastal North Carolina / Outer Banks': {
+    summary:
+      'Outer Banks parking lots and access lanes face dense seasonal vehicle loads, salt aerosol, wind-driven sand, and stormwater stress. We build coastal-ready asphalt systems with drainage-first execution for long-term durability.',
+  },
 };
 
 export default function LocationsIndex() {
