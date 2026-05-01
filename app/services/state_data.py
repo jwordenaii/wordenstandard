@@ -132,3 +132,21 @@ def get_state_prompt_fragment(abbr: str) -> str:
         f"Season: {s['asphaltMonths']} months, "
         f"QSR density: {s['qsrDensity']}]"
     )
+
+
+def normalize_state_code(code: Optional[str]) -> Optional[str]:
+    """
+    Normalize and validate a 2-letter state abbreviation.
+
+    Returns the upper-cased abbreviation when it matches a known state
+    (50 states + DC), or ``None`` when the input is empty/unknown.
+
+    Use this anywhere the backend accepts a state from an external
+    source (form input, CSV import, query string) so we have a single
+    source of truth for state validation.
+    """
+    if not code:
+        return None
+    upper = code.strip().upper()
+    return upper if upper in STATE_MAP else None
+

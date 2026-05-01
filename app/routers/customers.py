@@ -43,7 +43,7 @@ from ..core.limiter import CRM_LIMIT, limiter
 from ..core.security import verify_premium_security
 from ..database import get_db
 from ..models import Customer, ServiceHistory
-from ..services.state_data import STATE_MAP
+from ..services.state_data import STATE_MAP, normalize_state_code
 
 logger = logging.getLogger(__name__)
 
@@ -118,10 +118,8 @@ class ImportResult(BaseModel):
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _validate_state(code: Optional[str]) -> Optional[str]:
-    if not code:
-        return None
-    upper = code.strip().upper()
-    return upper if upper in STATE_MAP else None
+    # Thin wrapper kept for backward compatibility — delegates to the shared util.
+    return normalize_state_code(code)
 
 
 # ── CRUD endpoints ────────────────────────────────────────────────────────────

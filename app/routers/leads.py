@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -10,6 +10,7 @@ from ..models import Lead, ContactMessage
 from ..services.lead_scorer import score_lead
 from ..services.notifications import send_lead_notification
 from ..services.pricing import estimate_price
+from ..services.state_data import normalize_state_code
 from ..services.email_service import send_quote_confirmation, send_admin_notification, send_contact_response
 
 router = APIRouter(prefix="/api/v1/leads", tags=["leads"])
@@ -28,6 +29,13 @@ class QuoteRequest(BaseModel):
     urgency: str = Field(..., max_length=30)         # asap | within_1_week | within_1_month | flexible
     project_size_sqft: Optional[float] = Field(default=None, ge=0, le=10_000_000)
     address: Optional[str] = Field(default=None, max_length=300)
+    state_code: Optional[str] = Field(
+        default=None,
+        min_length=2,
+        max_length=2,
+        pattern=r"^[A-Za-z]{2}$",
+        description="2-letter US state abbreviation (validated against the 50 states + DC).",
+    )
     message: Optional[str] = Field(default=None, max_length=2000)
 
 
@@ -44,6 +52,13 @@ class EstimateRequest(BaseModel):
     service_type: str = Field(..., max_length=60)
     property_type: str = Field(default="residential", max_length=30)
     project_size_sqft: float = Field(..., gt=0, le=10_000_000)
+    state_code: Optional[str] = Field(
+        default=None,
+        min_length=2,
+        max_length=2,
+        pattern=r"^[A-Za-z]{2}$",
+        description="Optional 2-letter US state abbreviation for regional price adjustment.",
+    )
 
 
 @router.post("/quote", summary="Submit a quote request")
@@ -54,7 +69,18 @@ async def submit_quote(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
+    # Validate state against the 50-state + DC list. Reject unknown abbreviations
+    # (Pydantic has already enforced "two letters", so a non-None mismatch here
+    # means the abbreviation just isn't a real US state).
+    validated_state = normalize_state_code(req.state_code)
+    if req.state_code and validated_state is None:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unknown US state abbreviation: {req.state_code!r}",
+        )
+
     lead_data = req.model_dump()
+    lead_data["state_code"] = validated_state  # use canonical upper-case form
     scoring = score_lead(lead_data)
     lead_data["score"] = scoring
 
@@ -68,6 +94,7 @@ async def submit_quote(
         urgency=req.urgency,
         project_size_sqft=req.project_size_sqft,
         address=req.address,
+        state_code=validated_state,
         message=req.message,
         score_value=scoring["score"],
         score_label=scoring["label"],
