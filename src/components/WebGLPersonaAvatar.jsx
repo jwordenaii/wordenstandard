@@ -3,6 +3,56 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const DEFAULT_MODEL_URL = '/models/mr-worden.glb'
+const MODEL_PATH_CANDIDATES = [DEFAULT_MODEL_URL, '/mr-worden.glb', '/models/mr-worden.gltf']
+
+function getEnvModelCandidates() {
+  const single = (import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URL || '').trim()
+  const list = (import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URLS || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean)
+
+  return [single, ...list].filter(Boolean)
+}
+
+function looksLikeGlb(buffer) {
+  if (!buffer || buffer.byteLength < 4) return false
+  const bytes = new Uint8Array(buffer, 0, 4)
+  return bytes[0] === 0x67 && bytes[1] === 0x6c && bytes[2] === 0x54 && bytes[3] === 0x46 // glTF
+}
+
+function looksLikeGltfJson(text, contentType) {
+  const safeText = (text || '').trim()
+  if (!safeText) return false
+  if (safeText.startsWith('<!doctype html') || safeText.startsWith('<html')) return false
+  if (!safeText.startsWith('{')) return false
+
+  const type = (contentType || '').toLowerCase()
+  if (type.includes('model/gltf+json') || type.includes('application/json')) return true
+
+  return safeText.includes('"asset"') && safeText.includes('"version"')
+}
+
+async function findValidModelUrl(candidates) {
+  for (const candidate of candidates) {
+    try {
+      const response = await fetch(candidate, { method: 'GET', cache: 'no-store' })
+      if (!response.ok) continue
+
+      const contentType = response.headers.get('content-type') || ''
+      const buffer = await response.arrayBuffer()
+
+      if (looksLikeGlb(buffer)) return candidate
+
+      const headText = new TextDecoder().decode(buffer.slice(0, 512))
+      if (looksLikeGltfJson(headText, contentType)) return candidate
+    } catch {
+      // Try the next candidate URL.
+    }
+  }
+
+  return null
+}
 
 function createFallbackAvatar() {
   const root = new THREE.Group()
@@ -91,7 +141,7 @@ export default function WebGLPersonaAvatar({
   mode = 'idle',
   speechPulse = 0,
   speechIntensity = 0.6,
-  modelUrl = DEFAULT_MODEL_URL,
+  modelUrl,
 }) {
   const mountRef = useRef(null)
   const rendererRef = useRef(null)
@@ -103,10 +153,13 @@ export default function WebGLPersonaAvatar({
   const disposeFnsRef = useRef([])
   const speakingUntilRef = useRef(0)
 
-  const resolvedModelUrl = useMemo(
-    () => import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URL || modelUrl,
-    [modelUrl]
-  )
+  const resolvedModelCandidates = useMemo(() => {
+    const envCandidates = getEnvModelCandidates()
+    const propCandidate = (modelUrl || '').trim()
+
+    const merged = [...envCandidates, propCandidate, ...MODEL_PATH_CANDIDATES]
+    return [...new Set(merged.filter(Boolean))]
+  }, [modelUrl])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -146,26 +199,39 @@ export default function WebGLPersonaAvatar({
     let cancelled = false
     const loader = new GLTFLoader()
 
-    loader.load(
-      resolvedModelUrl,
-      (gltf) => {
-        if (cancelled) return
-        root.clear()
-        const model = gltf.scene
-        model.position.set(0, -0.1, 0)
-        model.scale.setScalar(1.05)
-        root.add(model)
-        mouthRef.current = findBestMouthTarget(model)
-      },
-      undefined,
-      () => {
-        if (cancelled) return
-        root.clear()
-        const fallback = createFallbackAvatar()
-        root.add(fallback)
-        mouthRef.current = findBestMouthTarget(fallback)
+    const loadFallback = () => {
+      if (cancelled) return
+      root.clear()
+      const fallback = createFallbackAvatar()
+      root.add(fallback)
+      mouthRef.current = findBestMouthTarget(fallback)
+    }
+
+    const loadModel = async () => {
+      const validUrl = await findValidModelUrl(resolvedModelCandidates)
+      if (!validUrl) {
+        loadFallback()
+        return
       }
-    )
+
+      loader.load(
+        validUrl,
+        (gltf) => {
+          if (cancelled) return
+          root.clear()
+          const model = gltf.scene
+          model.position.set(0, -0.1, 0)
+          model.scale.setScalar(1.05)
+          root.add(model)
+          mouthRef.current = findBestMouthTarget(model)
+        },
+        undefined,
+        () => {
+          loadFallback()
+        }
+      )
+    }
+    loadModel()
 
     const resize = () => {
       const w = mount.clientWidth || 220
@@ -231,7 +297,7 @@ export default function WebGLPersonaAvatar({
       disposeFnsRef.current.forEach((fn) => fn())
       disposeFnsRef.current = []
     }
-  }, [resolvedModelUrl, mode, speechIntensity])
+  }, [resolvedModelCandidates, mode, speechIntensity])
 
   useEffect(() => {
     const duration = 1200 + Math.round(speechPulse * 18)
