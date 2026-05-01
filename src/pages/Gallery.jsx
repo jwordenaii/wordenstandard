@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import GalleryUploadForm from '../components/GalleryUploadForm'
 import SchemaMarkup from '../components/SchemaMarkup'
 import { SITE_URL } from '../lib/businessInfo'
+import { useGalleryImages } from '../hooks/useGalleryImages'
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -108,9 +109,7 @@ function ImageCard({ image, token, onDeleted }) {
 }
 
 export default function Gallery() {
-  const [images, setImages] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { images, loading, error, reload, setImages } = useGalleryImages()
   const [showUpload, setShowUpload] = useState(false)
   const [token, setToken] = useState('')
   const [tokenInput, setTokenInput] = useState('')
@@ -123,25 +122,6 @@ export default function Gallery() {
     typeof window !== 'undefined' &&
     (new URLSearchParams(window.location.search).get('admin') === '1' ||
       window.location.hash.includes('admin=1'))
-
-  const fetchImages = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch(`${BASE}/api/v1/gallery/images`)
-      if (!res.ok) throw new Error(`Failed to load gallery (${res.status})`)
-      const data = await res.json()
-      setImages(data.images || [])
-    } catch (err) {
-      setError(err.message || 'Could not load gallery.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchImages()
-  }, [fetchImages])
 
   function handleUploaded(newImage) {
     setImages((prev) => [newImage, ...prev])
@@ -311,7 +291,7 @@ export default function Gallery() {
         {error && (
           <div className="text-center py-20">
             <p className="text-red-400 mb-4">{error}</p>
-            <button onClick={fetchImages} className="btn-primary text-sm !py-2">
+            <button onClick={reload} className="btn-primary text-sm !py-2">
               Try Again
             </button>
           </div>

@@ -16,6 +16,7 @@ import InspirationGallery from '../components/InspirationGallery'
 import SmartImage from '../components/SmartImage'
 import Carousel from '../components/Carousel'
 import { SITE_URL } from '../lib/businessInfo'
+import { useGalleryImages, imageLocation } from '../hooks/useGalleryImages'
 
 // ── Hero image strip ───────────────────────────────────────────────────────────
 // Royalty-free Unsplash photos (Unsplash License — free for commercial use,
@@ -400,6 +401,29 @@ const fadeUp = {
 }
 
 export default function Home() {
+  // Pull live photos from the gallery API — these are the photos uploaded
+  // through the live-site Gallery uploader, so a single upload populates
+  // both the Featured Branded Work carousel here and the /gallery page.
+  const { images: galleryImages } = useGalleryImages()
+
+  // Normalize a gallery API record into the shape the carousel/SmartImage
+  // already expect. Falls back to the static FEATURED_WORK list when the
+  // API hasn't returned anything yet, so the layout is never empty.
+  const featuredWork =
+    galleryImages.length > 0
+      ? galleryImages.map((img) => {
+          const loc = imageLocation(img)
+          return {
+            src: img.url, // base64 data URI from the gallery DB
+            alt: img.description || img.job_name,
+            caption: img.job_name,
+            sub: img.description || (loc ? `${loc.city || ''}${loc.region ? `, ${loc.region}` : ''}` : ''),
+            location: loc,
+            uploadDate: img.uploaded_at,
+          }
+        })
+      : FEATURED_WORK
+
   return (
     <>
       <SchemaMarkup
@@ -411,10 +435,11 @@ export default function Home() {
           WEBSITE_SCHEMA,
           LOCAL_BUSINESS_SCHEMA,
           faqSchema(HOME_FAQS),
-          // ImageObject per featured photo — adds contentLocation when the
-          // job site has known geo coordinates so Google Image Search can
+          // ImageObject per featured photo — adds contentLocation when a city
+          // / state can be resolved (either from structured fields or by
+          // parsing the operator's job_name) so Google Image Search can
           // surface these images for location-relevant queries.
-          ...FEATURED_WORK.map((item) => imageObjectSchema(item, SITE_URL)),
+          ...featuredWork.map((item) => imageObjectSchema(item, SITE_URL)),
         ]}
       />
 
@@ -534,9 +559,11 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Headline carousel — single large rotating photo with caption. */}
+          {/* Headline carousel — single large rotating photo with caption.
+              Pulls from the gallery API (photos uploaded via the Gallery
+              uploader on the live site) with a labeled fallback when empty. */}
           <Carousel
-            items={FEATURED_WORK}
+            items={featuredWork}
             ariaLabel="Featured branded project photos"
             className="mb-6"
             aspectClass="aspect-[16/9]"
@@ -563,12 +590,11 @@ export default function Home() {
             )}
           />
 
-          {/* Thumbnail grid — same set, lazy-loaded, also benefits from the
-              <SmartImage> branded fallback while real photos are uploaded. */}
+          {/* Thumbnail grid — same set, lazy-loaded. */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {FEATURED_WORK.map((p) => (
+            {featuredWork.map((p, idx) => (
               <figure
-                key={p.src}
+                key={`${p.src}-${idx}`}
                 className="relative rounded-xl overflow-hidden bg-brand-navy/40 shadow-md ring-1 ring-white/10"
               >
                 <SmartImage
