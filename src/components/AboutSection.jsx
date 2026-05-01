@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Users, Award, Thermometer } from 'lucide-react';
+import SmartImage from './SmartImage';
 
 const TEXTURE_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
 
@@ -13,14 +14,19 @@ const VALUES = [
 
 export default function AboutSection() {
   return (
-    <section id="about" className="border-t border-border">
+    <section id="about" className="border-t border-border relative overflow-hidden">
+      <div className="absolute top-10 -right-20 w-64 h-64 rounded-full bg-primary/12 blur-3xl pointer-events-none" />
       <div className="grid grid-cols-1 lg:grid-cols-2">
         {/* Image side */}
         <div className="relative min-h-[400px] lg:min-h-[600px] overflow-hidden">
-          <img
+          <SmartImage
             src={TEXTURE_IMG}
             alt="J. Worden & Sons crew completing a commercial asphalt paving project at dusk in Virginia."
-            className="w-full h-full object-cover" />
+            width={1600}
+            height={1100}
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="w-full h-full object-cover quality-premium"
+          />
           
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background/40 lg:to-background" />
         </div>
@@ -50,7 +56,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="border border-border p-5 hover:border-primary/40 transition-colors duration-500">
+              className="premium-panel rounded-2xl p-5 hover:border-primary/40 transition-colors duration-500">
               
                 <item.icon className="w-5 h-5 text-primary mb-3" />
                 <h3 className="font-display font-bold text-foreground text-sm tracking-wider uppercase">

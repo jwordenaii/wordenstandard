@@ -109,7 +109,8 @@ export default function FAQSection() {
   const active = FAQS.find((g) => g.category === activeCategory);
 
   return (
-    <section id="faq" className="border-t border-border py-16 md:py-24">
+    <section id="faq" className="border-t border-border py-16 md:py-24 relative overflow-hidden">
+      <div className="absolute -bottom-20 left-0 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
       <div className="max-w-5xl mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
@@ -126,7 +127,7 @@ export default function FAQSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Category tabs */}
-          <div className="lg:col-span-1 flex lg:flex-col gap-2">
+          <div className="lg:col-span-1 flex lg:flex-col gap-2 premium-panel rounded-2xl p-3 h-fit">
             {FAQS.map((group) => (
               <button
                 key={group.category}
@@ -150,7 +151,7 @@ export default function FAQSection() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-3 border border-border divide-y-0 px-6"
+              className="lg:col-span-3 premium-panel rounded-2xl divide-y-0 px-6"
             >
               {active?.items.map((item) => (
                 <FAQItem key={item.q} question={item.q} answer={item.a} />
