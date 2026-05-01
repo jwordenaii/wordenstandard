@@ -26,6 +26,14 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Richmond commercial landing page -->
+  <url>
+    <loc>https://www.jwordenasphaltpaving.com/commercial/richmond-va</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- ────────── VIRGINIA LOCATION PAGES ────────── -->
   <url>
     <loc>https://www.jwordenasphaltpaving.com/locations/chester-va</loc>

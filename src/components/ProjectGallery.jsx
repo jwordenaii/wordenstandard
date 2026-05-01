@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Ruler, Calendar, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { RICHMOND_COMMERCIAL_PROOF } from '@/lib/richmondCommercialProof';
 
 // Build rich, keyword-dense alt text for each photo — critical for Google Images SEO.
 const buildAltText = (p) => {
@@ -95,15 +96,26 @@ export default function ProjectGallery() {
   // Defensive: guarantee array at every consumer site, even if state was somehow set to non-array.
   const safeProjects = Array.isArray(projects) ? projects : [];
 
+  const projectsWithFallback = useMemo(() => {
+    const map = new Map();
+
+    [...safeProjects, ...RICHMOND_COMMERCIAL_PROOF].forEach((project) => {
+      const key = `${project.title}|${project.location}|${project.image_url}`;
+      if (!map.has(key)) map.set(key, project);
+    });
+
+    return Array.from(map.values()).sort((a, b) => (b.year || 0) - (a.year || 0));
+  }, [safeProjects]);
+
   // SEO: inject ImageGallery structured data once projects load.
-  useImageGalleryJsonLd(safeProjects);
+  useImageGalleryJsonLd(projectsWithFallback);
 
   const filtered = activeCategory === 'all'
-    ? safeProjects
-    : safeProjects.filter((p) => p.category === activeCategory);
+    ? projectsWithFallback
+    : projectsWithFallback.filter((p) => p.category === activeCategory);
 
   const availableCategories = CATEGORIES.filter(
-    (c) => c.id === 'all' || safeProjects.some((p) => p.category === c.id)
+    (c) => c.id === 'all' || projectsWithFallback.some((p) => p.category === c.id)
   );
 
   return (
@@ -130,7 +142,7 @@ export default function ProjectGallery() {
         {/* Category filters */}
         <div className="flex flex-wrap gap-2 mb-10 border-b border-border pb-6">
           {availableCategories.map((cat) => {
-            const count = cat.id === 'all' ? safeProjects.length : safeProjects.filter((p) => p.category === cat.id).length;
+            const count = cat.id === 'all' ? projectsWithFallback.length : projectsWithFallback.filter((p) => p.category === cat.id).length;
             const active = activeCategory === cat.id;
             return (
               <button

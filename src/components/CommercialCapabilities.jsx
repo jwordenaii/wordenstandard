@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check, Phone, ShieldCheck, Star } from 'lucide-react';
 import { trackPhoneClick } from '@/lib/analytics';
@@ -92,6 +93,13 @@ export default function CommercialCapabilities() {
             </div>
 
             <div className="space-y-3 mt-6">
+              <Link
+                to="/commercial/richmond-va"
+                className="w-full flex items-center justify-center gap-2 border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+              >
+                View Richmond Commercial Page
+              </Link>
+
               <a
                 href="tel:+18044461296"
                 onClick={() => trackPhoneClick('commercial_capabilities')}

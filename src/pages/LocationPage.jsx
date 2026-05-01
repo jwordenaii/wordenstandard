@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { getLocationBySlug, PRIMARY_DOMAIN } from '@/lib/locations';
 import Navbar from '@/components/Navbar';
@@ -109,6 +110,39 @@ export default function LocationPage() {
           neighborhoods={loc.neighborhoods}
           landmarks={loc.landmarks}
         />
+
+        {loc.slug === 'richmond-va' && (
+          <section className="border-t border-border py-12 md:py-14">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+              <div className="premium-panel rounded-2xl p-6 md:p-8">
+                <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-3">
+                  Richmond Commercial Resources
+                </p>
+                <h2 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight">
+                  Explore Detailed Commercial Scope And Proof
+                </h2>
+                <p className="text-muted-foreground text-sm md:text-base mt-3 leading-relaxed max-w-3xl">
+                  Review our Richmond commercial planning page and project evidence before requesting your estimate.
+                </p>
+                <div className="flex flex-wrap gap-3 mt-6">
+                  <Link
+                    to="/commercial/richmond-va"
+                    className="premium-cta px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase text-primary-foreground"
+                  >
+                    Richmond Commercial Page
+                  </Link>
+                  <Link
+                    to="/#projects"
+                    className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+                  >
+                    Richmond Project Proof
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         <MarketClimate climate={loc.climate} city={loc.city} />
         <MarketFAQ faqs={loc.faqs} city={loc.city} />
         <MarketCTA city={loc.city} state={loc.stateAbbr} />

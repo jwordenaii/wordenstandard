@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { CheckCircle2, ClipboardCheck, Phone, ShieldCheck } from 'lucide-react'
 import { trackPhoneClick } from '@/lib/analytics'
 
@@ -48,6 +49,13 @@ export default function LocalBidComparison() {
             </div>
 
             <div className="space-y-3 mt-6">
+              <Link
+                to="/commercial/richmond-va"
+                className="w-full flex items-center justify-center gap-2 border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+              >
+                Richmond Commercial Details
+              </Link>
+
               <a
                 href="tel:+18044461296"
                 onClick={() => trackPhoneClick('local_bid_comparison')}

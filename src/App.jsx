@@ -20,6 +20,7 @@ const JobDetail = lazy(() => import('./pages/JobDetail'));
 const CrewReporting = lazy(() => import('./pages/CrewReporting'));
 const LocationsIndex = lazy(() => import('./pages/LocationsIndex'));
 const LocationPage = lazy(() => import('./pages/LocationPage'));
+const RichmondCommercial = lazy(() => import('./pages/RichmondCommercial'));
 const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
@@ -71,6 +72,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/locations" element={<LocationsIndex />} />
         <Route path="/locations/:slug" element={<LocationPage />} />
+        <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<CrewEta />} />
