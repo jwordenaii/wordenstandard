@@ -441,6 +441,12 @@ export default function Home() {
                 caption: 'Neighborhood Road Work',
                 sub: 'Subdivision road paving & resurfacing',
               },
+              {
+                src: 'https://github.com/user-attachments/assets/3000889a-2978-40e1-acfc-fe4eeed729bf',
+                alt: 'Commercial parking lot paving in Portsmouth, Virginia — owner-provided project photo',
+                caption: 'Parking Lot Paving — Portsmouth, VA',
+                sub: 'Commercial lot paving',
+              },
             ].map((p) => (
               <figure
                 key={p.src}
