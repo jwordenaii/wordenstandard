@@ -6,12 +6,18 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   frontend:
     name: Frontend — Lint & Build
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -47,8 +53,7 @@ jobs:
   backend:
     name: Backend — Imports, Migrations & Tests
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -83,8 +88,7 @@ jobs:
   docker:
     name: Docker — Build Validation
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -97,9 +101,8 @@ jobs:
   tests:
     name: Tests — Frontend Unit & E2E Smoke
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     needs: [frontend, backend]
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -107,11 +110,6 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
 
       - name: Install frontend dependencies
         run: npm ci

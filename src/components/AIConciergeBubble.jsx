@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, Sparkles } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import MrWordenAvatar from './MrWordenAvatar';
 
 /**
  * Floating AI concierge chat bubble that lives on the public site.
@@ -16,6 +17,8 @@ export default function AIConciergeBubble() {
   const [sending, setSending] = useState(false);
   const [booting, setBooting] = useState(false);
   const scrollRef = useRef(null);
+
+  const avatarState = open ? (sending || booting ? 'talking' : 'listening') : 'idle';
 
   const initConversation = async () => {
     if (conversation) return conversation;
@@ -88,28 +91,38 @@ export default function AIConciergeBubble() {
       {/* Floating trigger */}
       <AnimatePresence>
         {!open && (
-          <motion.button
+          <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1.5 }}
-            onClick={handleOpen}
-            className="absolute bottom-8 right-5 sm:right-8 z-40 flex items-center gap-3 bg-primary text-primary-foreground pl-4 pr-5 py-3 shadow-2xl hover:shadow-primary/30 transition-shadow group"
-            aria-label="Open AI consultant chat"
+            className="absolute bottom-5 right-4 sm:bottom-8 sm:right-8 z-40 flex items-center gap-3 bg-black/75 text-foreground pl-2 pr-4 py-2 border border-primary/40 shadow-2xl hover:shadow-primary/30 transition-shadow group backdrop-blur-sm"
           >
-            <div className="relative">
-              <MessageCircle className="w-5 h-5" strokeWidth={2.5} />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-primary" />
+            <div className="relative -my-2">
+              <MrWordenAvatar
+                state={avatarState}
+                size={54}
+                onClick={handleOpen}
+                isOpen={open}
+              />
+              <span className="absolute top-3 right-2 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black" />
             </div>
             <div className="text-left leading-none">
+              <button
+                type="button"
+                onClick={handleOpen}
+                className="text-left"
+                aria-label="Open AI consultant chat"
+              >
               <p className="font-display font-black text-[11px] tracking-[0.15em] uppercase">
-                Ask the AI
+                Ask Mr. Worden
               </p>
               <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-70 mt-0.5">
-                Instant · 24/7
+                Live AI Concierge · 24/7
               </p>
+              </button>
             </div>
-          </motion.button>
+          </motion.div>
         )}
       </AnimatePresence>
 

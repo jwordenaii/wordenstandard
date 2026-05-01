@@ -12,6 +12,9 @@ on:
         required: false
         default: "production"
 
+permissions:
+  contents: read
+
 # Only one deployment per branch runs at a time; newer run cancels the previous one.
 concurrency:
   group: deploy-${{ github.ref }}
@@ -22,8 +25,7 @@ jobs:
   deploy-frontend:
     name: Deploy Front-End → Netlify
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 30
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -53,6 +55,14 @@ jobs:
       # ── Install dependencies ───────────────────────────────────────────────
       - name: Install Node dependencies
         run: npm ci
+
+      - name: Check required build variables
+        run: |
+          [ -n "$VITE_API_BASE_URL" ] || (echo "::error::Missing VITE_API_BASE_URL" && exit 1)
+          [ -n "$VITE_SITE_URL" ] || (echo "::error::Missing VITE_SITE_URL" && exit 1)
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
 
       # ── Build ──────────────────────────────────────────────────────────────
       - name: Build front-end
@@ -94,8 +104,7 @@ jobs:
   deploy-backend:
     name: Deploy Back-End
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 35
 
     steps:
       - uses: actions/checkout@v4
@@ -149,8 +158,7 @@ jobs:
     name: Integration & E2E Tests
     needs: [deploy-frontend, deploy-backend]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 35
 
     steps:
       - uses: actions/checkout@v4

@@ -1,16 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Phone } from 'lucide-react';
+import { trackEvent, trackPhoneClick } from '@/lib/analytics';
 
 const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/1c52a6398_generated_image.png';
 
 export default function HeroSection() {
   const scrollToQuote = () => {
+    trackEvent('hero_cta_click', { cta: 'free_estimate' });
     const el = document.querySelector('#quote');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToServices = () => {
+    trackEvent('hero_cta_click', { cta: 'explore_services' });
     const el = document.querySelector('#services');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
@@ -79,13 +82,25 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 items-center">
             <button
               onClick={scrollToQuote}
               className="bg-primary text-primary-foreground px-8 py-4 font-display font-bold text-sm tracking-wider uppercase hover:bg-primary/90 transition-colors min-h-[48px]">
               
               Get My Free Estimate
             </button>
+            <a
+              href="tel:+18044461296"
+              onClick={() => {
+                trackEvent('hero_cta_click', { cta: 'call_now' });
+                trackPhoneClick('hero');
+              }}
+              className="border border-primary text-primary px-6 py-4 font-display font-bold text-sm tracking-wider uppercase hover:bg-primary/10 transition-colors min-h-[48px] inline-flex items-center gap-2"
+              aria-label="Call (804) 446-1296"
+            >
+              <Phone className="w-4 h-4" />
+              Call (804) 446-1296
+            </a>
             <button
               onClick={scrollToServices}
               className="border border-border text-foreground px-4 py-4 hover:border-primary hover:text-primary transition-colors min-h-[48px]"
