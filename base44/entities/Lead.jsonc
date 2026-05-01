@@ -88,6 +88,69 @@
       "type": "number",
       "description": "Actual closed revenue in USD (set when status = won)"
     },
+    "gross_margin_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Estimated or realized gross margin percentage for this lead/project"
+    },
+    "gross_margin_band": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ],
+      "description": "Margin band used for prioritization and bid strategy"
+    },
+    "expected_gross_profit": {
+      "type": "number",
+      "description": "Estimated gross profit in USD based on estimated value and margin"
+    },
+    "closed_gross_profit": {
+      "type": "number",
+      "description": "Actual gross profit in USD when deal is closed"
+    },
+    "loss_reason": {
+      "type": "string",
+      "description": "Why lead was marked lost (price, timing, no response, competitor, etc.)"
+    },
+    "outcome_notes": {
+      "type": "string",
+      "description": "Internal close/loss summary for retraining and coaching"
+    },
+    "attribution_snapshot": {
+      "type": "string",
+      "description": "JSON snapshot of first-touch attribution parameters"
+    },
+    "attribution_first_touch_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When attribution was first captured"
+    },
+    "gclid": {
+      "type": "string",
+      "description": "Google Ads click ID captured at lead creation"
+    },
+    "wbraid": {
+      "type": "string",
+      "description": "Web-to-app click identifier for Google Ads attribution"
+    },
+    "gbraid": {
+      "type": "string",
+      "description": "App-to-web click identifier for Google Ads attribution"
+    },
+    "offline_conversion_ready": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when lead has enough data for offline conversion upload"
+    },
+    "offline_conversion_exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this lead was exported to offline conversion workflow"
+    },
     "conversion_source": {
       "type": "string",
       "enum": [

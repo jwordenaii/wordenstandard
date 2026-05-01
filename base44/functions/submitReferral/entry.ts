@@ -30,6 +30,8 @@ Deno.serve(async (req) => {
       notes: `Referred by ${user.full_name} (${user.email})${notes ? `. ${notes}` : ''}`,
       status: 'new',
       conversion_source: 'referral',
+      gross_margin_band: 'unknown',
+      offline_conversion_ready: false,
     });
 
     // Create the referral tracking record

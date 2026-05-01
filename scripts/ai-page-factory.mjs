@@ -39,6 +39,29 @@ function assertBlueprint(blueprint, fileName) {
   }
 }
 
+function assertPremiumQuality(blueprint, fileName) {
+  if ((blueprint.public === true) && (!blueprint.sections || blueprint.sections.length < 3)) {
+    throw new Error(`${fileName}: public pages require at least 3 sections for depth and authority`)
+  }
+
+  const description = String(blueprint.description || '').trim()
+  if (description.length < 80 || description.length > 180) {
+    throw new Error(`${fileName}: description should be 80-180 characters for SEO quality`)
+  }
+
+  const blockedPublicTerms = ['command center', 'admin', 'internal only', 'confidential']
+  const bodyText = `${blueprint.title || ''} ${blueprint.description || ''} ${blueprint.intro || ''}`.toLowerCase()
+
+  if (blueprint.public === true && blockedPublicTerms.some((term) => bodyText.includes(term))) {
+    throw new Error(`${fileName}: public page contains internal-only language`)
+  }
+
+  const hasThinSection = (blueprint.sections || []).some((section) => String(section?.body || '').trim().length < 80)
+  if (blueprint.public === true && hasThinSection) {
+    throw new Error(`${fileName}: each public section body should be at least 80 characters`)
+  }
+}
+
 function escapeSingleQuotes(text) {
   return String(text).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 }
@@ -205,6 +228,7 @@ async function loadBlueprints() {
     if (blueprint.enabled === false) continue
 
     assertBlueprint(blueprint, file.name)
+    assertPremiumQuality(blueprint, file.name)
 
     const pagePath = normalizePath(blueprint.slug)
     const componentName = `${slugToPascal(pagePath)}AIPage`

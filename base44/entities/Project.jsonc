@@ -40,6 +40,39 @@
       "type": "boolean",
       "default": false,
       "description": "Highlight on homepage"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Associated lead id used for attribution and close-loop analytics"
+    },
+    "contract_value": {
+      "type": "number",
+      "description": "Final contract value in USD"
+    },
+    "gross_margin_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Realized gross margin percent for project"
+    },
+    "gross_profit": {
+      "type": "number",
+      "description": "Realized gross profit in USD"
+    },
+    "acquisition_source": {
+      "type": "string",
+      "enum": [
+        "google_ads",
+        "google_organic",
+        "referral",
+        "direct",
+        "gmail_inbound",
+        "voice_ai",
+        "facebook",
+        "houzz",
+        "other"
+      ],
+      "description": "Attribution source tied to closed project"
     }
   },
   "required": [

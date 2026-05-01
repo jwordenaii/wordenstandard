@@ -2,7 +2,11 @@
 // Uses the global gtag() function loaded in index.html. All calls are safe no-ops
 // if gtag isn't available yet (e.g. during SSR or before the script loads).
 
-import { getAttributionEventParams, persistAttribution } from '@/lib/adsAttribution';
+import {
+  getAttributionEventParams,
+  getOfflineConversionIdentifiers,
+  persistAttribution,
+} from '@/lib/adsAttribution';
 
 // ─────────────────────────────────────────────────────────────
 // GOOGLE ADS CONVERSION IDs
@@ -64,6 +68,7 @@ export const trackLeadSubmission = (lead = {}) => {
     surface_type: lead.surface_type,
     sqft: lead.sqft,
     urgency: lead.urgency,
+    lead_id: lead.id,
     value: 250, // estimated lead value for ROAS math
     currency: 'USD',
   });
@@ -75,6 +80,55 @@ export const trackLeadSubmission = (lead = {}) => {
       currency: 'USD',
     });
   }
+};
+
+export const trackLeadOutcome = (lead = {}) => {
+  const closedValue = Number(lead.closed_value || lead.contract_value || 0);
+  const grossProfit = Number(lead.closed_gross_profit || 0);
+
+  trackEvent('lead_outcome_recorded', {
+    lead_id: lead.id,
+    status: lead.status,
+    conversion_source: lead.conversion_source,
+    gross_margin_band: lead.gross_margin_band,
+    closed_value: closedValue || undefined,
+    gross_profit: grossProfit || undefined,
+    value: closedValue || undefined,
+    currency: closedValue ? 'USD' : undefined,
+  });
+};
+
+export const buildOfflineConversionPayload = (lead = {}) => {
+  const ids = getOfflineConversionIdentifiers();
+  const conversionValue = Number(lead.closed_value || lead.contract_value || 0);
+  const conversionDateTime = lead.closed_at || new Date().toISOString();
+
+  return {
+    lead_id: lead.id,
+    conversion_name: 'Quote Form Submit',
+    conversion_time: conversionDateTime,
+    conversion_value: conversionValue,
+    currency: 'USD',
+    gclid: lead.gclid || ids.gclid || undefined,
+    wbraid: lead.wbraid || ids.wbraid || undefined,
+    gbraid: lead.gbraid || ids.gbraid || undefined,
+    eligible: Boolean(conversionValue > 0 && (lead.gclid || ids.gclid || lead.wbraid || ids.wbraid || lead.gbraid || ids.gbraid)),
+  };
+};
+
+export const trackOfflineConversionReady = (lead = {}) => {
+  const payload = buildOfflineConversionPayload(lead);
+  trackEvent('offline_conversion_ready', {
+    lead_id: payload.lead_id,
+    conversion_name: payload.conversion_name,
+    conversion_value: payload.conversion_value || undefined,
+    gclid_present: Boolean(payload.gclid),
+    wbraid_present: Boolean(payload.wbraid),
+    gbraid_present: Boolean(payload.gbraid),
+    eligible: payload.eligible,
+    currency: payload.conversion_value ? 'USD' : undefined,
+  });
+  return payload;
 };
 
 export const trackLandingPageView = (page = {}) => {

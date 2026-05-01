@@ -66,6 +66,13 @@ Deno.serve(async (req) => {
           urgency: args.urgency || 'standard',
           notes: `📞 Inbound phone call lead. ${args.notes || ''}`,
           status: 'new',
+          conversion_source: args.conversion_source || 'voice_ai',
+          gclid: args.gclid || '',
+          wbraid: args.wbraid || '',
+          gbraid: args.gbraid || '',
+          attribution_snapshot: args.attribution_snapshot || '',
+          attribution_first_touch_at: args.attribution_first_touch_at || new Date().toISOString(),
+          offline_conversion_ready: Boolean(args.gclid || args.wbraid || args.gbraid),
         });
         return json({ result: { success: true, lead_id: created.id } });
       }

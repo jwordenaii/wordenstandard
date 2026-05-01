@@ -170,6 +170,17 @@ export default function LeadInbox() {
                           {lead.estimated_value.toLocaleString()}
                         </span>
                       ) : null}
+                      {lead.gross_margin_band ? (
+                        <span className={`px-2 py-0.5 border font-display font-bold text-[10px] tracking-wider uppercase ${
+                          lead.gross_margin_band === 'high'
+                            ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300'
+                            : lead.gross_margin_band === 'medium'
+                              ? 'border-sky-400/40 bg-sky-500/10 text-sky-300'
+                              : 'border-amber-400/40 bg-amber-500/10 text-amber-300'
+                        }`}>
+                          {lead.gross_margin_band} margin
+                        </span>
+                      ) : null}
                       <span className="px-2 py-0.5 border border-border text-muted-foreground font-display text-[10px] tracking-[0.2em] uppercase">
                         {lead.status || 'new'}
                       </span>
@@ -231,6 +242,11 @@ export default function LeadInbox() {
                         <p className="font-body text-muted-foreground text-sm leading-relaxed">
                           {lead.score_reasoning}
                         </p>
+                        {lead.expected_gross_profit ? (
+                          <p className="font-body text-emerald-300 text-xs mt-2">
+                            Expected gross profit: ${Math.round(lead.expected_gross_profit).toLocaleString()}
+                          </p>
+                        ) : null}
                       </div>
                     )}
 

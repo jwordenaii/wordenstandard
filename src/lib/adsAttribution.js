@@ -34,8 +34,15 @@ export function persistAttribution() {
   if (typeof window === 'undefined') return {}
   const fromUrl = readAttributionFromUrl()
   if (Object.keys(fromUrl).length > 0) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fromUrl))
-    return fromUrl
+    const existing = safeJsonParse(window.localStorage.getItem(STORAGE_KEY) || '')
+    const merged = {
+      ...(existing && typeof existing === 'object' ? existing : {}),
+      ...fromUrl,
+      captured_at: existing?.captured_at || new Date().toISOString(),
+      last_seen_at: new Date().toISOString(),
+    }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
+    return merged
   }
 
   const cached = safeJsonParse(window.localStorage.getItem(STORAGE_KEY) || '')
@@ -59,5 +66,27 @@ export function getAttributionEventParams() {
     gclid: a.gclid || undefined,
     wbraid: a.wbraid || undefined,
     gbraid: a.gbraid || undefined,
+  }
+}
+
+export function getLeadAttributionFields() {
+  const a = getAttribution()
+  return {
+    conversion_source: a.utm_source || 'direct',
+    attribution_snapshot: Object.keys(a).length ? JSON.stringify(a) : undefined,
+    attribution_first_touch_at: a.captured_at || new Date().toISOString(),
+    gclid: a.gclid || undefined,
+    wbraid: a.wbraid || undefined,
+    gbraid: a.gbraid || undefined,
+    offline_conversion_ready: Boolean(a.gclid || a.wbraid || a.gbraid),
+  }
+}
+
+export function getOfflineConversionIdentifiers() {
+  const a = getAttribution()
+  return {
+    gclid: a.gclid || null,
+    wbraid: a.wbraid || null,
+    gbraid: a.gbraid || null,
   }
 }

@@ -6,7 +6,8 @@ import { ChevronRight, ChevronLeft, Check, MapPin, Ruler, Clock, User, Calculato
 import { toast } from 'sonner';
 import PavingCalculator from './PavingCalculator';
 import { base44 } from '@/api/base44Client';
-import { trackLeadSubmission, trackEvent } from '@/lib/analytics';
+import { trackLeadSubmission, trackEvent, trackOfflineConversionReady } from '@/lib/analytics';
+import { getLeadAttributionFields, persistAttribution } from '@/lib/adsAttribution';
 
 const SURFACE_TYPES = [
   { id: 'driveway', label: 'Driveway', sub: 'Residential · Fine-grain mix', icon: '🏠' },
@@ -82,6 +83,8 @@ export default function QuoteEngine() {
     if (isSubmitting || !canProceed()) return;
 
     setIsSubmitting(true);
+    persistAttribution();
+    const attribution = getLeadAttributionFields();
     const leadData = {
       name: formData.name.trim(),
       email: formData.email.trim(),
@@ -94,12 +97,14 @@ export default function QuoteEngine() {
       notes: formData.notes.trim(),
       status: 'new',
       conversion_source: detectConversionSource(),
+      ...attribution,
     };
     try {
       const createdLead = await base44.entities.Lead.create(leadData);
 
       // Fire GA4 + Google Ads conversion
-      trackLeadSubmission(leadData);
+      trackLeadSubmission({ ...leadData, id: createdLead?.id });
+      trackOfflineConversionReady({ ...leadData, id: createdLead?.id });
 
       // Fire-and-forget: generate + email branded PDF estimate (doesn't block UX)
       if (createdLead?.id) {

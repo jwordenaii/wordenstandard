@@ -13,10 +13,50 @@ const scoreSchema = {
     score: { type: 'number', minimum: 0, maximum: 100 },
     tier: { type: 'string', enum: ['hot', 'warm', 'cool', 'cold'] },
     estimated_value: { type: 'number', description: 'Estimated project revenue in USD' },
+    gross_margin_band: { type: 'string', enum: ['high', 'medium', 'low', 'unknown'] },
+    margin_confidence: { type: 'number', minimum: 0, maximum: 1 },
     reasoning: { type: 'string', description: '2-3 sentence explanation referencing specific lead signals' },
   },
-  required: ['score', 'tier', 'estimated_value', 'reasoning'],
+  required: ['score', 'tier', 'estimated_value', 'gross_margin_band', 'margin_confidence', 'reasoning'],
 };
+
+const SOURCE_SCORE_BONUS: Record<string, number> = {
+  google_ads: 6,
+  referral: 8,
+  google_organic: 4,
+  direct: 2,
+  gmail_inbound: 2,
+  voice_ai: 3,
+  facebook: 1,
+  houzz: 2,
+  other: 0,
+};
+
+function clampScore(value: number): number {
+  return Math.round(Math.max(0, Math.min(100, value || 0)));
+}
+
+function inferMarginPct(lead: any, estimatedValue: number): number {
+  const surface = String(lead?.surface_type || '').toLowerCase();
+  const material = String(lead?.material || '').toLowerCase();
+
+  let base = 28;
+  if (surface.includes('parking') || surface.includes('commercial') || surface.includes('industrial')) base = 24;
+  if (surface.includes('driveway') || surface.includes('residential')) base = 31;
+  if (surface.includes('walkway') || surface.includes('patio')) base = 34;
+  if (material.includes('premium') || material.includes('polymer')) base += 3;
+  if (estimatedValue > 65000) base -= 2;
+  if (estimatedValue < 8000) base += 2;
+
+  return Math.max(14, Math.min(46, base));
+}
+
+function marginBandFromPct(marginPct: number): 'high' | 'medium' | 'low' | 'unknown' {
+  if (!Number.isFinite(marginPct)) return 'unknown';
+  if (marginPct >= 32) return 'high';
+  if (marginPct >= 24) return 'medium';
+  return 'low';
+}
 
 const buildPrompt = (lead) => `You are a senior sales strategist for J. Worden & Sons Asphalt Paving (Chester, VA).
 Score this incoming lead 0-100 based on close-probability AND project value.
@@ -49,10 +89,12 @@ ${JSON.stringify({
   sqft: lead.sqft,
   material: lead.material,
   urgency: lead.urgency,
+  conversion_source: lead.conversion_source,
+  gclid_present: Boolean(lead.gclid),
   notes: lead.notes,
 }, null, 2)}
 
-Return valid JSON matching the schema. Be direct and specific in reasoning — reference actual lead signals.`;
+Return valid JSON matching the schema. Prioritize close-probability and expected margin, not just contract size. Be direct and specific in reasoning — reference actual lead signals.`;
 
 Deno.serve(async (req) => {
   try {
@@ -72,8 +114,18 @@ Deno.serve(async (req) => {
       model: 'claude_sonnet_4_6',
     });
 
-    const score = Math.round(Math.max(0, Math.min(100, Number(result.score) || 0)));
+    const source = String(lead?.conversion_source || 'other');
+    const sourceBonus = SOURCE_SCORE_BONUS[source] || 0;
+    const score = clampScore((Number(result.score) || 0) + sourceBonus);
     const tier = ['hot', 'warm', 'cool', 'cold'].includes(result.tier) ? result.tier : 'cool';
+    const estimatedValue = Math.round(Number(result.estimated_value) || 0);
+    const inferredMarginPct = inferMarginPct(lead, estimatedValue);
+    const inferredMarginBand = marginBandFromPct(inferredMarginPct);
+    const llmMarginBand = ['high', 'medium', 'low', 'unknown'].includes(result.gross_margin_band)
+      ? result.gross_margin_band
+      : inferredMarginBand;
+    const expectedGrossProfit = Math.round(estimatedValue * (inferredMarginPct / 100));
+    const marginConfidence = Math.max(0, Math.min(1, Number(result.margin_confidence) || 0.6));
 
     // Use user-scoped update so the request follows the caller's data environment
     // (Test vs Production). asServiceRole would default to Production and 404 on
@@ -82,11 +134,25 @@ Deno.serve(async (req) => {
       score,
       score_tier: tier,
       score_reasoning: result.reasoning || '',
-      estimated_value: Math.round(Number(result.estimated_value) || 0),
+      estimated_value: estimatedValue,
+      gross_margin_pct: inferredMarginPct,
+      gross_margin_band: llmMarginBand,
+      expected_gross_profit: expectedGrossProfit,
+      offline_conversion_ready: Boolean(lead?.gclid || lead?.wbraid || lead?.gbraid),
       scored_at: new Date().toISOString(),
     });
 
-    return Response.json({ success: true, leadId, score, tier, estimated_value: result.estimated_value });
+    return Response.json({
+      success: true,
+      leadId,
+      score,
+      tier,
+      estimated_value: estimatedValue,
+      gross_margin_pct: inferredMarginPct,
+      gross_margin_band: llmMarginBand,
+      margin_confidence: marginConfidence,
+      expected_gross_profit: expectedGrossProfit,
+    });
   } catch (error) {
     console.error('[scoreNewLead] Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
