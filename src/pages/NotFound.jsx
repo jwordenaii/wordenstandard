@@ -8,6 +8,7 @@ export default function NotFound() {
         title="Page Not Found"
         description="The page you are looking for does not exist. Return to J. Worden & Sons Asphalt Paving."
         canonical="/404"
+        noindex
       />
       <div className="min-h-screen bg-brand-navy flex items-center justify-center px-4 pt-16">
         <div className="max-w-lg w-full text-center">

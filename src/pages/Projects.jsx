@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA } from '../components/SchemaMarkup'
 import SocialShare from '../components/SocialShare'
+import SmartImage from '../components/SmartImage'
 import { trackEvent } from '../api/client'
 
 /**
@@ -32,7 +33,8 @@ const PROJECTS = [
     ],
     highlight: 'Owner-provided project image added to the portfolio.',
     emoji: '🛣',
-    imageUrl: 'https://github.com/user-attachments/assets/52e9f487-8090-43d6-a3f8-ab9d18933545',
+    imageUrl: '/work/commercial-access-road.jpg',
+    imageWebp: '/work/commercial-access-road.webp',
     imageAlt:
       'Commercial asphalt access road beside a fenced industrial facility with fresh pavement and clean edge detail',
   },
@@ -381,7 +383,28 @@ export default function Projects() {
         title="Project Portfolio — KFC National QSR Program & Commercial Paving"
         description="Verified project history for J. Worden & Sons — KFC new store builds and remodels across 12+ states including TX, NY, NJ, MI, MN, IA, MO, KS, GA, FL, NC, VA. Pavement Magazine Top 75. Est. 1984."
         canonical="/projects"
-        schema={LOCAL_BUSINESS_SCHEMA}
+        schema={[
+          LOCAL_BUSINESS_SCHEMA,
+          {
+            '@context': 'https://schema.org',
+            '@type': 'ImageObject',
+            contentUrl: `https://www.jwordenasphaltpaving.com/work/commercial-access-road.jpg`,
+            name: 'Commercial Asphalt Access Road & Gated Facility',
+            description:
+              'Commercial asphalt access road beside a fenced industrial facility with fresh pavement and clean edge detail.',
+            creditText: 'J. Worden & Sons Asphalt Paving',
+            // State-level Place — finer geo unavailable for this entry.
+            contentLocation: {
+              '@type': 'Place',
+              name: 'Virginia, US',
+              address: {
+                '@type': 'PostalAddress',
+                addressRegion: 'VA',
+                addressCountry: 'US',
+              },
+            },
+          },
+        ]}
         breadcrumb={[
           { name: 'Home', path: '/' },
           { name: 'Projects', path: '/projects' },
@@ -487,11 +510,17 @@ export default function Projects() {
               >
                 {project.imageUrl && (
                   <figure className="-m-6 mb-5">
-                    <img
+                    <SmartImage
                       src={project.imageUrl}
+                      webpSrc={project.imageWebp}
                       alt={project.imageAlt}
+                      label={project.name}
+                      sublabel={project.headline}
+                      width={1200}
+                      height={675}
+                      priority={i < 2}
                       className="h-72 w-full rounded-t-2xl object-cover"
-                      loading={i < 2 ? 'eager' : 'lazy'}
+                      sizes="(min-width: 768px) 50vw, 100vw"
                     />
                     <figcaption className="bg-brand-navy px-5 py-3 text-xs font-semibold text-brand-amber">
                       {project.headline}

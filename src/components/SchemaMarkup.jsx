@@ -28,6 +28,9 @@ const standaloneHelmetData = new HelmetData({})
  *   image       — absolute OG image URL (defaults to /og-default.jpg)
  *   schema      — JSON-LD object (or array of objects) to inject
  *   breadcrumb  — array of { name, path } for BreadcrumbList schema
+ *   noindex     — when true, emit robots="noindex,follow" so the page is
+ *                 excluded from search results (use for soft-404, gated, or
+ *                 utility pages that should not appear in the SERPs).
  */
 export default function SchemaMarkup({
   title,
@@ -36,6 +39,7 @@ export default function SchemaMarkup({
   image = `${SITE_URL}/og-default.jpg`,
   schema,
   breadcrumb,
+  noindex = false,
 }) {
   const fullTitle = `${title} | J. Worden & Sons Asphalt Paving`
   const canonicalUrl = `${SITE_URL}${canonical}`
@@ -67,6 +71,10 @@ export default function SchemaMarkup({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
+      {/* Per-page robots override. Defaults in index.html allow indexing;
+          setting noindex here suppresses it for soft-404 / utility pages. */}
+      {noindex && <meta name="robots" content="noindex,follow" />}
+      {noindex && <meta name="googlebot" content="noindex,follow" />}
 
       {/* Open Graph */}
       <meta property="og:type" content="website" />
@@ -75,6 +83,7 @@ export default function SchemaMarkup({
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content="J. Worden & Sons Asphalt Paving" />
+      <meta property="og:locale" content="en_US" />
 
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />

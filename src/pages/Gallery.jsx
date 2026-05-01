@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import GalleryUploadForm from '../components/GalleryUploadForm'
+import SchemaMarkup from '../components/SchemaMarkup'
+import { SITE_URL } from '../lib/businessInfo'
+import { useGalleryImages } from '../hooks/useGalleryImages'
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -106,9 +109,7 @@ function ImageCard({ image, token, onDeleted }) {
 }
 
 export default function Gallery() {
-  const [images, setImages] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { images, loading, error, reload, setImages } = useGalleryImages()
   const [showUpload, setShowUpload] = useState(false)
   const [token, setToken] = useState('')
   const [tokenInput, setTokenInput] = useState('')
@@ -121,25 +122,6 @@ export default function Gallery() {
     typeof window !== 'undefined' &&
     (new URLSearchParams(window.location.search).get('admin') === '1' ||
       window.location.hash.includes('admin=1'))
-
-  const fetchImages = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch(`${BASE}/api/v1/gallery/images`)
-      if (!res.ok) throw new Error(`Failed to load gallery (${res.status})`)
-      const data = await res.json()
-      setImages(data.images || [])
-    } catch (err) {
-      setError(err.message || 'Could not load gallery.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchImages()
-  }, [fetchImages])
 
   function handleUploaded(newImage) {
     setImages((prev) => [newImage, ...prev])
@@ -158,6 +140,70 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen bg-brand-navy pt-20">
+      <SchemaMarkup
+        title="Project Photo Gallery — Real Paving Jobs"
+        description="Real J. Worden & Sons asphalt paving jobs across Virginia — driveways, parking lots, KFC franchise sites, and more. See the quality before you book your free estimate."
+        canonical="/gallery"
+        breadcrumb={[
+          { name: 'Home', path: '/' },
+          { name: 'Gallery', path: '/gallery' },
+        ]}
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'ImageGallery',
+          name: 'J. Worden & Sons — Project Photo Gallery',
+          description:
+            'Real asphalt paving, driveway, and parking lot projects completed by J. Worden & Sons.',
+          url: `${SITE_URL}/gallery`,
+          // Each uploaded image is exposed as an ImageObject so Google can
+          // surface the gallery in image search and rich-result eligible
+          // gallery features. If the upload record carries location data
+          // (`location`, `latitude`/`longitude`, or `address`), it is folded
+          // into a contentLocation Place so Google Image Search can rank
+          // the photo for location-relevant queries.
+          image: images.map((img) => {
+            const obj = {
+              '@type': 'ImageObject',
+              contentUrl: img.url,
+              name: img.job_name,
+              description: img.description || img.job_name,
+              uploadDate: img.uploaded_at,
+              creditText: 'J. Worden & Sons Asphalt Paving',
+            }
+            const hasGeo =
+              typeof img.latitude === 'number' && typeof img.longitude === 'number'
+            const locationName =
+              img.location || img.city || img.address || (hasGeo ? 'Job site' : null)
+            if (locationName || hasGeo) {
+              obj.contentLocation = {
+                '@type': 'Place',
+                ...(locationName ? { name: locationName } : {}),
+                ...(img.address || img.city || img.region
+                  ? {
+                      address: {
+                        '@type': 'PostalAddress',
+                        ...(img.address ? { streetAddress: img.address } : {}),
+                        ...(img.city ? { addressLocality: img.city } : {}),
+                        ...(img.region ? { addressRegion: img.region } : {}),
+                        addressCountry: img.country || 'US',
+                      },
+                    }
+                  : {}),
+                ...(hasGeo
+                  ? {
+                      geo: {
+                        '@type': 'GeoCoordinates',
+                        latitude: img.latitude,
+                        longitude: img.longitude,
+                      },
+                    }
+                  : {}),
+              }
+            }
+            return obj
+          }),
+        }}
+      />
       {/* Hero */}
       <section className="py-16 px-4 text-center">
         <div className="max-w-3xl mx-auto">
@@ -245,7 +291,7 @@ export default function Gallery() {
         {error && (
           <div className="text-center py-20">
             <p className="text-red-400 mb-4">{error}</p>
-            <button onClick={fetchImages} className="btn-primary text-sm !py-2">
+            <button onClick={reload} className="btn-primary text-sm !py-2">
               Try Again
             </button>
           </div>

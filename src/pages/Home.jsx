@@ -13,6 +13,10 @@ import FAQAccordion from '../components/FAQAccordion'
 import SocialLinks from '../components/SocialLinks'
 import EstimateWidget from '../components/EstimateWidget'
 import InspirationGallery from '../components/InspirationGallery'
+import SmartImage from '../components/SmartImage'
+import Carousel from '../components/Carousel'
+import { SITE_URL } from '../lib/businessInfo'
+import { useGalleryImages, imageLocation } from '../hooks/useGalleryImages'
 
 // ── Hero image strip ───────────────────────────────────────────────────────────
 // Royalty-free Unsplash photos (Unsplash License — free for commercial use,
@@ -46,6 +50,106 @@ const HERO_GALLERY = [
     img:  'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=75&auto=format&fit=crop',
     grad: 'from-brand-charcoal to-brand-amber/30',
     href: '/services#masonry',
+  },
+]
+
+// ── Featured Branded Work ──────────────────────────────────────────────────────
+// Owner-provided photos. Files live in /public/work/ — see /public/work/README.md
+// for upload instructions. SmartImage shows a clean branded fallback panel until
+// each file is uploaded, so the layout looks intentional even before photos land.
+//
+// Each entry can also carry real geographic metadata (`location`) — the city,
+// region, country, and lat/lon where the job was done. When present, an
+// ImageObject + contentLocation JSON-LD block is emitted so Google Image Search
+// can surface these photos with location relevance.
+const FEATURED_WORK = [
+  {
+    src: '/work/kfc-marietta.jpg',
+    webp: '/work/kfc-marietta.webp',
+    alt: 'KFC "Big Chicken" landmark restaurant in Marietta, Georgia at dusk',
+    caption: 'KFC — Marietta, GA',
+    sub: 'The Big Chicken landmark',
+    location: { city: 'Marietta', region: 'GA', country: 'US', lat: 33.9526, lon: -84.5499 },
+  },
+  {
+    src: '/work/kfc-franchise-1.jpg',
+    webp: '/work/kfc-franchise-1.webp',
+    alt: 'KFC restaurant exterior — owner-provided project photo',
+    caption: 'KFC — Franchise Program',
+    sub: 'National QSR paving',
+  },
+  {
+    src: '/work/kfc-franchise-2.jpg',
+    webp: '/work/kfc-franchise-2.webp',
+    alt: 'KFC franchise location — owner-provided project photo',
+    caption: 'KFC — Multi-State Program',
+    sub: 'Franchise lot maintenance',
+  },
+  {
+    src: '/work/kfc-franchise-3.jpg',
+    webp: '/work/kfc-franchise-3.webp',
+    alt: 'KFC franchise paving project — owner-provided photo',
+    caption: 'KFC — Franchise Site',
+    sub: 'Lot paving & striping',
+  },
+  {
+    src: '/work/kfc-franchise-4.jpg',
+    webp: '/work/kfc-franchise-4.webp',
+    alt: 'KFC franchise paving project — owner-provided photo',
+    caption: 'KFC — Franchise Site',
+    sub: 'Mill, overlay & restripe',
+  },
+  {
+    src: '/work/taco-bell-colonial-heights.jpg',
+    webp: '/work/taco-bell-colonial-heights.webp',
+    alt: 'Taco Bell restaurant exterior in Colonial Heights, Virginia with fresh asphalt and clean edge work',
+    caption: 'Taco Bell — Colonial Heights, VA',
+    sub: 'New-build site paving',
+    location: { city: 'Colonial Heights', region: 'VA', country: 'US', lat: 37.2649, lon: -77.4106 },
+  },
+  {
+    src: '/work/chip-tar-stewarts-draft.jpg',
+    webp: '/work/chip-tar-stewarts-draft.webp',
+    alt: 'Chip and tar driveway in Stewarts Draft, Virginia — owner-provided project photo',
+    caption: 'Chip & Tar Driveway — Stewarts Draft, VA',
+    sub: 'Residential chip & tar surfacing',
+    location: { city: 'Stewarts Draft', region: 'VA', country: 'US', lat: 38.0501, lon: -78.9747 },
+  },
+  {
+    src: '/work/combo-driveway.jpg',
+    webp: '/work/combo-driveway.webp',
+    alt: 'Combination asphalt and chip & tar driveway — owner-provided project photo',
+    caption: 'Asphalt + Chip & Tar Combo',
+    sub: 'Hybrid driveway surfacing',
+  },
+  {
+    src: '/work/field-work.jpg',
+    webp: '/work/field-work.webp',
+    alt: 'Owner-provided J. Worden & Sons project photo',
+    caption: 'Project Photo',
+    sub: 'Owner-provided field work',
+  },
+  {
+    src: '/work/neighborhood-road.jpg',
+    webp: '/work/neighborhood-road.webp',
+    alt: 'Neighborhood road paving and resurfacing — owner-provided project photo',
+    caption: 'Neighborhood Road Work',
+    sub: 'Subdivision road paving & resurfacing',
+  },
+  {
+    src: '/work/parking-lot-portsmouth.jpg',
+    webp: '/work/parking-lot-portsmouth.webp',
+    alt: 'Commercial parking lot paving in Portsmouth, Virginia — owner-provided project photo',
+    caption: 'Parking Lot Paving — Portsmouth, VA',
+    sub: 'Commercial lot paving',
+    location: { city: 'Portsmouth', region: 'VA', country: 'US', lat: 36.8354, lon: -76.2983 },
+  },
+  {
+    src: '/work/drive-thru-overlay.jpg',
+    webp: '/work/drive-thru-overlay.webp',
+    alt: 'Commercial drive-thru parking lot with fresh asphalt overlay and dump truck on site — owner-provided project photo',
+    caption: 'Parking Lot Paving',
+    sub: 'Commercial drive-thru lot — fresh asphalt overlay',
   },
 ]
 
@@ -245,6 +349,48 @@ const HOME_FAQS = [
   },
 ]
 
+/**
+ * Build an ImageObject schema for a project photo.
+ *
+ * If `location` is provided we attach a `contentLocation` Place with
+ * GeoCoordinates so Google Image Search can surface the photo with real
+ * geographic relevance (e.g. for "asphalt paving Portsmouth VA" image
+ * queries). When location is missing we emit a minimal ImageObject so the
+ * photo is still discoverable as part of the brand's media corpus.
+ */
+function imageObjectSchema(item, siteUrl) {
+  const obj = {
+    '@context': 'https://schema.org',
+    '@type': 'ImageObject',
+    contentUrl: `${siteUrl}${item.src}`,
+    name: item.caption,
+    description: item.alt,
+    creditText: 'J. Worden & Sons Asphalt Paving',
+    creator: { '@id': `${siteUrl}/#organization` },
+    copyrightHolder: { '@id': `${siteUrl}/#organization` },
+    license: `${siteUrl}/`,
+    acquireLicensePage: `${siteUrl}/contact`,
+  }
+  if (item.location) {
+    obj.contentLocation = {
+      '@type': 'Place',
+      name: `${item.location.city}, ${item.location.region}`,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: item.location.city,
+        addressRegion: item.location.region,
+        addressCountry: item.location.country || 'US',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: item.location.lat,
+        longitude: item.location.lon,
+      },
+    }
+  }
+  return obj
+}
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i = 0) => ({
@@ -255,13 +401,53 @@ const fadeUp = {
 }
 
 export default function Home() {
+  // Pull live photos from the gallery API — these are the photos uploaded
+  // through the live-site Gallery uploader, so a single upload populates
+  // both the Featured Branded Work carousel here and the /gallery page.
+  // `defer: true` waits for browser idle so the heavy base64 payload doesn't
+  // compete with the hero image LCP.
+  const { images: galleryImages } = useGalleryImages({ defer: true })
+
+  // Normalize a gallery API record into the shape the carousel/SmartImage
+  // already expect. Falls back to the static FEATURED_WORK list when the
+  // API hasn't returned anything yet, so the layout is never empty.
+  const formatLocation = (loc) => {
+    if (!loc) return ''
+    if (loc.city && loc.region) return `${loc.city}, ${loc.region}`
+    return loc.city || loc.region || ''
+  }
+  const featuredWork =
+    galleryImages.length > 0
+      ? galleryImages.map((img) => {
+          const loc = imageLocation(img)
+          return {
+            src: img.url, // base64 data URI from the gallery DB
+            alt: img.description || img.job_name,
+            caption: img.job_name,
+            sub: img.description || formatLocation(loc),
+            location: loc,
+            uploadDate: img.uploaded_at,
+          }
+        })
+      : FEATURED_WORK
+
   return (
     <>
       <SchemaMarkup
         title="4th-Generation Asphalt Paving Since 1984"
         description="J. Worden & Sons — trusted asphalt paving, sealcoating, crack filling, and parking lot construction. Serving residential and commercial clients since 1984. Free estimates."
         canonical="/"
-        schema={[ORGANIZATION_SCHEMA, WEBSITE_SCHEMA, LOCAL_BUSINESS_SCHEMA, faqSchema(HOME_FAQS)]}
+        schema={[
+          ORGANIZATION_SCHEMA,
+          WEBSITE_SCHEMA,
+          LOCAL_BUSINESS_SCHEMA,
+          faqSchema(HOME_FAQS),
+          // ImageObject per featured photo — adds contentLocation when a city
+          // / state can be resolved (either from structured fields or by
+          // parsing the operator's job_name) so Google Image Search can
+          // surface these images for location-relevant queries.
+          ...featuredWork.map((item) => imageObjectSchema(item, SITE_URL)),
+        ]}
       />
 
       {/* ── Hero ──────────────────────────────────────────────────────── */}
@@ -379,97 +565,61 @@ export default function Home() {
               National QSR sites paved and maintained by J. Worden &amp; Sons.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {[
-              {
-                src: 'https://github.com/user-attachments/assets/4f880609-1cff-4da5-b882-cf4dd01a48d6',
-                alt: 'KFC "Big Chicken" landmark restaurant in Marietta, Georgia at dusk',
-                caption: 'KFC — Marietta, GA',
-                sub: 'The Big Chicken landmark',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/ea12b333-419a-48d1-aac1-986c882e7059',
-                alt: 'KFC restaurant exterior — owner-provided project photo',
-                caption: 'KFC — Franchise Program',
-                sub: 'National QSR paving',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/6b4c6059-3552-4c66-8765-88f56f999ef1',
-                alt: 'KFC franchise location — owner-provided project photo',
-                caption: 'KFC — Multi-State Program',
-                sub: 'Franchise lot maintenance',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/de7edca9-b10c-4812-9b3f-32e8deec32d7',
-                alt: 'KFC franchise paving project — owner-provided photo',
-                caption: 'KFC — Franchise Site',
-                sub: 'Lot paving & striping',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/2be9e7fc-2f8d-435f-a865-93145c2e78bf',
-                alt: 'KFC franchise paving project — owner-provided photo',
-                caption: 'KFC — Franchise Site',
-                sub: 'Mill, overlay & restripe',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/6f282da5-07e8-4b66-9280-10b3f722bd9e',
-                alt: 'Taco Bell restaurant exterior in Colonial Heights, Virginia with fresh asphalt and clean edge work',
-                caption: 'Taco Bell — Colonial Heights, VA',
-                sub: 'New-build site paving',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/3908976f-9313-4624-8338-bd13c3a8d862',
-                alt: 'Chip and tar driveway in Stewarts Draft, Virginia — owner-provided project photo',
-                caption: 'Chip & Tar Driveway — Stewarts Draft, VA',
-                sub: 'Residential chip & tar surfacing',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/8e1c6e44-7600-4efb-91f9-e350e0890a0b',
-                alt: 'Combination asphalt and chip & tar driveway — owner-provided project photo',
-                caption: 'Asphalt + Chip & Tar Combo',
-                sub: 'Hybrid driveway surfacing',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/e8e7f85b-eba4-4816-95b9-9aaea1a3aa1c',
-                alt: 'Owner-provided J. Worden & Sons project photo',
-                caption: 'Project Photo',
-                sub: 'Owner-provided field work',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/058c2835-6e79-4a81-a5a6-d97dfa19653c',
-                alt: 'Neighborhood road paving and resurfacing — owner-provided project photo',
-                caption: 'Neighborhood Road Work',
-                sub: 'Subdivision road paving & resurfacing',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/3000889a-2978-40e1-acfc-fe4eeed729bf',
-                alt: 'Commercial parking lot paving in Portsmouth, Virginia — owner-provided project photo',
-                caption: 'Parking Lot Paving — Portsmouth, VA',
-                sub: 'Commercial lot paving',
-              },
-              {
-                src: 'https://github.com/user-attachments/assets/e345b407-04a4-46ce-a502-e4174f0f5116',
-                alt: 'Commercial drive-thru parking lot with fresh asphalt overlay and dump truck on site — owner-provided project photo',
-                caption: 'Parking Lot Paving',
-                sub: 'Commercial drive-thru lot — fresh asphalt overlay',
-              },
-            ].map((p) => (
-              <figure
-                key={p.src}
-                className="relative rounded-xl overflow-hidden bg-brand-navy/40 shadow-lg ring-1 ring-white/10"
-              >
-                <img
+
+          {/* Headline carousel — single large rotating photo with caption.
+              Pulls from the gallery API (photos uploaded via the Gallery
+              uploader on the live site) with a labeled fallback when empty. */}
+          <Carousel
+            items={featuredWork}
+            ariaLabel="Featured branded project photos"
+            className="mb-6"
+            aspectClass="aspect-[16/9]"
+            renderItem={(p) => (
+              <figure className="relative w-full h-full">
+                <SmartImage
                   src={p.src}
+                  webpSrc={p.webp}
                   alt={p.alt}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-56 sm:h-64 md:h-60 lg:h-72 object-cover"
+                  label={p.caption}
+                  sublabel={p.sub}
+                  width={1600}
+                  height={900}
+                  className="w-full h-full object-cover"
+                  sizes="(min-width: 1024px) 1024px, 100vw"
                 />
-                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 py-3">
-                  <div className="text-white font-semibold text-sm sm:text-base">
+                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 pt-10 pb-6">
+                  <div className="text-white font-semibold text-base sm:text-lg">
                     {p.caption}
                   </div>
-                  <div className="text-white/70 text-xs">{p.sub}</div>
+                  <div className="text-white/70 text-xs sm:text-sm">{p.sub}</div>
+                </figcaption>
+              </figure>
+            )}
+          />
+
+          {/* Thumbnail grid — same set, lazy-loaded. */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {featuredWork.map((p, idx) => (
+              <figure
+                key={`${p.src}-${idx}`}
+                className="relative rounded-xl overflow-hidden bg-brand-navy/40 shadow-md ring-1 ring-white/10"
+              >
+                <SmartImage
+                  src={p.src}
+                  webpSrc={p.webp}
+                  alt={p.alt}
+                  label={p.caption}
+                  sublabel={p.sub}
+                  width={800}
+                  height={600}
+                  className="w-full h-40 sm:h-44 md:h-48 object-cover"
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                />
+                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-3 py-2">
+                  <div className="text-white font-semibold text-xs sm:text-sm">
+                    {p.caption}
+                  </div>
+                  <div className="text-white/60 text-[10px] sm:text-xs">{p.sub}</div>
                 </figcaption>
               </figure>
             ))}
