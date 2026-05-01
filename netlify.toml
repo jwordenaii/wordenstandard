@@ -7,6 +7,24 @@
   NODE_VERSION = "20"
 
 [[redirects]]
+  from = "https://jwordenasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://jwordenasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.jwordenasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/robots.txt"
   to = "/robots.txt"
   status = 200
@@ -29,6 +47,8 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
 
 [[headers]]
   for = "/assets/*"

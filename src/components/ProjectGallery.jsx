@@ -26,7 +26,7 @@ const useImageGalleryJsonLd = (projects) => {
       author: {
         '@type': 'Organization',
         name: 'J. Worden & Sons Asphalt Paving',
-        url: 'https://jwordenasphaltpaving.com/',
+        url: 'https://www.jwordenasphaltpaving.com/',
       },
       image: projects.map((p) => ({
         '@type': 'ImageObject',
@@ -42,7 +42,7 @@ const useImageGalleryJsonLd = (projects) => {
           name: 'J. Worden & Sons Asphalt Paving',
         },
         copyrightNotice: `\u00a9 ${p.year || new Date().getFullYear()} J. Worden & Sons Asphalt Paving`,
-        license: 'https://jwordenasphaltpaving.com/',
+        license: 'https://www.jwordenasphaltpaving.com/',
       })),
     };
 

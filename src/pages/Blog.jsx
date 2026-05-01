@@ -38,7 +38,7 @@ export default function Blog() {
       '@type': 'BlogPosting',
       headline: p.title,
       description: p.excerpt,
-      url: `https://jwordenasphaltpaving.com/blog/${p.slug}`,
+      url: `https://www.jwordenasphaltpaving.com/blog/${p.slug}`,
       datePublished: p.published_date,
       image: p.cover_image,
       author: { '@type': 'Organization', name: p.author || 'J. Worden & Sons' },

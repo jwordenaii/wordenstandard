@@ -26,7 +26,7 @@
 # ============================================================
 [[redirects]]
   from = "https://www.jwordenasphaltpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
@@ -35,37 +35,37 @@
 # ============================================================
 [[redirects]]
   from = "https://jwordensons.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.jwordensons.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://jwordenpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.jwordenpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://wordenpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.wordenpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/:splat"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
   status = 301
   force = true
 
@@ -74,49 +74,49 @@
 # ============================================================
 [[redirects]]
   from = "https://richmondvapaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/richmond-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/richmond-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.richmondvapaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/richmond-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/richmond-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://chestervapaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/chester-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/chester-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.chestervapaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/chester-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/chester-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://midlothianpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/midlothian-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/midlothian-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.midlothianpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/midlothian-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/midlothian-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://mechanicsvillepaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/mechanicsville-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/mechanicsville-va"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.mechanicsvillepaving.com/*"
-  to = "https://jwordenasphaltpaving.com/locations/mechanicsville-va"
+  to = "https://www.jwordenasphaltpaving.com/locations/mechanicsville-va"
   status = 301
   force = true
 
@@ -126,109 +126,109 @@
 # ============================================================
 [[redirects]]
   from = "https://savannahpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.savannahpaving.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://atlantapavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.atlantapavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://augustapaving.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.augustapaving.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://charlottepavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.charlottepavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://raleighpavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.raleighpavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://greensboropaving.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.greensboropaving.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://charlestonpavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.charlestonpavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://columbiapavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.columbiapavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://kansascitypavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 
 [[redirects]]
   from = "https://www.kansascitypavingpros.com/*"
-  to = "https://jwordenasphaltpaving.com/"
+  to = "https://www.jwordenasphaltpaving.com/"
   status = 301
   force = true
 

@@ -70,7 +70,7 @@ export default function BlogPost() {
     author: {
       '@type': 'Organization',
       name: post.author || 'J. Worden & Sons',
-      url: 'https://jwordenasphaltpaving.com/',
+      url: 'https://www.jwordenasphaltpaving.com/',
     },
     publisher: {
       '@type': 'Organization',
@@ -82,7 +82,7 @@ export default function BlogPost() {
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://jwordenasphaltpaving.com/blog/${post.slug}`,
+      '@id': `https://www.jwordenasphaltpaving.com/blog/${post.slug}`,
     },
     keywords: post.tags?.join(', '),
   };

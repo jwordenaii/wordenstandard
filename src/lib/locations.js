@@ -2,7 +2,7 @@
 // sitemap, navigation, and schema generation.
 // Each entry produces /locations/[slug]
 
-export const PRIMARY_DOMAIN = 'https://jwordenasphaltpaving.com';
+export const PRIMARY_DOMAIN = 'https://www.jwordenasphaltpaving.com';
 
 export const LOCATIONS = [
   // ──────── VIRGINIA ────────

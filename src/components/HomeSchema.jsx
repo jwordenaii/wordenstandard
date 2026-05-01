@@ -14,11 +14,11 @@ export default function HomeSchema() {
     const localBusiness = {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
-      '@id': 'https://jwordenasphaltpaving.com/#organization',
+      '@id': 'https://www.jwordenasphaltpaving.com/#organization',
       name: 'J. Worden & Sons Asphalt Paving',
       alternateName: ['J. Worden and Sons', 'JWorden Paving', 'J Worden Paving LLC'],
-      url: 'https://jwordenasphaltpaving.com/',
-      logo: 'https://jwordenasphaltpaving.com/logo.png',
+      url: 'https://www.jwordenasphaltpaving.com/',
+      logo: 'https://www.jwordenasphaltpaving.com/logo.png',
       image: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
       description:
         'Virginia\'s family-owned asphalt paving contractor for 40+ years. Mountain-grade spec for the I-81 corridor, coastal-spec engineering for Virginia Beach and Hampton Roads, and virgin-soil stabilization for Fredericksburg new construction. Serving all of Virginia with 4th-generation craftsmanship, written 5-year warranty, licensed/bonded/insured.',

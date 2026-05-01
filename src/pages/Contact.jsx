@@ -6,7 +6,7 @@ const CONTACT_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'ContactPage',
   name: 'Contact J. Worden & Sons',
-  url: 'https://jwordenasphaltpaving.com/contact',
+  url: 'https://www.jwordenasphaltpaving.com/contact',
 }
 
 const SERVICE_OPTIONS = [
