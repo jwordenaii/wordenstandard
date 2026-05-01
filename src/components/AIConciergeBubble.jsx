@@ -4,6 +4,46 @@ import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio } from 'lucide-r
 import { base44 } from '@/api/base44Client';
 import WebGLPersonaAvatar from './WebGLPersonaAvatar';
 
+function splitSentences(text) {
+  return (text || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function southernFounderStyle(text) {
+  const source = (text || '').trim();
+  if (!source) return '';
+
+  if (source.toLowerCase().includes('mr. worden')) return source;
+
+  const sentences = splitSentences(source);
+  if (sentences.length === 0) return source;
+
+  const opener = 'Yes sir, here is how I would handle it:';
+  const recommendation = sentences[0].replace(/^[^a-zA-Z0-9]+/, '');
+  const nextStep = sentences.slice(1).join(' ');
+
+  const compactRecommendation = recommendation.endsWith('.') ? recommendation : `${recommendation}.`;
+  const compactNextStep = nextStep
+    ? nextStep.endsWith('.') || nextStep.endsWith('!') || nextStep.endsWith('?')
+      ? nextStep
+      : `${nextStep}.`
+    : 'If you would like, I can walk you through a practical next step right now.';
+
+  return `${opener} ${compactRecommendation} ${compactNextStep} — Mr. Worden`;
+}
+
+function styleFounderMessage(message) {
+  if (!message || message.role !== 'assistant') return message;
+  return {
+    ...message,
+    content: southernFounderStyle(message.content),
+  };
+}
+
 /**
  * Floating AI concierge chat bubble that lives on the public site.
  * Uses the existing `paving_consultant` agent to answer homeowner questions 24/7.
@@ -196,7 +236,7 @@ export default function AIConciergeBubble() {
       setMessages([
         {
           role: 'assistant',
-          content: "Hi, I'm Mr. Worden, founder of J. Worden & Sons. Ask me anything about paving: pricing, timing, materials, and what I'd recommend for your exact project. I'll keep it practical and direct.",
+          content: "Yes sir, I am Mr. Worden, founder of J. Worden & Sons. Ask me anything about paving, and I will give you a practical recommendation with a clear next step. — Mr. Worden",
         },
       ]);
       return conv;
@@ -214,7 +254,7 @@ export default function AIConciergeBubble() {
     if (!conversation?.id) return;
     const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
       if (Array.isArray(data?.messages) && data.messages.length > 0) {
-        setMessages(data.messages);
+        setMessages(data.messages.map(styleFounderMessage));
       }
     });
     return unsubscribe;
