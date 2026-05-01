@@ -362,6 +362,85 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Featured branded work — owner-provided photos ─────────────────── */}
+      <section
+        className="bg-brand-charcoal pt-10 sm:pt-12"
+        aria-labelledby="featured-branded-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
+            <h2
+              id="featured-branded-heading"
+              className="font-display font-black text-white text-2xl sm:text-3xl"
+            >
+              Featured Branded Work
+            </h2>
+            <p className="text-white/60 text-sm mt-1">
+              National QSR sites paved and maintained by J. Worden &amp; Sons.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {[
+              {
+                src: 'https://github.com/user-attachments/assets/4f880609-1cff-4da5-b882-cf4dd01a48d6',
+                alt: 'KFC "Big Chicken" landmark restaurant in Marietta, Georgia at dusk',
+                caption: 'KFC — Marietta, GA',
+                sub: 'The Big Chicken landmark',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/ea12b333-419a-48d1-aac1-986c882e7059',
+                alt: 'KFC restaurant exterior — owner-provided project photo',
+                caption: 'KFC — Franchise Program',
+                sub: 'National QSR paving',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/6b4c6059-3552-4c66-8765-88f56f999ef1',
+                alt: 'KFC franchise location — owner-provided project photo',
+                caption: 'KFC — Multi-State Program',
+                sub: 'Franchise lot maintenance',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/de7edca9-b10c-4812-9b3f-32e8deec32d7',
+                alt: 'KFC franchise paving project — owner-provided photo',
+                caption: 'KFC — Franchise Site',
+                sub: 'Lot paving & striping',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/2be9e7fc-2f8d-435f-a865-93145c2e78bf',
+                alt: 'KFC franchise paving project — owner-provided photo',
+                caption: 'KFC — Franchise Site',
+                sub: 'Mill, overlay & restripe',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/6f282da5-07e8-4b66-9280-10b3f722bd9e',
+                alt: 'Taco Bell restaurant exterior in Colonial Heights, Virginia with fresh asphalt and clean edge work',
+                caption: 'Taco Bell — Colonial Heights, VA',
+                sub: 'New-build site paving',
+              },
+            ].map((p) => (
+              <figure
+                key={p.src}
+                className="relative rounded-xl overflow-hidden bg-brand-navy/40 shadow-lg ring-1 ring-white/10"
+              >
+                <img
+                  src={p.src}
+                  alt={p.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-56 sm:h-64 md:h-60 lg:h-72 object-cover"
+                />
+                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 py-3">
+                  <div className="text-white font-semibold text-sm sm:text-base">
+                    {p.caption}
+                  </div>
+                  <div className="text-white/70 text-xs">{p.sub}</div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Hero image strip — "Our Work" preview directly under the header ─── */}
       <section
         className="bg-brand-charcoal py-10 sm:py-12"
