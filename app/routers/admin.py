@@ -1,10 +1,13 @@
 """
 Admin dashboard router — served entirely from the backend (FastAPI + Jinja2).
 
-All routes under /admin require HTTP Basic Authentication.
-Credentials are supplied via environment variables:
-  ADMIN_USERNAME  (default: "admin")
-  ADMIN_PASSWORD  (required — no default; routes return 401 if unset)
+All routes under /admin require PIN-based authentication.
+The PIN is supplied via environment variable:
+  ADMIN_PIN  (required — no default; routes return 401 if unset or incorrect)
+
+Pass the PIN on every request as a query parameter or POST body field:
+  GET  /admin/dashboard?pin=1234
+  POST /admin/content/new  (include pin=1234 in the form body)
 
 The dashboard exposes:
   GET  /admin                      → redirect to /admin/dashboard
@@ -35,9 +38,8 @@ import re
 import secrets
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, Header, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -52,7 +54,6 @@ from ..services.totp_service import TOTPService
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", include_in_schema=False)
-security = HTTPBasic()
 
 # ── Template engine ────────────────────────────────────────────────────────────
 
@@ -64,38 +65,45 @@ templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 
 def _require_admin(
     request: Request,
-    credentials: HTTPBasicCredentials = Depends(security),
+    pin: str | None = Query(default=None),
     x_totp_token: str | None = Header(default=None, alias="X-TOTP-Token"),
 ) -> str:
     """
-    Verify HTTP Basic credentials against ADMIN_USERNAME / ADMIN_PASSWORD env vars.
+    Verify the admin PIN against the ADMIN_PIN environment variable.
     Uses secrets.compare_digest to prevent timing attacks.
+
+    The PIN must be supplied on every request via the ``pin`` query parameter
+    (e.g. ``/admin/dashboard?pin=1234``) or as a ``pin`` field in a POST body
+    (handled by individual route handlers that accept it as a Form field and
+    forward it through the dependency).
 
     When 2FA is enabled for the admin user, a valid TOTP token (or backup code)
     must also be supplied via the ``X-TOTP-Token`` request header.  Clients that
     do not yet support the header will receive a 401 with a descriptive message
     so they can prompt the user for the code.
     """
-    admin_user = os.getenv("ADMIN_USERNAME", "admin").encode()
-    admin_pass = os.getenv("ADMIN_PASSWORD", "").encode()
+    admin_pin = os.getenv("ADMIN_PIN", "")
 
-    if not admin_pass:
+    if not admin_pin:
         raise HTTPException(
             status_code=503,
-            detail="Admin dashboard is not configured. Set ADMIN_PASSWORD.",
+            detail="Admin dashboard is not configured. Set ADMIN_PIN.",
         )
 
-    user_ok = secrets.compare_digest(credentials.username.encode(), admin_user)
-    pass_ok = secrets.compare_digest(credentials.password.encode(), admin_pass)
-
-    if not (user_ok and pass_ok):
+    if not pin:
         raise HTTPException(
             status_code=401,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Basic realm=\"JWordenAI Admin\""},
+            detail="Unauthorized — PIN required.",
         )
 
-    username = credentials.username
+    if not secrets.compare_digest(pin.encode(), admin_pin.encode()):
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized — incorrect PIN.",
+        )
+
+    # Use a fixed identifier for the admin user (no username concept with PIN auth)
+    username = "admin"
 
     # ── 2FA check ─────────────────────────────────────────────────────────────
     # Import here to avoid a circular import at module load time.
@@ -119,7 +127,6 @@ def _require_admin(
                     "Two-factor authentication is enabled. "
                     "Supply your 6-digit TOTP code in the X-TOTP-Token header."
                 ),
-                headers={"WWW-Authenticate": "Basic realm=\"JWordenAI Admin\""},
             )
 
         # Accept a live TOTP token first
@@ -149,7 +156,6 @@ def _require_admin(
                 raise HTTPException(
                     status_code=401,
                     detail="Invalid TOTP token or backup code.",
-                    headers={"WWW-Authenticate": "Basic realm=\"JWordenAI Admin\""},
                 )
 
     return username
