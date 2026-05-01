@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackPhoneClick } from '@/lib/analytics';
+import SmartImage from './SmartImage';
 
 const NAV_LINKS = [
 { label: 'Services', href: '#services' },
@@ -37,11 +38,14 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo — top left corner */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0" aria-label="J. Worden & Sons Paving — Home">
-            <img
+            <SmartImage
               src="https://media.base44.com/images/public/69c853446b8987b1630018ff/920c45a44_generated_image.png"
               alt="J. Worden & Sons Paving — Quality Work. Built To Last."
-              style={{ width: 'auto', maxWidth: 'none' }}
-              className="h-20 sm:h-24 md:h-28 object-contain"
+              width={1400}
+              height={420}
+              priority
+              sizes="(max-width: 768px) 220px, 300px"
+              className="h-20 sm:h-24 md:h-28 w-auto object-contain quality-premium"
             />
           </button>
 

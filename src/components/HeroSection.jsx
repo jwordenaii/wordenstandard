@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, Phone } from 'lucide-react';
 import { trackEvent, trackPhoneClick } from '@/lib/analytics';
+import SmartImage from './SmartImage';
 
 const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/1c52a6398_generated_image.png';
 
@@ -22,15 +23,15 @@ export default function HeroSection() {
     <section className="relative min-h-screen flex flex-col justify-end overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0 overflow-hidden">
-        <img
+        <SmartImage
           src={HERO_IMAGE}
           alt="Heavy asphalt paving machine laying fresh hot-mix asphalt at golden hour with steam rising from the surface"
-          width="1920"
-          height="1080"
-          fetchpriority="high"
-          decoding="async"
-          style={{ height: 'calc(100% + 180px)', objectPosition: 'center top' }}
-          className="w-full object-cover" />
+          width={2560}
+          height={1440}
+          priority
+          sizes="100vw"
+          className="w-full h-full object-cover object-top quality-premium"
+        />
         
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/30 to-transparent" />

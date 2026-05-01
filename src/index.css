@@ -134,6 +134,12 @@
   border-radius: 3px;
 }
 
+.quality-premium {
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 /* Focus states for accessibility */
 *:focus-visible {
   outline: 3px solid hsl(43 100% 50%) !important;

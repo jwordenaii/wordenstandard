@@ -97,7 +97,11 @@ export default function ProofGallery() {
               <img
                 src={project.image}
                 alt={project.alt}
-                className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:contrast-110"
+                width="1200"
+                height="900"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover quality-premium transition-all duration-700 group-hover:scale-105 group-hover:contrast-110"
                 draggable={false}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />

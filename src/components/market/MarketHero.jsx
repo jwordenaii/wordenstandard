@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, ArrowDown } from 'lucide-react';
+import SmartImage from '../SmartImage';
 
 const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png';
 
@@ -13,10 +14,14 @@ export default function MarketHero({ city, state, region, headline, intro }) {
   return (
     <section className="relative min-h-[80vh] flex flex-col justify-end overflow-hidden">
       <div className="absolute inset-0">
-        <img
+        <SmartImage
           src={HERO_IMAGE}
           alt={`Asphalt paving services in ${city}, ${state}`}
-          className="w-full h-full object-cover"
+          width={2400}
+          height={1350}
+          priority
+          sizes="100vw"
+          className="w-full h-full object-cover quality-premium"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/70 to-transparent" />

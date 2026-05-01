@@ -192,7 +192,7 @@ export default function ProjectGallery() {
                           ? { transform: 'rotate(270deg) scale(1.34)', transformOrigin: 'center center' }
                           : undefined
                       }
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="w-full h-full object-cover quality-premium transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                     <span className="absolute top-4 left-4 px-3 py-1 bg-primary text-primary-foreground font-display font-bold text-[10px] tracking-[0.2em] uppercase">

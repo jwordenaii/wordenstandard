@@ -66,7 +66,10 @@ export default function BeforeAfterSlider({
       <img
         src={afterImage}
         alt={`After: ${alt}`}
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        width="1600"
+        height="1000"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover quality-premium pointer-events-none"
         draggable={false}
         loading="lazy"
       />
@@ -82,7 +85,10 @@ export default function BeforeAfterSlider({
         <img
           src={beforeImage}
           alt={`Before: ${alt}`}
-          className="w-full h-full object-cover"
+          width="1600"
+          height="1000"
+          decoding="async"
+          className="w-full h-full object-cover quality-premium"
           draggable={false}
           loading="lazy"
         />
