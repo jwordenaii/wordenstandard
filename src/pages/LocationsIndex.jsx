@@ -53,7 +53,7 @@ const REGION_META = {
   },
   'Coastal North Carolina / Outer Banks': {
     summary:
-      'Outer Banks parking lots and access lanes face dense seasonal vehicle loads, salt aerosol, wind-driven sand, and stormwater stress. We build coastal-ready asphalt systems with drainage-first execution for long-term durability.',
+      'Outer Banks driveways, parking lots, and access lanes face dense seasonal vehicle loads, salt aerosol, wind-driven sand, and stormwater stress. We build coastal-ready asphalt systems with drainage-first execution for long-term durability.',
   },
 };
 

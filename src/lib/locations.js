@@ -496,9 +496,9 @@ export const LOCATIONS = [
     stateAbbr: 'NC',
     region: 'Coastal North Carolina / Outer Banks',
     geo: { lat: 35.9574, lng: -75.6241 },
-    headline: 'Outer Banks, NC Asphalt Paving — Built for Coastal Traffic and Salt Air',
+    headline: 'Outer Banks, NC Asphalt Paving — Driveways, Parking Lots, and Coastal Durability',
     intro:
-      'Outer Banks pavement sees heavy seasonal traffic, salt-air exposure, and rapid weather swings that punish weak asphalt systems. We support parking lots, access roads, and mixed-use surfaces across OBX communities with strong base prep, drainage-first grading, and durable coastal asphalt mixes designed for high-turnover vehicle volume.',
+      'Outer Banks pavement sees heavy seasonal traffic, salt-air exposure, and rapid weather swings that punish weak asphalt systems. We support residential driveways, parking lots, access roads, and mixed-use surfaces across OBX communities with strong base prep, drainage-first grading, and durable coastal asphalt mixes designed for both daily homeowners and high-turnover vehicle volume.',
     neighborhoods: [
       'Nags Head', 'Kill Devil Hills', 'Kitty Hawk', 'Southern Shores',
       'Duck', 'Corolla', 'Manteo', 'Wanchese',
@@ -506,20 +506,20 @@ export const LOCATIONS = [
     landmarks: ['Wright Memorial Bridge', 'NC-12 corridor', 'Nags Head Beach Accesses', 'Jockey\'s Ridge State Park', 'Outer Banks Visitors Bureau area'],
     climate: {
       title: 'Salt Air, Sand Intrusion, and Seasonal Parking Loads',
-      body: 'OBX lots and drive lanes face concentrated summer traffic, wind-driven sand, and salt aerosol that accelerates oxidation. We use coastal-ready compaction and drainage design to protect parking-lot edges, reduce standing water, and extend pavement life in high-demand tourist corridors.',
+      body: 'OBX driveways, lots, and drive lanes face concentrated summer traffic, wind-driven sand, and salt aerosol that accelerates oxidation. We use coastal-ready compaction and drainage design to protect driveway and parking-lot edges, reduce standing water, and extend pavement life in high-demand tourist corridors.',
     },
     faqs: [
       {
-        q: 'Do you handle high-traffic parking lots in the Outer Banks summer season?',
-        a: 'Yes. We build parking-lot scopes for tourism-heavy turnover with phased planning, reinforced high-wear zones, and striping layouts optimized for seasonal peaks.',
+        q: 'Do you handle both residential driveways and high-traffic parking lots in the Outer Banks?',
+        a: 'Yes. We handle driveway installs and replacements for homeowners plus parking-lot scopes for tourism-heavy turnover with reinforced high-wear zones and practical phasing.',
       },
       {
-        q: 'How do you protect asphalt from OBX salt air and coastal moisture?',
-        a: 'We focus on stable base construction, clean drainage paths, and maintenance cadence tuned for coastal oxidation so lots hold up longer under beach-market conditions.',
+        q: 'How do you protect OBX driveways and lots from salt air and coastal moisture?',
+        a: 'We focus on stable base construction, clean drainage paths, and maintenance cadence tuned for coastal oxidation so driveways and lots hold up longer under beach-market conditions.',
       },
       {
-        q: 'Can you pave around active businesses and rental properties?',
-        a: 'Yes. We stage work in sections to keep access open for guests, residents, and delivery traffic while the paving plan is completed safely.',
+        q: 'Can you pave around active businesses, rentals, and occupied homes?',
+        a: 'Yes. We stage work in sections to keep access open for guests, residents, homeowners, and delivery traffic while the paving plan is completed safely.',
       },
     ],
     reviews: 31,
