@@ -44,8 +44,8 @@ const SERVICES = [
     image: INDUSTRIAL_IMG,
     alt: 'Heavy industrial asphalt paving at a logistics hub with yellow machinery rollers compacting thick asphalt at dawn',
     features: ['Heavy-Load Bases', 'Truck Yards', 'Loading Docks', 'Airport Taxiways'],
-    ctaLabel: 'Home Services Details',
-    ctaHref: '/home-services',
+    ctaLabel: 'GC Division Details',
+    ctaHref: '/general-contracting',
   },
 ];
 
