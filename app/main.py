@@ -295,13 +295,19 @@ _ALLOWED_ORIGINS = [
     "https://jworden.netlify.app",
     "https://jwordenasphaltpaving.com",
     "https://www.jwordenasphaltpaving.com",
+    "https://frontend-production.up.railway.app",  # Railway frontend service
     "http://localhost:5173",   # Vite dev server
     "http://localhost:3000",
 ] + _EXTRA_ORIGINS
 
+# Allow Netlify deploy-preview origins (e.g. https://deploy-preview-42--jworden.netlify.app).
+# Override or extend via EXTRA_CORS_ORIGINS env var on Railway for additional origins.
+_DEPLOY_PREVIEW_ORIGIN_REGEX = r"https://deploy-preview-\d+--jworden\.netlify\.app"
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED_ORIGINS,
+    allow_origin_regex=_DEPLOY_PREVIEW_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
