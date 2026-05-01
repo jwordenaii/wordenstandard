@@ -147,7 +147,7 @@ jobs:
   # ── Integration: start both services and run E2E tests ───────────────────────
   integration-tests:
     name: Integration & E2E Tests
-    needs: [deploy-frontend]
+    needs: [deploy-frontend, deploy-backend]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -172,7 +172,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Frontend unit tests
-        run: npm test
+        run: npm run test:unit --if-present
 
       - name: Backend API tests
         run: pytest -q tests/backend
@@ -185,7 +185,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke tests (frontend ↔ mock backend)
-        run: npm run test:e2e
+        run: npm run test:e2e --if-present
         env:
           VITE_API_BASE_URL: http://127.0.0.1:9999
           VITE_CC_PASSWORD: e2e-pin

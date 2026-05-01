@@ -45,6 +45,10 @@ export default function QuoteEngine() {
     notes: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const sanitizePhone = (value) => value.replace(/[^0-9+()\-\s]/g, '').slice(0, 22);
+  const isPhoneValid = (value) => value.replace(/\D/g, '').length >= 10;
 
   const nextStep = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
@@ -54,7 +58,7 @@ export default function QuoteEngine() {
     if (step === 1) return parseFloat(formData.width) > 0 && parseFloat(formData.length) > 0;
     if (step === 2) return !!formData.materialId;
     if (step === 3) return !!formData.urgency;
-    if (step === 4) return !!formData.name && !!formData.phone;
+    if (step === 4) return formData.name.trim().length > 1 && isPhoneValid(formData.phone);
     return false;
   };
 
@@ -75,31 +79,41 @@ export default function QuoteEngine() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting || !canProceed()) return;
+
+    setIsSubmitting(true);
     const leadData = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      address: formData.address.trim(),
       surface_type: formData.surfaceType,
       sqft: formData.sqft,
       material: formData.materialId,
       urgency: formData.urgency,
-      notes: formData.notes,
+      notes: formData.notes.trim(),
       status: 'new',
       conversion_source: detectConversionSource(),
     };
-    const createdLead = await base44.entities.Lead.create(leadData);
+    try {
+      const createdLead = await base44.entities.Lead.create(leadData);
 
-    // Fire GA4 + Google Ads conversion
-    trackLeadSubmission(leadData);
+      // Fire GA4 + Google Ads conversion
+      trackLeadSubmission(leadData);
 
-    // Fire-and-forget: generate + email branded PDF estimate (doesn't block UX)
-    if (createdLead?.id) {
-      base44.functions.invoke('generateInstantQuotePdf', { leadId: createdLead.id }).catch(() => {});
+      // Fire-and-forget: generate + email branded PDF estimate (doesn't block UX)
+      if (createdLead?.id) {
+        base44.functions.invoke('generateInstantQuotePdf', { leadId: createdLead.id }).catch(() => {});
+      }
+
+      setSubmitted(true);
+      toast.success("Estimate request submitted! We'll be in touch within 24 hours.");
+    } catch (error) {
+      trackEvent('quote_submit_error', { message: error?.message || 'unknown_error' });
+      toast.error('Submission failed. Please call (804) 446-1296 and we will take your details now.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSubmitted(true);
-    toast.success("Estimate request submitted! We'll be in touch within 24 hours.");
   };
 
   // Track funnel progression for analytics
@@ -331,6 +345,7 @@ export default function QuoteEngine() {
                   <div className="space-y-4">
                     <Input
                       placeholder="Full Name *"
+                      autoComplete="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-12 font-body"
@@ -339,6 +354,7 @@ export default function QuoteEngine() {
                       <Input
                         placeholder="Email"
                         type="email"
+                        autoComplete="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-12 font-body"
@@ -346,13 +362,16 @@ export default function QuoteEngine() {
                       <Input
                         placeholder="Phone *"
                         type="tel"
+                        autoComplete="tel"
+                        inputMode="tel"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, phone: sanitizePhone(e.target.value) })}
                         className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-12 font-body"
                       />
                     </div>
                     <Input
                       placeholder="Project Address"
+                      autoComplete="street-address"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-12 font-body"
@@ -364,6 +383,9 @@ export default function QuoteEngine() {
                       className="bg-muted border-border text-foreground placeholder:text-muted-foreground min-h-[100px] font-body"
                     />
                   </div>
+                  <p className="font-body text-muted-foreground text-xs mt-3">
+                    Phone is required so a project specialist can confirm scope and scheduling.
+                  </p>
                 </div>
               )}
             </motion.div>
@@ -398,14 +420,14 @@ export default function QuoteEngine() {
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={!canProceed()}
+                disabled={!canProceed() || isSubmitting}
                 className={`flex items-center gap-2 font-display font-bold text-sm tracking-wider uppercase min-h-[48px] px-8 py-3 transition-colors ${
-                  canProceed()
+                  canProceed() && !isSubmitting
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'bg-muted text-muted-foreground cursor-not-allowed'
                 }`}
               >
-                Get My Free Estimate <Check className="w-4 h-4" />
+                {isSubmitting ? 'Submitting...' : 'Get My Free Estimate'} <Check className="w-4 h-4" />
               </button>
             )}
           </div>
