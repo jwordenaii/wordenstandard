@@ -100,6 +100,34 @@ const RATES = {
     commercial: { low: 90.0, high: 240.0 },
     default: { low: 90.0, high: 260.0 },
   },
+  // ── Concrete flatwork ────────────────────────────────────────────────────
+  // Per sq ft installed; assumes 4" residential / 6" commercial slab thickness,
+  // standard broom finish, fiber mesh reinforcement. Stamped/colored or thicker
+  // pours quote higher within range. Rebar mat add: ~$0.50–$1.50 / sq ft.
+  concrete: {
+    residential: { low: 6.0, high: 14.0 },
+    commercial: { low: 7.0, high: 16.0 },
+    default: { low: 6.0, high: 15.0 },
+  },
+  // ── Drone survey / aerial mapping ───────────────────────────────────────
+  // Quoted per sq ft of mapped area for parity with the rest of the engine.
+  // National benchmarks: orthomosaic mapping $80–$300/acre (~$0.002–$0.007/sf),
+  // progress / inspection flights typically $400–$1,200 per site visit.
+  // Mobilization floor in the consumer applies; small lots round up to the floor.
+  drone_survey: {
+    residential: { low: 0.003, high: 0.012 },
+    commercial: { low: 0.0025, high: 0.009 },
+    default: { low: 0.003, high: 0.012 },
+  },
+  // ── Civil site work (public/budgetary tier) ─────────────────────────────
+  // Per sq ft of disturbed area: rough/fine grading, basic erosion control,
+  // shallow storm conveyance. Engineer-tier takeoff (cy earthwork, lf storm,
+  // detention sizing) lives behind the gated /api/v1/takeoff/* endpoints.
+  civil_site_work: {
+    residential: { low: 4.0, high: 12.0 },
+    commercial: { low: 5.0, high: 18.0 },
+    default: { low: 4.0, high: 15.0 },
+  },
 }
 
 /** Format a dollar value: round to nearest $50 for clarity */

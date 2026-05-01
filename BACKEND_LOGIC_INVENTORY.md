@@ -133,7 +133,7 @@
 |-----------|---------|----------------|-----------------|
 | **BIM Integration** | Building Information Modeling | Coordinate with architects/engineers | Add pyrevit or Revit API |
 | **CAD/DWG Support** | Read construction drawings | Estimate from blueprints | Add ezdxf or LibreCAD |
-| **Drone Integration** | Aerial site surveys | Orthomosaic mapping, progress tracking | Add DJI SDK or OpenDroneMap |
+| **Drone Integration** | Aerial site surveys | Orthomosaic mapping, progress tracking | ✅ Quoting + KB live (Phase 1); fulfillment via gated `/premium-civil-stack` photogrammetry endpoint. DJI SDK / OpenDroneMap remain optional for in-house capture automation. |
 | **LiDAR Processing** | 3D point cloud analysis | Precise site measurements | Add Open3D or CloudCompare |
 | **Thermal Imaging** | Asphalt temperature monitoring | Critical for paving quality | Add OpenCV + thermal camera SDK |
 | **GPS/GNSS Accuracy** | Centimeter-level positioning | Precise grading, layout | Add RTK-GPS libraries |

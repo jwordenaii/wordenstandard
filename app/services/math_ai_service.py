@@ -86,6 +86,13 @@ _BASE_RATES: dict[str, tuple[float, float, float]] = {
     "reconstruction":    (5.00,  7.50, 10.00),
     "striping":          (0.10,  0.18,  0.25),
     "patching":          (1.50,  2.75,  4.00),
+    # ── New first-class services (Phase 1 gap fixes) ─────────────────────────
+    # Concrete flatwork: 4–6" slab, broom finish, fiber mesh; stamped/colored at top of range
+    "concrete":          (6.00,  10.00, 16.00),
+    # Drone survey / aerial mapping: $/sf of mapped area (orthomosaic basis)
+    "drone_survey":      (0.003, 0.0065, 0.012),
+    # Civil site work (public budgetary tier): grading + erosion + shallow storm $/sf disturbed
+    "civil_site_work":   (4.00,  9.00,  18.00),
 }
 
 # Traffic load factors (vehicles/day → deterioration multiplier)

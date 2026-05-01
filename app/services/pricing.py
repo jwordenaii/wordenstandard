@@ -51,6 +51,21 @@ _RATES: dict[str, dict[str, tuple[float, float]]] = {
     "adu":                  {"residential": (150.00, 400.00), "commercial": (140.00, 350.00)},
     # Commercial New Build — shell + tenant improvements per sq ft
     "commercial_build":     {"residential": (100.00, 260.00), "commercial": (90.00, 240.00)},
+    # ── Concrete flatwork ─────────────────────────────────────────────────────
+    # Per sq ft installed (4" residential / 6" commercial slab, broom finish,
+    # fiber-mesh reinforcement). Stamped/colored or thicker pours quote at the
+    # high end. Rebar mat add: ~$0.50–$1.50 / sq ft.
+    "concrete":             {"residential": (6.00, 14.00),   "commercial": (7.00, 16.00)},
+    # ── Drone survey / aerial mapping ────────────────────────────────────────
+    # Per sq ft of mapped area for parity with the rest of the engine.
+    # Orthomosaic mapping $80–$300/acre (~$0.002–$0.007/sf); single inspection
+    # flights $400–$1,200/site (mobilization floor handles tiny sites).
+    "drone_survey":         {"residential": (0.003, 0.012),  "commercial": (0.0025, 0.009)},
+    # ── Civil site work (public/budgetary tier) ──────────────────────────────
+    # Per sq ft of disturbed area: rough/fine grading, basic erosion control,
+    # shallow storm conveyance. Engineer-tier takeoff (cy earthwork, lf storm,
+    # detention sizing) lives behind the gated /api/v1/takeoff/* endpoints.
+    "civil_site_work":      {"residential": (4.00, 12.00),   "commercial": (5.00, 18.00)},
 }
 
 _MOBILISATION_FLOOR_LOW  = 300.0   # minimum low-end job cost

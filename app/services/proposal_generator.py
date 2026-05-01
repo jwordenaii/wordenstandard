@@ -116,6 +116,27 @@ _SERVICE_SCOPE_HINTS: dict[str, str] = {
         "Include: annual inspection schedule, priority mobilization commitment, multi-year "
         "volume pricing, and documentation for property records."
     ),
+    "concrete": (
+        "Include: subgrade prep and compaction (95% Proctor), formwork, fiber-mesh or rebar "
+        "reinforcement schedule, mix design (typ. 4,000 psi w/ air entrainment in freeze zones), "
+        "pour and finish (broom / trowel / stamped), control joint layout (~2.5× slab thickness "
+        "in feet, max 10 ft o.c.), and 7-day cure protection. Note ACI 332 residential and ACI "
+        "330 parking-lot standards as applicable."
+    ),
+    "drone_survey": (
+        "Include: FAA Part 107 licensed pilot, pre-flight airspace check / LAANC authorization "
+        "where required, ground control points for survey-grade accuracy, flight plan and "
+        "altitude (typ. 200–400 ft AGL), deliverables (orthomosaic GeoTIFF, DSM/DEM, contour "
+        "shapefile, point cloud, annotated PDF report), and turnaround SLA. BVLOS / night ops "
+        "quoted separately."
+    ),
+    "civil_site_work": (
+        "Include: clearing and grubbing, cut/fill earthwork balance, rough and fine grading to "
+        "design subgrade, basic storm conveyance (inlets + shallow pipe), erosion and sediment "
+        "control (silt fence, inlet protection, stabilized construction entrance) per state "
+        "ESC handbook, and final stabilization. Engineer-stamped grading and SWPPP available "
+        "as a separate deliverable when required by the AHJ."
+    ),
 }
 
 
