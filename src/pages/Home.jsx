@@ -193,6 +193,28 @@ export default function Home() {
 
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center bg-brand-navy overflow-hidden pt-16">
+        {/* Background hero image — branded, optimized, lazy via fetchpriority */}
+        <picture>
+          <source srcSet="/hero-paving.webp" type="image/webp" />
+          <img
+            src="/hero-paving.jpg"
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            width="1920"
+            height="1080"
+          />
+        </picture>
+        {/* Dark gradient overlay so text stays readable over the image */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(26,26,26,0.55) 0%, rgba(26,26,26,0.75) 100%)',
+          }}
+        />
         {/* Background texture */}
         <div
           className="absolute inset-0 opacity-10"
@@ -250,7 +272,7 @@ export default function Home() {
             </Link>
             <a
               href="tel:+18044461296"
-              className="btn-outline text-lg px-8 py-4"
+              className="btn-outline-light text-lg px-8 py-4"
               onClick={() => trackEvent('phone_click', { location: 'hero' })}
             >
               📞 Call Us Today
@@ -626,7 +648,7 @@ export default function Home() {
               </span>
               <h2 className="font-display font-black text-2xl mt-1">Serving 20+ Virginia Cities</h2>
             </div>
-            <Link to="/service-areas" className="btn-outline text-sm flex-shrink-0">
+            <Link to="/service-areas" className="btn-outline-light text-sm flex-shrink-0">
               View All Service Areas →
             </Link>
           </div>

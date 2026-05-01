@@ -69,7 +69,7 @@ export default function ServiceAreas() {
             </Link>
             <a
               href="tel:+18044461296"
-              className="btn-outline text-lg px-8 py-4"
+              className="btn-outline-light text-lg px-8 py-4"
               onClick={() => trackEvent('phone_click', { location: 'service_areas_hero' })}
             >
               📞 (804) 446-1296
