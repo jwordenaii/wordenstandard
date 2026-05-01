@@ -13,8 +13,10 @@ COPY . .
 FROM builder AS runtime
 
 EXPOSE 8000
-# Development / hot-reload entrypoint (overridden in docker-compose)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Default runtime entrypoint runs Uvicorn without --reload so it is safe to
+# use as a production fallback. docker-compose overrides the command for
+# local development to add --reload.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ── Production stage ──────────────────────────────────────────────────────────
 FROM python:3.11-slim AS production
