@@ -435,6 +435,12 @@ export default function Home() {
                 caption: 'Project Photo',
                 sub: 'Owner-provided field work',
               },
+              {
+                src: 'https://github.com/user-attachments/assets/058c2835-6e79-4a81-a5a6-d97dfa19653c',
+                alt: 'Neighborhood road paving and resurfacing — owner-provided project photo',
+                caption: 'Neighborhood Road Work',
+                sub: 'Subdivision road paving & resurfacing',
+              },
             ].map((p) => (
               <figure
                 key={p.src}
