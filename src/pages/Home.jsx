@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import SchemaMarkup, {
@@ -47,6 +48,43 @@ const HERO_GALLERY = [
     href: '/services#masonry',
   },
 ]
+
+/**
+ * One card in the hero "Our Work" gallery.  Tracks image-load failures in
+ * local state so the gradient fallback shows cleanly through React's render
+ * cycle (no direct DOM mutation).
+ */
+function HeroGalleryCard({ item }) {
+  const [imgFailed, setImgFailed] = useState(false)
+  return (
+    <Link
+      to={item.href}
+      onClick={() => trackEvent('hero_gallery_click', { item: item.label })}
+      className={`relative group block aspect-[4/3] rounded-lg overflow-hidden bg-gradient-to-br ${item.grad} shadow-md hover:shadow-xl transition-shadow`}
+      aria-label={`${item.label} — ${item.desc}`}
+    >
+      {!imgFailed && (
+        <img
+          src={item.img}
+          alt={`${item.label} — ${item.desc}`}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+          onError={() => setImgFailed(true)}
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+        <div className="font-display font-bold text-white text-base sm:text-lg leading-tight">
+          {item.label}
+        </div>
+        <div className="text-white/70 text-xs mt-0.5 hidden sm:block">
+          {item.desc}
+        </div>
+      </div>
+    </Link>
+  )
+}
 
 
 const SERVICES = [
@@ -329,34 +367,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {HERO_GALLERY.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                onClick={() => trackEvent('hero_gallery_click', { item: item.label })}
-                className={`relative group block aspect-[4/3] rounded-lg overflow-hidden bg-gradient-to-br ${item.grad} shadow-md hover:shadow-xl transition-shadow`}
-                aria-label={`${item.label} — ${item.desc}`}
-              >
-                <img
-                  src={item.img}
-                  alt={`${item.label} — ${item.desc}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                  onError={(e) => {
-                    /* Hide broken image so the gradient fallback shows through. */
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                  <div className="font-display font-bold text-white text-base sm:text-lg leading-tight">
-                    {item.label}
-                  </div>
-                  <div className="text-white/70 text-xs mt-0.5 hidden sm:block">
-                    {item.desc}
-                  </div>
-                </div>
-              </Link>
+              <HeroGalleryCard key={item.label} item={item} />
             ))}
           </div>
           <div className="mt-5 text-center sm:hidden">

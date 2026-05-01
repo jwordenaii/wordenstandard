@@ -65,16 +65,16 @@ export default function Contact() {
     fetchSuggestion(form.message)
   }
 
-  const buildMessageBody = () =>
-    [
-      form.service_type ? `Service: ${form.service_type}` : '',
-      form.urgency ? `Urgency: ${form.urgency}` : '',
-      form.phone ? `Phone: ${form.phone}` : '',
-      '',
-      form.message,
-    ]
-      .filter((line) => line !== undefined && line !== null)
-      .join('\n')
+  const buildMessageBody = () => {
+    const meta = [
+      form.service_type ? `Service: ${form.service_type}` : null,
+      form.urgency ? `Urgency: ${form.urgency}` : null,
+      form.phone ? `Phone: ${form.phone}` : null,
+    ].filter(Boolean)
+    // Separate the metadata block from the user's message with a blank line
+    // (only when there is actually any metadata to separate).
+    return [...meta, ...(meta.length ? [''] : []), form.message].join('\n')
+  }
 
   /** Fallback: if the backend can't be reached, open the user's email client
    *  with a pre-filled message so the lead is never lost. */
