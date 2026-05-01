@@ -9,6 +9,7 @@ const NAV_LINKS = [
 { label: 'Services', href: '#services' },
 { label: 'Residential', href: '/residential' },
 { label: 'Home Services', href: '/home-services' },
+{ label: 'Tar & Chip', href: '/tar-and-chip' },
 { label: 'GC', href: '/general-contracting' },
 { label: 'Our Work', href: '#proof' },
 { label: 'About', href: '#about' },

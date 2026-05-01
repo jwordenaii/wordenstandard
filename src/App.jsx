@@ -24,6 +24,7 @@ const RichmondCommercial = lazy(() => import('./pages/RichmondCommercial'));
 const ResidentialAsphalt = lazy(() => import('./pages/ResidentialAsphalt'));
 const HomeServices = lazy(() => import('./pages/HomeServices'));
 const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
+const TarAndChip = lazy(() => import('./pages/TarAndChip'));
 const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
         <Route path="/residential" element={<ResidentialAsphalt />} />
         <Route path="/home-services" element={<HomeServices />} />
         <Route path="/general-contracting" element={<GeneralContracting />} />
+        <Route path="/tar-and-chip" element={<TarAndChip />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<CrewEta />} />
