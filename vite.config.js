@@ -26,8 +26,8 @@ export default defineConfig(({ mode }) => {
       hostname: siteUrl,
       generateRobotsTxt: false,
       dynamicRoutes: [
-        // Core pages
-        '/',
+        // Core pages (the plugin auto-adds "/" from index.html, so it is
+        // intentionally omitted here to avoid a duplicate <url> entry)
         '/services',
         '/about',
         '/contact',
@@ -44,21 +44,11 @@ export default defineConfig(({ mode }) => {
         // Blog
         '/blog',
         ...BLOG_SLUGS.map((s) => `/blog/${s}`),
-        // Advisory Board top-level
-        '/advisory',
-        '/advisory/utilities',
-        '/advisory/compare',
-        '/advisory/legal-strategy',
-        '/advisory/contractor-ranker',
-        // Category hubs
-        '/advisory/licensing',
-        '/advisory/construction-law',
-        '/advisory/safety',
-        '/advisory/contracts',
-        '/advisory/prevailing-wage',
-        '/advisory/environmental',
-        '/advisory/building-codes',
-        '/advisory/roads-paving',
+        // NOTE: /advisory/* routes are intentionally NOT included in the
+        // sitemap. They are PIN-gated internal operator tools; submitting
+        // them to search engines would generate "Indexed though blocked"
+        // warnings in Search Console. They are also disallowed in
+        // public/robots.txt.
       ],
     }),
   ],

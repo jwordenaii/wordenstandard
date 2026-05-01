@@ -447,6 +447,12 @@ export default function Home() {
                 caption: 'Parking Lot Paving — Portsmouth, VA',
                 sub: 'Commercial lot paving',
               },
+              {
+                src: 'https://github.com/user-attachments/assets/e345b407-04a4-46ce-a502-e4174f0f5116',
+                alt: 'Commercial drive-thru parking lot with fresh asphalt overlay and dump truck on site — owner-provided project photo',
+                caption: 'Parking Lot Paving',
+                sub: 'Commercial drive-thru lot — fresh asphalt overlay',
+              },
             ].map((p) => (
               <figure
                 key={p.src}
