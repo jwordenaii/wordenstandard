@@ -17,23 +17,29 @@ function southernFounderStyle(text) {
   const source = (text || '').trim();
   if (!source) return '';
 
-  if (source.toLowerCase().includes('mr. worden')) return source;
+  const lower = source.toLowerCase();
+  if (lower.includes('mr. worden, founder')) return source;
 
   const sentences = splitSentences(source);
   if (sentences.length === 0) return source;
 
-  const opener = 'Yes sir, here is how I would handle it:';
-  const recommendation = sentences[0].replace(/^[^a-zA-Z0-9]+/, '');
-  const nextStep = sentences.slice(1).join(' ');
+  const recommendation = (sentences[0] || '').replace(/^[^a-zA-Z0-9]+/, '');
+  const whyItWorks = sentences[1] || '';
+  const practicalNextStep = sentences.slice(2).join(' ');
 
   const compactRecommendation = recommendation.endsWith('.') ? recommendation : `${recommendation}.`;
-  const compactNextStep = nextStep
-    ? nextStep.endsWith('.') || nextStep.endsWith('!') || nextStep.endsWith('?')
-      ? nextStep
-      : `${nextStep}.`
-    : 'If you would like, I can walk you through a practical next step right now.';
+  const compactWhy = whyItWorks
+    ? whyItWorks.endsWith('.') || whyItWorks.endsWith('!') || whyItWorks.endsWith('?')
+      ? whyItWorks
+      : `${whyItWorks}.`
+    : 'That approach holds up better in Virginia weather and daily traffic.';
+  const compactNextStep = practicalNextStep
+    ? practicalNextStep.endsWith('.') || practicalNextStep.endsWith('!') || practicalNextStep.endsWith('?')
+      ? practicalNextStep
+      : `${practicalNextStep}.`
+    : 'If you want, I can map out the smartest next step for your property right now.';
 
-  return `${opener} ${compactRecommendation} ${compactNextStep} — Mr. Worden`;
+  return `Recommendation: ${compactRecommendation} Why: ${compactWhy} Next step: ${compactNextStep} — Mr. Worden, Founder`;
 }
 
 function styleFounderMessage(message) {
@@ -236,7 +242,7 @@ export default function AIConciergeBubble() {
       setMessages([
         {
           role: 'assistant',
-          content: "Yes sir, I am Mr. Worden, founder of J. Worden & Sons. Ask me anything about paving, and I will give you a practical recommendation with a clear next step. — Mr. Worden",
+          content: "Recommendation: Ask me anything about your paving project and I will give you a direct recommendation. Why: I run this like a real jobsite decision, not a generic chatbot answer. Next step: Share your driveway size, condition, and timeline, and I will lay out the smartest plan. — Mr. Worden, Founder",
         },
       ]);
       return conv;
