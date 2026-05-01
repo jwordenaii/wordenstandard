@@ -63,7 +63,7 @@ _INJECTION_PATTERNS: list[re.Pattern] = [
     re.compile(r"(you\s+are\s+now|act\s+as|pretend\s+(you\s+are|to\s+be))", re.I),
     re.compile(r"(disregard|forget|override)\s+(your|all|the)\s+(instructions?|rules?|guidelines?|system\s+prompt)", re.I),
     re.compile(r"jailbreak", re.I),
-    re.compile(r"DAN\b", re.I),
+    re.compile(r"DAN\b", re.I),  # "Do Anything Now" — a well-known jailbreak prompt
     re.compile(r"<\|?(system|assistant|user|im_start|im_end)\|?>", re.I),
     re.compile(r"\[SYSTEM\]|\[INST\]|\[\/INST\]", re.I),
     re.compile(r"###\s*(instruction|system|override)", re.I),

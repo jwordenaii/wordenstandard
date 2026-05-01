@@ -206,6 +206,33 @@ function getPageHelp(pathname) {
   return PAGE_HELP[pathname] || PAGE_HELP.default
 }
 
+// ── Header avatar SVG (compact portrait of Mr. J. Worden Sr.) ─────────────────
+
+function HeaderAvatar() {
+  return (
+    <div className="w-9 h-9 rounded-full bg-brand-amber/20 border-2 border-brand-amber/60 flex items-center justify-center flex-shrink-0 overflow-hidden" aria-hidden="true">
+      <svg viewBox="0 0 80 88" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+        <path d="M18 31 Q17 17 40 15 Q63 17 62 31 Z" fill="#f5a623" />
+        <rect x="13" y="29" width="54" height="6" rx="3" fill="#d4880a" />
+        <rect x="15" y="29" width="50" height="4.5" rx="2" fill="#f5a623" />
+        <rect x="36" y="22" width="8" height="5" rx="1.5" fill="#d4880a" opacity="0.8" />
+        <text x="40" y="26.5" fontSize="4" fill="white" textAnchor="middle" fontWeight="bold">JW</text>
+        <ellipse cx="40" cy="46" rx="18" ry="20" fill="#F4C3A1" />
+        <circle cx="32" cy="44" r="6.5" stroke="#4a4a4a" strokeWidth="1.8" fill="white" fillOpacity="0.6" />
+        <circle cx="48" cy="44" r="6.5" stroke="#4a4a4a" strokeWidth="1.8" fill="white" fillOpacity="0.6" />
+        <path d="M38.5 44 H41.5" stroke="#4a4a4a" strokeWidth="1.6" />
+        <circle cx="32" cy="44" r="2.8" fill="#2a1505" />
+        <circle cx="48" cy="44" r="2.8" fill="#2a1505" />
+        <path d="M31 54 Q36 57 40 55 Q44 57 49 54" stroke="#7a4a25" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <path d="M33 57 Q40 62.5 47 57" stroke="#c8966c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        <path d="M19 73 Q18 88 40 88 Q62 88 61 73 Q52 66 40 66 Q28 66 19 73 Z" fill="#1a1a2e" />
+        <path d="M37.5 66 L40 70 L42.5 66 L40 68.5 Z" fill="#f5a623" />
+        <path d="M38.5 70 L40 78 L41.5 70 Z" fill="#f5a623" />
+      </svg>
+    </div>
+  )
+}
+
 // ── Quick action definitions ──────────────────────────────────────────────────
 
 const QUICK_ACTIONS = [
@@ -712,26 +739,7 @@ export default function ChatWidget() {
             {/* Premium Header */}
             <div className="bg-gradient-to-r from-brand-navy to-[#0e2240] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-brand-amber/20 border-2 border-brand-amber/60 flex items-center justify-center flex-shrink-0 overflow-hidden" aria-hidden="true">
-                  <svg viewBox="0 0 80 88" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                    <path d="M18 31 Q17 17 40 15 Q63 17 62 31 Z" fill="#f5a623" />
-                    <rect x="13" y="29" width="54" height="6" rx="3" fill="#d4880a" />
-                    <rect x="15" y="29" width="50" height="4.5" rx="2" fill="#f5a623" />
-                    <rect x="36" y="22" width="8" height="5" rx="1.5" fill="#d4880a" opacity="0.8" />
-                    <text x="40" y="26.5" fontSize="4" fill="white" textAnchor="middle" fontWeight="bold">JW</text>
-                    <ellipse cx="40" cy="46" rx="18" ry="20" fill="#F4C3A1" />
-                    <circle cx="32" cy="44" r="6.5" stroke="#4a4a4a" strokeWidth="1.8" fill="white" fillOpacity="0.6" />
-                    <circle cx="48" cy="44" r="6.5" stroke="#4a4a4a" strokeWidth="1.8" fill="white" fillOpacity="0.6" />
-                    <path d="M38.5 44 H41.5" stroke="#4a4a4a" strokeWidth="1.6" />
-                    <circle cx="32" cy="44" r="2.8" fill="#2a1505" />
-                    <circle cx="48" cy="44" r="2.8" fill="#2a1505" />
-                    <path d="M31 54 Q36 57 40 55 Q44 57 49 54" stroke="#7a4a25" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                    <path d="M33 57 Q40 62.5 47 57" stroke="#c8966c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-                    <path d="M19 73 Q18 88 40 88 Q62 88 61 73 Q52 66 40 66 Q28 66 19 73 Z" fill="#1a1a2e" />
-                    <path d="M37.5 66 L40 70 L42.5 66 L40 68.5 Z" fill="#f5a623" />
-                    <path d="M38.5 70 L40 78 L41.5 70 Z" fill="#f5a623" />
-                  </svg>
-                </div>
+                <HeaderAvatar />
                 <div>
                   <div className="font-bold text-sm leading-tight">Mr. J. Worden</div>
                   <div className="text-white/60 text-xs flex items-center gap-1">
