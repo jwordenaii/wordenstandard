@@ -485,3 +485,13 @@ def truck_ping(req: TelemetryPing, background_tasks: BackgroundTasks):
 @app.get("/health", tags=["ops"])
 def health():
     return {"status": "ok", "service": "JWordenAI"}
+
+
+# ── Sentry test ───────────────────────────────────────────────────────────────
+# Hit GET /sentry-test to trigger a deliberate exception and confirm that Sentry
+# is capturing and reporting errors from this environment.  Remove or gate behind
+# auth once the integration has been verified.
+
+@app.get("/sentry-test", tags=["ops"])
+def sentry_test():
+    raise Exception("Sentry is working! 🎉")
