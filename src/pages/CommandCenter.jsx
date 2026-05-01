@@ -318,6 +318,82 @@ function ChannelPerformancePanel() {
   )
 }
 
+function HumanApprovalPolicyPanel() {
+  const policyRules = [
+    {
+      rule: 'Ad Budget Change > 20% day-over-day',
+      level: 'Human Required',
+      reason: 'Protect spend volatility and prevent runaway CAC',
+      owner: 'Marketing Lead',
+    },
+    {
+      rule: 'Any new public landing page publish',
+      level: 'Human Required',
+      reason: 'Claim/legal/brand QA before public indexation',
+      owner: 'Growth + Brand',
+    },
+    {
+      rule: 'Price or discount policy modification',
+      level: 'Human Required',
+      reason: 'Margin protection and offer consistency',
+      owner: 'Owner/GM',
+    },
+    {
+      rule: 'Auto-reply with comparative competitor claims',
+      level: 'Human Required',
+      reason: 'Reduce legal and reputational risk',
+      owner: 'Reputation Lead',
+    },
+    {
+      rule: 'Automated low-risk bid optimizations within thresholds',
+      level: 'Auto Allowed',
+      reason: 'Fast optimization under bounded controls',
+      owner: 'AI Optimizer',
+    },
+  ]
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
+          Human Approval Policy
+        </h3>
+        <span className="text-xs text-white/45">Hard stops for irreversible actions</span>
+      </div>
+
+      <div className="space-y-2.5">
+        {policyRules.map((item) => {
+          const requiresHuman = item.level === 'Human Required'
+          return (
+            <div key={item.rule} className="rounded-xl border border-white/10 bg-black/20 px-3 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-white font-semibold">{item.rule}</p>
+                <span
+                  className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                    requiresHuman
+                      ? 'border-amber-300/50 bg-amber-300/10 text-amber-200'
+                      : 'border-emerald-300/50 bg-emerald-300/10 text-emerald-200'
+                  }`}
+                >
+                  {item.level}
+                </span>
+              </div>
+              <p className="text-xs text-white/60 mt-1.5">{item.reason}</p>
+              <p className="text-[11px] text-brand-amber mt-1.5">Owner: {item.owner}</p>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-2.5">
+        <p className="text-xs text-amber-100 leading-relaxed">
+          Governance standard: monitor and draft automatically, but require a human approval event for budget jumps, public publishing, pricing changes, and legal-risk messaging.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function PinGate({ onUnlock }) {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
@@ -471,6 +547,8 @@ export default function CommandCenter() {
                     <SystemHealth />
                   </div>
                 </div>
+
+                <HumanApprovalPolicyPanel />
               </div>
             )}
 
