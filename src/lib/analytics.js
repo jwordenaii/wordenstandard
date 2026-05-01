@@ -82,6 +82,10 @@ export const trackLandingPageView = (page = {}) => {
     landing_slug: page.slug,
     landing_keyword: page.primaryKeyword,
     ad_intent: page.adIntent,
+    ad_group: page.adGroup,
+    keyword_cluster: Array.isArray(page.keywordCluster)
+      ? page.keywordCluster.join(' | ')
+      : undefined,
   });
 };
 
@@ -90,6 +94,10 @@ export const trackLandingPrimaryCta = (page = {}, location = 'unknown') => {
     landing_slug: page.slug,
     landing_keyword: page.primaryKeyword,
     ad_intent: page.adIntent,
+    ad_group: page.adGroup,
+    keyword_cluster: Array.isArray(page.keywordCluster)
+      ? page.keywordCluster.join(' | ')
+      : undefined,
     cta_location: location,
     value: 35,
     currency: 'USD',
@@ -101,6 +109,10 @@ export const trackQualifiedLeadSignal = (page = {}, signal = 'unknown') => {
     landing_slug: page.slug,
     landing_keyword: page.primaryKeyword,
     ad_intent: page.adIntent,
+    ad_group: page.adGroup,
+    keyword_cluster: Array.isArray(page.keywordCluster)
+      ? page.keywordCluster.join(' | ')
+      : undefined,
     signal,
     value: 120,
     currency: 'USD',
