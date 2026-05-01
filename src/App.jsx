@@ -27,6 +27,7 @@ const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
 const ContractorAIPlatform = lazy(() => import('./pages/ContractorAIPlatform'));
 const CommandCenter = lazy(() => import('./pages/CommandCenter'));
+const JwordenAI = lazy(() => import('./pages/JwordenAI'));
 const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
         <Route path="/locations" element={<LocationsIndex />} />
         <Route path="/locations/:slug" element={<LocationPage />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
+        <Route path="/jwordenai" element={<JwordenAI />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<CrewEta />} />
