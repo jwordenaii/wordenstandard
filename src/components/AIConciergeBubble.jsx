@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import MrWordenAvatar from './MrWordenAvatar';
+import WebGLPersonaAvatar from './WebGLPersonaAvatar';
 
 /**
  * Floating AI concierge chat bubble that lives on the public site.
@@ -17,10 +17,18 @@ export default function AIConciergeBubble() {
   const [sending, setSending] = useState(false);
   const [booting, setBooting] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [voiceMode, setVoiceMode] = useState('push'); // off | push | handsfree
+  const [voiceOutputEnabled, setVoiceOutputEnabled] = useState(true);
+  const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [speechPulse, setSpeechPulse] = useState(0);
   const scrollRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const handsFreeRestartRef = useRef(null);
+  const lastAssistantMessageRef = useRef('');
 
   const avatarState = open
-    ? (sending || booting ? 'talking' : 'listening')
+    ? (speaking || sending || booting ? 'talking' : listening ? 'listening' : 'idle')
     : hovered
       ? 'wave'
       : 'idle';
@@ -30,6 +38,60 @@ export default function AIConciergeBubble() {
     'How soon can you start in Chester?',
     'Is asphalt better than concrete for my project?',
   ];
+
+  const stopListening = useCallback(() => {
+    if (handsFreeRestartRef.current) {
+      clearTimeout(handsFreeRestartRef.current);
+      handsFreeRestartRef.current = null;
+    }
+    const rec = recognitionRef.current;
+    if (rec) {
+      try {
+        rec.stop();
+      } catch {
+        // ignore recognition stop races
+      }
+    }
+  }, []);
+
+  const startListening = useCallback(() => {
+    const rec = recognitionRef.current;
+    if (!rec || listening || sending || booting || speaking || !open) return;
+    try {
+      rec.start();
+    } catch {
+      // ignore recognition start races
+    }
+  }, [listening, sending, booting, speaking, open]);
+
+  const speakAssistant = useCallback(
+    (text) => {
+      if (!voiceOutputEnabled || !('speechSynthesis' in window)) return;
+      if (!text?.trim()) return;
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text.trim());
+      utterance.rate = 1.02;
+      utterance.pitch = 0.96;
+      utterance.volume = 1;
+      utterance.onstart = () => {
+        setSpeaking(true);
+        setSpeechPulse((p) => p + Math.max(1, Math.round(text.length / 6)));
+      };
+      utterance.onboundary = () => {
+        setSpeechPulse((p) => p + 1);
+      };
+      utterance.onend = () => {
+        setSpeaking(false);
+        if (voiceMode === 'handsfree' && open) {
+          handsFreeRestartRef.current = setTimeout(() => startListening(), 350);
+        }
+      };
+      utterance.onerror = () => setSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    },
+    [voiceOutputEnabled, voiceMode, open, startListening]
+  );
 
   const initConversation = async () => {
     if (conversation) return conversation;
@@ -74,6 +136,74 @@ export default function AIConciergeBubble() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
+
+  // Speech recognition setup (push-to-talk + hands-free)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const rec = new SpeechRecognition();
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.continuous = voiceMode === 'handsfree';
+
+    rec.onstart = () => setListening(true);
+    rec.onend = () => {
+      setListening(false);
+      if (voiceMode === 'handsfree' && open && !speaking && !sending && !booting) {
+        handsFreeRestartRef.current = setTimeout(() => startListening(), 500);
+      }
+    };
+    rec.onerror = () => setListening(false);
+    rec.onresult = async (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+      }
+      const spoken = finalTranscript.trim();
+      if (!spoken) return;
+
+      if (voiceMode === 'handsfree') {
+        await sendMessage(spoken);
+      } else {
+        setInput((prev) => (prev ? `${prev} ${spoken}` : spoken));
+      }
+    };
+
+    recognitionRef.current = rec;
+    return () => {
+      try {
+        rec.stop();
+      } catch {
+        // ignore cleanup races
+      }
+      recognitionRef.current = null;
+    };
+  }, [voiceMode, open, speaking, sending, booting, startListening]);
+
+  // Speak assistant messages and drive lip-sync pacing from message length.
+  useEffect(() => {
+    const assistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    if (!assistant?.content) return;
+    if (assistant.content === lastAssistantMessageRef.current) return;
+    lastAssistantMessageRef.current = assistant.content;
+
+    setSpeechPulse((p) => p + Math.max(1, Math.round(assistant.content.length / 8)));
+    if (open) speakAssistant(assistant.content);
+  }, [messages, open, speakAssistant]);
+
+  useEffect(() => {
+    if (!open) {
+      stopListening();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    if (voiceMode === 'handsfree' && !speaking && !sending && !booting) {
+      startListening();
+    }
+  }, [open, voiceMode, speaking, sending, booting, startListening, stopListening]);
 
   const handleOpen = async () => {
     setOpen(true);
@@ -134,12 +264,16 @@ export default function AIConciergeBubble() {
                 className="absolute -inset-2 rounded-full border border-primary/30 pointer-events-none"
               />
 
-              <MrWordenAvatar
-                state={avatarState}
-                size={72}
-                onClick={handleOpen}
-                isOpen={open}
-              />
+              <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
+                <div className="w-[96px] h-[96px] rounded-full border border-primary/40 bg-black/40 overflow-hidden">
+                  <WebGLPersonaAvatar
+                    mode={avatarState}
+                    speechPulse={speechPulse}
+                    speechIntensity={speaking ? 0.9 : 0.55}
+                    className="w-full h-full"
+                  />
+                </div>
+              </button>
               <span className="absolute top-4 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_12px_rgba(34,197,94,.8)]" />
             </motion.div>
 
@@ -175,8 +309,13 @@ export default function AIConciergeBubble() {
             {/* Header */}
             <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-primary flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
+                <div className="w-11 h-11 rounded-full border border-primary/40 overflow-hidden bg-black/50">
+                  <WebGLPersonaAvatar
+                    mode={avatarState}
+                    speechPulse={speechPulse}
+                    speechIntensity={speaking ? 0.95 : 0.5}
+                    className="w-full h-full"
+                  />
                 </div>
                 <div>
                   <p className="font-display font-black text-foreground text-sm uppercase tracking-wider">
@@ -185,18 +324,40 @@ export default function AIConciergeBubble() {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                     <p className="font-display text-muted-foreground text-[10px] tracking-wider uppercase">
-                        Premium persona · Replies instantly
+                        WebGL persona · voice ready
                     </p>
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="text-muted-foreground hover:text-foreground p-1"
-                aria-label="Close chat"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setVoiceOutputEnabled((v) => !v)}
+                  className="w-8 h-8 border border-border/80 hover:border-primary/60 flex items-center justify-center"
+                  aria-label={voiceOutputEnabled ? 'Mute voice output' : 'Enable voice output'}
+                  title={voiceOutputEnabled ? 'Voice output on' : 'Voice output off'}
+                >
+                  {voiceOutputEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVoiceMode((m) => (m === 'handsfree' ? 'push' : 'handsfree'))}
+                  className={`w-8 h-8 border flex items-center justify-center ${
+                    voiceMode === 'handsfree' ? 'border-primary text-primary' : 'border-border/80 hover:border-primary/60'
+                  }`}
+                  aria-label="Toggle hands-free voice mode"
+                  title={voiceMode === 'handsfree' ? 'Hands-free mode on' : 'Push-to-talk mode'}
+                >
+                  <Radio className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-muted-foreground hover:text-foreground p-1"
+                  aria-label="Close chat"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
@@ -247,11 +408,25 @@ export default function AIConciergeBubble() {
 
             {/* Input */}
             <form onSubmit={handleSend} className="p-3 border-t border-border bg-card flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => (listening ? stopListening() : startListening())}
+                disabled={booting || sending}
+                className={`w-11 h-11 border flex items-center justify-center transition-colors ${
+                  listening
+                    ? 'border-primary bg-primary/15 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/60 hover:text-primary'
+                } disabled:opacity-50`}
+                aria-label={listening ? 'Stop voice input' : 'Start voice input'}
+                title={voiceMode === 'handsfree' ? 'Hands-free voice input' : 'Push-to-talk voice input'}
+              >
+                {listening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+              </button>
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about pricing, timing, materials..."
+                placeholder={listening ? 'Listening… speak now' : 'Ask about pricing, timing, materials...'}
                 disabled={sending || booting}
                 className="flex-1 bg-muted border border-border px-3 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:opacity-50"
               />
