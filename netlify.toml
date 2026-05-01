@@ -10,14 +10,11 @@
 # The VITE_CC_PASSWORD variable provides a secondary client-side deterrent
 # (see CommandCenter.jsx), but COMMAND_CENTER_PIN is the real protection layer.
 
-[edge_functions]
-  directory = "netlify/edge-functions"
-
-[[edge_functions.function]]
+[[edge_functions]]
   path = "/command-center"
   function = "command-center-auth"
 
-[[edge_functions.function]]
+[[edge_functions]]
   path = "/command-center/*"
   function = "command-center-auth"
 
