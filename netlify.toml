@@ -13,11 +13,11 @@
 [edge_functions]
   directory = "netlify/edge-functions"
 
-[[edge_functions]]
+[[edge_functions.function]]
   path = "/command-center"
   function = "command-center-auth"
 
-[[edge_functions]]
+[[edge_functions.function]]
   path = "/command-center/*"
   function = "command-center-auth"
 
