@@ -10,7 +10,13 @@ import multiprocessing
 import os
 
 # ── Server socket ─────────────────────────────────────────────────────────────
-bind = "0.0.0.0:8000"
+# Honour the platform-injected ``PORT`` env var (Railway, Render, Heroku, Fly,
+# Cloud Run all set this).  Falls back to 8000 for local development and the
+# Dockerfile's documented EXPOSE.  Without this, Railway's health check hits
+# the wrong port and marks the deploy as failed even though the container is
+# running.
+_port = os.getenv("PORT", "8000").strip() or "8000"
+bind = f"0.0.0.0:{_port}"
 
 # ── Workers ───────────────────────────────────────────────────────────────────
 # Formula: (2 × CPU count) + 1 is a common starting point for I/O-bound apps.
