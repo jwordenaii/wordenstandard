@@ -42,6 +42,14 @@
     <priority>0.6</priority>
   </url>
 
+  <!-- AI-built landing pages -->
+  <url>
+    <loc>https://www.jwordenasphaltpaving.com/lp/richmond-parking-lot-repair</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- ────────── VIRGINIA LOCATION PAGES ────────── -->
   <url>
     <loc>https://www.jwordenasphaltpaving.com/locations/chester-va</loc>

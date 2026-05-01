@@ -2,6 +2,8 @@
 // Uses the global gtag() function loaded in index.html. All calls are safe no-ops
 // if gtag isn't available yet (e.g. during SSR or before the script loads).
 
+import { getAttributionEventParams, persistAttribution } from '@/lib/adsAttribution';
+
 // ─────────────────────────────────────────────────────────────
 // GOOGLE ADS CONVERSION IDs
 // ─────────────────────────────────────────────────────────────
@@ -32,8 +34,9 @@ const hasGtag = () => typeof window !== 'undefined' && typeof window.gtag === 'f
  * @param {object} params - event parameters (value, currency, etc.)
  */
 export const trackEvent = (eventName, params = {}) => {
+  persistAttribution();
   if (!hasGtag()) return;
-  window.gtag('event', eventName, params);
+  window.gtag('event', eventName, { ...getAttributionEventParams(), ...params });
 };
 
 /**
@@ -72,6 +75,36 @@ export const trackLeadSubmission = (lead = {}) => {
       currency: 'USD',
     });
   }
+};
+
+export const trackLandingPageView = (page = {}) => {
+  trackEvent('landing_page_view', {
+    landing_slug: page.slug,
+    landing_keyword: page.primaryKeyword,
+    ad_intent: page.adIntent,
+  });
+};
+
+export const trackLandingPrimaryCta = (page = {}, location = 'unknown') => {
+  trackEvent('landing_primary_cta_click', {
+    landing_slug: page.slug,
+    landing_keyword: page.primaryKeyword,
+    ad_intent: page.adIntent,
+    cta_location: location,
+    value: 35,
+    currency: 'USD',
+  });
+};
+
+export const trackQualifiedLeadSignal = (page = {}, signal = 'unknown') => {
+  trackEvent('qualified_lead_signal', {
+    landing_slug: page.slug,
+    landing_keyword: page.primaryKeyword,
+    ad_intent: page.adIntent,
+    signal,
+    value: 120,
+    currency: 'USD',
+  });
 };
 
 /**

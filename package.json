@@ -9,6 +9,7 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
+    "ai:build-pages": "node scripts/ai-page-factory.mjs",
     "preview": "vite preview",
     "test": "npm run test:unit",
     "test:unit": "echo \"No frontend unit tests configured\"",

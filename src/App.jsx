@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import RouteLoader from '@/components/RouteLoader';
 import SplashScreen from '@/components/SplashScreen';
+import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
 import Home from './pages/Home';
@@ -28,6 +29,7 @@ const TarAndChip = lazy(() => import('./pages/TarAndChip'));
 const ContractorAIPlatform = lazy(() => import('./pages/ContractorAIPlatform'));
 const CommandCenter = lazy(() => import('./pages/CommandCenter'));
 const JwordenAI = lazy(() => import('./pages/JwordenAI'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
@@ -81,11 +83,18 @@ const AuthenticatedApp = () => {
         <Route path="/locations/:slug" element={<LocationPage />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/jwordenai" element={<JwordenAI />} />
+        <Route path="/lp/:slug" element={<LandingPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<CrewEta />} />
+        {publicAIPages.map(({ path, Component }) => (
+          <Route key={path} path={path} element={<Component />} />
+        ))}
 
         {/* Back-office (auth required) */}
+        {internalAIPages.map(({ path, Component }) => (
+          <Route key={path} path={path} element={<RequireAuth><Component /></RequireAuth>} />
+        ))}
         <Route path="/command-center" element={<RequireAuth><CommandCenter /></RequireAuth>} />
         <Route path="/residential" element={<RequireAuth><ResidentialAsphalt /></RequireAuth>} />
         <Route path="/home-services" element={<RequireAuth><HomeServices /></RequireAuth>} />
