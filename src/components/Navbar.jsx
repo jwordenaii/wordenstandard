@@ -7,6 +7,8 @@ import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
 const NAV_LINKS = [
 { label: 'Services', href: '#services' },
+{ label: 'Residential', href: '/residential' },
+{ label: 'Home Services', href: '/home-services' },
 { label: 'Our Work', href: '#proof' },
 { label: 'About', href: '#about' },
 { label: 'Blog', href: '/blog', external: true },

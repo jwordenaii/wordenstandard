@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Home, Building2, Factory } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const RESIDENTIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/d6289d266_generated_image.png';
 const COMMERCIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png';
@@ -17,6 +18,8 @@ const SERVICES = [
     image: RESIDENTIAL_IMG,
     alt: 'Freshly paved residential driveway with fine-grain asphalt and clean edges against green lawn at golden hour',
     features: ['Hot-Mix Asphalt', 'Sealcoating', 'Crack Repair', 'Resurfacing'],
+    ctaLabel: 'Residential Details',
+    ctaHref: '/residential',
   },
   {
     id: 'commercial',
@@ -28,6 +31,8 @@ const SERVICES = [
     image: COMMERCIAL_IMG,
     alt: 'Aerial view of a completed commercial parking lot with fresh black asphalt and bright yellow line markings',
     features: ['Parking Lots', 'Line Striping', 'ADA Compliance', 'Drainage Systems'],
+    ctaLabel: 'Commercial Details',
+    ctaHref: '/commercial/richmond-va',
   },
   {
     id: 'industrial',
@@ -39,6 +44,8 @@ const SERVICES = [
     image: INDUSTRIAL_IMG,
     alt: 'Heavy industrial asphalt paving at a logistics hub with yellow machinery rollers compacting thick asphalt at dawn',
     features: ['Heavy-Load Bases', 'Truck Yards', 'Loading Docks', 'Airport Taxiways'],
+    ctaLabel: 'Home Services Details',
+    ctaHref: '/home-services',
   },
 ];
 
@@ -126,12 +133,20 @@ export default function ServicePanels() {
                     </span>
                   ))}
                 </div>
-                <button
-                  onClick={scrollToQuote}
-                  className="flex items-center gap-2 text-primary font-display font-bold text-sm tracking-wider uppercase group-hover:gap-4 transition-all duration-300 min-h-[48px]"
-                >
-                  Get Quote <ArrowRight className="w-4 h-4" />
-                </button>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <Link
+                    to={service.ctaHref}
+                    className="flex items-center gap-2 text-primary font-display font-bold text-sm tracking-wider uppercase hover:text-primary/80 transition-colors min-h-[48px]"
+                  >
+                    {service.ctaLabel} <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <button
+                    onClick={scrollToQuote}
+                    className="flex items-center gap-2 text-muted-foreground font-display font-bold text-sm tracking-wider uppercase group-hover:gap-4 transition-all duration-300 min-h-[48px]"
+                  >
+                    Get Quote <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
