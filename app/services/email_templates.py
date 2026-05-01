@@ -257,21 +257,29 @@ def quote_confirmation(lead: Any) -> tuple[str, str, str]:
 
     html_body = _html_wrapper(subject, body_html, unsubscribe_url=f"{COMPANY_WEBSITE}/unsubscribe")
 
-    plain_text = (
-        f"Hi {name},\n\n"
-        f"Thank you for contacting {COMPANY_NAME}!\n\n"
-        f"We received your quote request for {service_display} ({urgency_display}).\n"
-        f"Our team will follow up {sla}.\n\n"
-        f"Service: {service_display}\n"
-        f"Urgency: {urgency_display}\n"
-        f"Address: {address or 'Not provided'}\n"
-        f"State: {state_code or 'Not provided'}\n\n"
-        f"Questions? Call us: {COMPANY_PHONE}\n"
-        f"Website: {COMPANY_WEBSITE}\n\n"
-        f"— The {COMPANY_NAME} Team"
-        f"{compliance_text}\n\n"
-        f"To unsubscribe: {COMPANY_WEBSITE}/unsubscribe"
-    )
+    plain_lines = [
+        f"Hi {name},",
+        "",
+        f"Thank you for contacting {COMPANY_NAME}!",
+        "",
+        f"We received your quote request for {service_display} ({urgency_display}).",
+        f"Our team will follow up {sla}.",
+        "",
+        f"Service: {service_display}",
+        f"Urgency: {urgency_display}",
+        f"Address: {address or 'Not provided'}",
+        f"State: {state_code or 'Not provided'}",
+        "",
+        f"Questions? Call us: {COMPANY_PHONE}",
+        f"Website: {COMPANY_WEBSITE}",
+        "",
+        f"— The {COMPANY_NAME} Team",
+    ]
+    if compliance_text:
+        # _compliance_footer_text already includes its own leading blank line
+        plain_lines.append(compliance_text.rstrip())
+    plain_lines.extend(["", f"To unsubscribe: {COMPANY_WEBSITE}/unsubscribe"])
+    plain_text = "\n".join(plain_lines)
 
     return subject, html_body, plain_text
 
