@@ -82,6 +82,26 @@ export const api = {
   askForeman: (data) => request('POST', '/api/v1/foreman/chat', data),
   getForemanStatus: () => request('GET', '/api/v1/foreman/status'),
   getVisionResult: (jobId) => request('GET', `/api/v1/ai/vision-result/${jobId}`),
+  // ── Property Visualizer (public, anonymous) ───────────────────────────────
+  scanParcel: (data) => request('POST', '/api/v1/visualizer/parcel', data),
+  submitVisualProposal: (data) => request('POST', '/api/v1/visualizer/proposal', data),
+  getAIDesignSuggestions: (data) => request('POST', '/api/v1/visualizer/ai-suggestions', data),
+  // ── Proposals + Stripe checkout (post-quote pipeline) ─────────────────────
+  generateProposal: (leadId) =>
+    request('POST', '/api/v1/proposals/generate', { lead_id: leadId, include_pdf: true }),
+  sendProposal: (leadId) => request('POST', `/api/v1/proposals/${leadId}/send`),
+  createCheckoutSession: (leadId, successUrl, cancelUrl) =>
+    request('POST', '/api/v1/payments/checkout-session', {
+      lead_id: leadId,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    }),
+  // ── National permit feed (Command Center) ─────────────────────────────────
+  getNationalPermits: (states, keyword, limit = 50) => {
+    const params = { keyword, limit }
+    if (Array.isArray(states) && states.length) params.states = states.join(',')
+    return request('GET', `/api/v1/permits/national${buildQS(params)}`)
+  },
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────
