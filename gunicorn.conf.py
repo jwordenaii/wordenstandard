@@ -6,7 +6,7 @@ Usage:
 Uvicorn worker class bridges Gunicorn's process management with ASGI.
 """
 
-import multiprocessing
+import multiprocessing  # noqa: F401  — kept for operators who want to switch back to a CPU-based formula
 import os
 
 # ── Server socket ─────────────────────────────────────────────────────────────
@@ -19,17 +19,22 @@ _port = os.getenv("PORT", "8000").strip() or "8000"
 bind = f"0.0.0.0:{_port}"
 
 # ── Workers ───────────────────────────────────────────────────────────────────
-# Formula: (2 × CPU count) + 1 is a common starting point for I/O-bound apps.
-# Honour the standard ``WEB_CONCURRENCY`` env var so operators can cap the
-# worker count on small / managed instances. This matters because each worker
-# opens its own SQLAlchemy connection pool (DB_POOL_SIZE), and the product
-# of (workers × pool_size) can quickly exhaust managed Postgres connection
-# limits on platforms like Railway / Render.
-_default_workers = multiprocessing.cpu_count() * 2 + 1
+# IMPORTANT: keep the *default* worker count low.  Each worker forks the full
+# FastAPI app (sentry, sqlalchemy, openai, langchain, socket.io, etc.) and
+# easily occupies 150-300 MB resident memory.  On a typical Railway container
+# (512 MB - 1 GB), the historical formula `(2 × cpu_count) + 1` produced 17+
+# workers on shared 8-vCPU hosts → multi-GB RSS → instant OOM kill → crash
+# loop.  We default to 2 workers (safe everywhere) and let operators raise it
+# via WEB_CONCURRENCY when they have explicit memory headroom.
+#
+# Each worker also opens its own SQLAlchemy connection pool (DB_POOL_SIZE),
+# so (workers × pool_size) must stay below the managed Postgres connection
+# limit (Railway: ~100, Render Hobby: ~97).
+_DEFAULT_WORKERS = 2
 try:
-    workers = int(os.getenv("WEB_CONCURRENCY", "").strip() or _default_workers)
+    workers = int(os.getenv("WEB_CONCURRENCY", "").strip() or _DEFAULT_WORKERS)
 except ValueError:
-    workers = _default_workers
+    workers = _DEFAULT_WORKERS
 if workers < 1:
     workers = 1
 worker_class = "uvicorn.workers.UvicornWorker"
