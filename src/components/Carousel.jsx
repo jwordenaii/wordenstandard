@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 /**
@@ -30,7 +30,6 @@ export default function Carousel({
 }) {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
-  const dragX = useRef(0)
   const count = items.length
 
   const goTo = useCallback(
@@ -101,13 +100,16 @@ export default function Carousel({
             drag={count > 1 ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.18}
-            onDragStart={(_, info) => {
-              dragX.current = info.point.x
-            }}
             onDragEnd={(_, info) => {
-              const delta = info.point.x - dragX.current
-              if (delta < -50) next()
-              else if (delta > 50) prev()
+              // info.offset.x is the actual drag distance in pixels relative
+              // to the gesture start point — the correct value for swipe
+              // detection. (info.point.x is the global pointer position and
+              // would yield wildly different thresholds depending on where
+              // on the screen the gesture started.)
+              const delta = info.offset.x
+              const SWIPE_THRESHOLD_PX = 50
+              if (delta < -SWIPE_THRESHOLD_PX) next()
+              else if (delta > SWIPE_THRESHOLD_PX) prev()
             }}
             aria-roledescription="slide"
             aria-label={`Slide ${index + 1} of ${count}`}

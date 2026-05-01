@@ -62,7 +62,11 @@ export default function App() {
       <ErrorBoundary>
         <div className="flex flex-col min-h-screen">
           <Navbar />
-          <main className="flex-1">
+          {/* On mobile, reserve space at the bottom so the sticky
+              MobileCallBar (≈56px + iOS safe area) never covers the last
+              line of page content. Hidden on desktop where the bar isn't
+              rendered. */}
+          <main className="flex-1 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0">
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Home />} />

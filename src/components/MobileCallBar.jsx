@@ -47,25 +47,35 @@ export default function MobileCallBar() {
 
   return (
     <div
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-brand-navy border-t border-brand-amber/40 shadow-2xl"
+      // pb env() respects iPhone home-indicator safe area so the buttons
+      // never sit under the system gesture bar.
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-brand-navy border-t-2 border-brand-amber shadow-2xl pb-[env(safe-area-inset-bottom)]"
       role="region"
       aria-label="Quick contact"
     >
       <div className="flex items-stretch">
         <a
           href={`tel:${PHONE_E164}`}
-          className="flex-1 flex items-center justify-center gap-2 py-3 text-white font-bold text-sm hover:bg-white/10 transition-colors"
+          // min-h ≥ 56px satisfies WCAG 2.2 / Google Lighthouse "Tap targets"
+          // audit (recommended ≥ 48×48). Bigger and bolder so it reads as
+          // the primary mobile action.
+          className="flex-1 flex items-center justify-center gap-2 min-h-[56px] py-3 text-white font-extrabold text-base hover:bg-white/10 active:bg-white/20 transition-colors"
           onClick={() => trackEvent('phone_click', { location: 'mobile_call_bar' })}
           aria-label={`Call J. Worden & Sons at ${PHONE_DISPLAY}`}
         >
-          <span className="text-xl" aria-hidden="true">
-            📞
-          </span>
+          <svg
+            className="w-5 h-5 text-brand-amber"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.05-.24c1.16.39 2.4.6 3.67.6a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A18 18 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.27.21 2.51.6 3.67a1 1 0 0 1-.24 1.05l-2.24 2.07Z" />
+          </svg>
           <span>Call {PHONE_DISPLAY}</span>
         </a>
         <a
           href="/quote"
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-brand-amber text-brand-navy font-bold text-sm hover:bg-brand-amber-dark transition-colors"
+          className="flex items-center justify-center gap-2 min-h-[56px] px-5 bg-brand-amber text-brand-navy font-extrabold text-base hover:bg-brand-amber-dark active:brightness-95 transition-colors"
           onClick={() => trackEvent('cta_click', { location: 'mobile_call_bar' })}
         >
           Free Quote
