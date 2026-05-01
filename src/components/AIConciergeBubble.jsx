@@ -16,9 +16,20 @@ export default function AIConciergeBubble() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [booting, setBooting] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const scrollRef = useRef(null);
 
-  const avatarState = open ? (sending || booting ? 'talking' : 'listening') : 'idle';
+  const avatarState = open
+    ? (sending || booting ? 'talking' : 'listening')
+    : hovered
+      ? 'wave'
+      : 'idle';
+
+  const QUICK_PROMPTS = [
+    'How much does a driveway usually cost?',
+    'How soon can you start in Chester?',
+    'Is asphalt better than concrete for my project?',
+  ];
 
   const initConversation = async () => {
     if (conversation) return conversation;
@@ -69,12 +80,9 @@ export default function AIConciergeBubble() {
     if (!conversation) await initConversation();
   };
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    const text = input.trim();
+  const sendMessage = async (text) => {
     if (!text || sending) return;
     setSending(true);
-    setInput('');
     try {
       const conv = conversation || (await initConversation());
       if (!conv) return;
@@ -84,6 +92,20 @@ export default function AIConciergeBubble() {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text) return;
+    setInput('');
+    await sendMessage(text);
+  };
+
+  const handleQuickPrompt = async (text) => {
+    if (sending || booting) return;
+    setInput('');
+    await sendMessage(text);
   };
 
   return (
@@ -96,30 +118,44 @@ export default function AIConciergeBubble() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1.5 }}
-            className="absolute bottom-5 right-4 sm:bottom-8 sm:right-8 z-40 flex items-center gap-3 bg-black/75 text-foreground pl-2 pr-4 py-2 border border-primary/40 shadow-2xl hover:shadow-primary/30 transition-shadow group backdrop-blur-sm"
+            className="absolute bottom-5 right-4 sm:bottom-8 sm:right-8 z-40"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
           >
-            <div className="relative -my-2">
+            <motion.div
+              animate={{ y: [0, -7, 0], rotate: [0, -0.5, 0.5, 0] }}
+              transition={{ repeat: Infinity, duration: 4.6, ease: 'easeInOut' }}
+              className="relative"
+            >
+              <div className="absolute inset-0 rounded-full bg-primary/25 blur-xl scale-110 pointer-events-none" />
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ repeat: Infinity, duration: 15, ease: 'linear' }}
+                className="absolute -inset-2 rounded-full border border-primary/30 pointer-events-none"
+              />
+
               <MrWordenAvatar
                 state={avatarState}
-                size={54}
+                size={72}
                 onClick={handleOpen}
                 isOpen={open}
               />
-              <span className="absolute top-3 right-2 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black" />
-            </div>
-            <div className="text-left leading-none">
+              <span className="absolute top-4 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_12px_rgba(34,197,94,.8)]" />
+            </motion.div>
+
+            <div className="absolute right-[5.3rem] bottom-4 sm:bottom-6 text-left leading-none bg-black/80 border border-primary/40 px-3 py-2 backdrop-blur-sm whitespace-nowrap">
               <button
                 type="button"
                 onClick={handleOpen}
                 className="text-left"
                 aria-label="Open AI consultant chat"
               >
-              <p className="font-display font-black text-[11px] tracking-[0.15em] uppercase">
-                Ask Mr. Worden
-              </p>
-              <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-70 mt-0.5">
-                Live AI Concierge · 24/7
-              </p>
+                <p className="font-display font-black text-[11px] tracking-[0.15em] uppercase text-primary">
+                  Meet Mr. Worden AI
+                </p>
+                <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-80 mt-0.5 text-foreground">
+                  Real-time concierge · 24/7
+                </p>
               </button>
             </div>
           </motion.div>
@@ -134,10 +170,10 @@ export default function AIConciergeBubble() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-8 right-5 sm:right-8 left-5 sm:left-auto z-50 w-auto sm:w-[400px] h-[560px] max-h-[80vh] bg-card border border-border shadow-2xl flex flex-col overflow-hidden"
+            className="absolute bottom-6 right-4 sm:right-8 left-4 sm:left-auto z-50 w-auto sm:w-[430px] h-[620px] max-h-[82vh] bg-card/95 border border-primary/30 shadow-2xl rounded-xl flex flex-col overflow-hidden backdrop-blur-sm"
           >
             {/* Header */}
-            <div className="bg-obsidian text-foreground p-4 flex items-center justify-between border-b border-border">
+            <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-primary flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-primary-foreground" />
@@ -149,7 +185,7 @@ export default function AIConciergeBubble() {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                     <p className="font-display text-muted-foreground text-[10px] tracking-wider uppercase">
-                      Online · Replies instantly
+                        Premium persona · Replies instantly
                     </p>
                   </div>
                 </div>
@@ -190,6 +226,23 @@ export default function AIConciergeBubble() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Quick prompts */}
+            <div className="px-3 pt-2 pb-1 border-t border-border bg-card/70">
+              <div className="flex gap-2 overflow-x-auto">
+                {QUICK_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => handleQuickPrompt(prompt)}
+                    disabled={sending || booting}
+                    className="shrink-0 text-left px-3 py-1.5 text-xs font-display tracking-wide border border-border hover:border-primary/60 hover:bg-primary/10 transition-colors disabled:opacity-50"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Input */}
