@@ -404,11 +404,18 @@ export default function Home() {
   // Pull live photos from the gallery API — these are the photos uploaded
   // through the live-site Gallery uploader, so a single upload populates
   // both the Featured Branded Work carousel here and the /gallery page.
-  const { images: galleryImages } = useGalleryImages()
+  // `defer: true` waits for browser idle so the heavy base64 payload doesn't
+  // compete with the hero image LCP.
+  const { images: galleryImages } = useGalleryImages({ defer: true })
 
   // Normalize a gallery API record into the shape the carousel/SmartImage
   // already expect. Falls back to the static FEATURED_WORK list when the
   // API hasn't returned anything yet, so the layout is never empty.
+  const formatLocation = (loc) => {
+    if (!loc) return ''
+    if (loc.city && loc.region) return `${loc.city}, ${loc.region}`
+    return loc.city || loc.region || ''
+  }
   const featuredWork =
     galleryImages.length > 0
       ? galleryImages.map((img) => {
@@ -417,7 +424,7 @@ export default function Home() {
             src: img.url, // base64 data URI from the gallery DB
             alt: img.description || img.job_name,
             caption: img.job_name,
-            sub: img.description || (loc ? `${loc.city || ''}${loc.region ? `, ${loc.region}` : ''}` : ''),
+            sub: img.description || formatLocation(loc),
             location: loc,
             uploadDate: img.uploaded_at,
           }

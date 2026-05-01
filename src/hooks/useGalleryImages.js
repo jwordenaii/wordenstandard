@@ -42,7 +42,11 @@ const STATE_NAME_TO_ABBR = Object.fromEntries(
 export function parseLocation(text) {
   if (!text || typeof text !== 'string') return null
   const cleaned = text.replace(/[—–]/g, '-')
-  // Match  "Some City, ST"  or  "Some City, State Name"  (with optional dash)
+  // Capture group 1: a city name — initial-capital words (1-4 of them) so we
+  // accept "Richmond", "Stewarts Draft", "Virginia Beach", "Colonial Heights".
+  // Capture group 2: a state — either a 2-letter code ("VA") or 1-2 capitalized
+  // words ("Virginia", "New York", "North Carolina"). The state is then
+  // resolved against US_STATES to filter out false positives.
   const re = /([A-Z][A-Za-z.'’-]+(?:\s+[A-Z][A-Za-z.'’-]+){0,3})[,\s-]+([A-Z]{2}|[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\b/g
   let match
   let last = null
@@ -96,10 +100,17 @@ export function imageLocation(img) {
  * Used by both the dedicated /gallery page (full grid + admin tools) and the
  * Home page Featured Branded Work carousel — single source of truth so the
  * homepage automatically updates whenever an operator uploads a new photo.
+ *
+ * Options:
+ *   defer  — when true, the network request is delayed until after first
+ *            paint via `requestIdleCallback` (falling back to setTimeout).
+ *            The gallery payload is heavy (base64-encoded data URIs from the
+ *            backend), so deferring it on the homepage keeps it from
+ *            competing with the LCP hero image.
  */
-export function useGalleryImages() {
+export function useGalleryImages({ defer = false } = {}) {
   const [images, setImages] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!defer)
   const [error, setError] = useState(null)
 
   const reload = useCallback(async () => {
@@ -119,8 +130,22 @@ export function useGalleryImages() {
   }, [])
 
   useEffect(() => {
-    reload()
-  }, [reload])
+    if (!defer) {
+      reload()
+      return
+    }
+    // Wait for the browser to be idle so we don't compete with the LCP/hero
+    // render. Falls back to a 1.5s setTimeout when requestIdleCallback is
+    // unavailable (Safari).
+    const ric = typeof window !== 'undefined' && window.requestIdleCallback
+    let handle
+    if (ric) {
+      handle = ric(() => reload(), { timeout: 2500 })
+      return () => window.cancelIdleCallback && window.cancelIdleCallback(handle)
+    }
+    handle = setTimeout(reload, 1500)
+    return () => clearTimeout(handle)
+  }, [defer, reload])
 
   return { images, loading, error, reload, setImages }
 }

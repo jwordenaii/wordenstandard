@@ -60,9 +60,22 @@ export default defineConfig(({ mode }) => {
   build: {
     rollupOptions: {
       output: {
-        // Code-split by route for faster page loads
+        // Code-split by route for faster page loads. The big libraries below
+        // are split into their own chunks so they only ship when a route
+        // that actually imports them is loaded — e.g. three.js stays out of
+        // the homepage bundle entirely.
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Three.js + react-three — only Visualizer page uses these.
+            if (
+              id.includes('/three/') ||
+              id.includes('three-mesh-bvh') ||
+              id.includes('@react-three')
+            ) return 'three'
+            // Leaflet + leaflet-draw — only CommandCenter map uses these.
+            if (id.includes('leaflet')) return 'leaflet'
+            // Stripe — only Quote checkout flow uses these.
+            if (id.includes('@stripe')) return 'stripe'
             if (id.includes('framer-motion')) return 'framer'
             if (id.includes('react-router')) return 'router'
             if (id.includes('@tanstack')) return 'query'
