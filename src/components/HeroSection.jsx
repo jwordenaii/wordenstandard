@@ -19,6 +19,12 @@ export default function HeroSection() {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToFaq = () => {
+    trackEvent('hero_cta_click', { cta: 'diagnose_first' });
+    const el = document.querySelector('#faq');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="relative min-h-screen flex flex-col justify-end overflow-hidden">
       {/* Background image */}
@@ -47,7 +53,7 @@ export default function HeroSection() {
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}>
           
           <p className="font-display text-primary text-sm md:text-base tracking-[0.34em] uppercase mb-4 md:mb-6">
-            40 Years in Virginia · Family-Owned · Licensed & Insured
+            Educate First · Pave Second · 40 Years in Virginia
           </p>
 
           <h1 className="font-display font-black text-foreground uppercase leading-[0.84] tracking-[0.02em]">
@@ -58,8 +64,12 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <p className="font-body text-foreground/90 mt-6 text-lg md:text-xl max-w-xl leading-relaxed md:mt-8">
-            Driveways, parking lots, and commercial surfaces engineered to outlast the cheap bid down the street. Free on-site estimate in 24 hours — no pressure, no sales pitch.
+          <p className="font-body text-foreground/90 mt-6 text-lg md:text-xl max-w-2xl leading-relaxed md:mt-8">
+            We explain what your pavement actually needs before we recommend a job. Get transparent guidance on repair vs replace, clear scope options, and a quote only when you are ready.
+          </p>
+
+          <p className="font-display text-muted-foreground text-xs md:text-sm tracking-[0.18em] uppercase mt-4">
+            No pressure sales • no vague line items • no surprise change orders
           </p>
         </motion.div>
 
@@ -87,10 +97,16 @@ export default function HeroSection() {
 
           <div className="flex flex-wrap gap-4 items-center">
             <button
+              onClick={scrollToFaq}
+              className="border border-primary/70 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors min-h-[48px]"
+            >
+              Help Me Diagnose First
+            </button>
+            <button
               onClick={scrollToQuote}
               className="premium-cta text-primary-foreground px-8 py-4 font-display font-bold text-sm tracking-[0.16em] uppercase transition-all min-h-[48px]">
               
-              Get My Free Estimate
+              I Know What I Need
             </button>
             <a
               href="tel:+18044461296"
