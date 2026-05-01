@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 
 # Block back-office & admin routes (not for public indexing)
+Disallow: /command-center
 Disallow: /dashboard
 Disallow: /consultant
 Disallow: /job
@@ -12,6 +13,14 @@ Disallow: /admin/
 Disallow: /leads
 Disallow: /voice-calls
 Disallow: /revenue
+
+# Block internal strategy/tooling routes
+Disallow: /residential
+Disallow: /home-services
+Disallow: /general-contracting
+Disallow: /tar-and-chip
+Disallow: /contractor-ai
+Disallow: /advisory
 
 # Block URL parameters that create duplicate content
 Disallow: /*?gclid=

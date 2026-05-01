@@ -54,3 +54,88 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/command-center"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/dashboard"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/consultant"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/job"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/crew-reporting"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/dns-migration"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/portal"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/leads"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/voice-calls"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/revenue"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/residential"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/home-services"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/general-contracting"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/tar-and-chip"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/contractor-ai"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/advisory/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
