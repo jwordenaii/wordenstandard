@@ -7,6 +7,8 @@ const COMPARISON_POINTS = [
   'Documented repair-vs-replace recommendation before quote',
   'Drainage and ADA checks included up front',
   'Written workmanship warranty and clear maintenance plan',
+  'Compaction process and roller pass plan explained in writing',
+  'Who handles permit and traffic control coordination, if needed',
 ]
 
 export default function LocalBidComparison() {
@@ -22,7 +24,8 @@ export default function LocalBidComparison() {
             </h2>
             <p className="font-body text-muted-foreground text-base md:text-lg leading-relaxed mt-5 max-w-3xl">
               If you are reviewing quotes from local companies like RVA Asphalt Sealcoating,
-              Mark Morrison Paving, Total Asphalt, and J. Worden & Sons, use this checklist to keep bids apples-to-apples.
+              Mark Morrison Paving, Total Asphalt, Richmond Paving Inc, and J. Worden & Sons,
+              use this checklist to keep bids apples-to-apples.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-7">

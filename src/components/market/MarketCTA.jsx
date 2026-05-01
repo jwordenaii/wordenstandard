@@ -19,7 +19,7 @@ export default function MarketCTA({ city, state }) {
             <Phone className="w-4 h-4" /> (804) 446-1296
           </a>
           <a
-            href="mailto:info@jwordenpaving.com"
+            href="mailto:j.wordenandsonspaving@gmail.com"
             className="border border-primary-foreground/40 text-primary-foreground px-7 py-4 font-display font-bold text-sm tracking-wider uppercase hover:bg-primary-foreground/10 transition-colors min-h-[48px] flex items-center gap-2"
           >
             <Mail className="w-4 h-4" /> Email Estimate Team

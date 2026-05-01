@@ -57,18 +57,6 @@
   status = 301
   force = true
 
-[[redirects]]
-  from = "https://wordenpaving.com/*"
-  to = "https://www.jwordenasphaltpaving.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://www.wordenpaving.com/*"
-  to = "https://www.jwordenasphaltpaving.com/:splat"
-  status = 301
-  force = true
-
 # ============================================================
 # VIRGINIA GEO DOMAINS
 # ============================================================

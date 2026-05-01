@@ -5,7 +5,6 @@ const DOMAINS = [
   { domain: 'jwordenasphaltpaving.com', target: '/', priority: 'PRIMARY', notes: 'Root domain — must go live FIRST' },
   { domain: 'jwordensons.com', target: '/', priority: 'Brand Alias', notes: 'Redirects to root' },
   { domain: 'jwordenpaving.com', target: '/', priority: 'Brand Alias', notes: 'Redirects to root' },
-  { domain: 'wordenpaving.com', target: '/', priority: 'Brand Alias', notes: 'Redirects to root' },
   { domain: 'richmondvapaving.com', target: '/locations/richmond-va', priority: 'Geo — VA', notes: 'Richmond market' },
   { domain: 'chestervapaving.com', target: '/locations/chester-va', priority: 'Geo — VA', notes: 'HQ market' },
   { domain: 'midlothianpaving.com', target: '/locations/midlothian-va', priority: 'Geo — VA', notes: 'Midlothian market' },
@@ -83,7 +82,7 @@ export default function DnsMigration() {
                 // DNS Migration Control Center
               </p>
               <h1 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95]">
-                17 Domains → Netlify
+                16 Domains → Netlify
               </h1>
               <p className="font-body text-muted-foreground text-base mt-4 max-w-2xl">
                 Per-domain checklist for migrating all vanity domains to the `doooone` Netlify project. Progress auto-saves to this browser.

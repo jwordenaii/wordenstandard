@@ -68,6 +68,10 @@ export default function HeroSection() {
             We explain what your pavement actually needs before we recommend a job. Get transparent guidance on repair vs replace, clear scope options, and a quote only when you are ready.
           </p>
 
+          <p className="font-body text-foreground/75 mt-3 text-sm md:text-base max-w-2xl leading-relaxed">
+            Trusted across Richmond, Chester, Midlothian, and Central Virginia for residential driveways and commercial parking lot paving.
+          </p>
+
           <p className="font-display text-muted-foreground text-xs md:text-sm tracking-[0.18em] uppercase mt-4">
             No pressure sales • no vague line items • no surprise change orders
           </p>

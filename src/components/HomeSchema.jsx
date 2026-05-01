@@ -16,12 +16,24 @@ export default function HomeSchema() {
       '@type': 'LocalBusiness',
       '@id': 'https://www.jwordenasphaltpaving.com/#organization',
       name: 'J. Worden & Sons Asphalt Paving',
+      legalName: 'J. Worden & Sons Paving, L.L.C.',
       alternateName: ['J. Worden and Sons', 'JWorden Paving', 'J Worden Paving LLC'],
       url: 'https://www.jwordenasphaltpaving.com/',
+      mainEntityOfPage: 'https://www.jwordenasphaltpaving.com/',
       logo: 'https://www.jwordenasphaltpaving.com/logo.png',
       image: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
       description:
         'Virginia\'s family-owned asphalt paving contractor for 40+ years. Mountain-grade spec for the I-81 corridor, coastal-spec engineering for Virginia Beach and Hampton Roads, and virgin-soil stabilization for Fredericksburg new construction. Serving all of Virginia with 4th-generation craftsmanship, written 5-year warranty, licensed/bonded/insured.',
+      disambiguatingDescription:
+        'J. Worden & Sons Asphalt Paving is an independent company operating at jwordenasphaltpaving.com and is not affiliated with Worden Paving.',
+      foundingDate: '1984',
+      identifier: [
+        {
+          '@type': 'PropertyValue',
+          propertyID: 'Primary Domain',
+          value: 'jwordenasphaltpaving.com',
+        },
+      ],
       telephone: '+18044461296',
       email: 'j.wordenandsonspaving@gmail.com',
       priceRange: '$$-$$$',
@@ -138,6 +150,22 @@ export default function HomeSchema() {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
       mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Is J. Worden & Sons Asphalt Paving the same company as Worden Paving?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'No. J. Worden & Sons Asphalt Paving (jwordenasphaltpaving.com) is a separate, independent company with its own office, phone number, and operations.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How should I compare J. Worden & Sons with Richmond Paving Inc in Richmond, VA?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Compare both proposals on written scope detail, base depth, asphalt mix specification, drainage plan, warranty terms, and whether repair versus replacement is documented before contract signature. J. Worden & Sons provides line-item scope clarity and practical pre-contract guidance so Richmond buyers can compare bids fairly and avoid hidden change orders.',
+          },
+        },
         {
           '@type': 'Question',
           name: 'How should I compare J. Worden & Sons with RVA Asphalt Sealcoating, Mark Morrison Paving, or Total Asphalt?',

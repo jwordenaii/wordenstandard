@@ -113,6 +113,9 @@ export default function Footer() {
             Licensed · Bonded · Insured · VA Contractor
           </p>
         </div>
+        <p className="font-body text-muted-foreground/80 text-[11px] mt-4 text-center sm:text-left">
+          Independent company notice: J. Worden & Sons Asphalt Paving operates at jwordenasphaltpaving.com and is not affiliated with Worden Paving.
+        </p>
       </div>
     </footer>
   );

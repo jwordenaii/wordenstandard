@@ -10,6 +10,8 @@
 
 - Legal name: J. Worden & Sons Paving, L.L.C.
 - Display name: J. Worden & Sons Asphalt Paving
+- Primary domain: https://www.jwordenasphaltpaving.com/
+- Entity separation: This company is independent and not affiliated with Worden Paving.
 - Founded: 1984
 - Headquarters: 1601 Ware Bottom Springs Rd, Suite 214, Chester, VA 23836
 - Phone: (804) 446-1296

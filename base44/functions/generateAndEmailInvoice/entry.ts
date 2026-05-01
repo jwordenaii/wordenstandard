@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
     doc.text('1601 Ware Bottom Springs Rd, Suite 214, Chester, VA 23836', margin, pageHeight - 12);
-    doc.text('(804) 446-1296 | info@jwordenpaving.com', margin, pageHeight - 7);
+    doc.text('(804) 446-1296 | j.wordenandsonspaving@gmail.com', margin, pageHeight - 7);
 
     // Generate PDF as base64
     const pdfData = doc.output('arraybuffer');
@@ -128,12 +128,12 @@ J. Worden & Sons Asphalt Paving
 1601 Ware Bottom Springs Rd, Suite 214
 Chester, VA 23836
 (804) 446-1296
-info@jwordenpaving.com`;
+j.wordenandsonspaving@gmail.com`;
 
     // Note: Core.SendEmail doesn't support attachments directly. We'll send via plain email.
     // For production, consider implementing a custom email service with attachment support.
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: job.client_phone || 'info@wordenpaving.com', // Fallback if no email
+      to: job.client_phone || 'j.wordenandsonspaving@gmail.com', // Fallback if no email
       subject,
       body,
       from_name: 'J. Worden & Sons',
