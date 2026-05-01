@@ -149,12 +149,49 @@ export default function WebGLPersonaAvatar({
   const sceneRef = useRef(null)
   const cameraRef = useRef(null)
   const rootRef = useRef(null)
-  const mouthRef = useRef(null)
+  const lipRigRef = useRef(null)
   const clockRef = useRef(new THREE.Clock())
   const disposeFnsRef = useRef([])
   const speakingUntilRef = useRef(0)
   const modeRef = useRef(mode)
   const speechIntensityRef = useRef(speechIntensity)
+  const mixerRef = useRef(null)
+  const actionsRef = useRef({})
+  const activeActionRef = useRef(null)
+
+  const selectClipByMode = (actions, activeMode) => {
+    const modeOrder = {
+      talking: ['talk', 'speak', 'voice', 'idle'],
+      listening: ['listen', 'idle', 'breath'],
+      wave: ['wave', 'greet', 'idle'],
+      idle: ['idle', 'breath', 'base'],
+    }
+
+    const names = modeOrder[activeMode] || modeOrder.idle
+    for (const key of names) {
+      if (actions[key]) return key
+    }
+    return null
+  }
+
+  const applyActionForMode = (activeMode) => {
+    const actions = actionsRef.current
+    if (!actions || Object.keys(actions).length === 0) return
+
+    const nextName = selectClipByMode(actions, activeMode)
+    if (!nextName) return
+    if (activeActionRef.current === nextName) return
+
+    const nextAction = actions[nextName]
+    const currentAction = activeActionRef.current ? actions[activeActionRef.current] : null
+
+    if (currentAction && currentAction !== nextAction) {
+      currentAction.fadeOut(0.28)
+    }
+
+    nextAction.reset().setEffectiveWeight(1).fadeIn(0.28).play()
+    activeActionRef.current = nextName
+  }
 
   useEffect(() => {
     modeRef.current = mode
@@ -215,8 +252,86 @@ export default function WebGLPersonaAvatar({
       root.clear()
       const fallback = createFallbackAvatar()
       root.add(fallback)
-      mouthRef.current = findBestMouthTarget(fallback)
+      lipRigRef.current = {
+        kind: 'scale',
+        mesh: findBestMouthTarget(fallback),
+      }
+
+      mixerRef.current = null
+      actionsRef.current = {}
+      activeActionRef.current = null
       onModelModeChange?.('fallback')
+    }
+
+    const pickMorphIndices = (mesh) => {
+      const dict = mesh.morphTargetDictionary || {}
+      const names = Object.keys(dict)
+
+      const preferred = names.filter((n) => {
+        const low = n.toLowerCase()
+        return (
+          low.includes('viseme') ||
+          low.includes('mouth') ||
+          low.includes('jaw') ||
+          low.includes('aa') ||
+          low.includes('oh')
+        )
+      })
+
+      const selected = preferred.length > 0 ? preferred : names.slice(0, 2)
+      return selected.map((name) => dict[name]).filter((idx) => Number.isInteger(idx))
+    }
+
+    const findLipRig = (model) => {
+      let scaleMesh = null
+      let morphMesh = null
+      let morphIndices = []
+
+      model.traverse((node) => {
+        if (!node.isMesh) return
+
+        if (!scaleMesh) {
+          const lowName = (node.name || '').toLowerCase()
+          if (lowName.includes('mouth') || lowName.includes('jaw') || lowName.includes('teeth')) {
+            scaleMesh = node
+          }
+        }
+
+        if (!morphMesh && Array.isArray(node.morphTargetInfluences) && node.morphTargetInfluences.length > 0) {
+          const indices = pickMorphIndices(node)
+          if (indices.length > 0) {
+            morphMesh = node
+            morphIndices = indices
+          }
+        }
+      })
+
+      if (morphMesh && morphIndices.length > 0) {
+        return { kind: 'morph', mesh: morphMesh, indices: morphIndices }
+      }
+
+      return { kind: 'scale', mesh: scaleMesh || findBestMouthTarget(model) }
+    }
+
+    const buildActions = (mixer, clips) => {
+      const map = {}
+      const classify = (clip) => {
+        const n = clip.name.toLowerCase()
+        if (n.includes('talk') || n.includes('speak') || n.includes('voice')) return 'talk'
+        if (n.includes('listen') || n.includes('thinking')) return 'listen'
+        if (n.includes('wave') || n.includes('greet') || n.includes('hello')) return 'wave'
+        if (n.includes('breath')) return 'breath'
+        if (n.includes('idle') || n.includes('base')) return 'idle'
+        return null
+      }
+
+      clips.forEach((clip) => {
+        const key = classify(clip)
+        if (!key || map[key]) return
+        map[key] = mixer.clipAction(clip)
+      })
+
+      return map
     }
 
     const loadModel = async () => {
@@ -235,7 +350,21 @@ export default function WebGLPersonaAvatar({
           model.position.set(0, -0.1, 0)
           model.scale.setScalar(1.05)
           root.add(model)
-          mouthRef.current = findBestMouthTarget(model)
+          lipRigRef.current = findLipRig(model)
+
+          if (Array.isArray(gltf.animations) && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model)
+            const actions = buildActions(mixer, gltf.animations)
+            mixerRef.current = mixer
+            actionsRef.current = actions
+            activeActionRef.current = null
+            applyActionForMode(modeRef.current)
+          } else {
+            mixerRef.current = null
+            actionsRef.current = {}
+            activeActionRef.current = null
+          }
+
           onModelModeChange?.('model')
         },
         undefined,
@@ -261,6 +390,12 @@ export default function WebGLPersonaAvatar({
       const elapsed = clockRef.current.getElapsedTime()
       const rootObj = rootRef.current
       const activeMode = modeRef.current
+      const delta = clockRef.current.getDelta()
+
+      if (mixerRef.current) {
+        applyActionForMode(activeMode)
+        mixerRef.current.update(Math.min(delta, 1 / 30))
+      }
 
       if (rootObj) {
         const idleAmp = activeMode === 'talking' ? 0.028 : 0.018
@@ -280,11 +415,20 @@ export default function WebGLPersonaAvatar({
       const haloPulse = 0.16 + Math.max(0, Math.sin(elapsed * 2.4)) * 0.14
       halo.material.opacity = activeMode === 'talking' ? haloPulse + 0.1 : haloPulse
 
-      const mouth = mouthRef.current
-      if (mouth) {
+      const lipRig = lipRigRef.current
+      if (lipRig) {
         const active = activeMode === 'talking' || Date.now() < speakingUntilRef.current
-        const pulse = active ? (0.6 + Math.abs(Math.sin(elapsed * 20)) * (0.8 + speechIntensityRef.current)) : 1
-        mouth.scale.y = pulse
+        const openValue = active ? (0.25 + Math.abs(Math.sin(elapsed * 20)) * (0.5 + speechIntensityRef.current * 0.3)) : 0
+
+        if (lipRig.kind === 'morph' && lipRig.mesh && lipRig.indices) {
+          lipRig.indices.forEach((idx) => {
+            if (lipRig.mesh.morphTargetInfluences && lipRig.mesh.morphTargetInfluences[idx] !== undefined) {
+              lipRig.mesh.morphTargetInfluences[idx] = openValue
+            }
+          })
+        } else if (lipRig.mesh) {
+          lipRig.mesh.scale.y = 0.9 + openValue
+        }
       }
 
       renderer.render(scene, camera)

@@ -37,6 +37,7 @@ export default function AIConciergeBubble() {
       : 'idle';
 
   const QUICK_PROMPTS = [
+    'Mr. Worden, what would you do for my driveway?',
     'How much does a driveway usually cost?',
     'How soon can you start in Chester?',
     'Is asphalt better than concrete for my project?',
@@ -117,7 +118,7 @@ export default function AIConciergeBubble() {
       setMessages([
         {
           role: 'assistant',
-          content: "Hi — I'm the J. Worden & Sons AI consultant. Ask me anything about paving: pricing, timing, materials, or whether asphalt is right for your project. I'll answer straight.",
+          content: "Hi, I'm Mr. Worden, founder of J. Worden & Sons. Ask me anything about paving: pricing, timing, materials, and what I'd recommend for your exact project. I'll keep it practical and direct.",
         },
       ]);
       return conv;
@@ -308,10 +309,10 @@ export default function AIConciergeBubble() {
                 aria-label="Open AI consultant chat"
               >
                 <p className="font-display font-black text-[11px] tracking-[0.15em] uppercase text-primary">
-                  Meet Mr. Worden AI
+                  Meet Mr. Worden
                 </p>
                 <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-80 mt-0.5 text-foreground">
-                  Real-time concierge · 24/7
+                  Founder concierge · 24/7
                 </p>
               </button>
             </div>
@@ -343,12 +344,12 @@ export default function AIConciergeBubble() {
                 </div>
                 <div>
                   <p className="font-display font-black text-foreground text-sm uppercase tracking-wider">
-                    J. Worden AI
+                    Mr. Worden · Founder
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                     <p className="font-display text-muted-foreground text-[10px] tracking-wider uppercase">
-                      {modelMode === 'model' ? 'Real model · voice ready' : 'Fallback model · voice ready'}
+                      {modelMode === 'model' ? 'Founder model live · voice ready' : 'Founder fallback · voice ready'}
                     </p>
                   </div>
                 </div>
