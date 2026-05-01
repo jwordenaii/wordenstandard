@@ -36,6 +36,7 @@ class Lead(Base):
     urgency         = Column(String(30), nullable=False)
     project_size_sqft = Column(Float, nullable=True)
     address         = Column(String(300), nullable=True)
+    state_code      = Column(String(2),   nullable=True, index=True)
     message         = Column(Text, nullable=True)
 
     # Lead scoring

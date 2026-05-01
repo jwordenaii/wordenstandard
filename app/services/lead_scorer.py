@@ -9,9 +9,15 @@ Score bands:
 State-awareness:
   QSR-dense states (VA, TX, FL, NC, GA, NY, NJ, MI, OH, IL, CA, PA) get +5
   High-labor markets get +3 (larger average job value)
+
+Compliance advisory:
+  Leads from licensed-required states outside ``WORDEN_ACTIVE_STATES`` get a
+  ``compliance_warning`` field so ops can escalate before quoting. The warning
+  is advisory only — scoring is unchanged so multi-tenant licensees in other
+  states still get correctly tiered.
 """
 
-from .state_data import STATE_MAP
+from .state_data import STATE_MAP, WORDEN_ACTIVE_STATES
 
 _QSR_HIGH_STATES = {
     "VA","TX","FL","NC","GA","NY","NJ","MI","OH","IL","CA","PA","MD","TN","MO","IN","WA",
@@ -70,9 +76,25 @@ def score_lead(data: dict) -> dict:
     else:
         label, priority, follow_up = "COOL", 3, "Call within 48 hours"
 
-    return {
+    result = {
         "score": score,
         "label": label,
         "priority": priority,
         "follow_up_sla": follow_up,
     }
+
+    # ── Compliance advisory (does not modify score) ───────────────────────────
+    if state and state in STATE_MAP and state not in WORDEN_ACTIVE_STATES:
+        s = STATE_MAP[state]
+        if s.get("hasStateLicensing") or s.get("hasPrevailingWage"):
+            reasons = []
+            if s.get("hasStateLicensing"):
+                reasons.append("state contractor license required")
+            if s.get("hasPrevailingWage"):
+                reasons.append("prevailing wage applies on public work")
+            result["compliance_warning"] = (
+                f"{s['name']} ({state}) is outside Worden's active service territory and "
+                f"{', '.join(reasons)} — verify licensure or escalate to operations before quoting."
+            )
+
+    return result
