@@ -417,6 +417,24 @@ export default function Home() {
                 caption: 'Taco Bell — Colonial Heights, VA',
                 sub: 'New-build site paving',
               },
+              {
+                src: 'https://github.com/user-attachments/assets/3908976f-9313-4624-8338-bd13c3a8d862',
+                alt: 'Chip and tar driveway in Stewarts Draft, Virginia — owner-provided project photo',
+                caption: 'Chip & Tar Driveway — Stewarts Draft, VA',
+                sub: 'Residential chip & tar surfacing',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/8e1c6e44-7600-4efb-91f9-e350e0890a0b',
+                alt: 'Combination asphalt and chip & tar driveway — owner-provided project photo',
+                caption: 'Asphalt + Chip & Tar Combo',
+                sub: 'Hybrid driveway surfacing',
+              },
+              {
+                src: 'https://github.com/user-attachments/assets/e8e7f85b-eba4-4816-95b9-9aaea1a3aa1c',
+                alt: 'Owner-provided J. Worden & Sons project photo',
+                caption: 'Project Photo',
+                sub: 'Owner-provided field work',
+              },
             ].map((p) => (
               <figure
                 key={p.src}
