@@ -6,6 +6,22 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import SmartImage from '../components/SmartImage';
+import { PRIMARY_DOMAIN } from '@/lib/locations';
+
+const BLOG_FAQS = [
+  {
+    q: 'How often should asphalt driveways be sealcoated in Virginia?',
+    a: 'Most driveways in Virginia benefit from sealcoating about every 2 to 3 years depending on traffic, sun exposure, and drainage conditions.',
+  },
+  {
+    q: 'When should I repair asphalt versus replace it?',
+    a: 'If the base is stable, targeted repairs or overlays may be effective. If there is widespread base failure, full reconstruction is typically the better long-term choice.',
+  },
+  {
+    q: 'Do climate and freeze-thaw cycles affect asphalt lifespan?',
+    a: 'Yes. Freeze-thaw movement, water intrusion, and heat cycles materially impact performance, which is why drainage and maintenance planning are critical.',
+  },
+];
 
 export default function Blog() {
   const [posts, setPosts] = useState([]);
@@ -27,23 +43,62 @@ export default function Blog() {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Blog',
-    name: 'J. Worden & Sons Asphalt Paving Blog',
-    description:
-      'Expert guides on asphalt paving, sealcoating, driveway maintenance, and commercial paving across Central Virginia and the Southeast.',
-    publisher: {
-      '@type': 'Organization',
-      name: 'J. Worden & Sons Asphalt Paving',
-    },
-    blogPost: safePosts.map((p) => ({
-      '@type': 'BlogPosting',
-      headline: p.title,
-      description: p.excerpt,
-      url: `https://www.jwordenasphaltpaving.com/blog/${p.slug}`,
-      datePublished: p.published_date,
-      image: p.cover_image,
-      author: { '@type': 'Organization', name: p.author || 'J. Worden & Sons' },
-    })),
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${PRIMARY_DOMAIN}/blog#page`,
+        url: `${PRIMARY_DOMAIN}/blog`,
+        name: 'J. Worden & Sons Asphalt Paving Blog',
+        description:
+          'Expert guides on asphalt paving, sealcoating, driveway maintenance, and commercial paving across Central Virginia and the Southeast.',
+      },
+      {
+        '@type': 'Blog',
+        '@id': `${PRIMARY_DOMAIN}/blog#blog`,
+        url: `${PRIMARY_DOMAIN}/blog`,
+        name: 'J. Worden & Sons Asphalt Paving Blog',
+        description:
+          'Expert guides on asphalt paving, sealcoating, driveway maintenance, and commercial paving across Central Virginia and the Southeast.',
+        publisher: {
+          '@type': 'Organization',
+          name: 'J. Worden & Sons Asphalt Paving',
+        },
+        blogPost: safePosts.map((p) => ({
+          '@type': 'BlogPosting',
+          headline: p.title,
+          description: p.excerpt,
+          url: `${PRIMARY_DOMAIN}/blog/${p.slug}`,
+          datePublished: p.published_date,
+          image: p.cover_image,
+          author: { '@type': 'Organization', name: p.author || 'J. Worden & Sons' },
+        })),
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Latest Asphalt Paving Blog Articles',
+        itemListElement: safePosts.map((p, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: `${PRIMARY_DOMAIN}/blog/${p.slug}`,
+          name: p.title,
+        })),
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: BLOG_FAQS.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: PRIMARY_DOMAIN },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${PRIMARY_DOMAIN}/blog` },
+        ],
+      },
+    ],
   };
 
   return (
@@ -142,6 +197,45 @@ export default function Blog() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="border-t border-border py-12 bg-muted/20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-[10px] tracking-[0.3em] uppercase mb-4">
+            // Popular Service Paths
+          </p>
+          <div className="flex flex-wrap gap-2 mb-8">
+            <Link to="/residential" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Residential Driveway Paving
+            </Link>
+            <Link to="/commercial/richmond-va" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Commercial Paving Richmond
+            </Link>
+            <Link to="/home-services" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Home Asphalt Services
+            </Link>
+            <Link to="/tar-and-chip" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Tar And Chip Services
+            </Link>
+            <Link to="/locations" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Service Areas
+            </Link>
+          </div>
+
+          <p className="font-display text-primary text-[10px] tracking-[0.3em] uppercase mb-4">
+            // Blog FAQ
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {BLOG_FAQS.map((item) => (
+              <article key={item.q} className="border border-border bg-card p-5">
+                <h3 className="font-display font-black text-foreground text-base uppercase tracking-tight leading-tight">
+                  {item.q}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-3">{item.a}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

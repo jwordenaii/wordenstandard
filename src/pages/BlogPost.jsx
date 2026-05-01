@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
+import { PRIMARY_DOMAIN } from '@/lib/locations';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -59,32 +60,52 @@ export default function BlogPost() {
     );
   }
 
+  const postUrl = `${PRIMARY_DOMAIN}/blog/${post.slug}`;
+  const postBodyText = (post.content || '').replace(/[#>*_`\-\[\]\(\)]/g, ' ').replace(/\s+/g, ' ').trim();
+
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.excerpt,
-    image: post.cover_image,
-    datePublished: post.published_date,
-    dateModified: post.updated_date || post.published_date,
-    author: {
-      '@type': 'Organization',
-      name: post.author || 'J. Worden & Sons',
-      url: 'https://www.jwordenasphaltpaving.com/',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'J. Worden & Sons Asphalt Paving',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        '@id': `${postUrl}#article`,
+        headline: post.title,
+        description: post.excerpt,
+        image: post.cover_image,
+        datePublished: post.published_date,
+        dateModified: post.updated_date || post.published_date,
+        author: {
+          '@type': 'Organization',
+          name: post.author || 'J. Worden & Sons',
+          url: PRIMARY_DOMAIN,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'J. Worden & Sons Asphalt Paving',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': postUrl,
+        },
+        articleSection: post.category?.replace('-', ' ') || 'Asphalt Paving',
+        articleBody: postBodyText,
+        inLanguage: 'en-US',
+        keywords: post.tags?.join(', '),
+        isPartOf: { '@id': `${PRIMARY_DOMAIN}/blog#blog` },
       },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://www.jwordenasphaltpaving.com/blog/${post.slug}`,
-    },
-    keywords: post.tags?.join(', '),
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: PRIMARY_DOMAIN },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${PRIMARY_DOMAIN}/blog` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: postUrl },
+        ],
+      },
+    ],
   };
 
   return (
@@ -94,7 +115,10 @@ export default function BlogPost() {
         description={post.excerpt}
         canonicalPath={`/blog/${post.slug}`}
         ogImage={post.cover_image}
+        ogType="article"
         jsonLd={jsonLd}
+        publishedTime={post.published_date}
+        modifiedTime={post.updated_date || post.published_date}
       />
       <Navbar />
 
@@ -192,6 +216,31 @@ export default function BlogPost() {
           >
             Request Estimate <ArrowRight className="w-4 h-4" />
           </Link>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-10 bg-muted/20">
+        <div className="max-w-3xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-[10px] tracking-[0.3em] uppercase mb-4">
+            // Related Service Paths
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/residential" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Residential Paving
+            </Link>
+            <Link to="/commercial/richmond-va" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Commercial Paving
+            </Link>
+            <Link to="/home-services" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Home Services
+            </Link>
+            <Link to="/tar-and-chip" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Tar And Chip
+            </Link>
+            <Link to="/locations" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Service Areas
+            </Link>
+          </div>
         </div>
       </section>
 
