@@ -74,6 +74,13 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Long-cache project photos so visitors get fast repeat loads. The folder is
+# write-once / drop-in; if a photo is updated, change the filename.
+[[headers]]
+  for = "/work/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]

@@ -5,7 +5,7 @@ import { STATE_PAGE_ROUTES, WORDEN_ACTIVE_STATES } from './src/lib/states50.js'
 import { SERVICE_AREAS } from './src/data/serviceAreas.js'
 import { BLOG_POSTS } from './src/data/blogPosts.js'
 
-const DEFAULT_SITE_URL = 'https://jworden.netlify.app'
+const DEFAULT_SITE_URL = 'https://www.jwordenasphaltpaving.com'
 
 // City and blog slugs are derived from the same data the React pages render
 // from, so the sitemap can never drift out of sync with the actual routes.
