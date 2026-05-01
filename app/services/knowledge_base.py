@@ -366,7 +366,7 @@ INTEGRATION WITH OTHER SERVICES:
 • Drone topo feeds the civil_site_work earthwork takeoff directly
 • As-built orthos archived alongside the GC project record for warranty / lien defense
 • Photogrammetry pipeline (premium /premium-civil-stack endpoint) handles the heavy
-  processing — this service line is the data-capture and quoting front door
+  processing — this service line is the data capture and quoting front door
 
 === END DRONE KNOWLEDGE ===
 """
