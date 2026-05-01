@@ -18,6 +18,7 @@
 #   POST /api/v1/math-ai/pavement-score      — PCI pavement condition scoring
 #   POST /api/v1/math-ai/cost-estimate       — project cost estimation
 #   POST /api/v1/math-ai/maintenance-forecast — maintenance schedule forecasting
+#   POST /api/v1/public/chat                  — Mr. Worden premium concierge chat (rate-limited)
 #
 # PROTECTED ENDPOINTS (require bearer token via verify_premium_security):
 #   POST /api/v1/ai/photo-inspect      — GPT-4 Vision analysis
@@ -219,6 +220,7 @@ from .routers import gallery as gallery_router
 from .routers import chat as chat_router
 from .routers import email as email_router
 from .routers import math_ai as math_ai_router
+from .routers import public_chat as public_chat_router
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
 
@@ -428,6 +430,9 @@ app.include_router(email_router.router)
 
 # Mathematical AI (pavement scoring, cost estimation, lead quality, maintenance)
 app.include_router(math_ai_router.router)
+
+# Public concierge chat — Mr. Worden widget (no auth, rate-limited)
+app.include_router(public_chat_router.router)
 
 
 # ── Socket.IO ASGI mount ──────────────────────────────────────────────────────
