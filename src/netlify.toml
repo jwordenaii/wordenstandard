@@ -1,0 +1,342 @@
+# Netlify configuration for J. Worden & Sons
+# This file takes precedence over public/_redirects and is more reliable
+# because it has a file extension that build pipelines always respect.
+
+# ============================================================
+# STATIC FILE ESCAPE HATCHES (must come FIRST — force = true)
+# Prevents the SPA fallback from intercepting these files and
+# returning the React app's index.html instead of the real content.
+# ============================================================
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+  force = true
+
+# ============================================================
+# PRIMARY DOMAIN CANONICALIZATION
+# www.jwordenasphaltpaving.com → jwordenasphaltpaving.com
+# Prevents Google from splitting indexing and fixes stale asset errors
+# ============================================================
+[[redirects]]
+  from = "https://www.jwordenasphaltpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+# ============================================================
+# VIRGINIA BRAND ALIASES → root domain
+# ============================================================
+[[redirects]]
+  from = "https://jwordensons.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.jwordensons.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://jwordenpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.jwordenpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://wordenpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.wordenpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+# ============================================================
+# VIRGINIA GEO DOMAINS
+# ============================================================
+[[redirects]]
+  from = "https://richmondvapaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/richmond-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.richmondvapaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/richmond-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://chestervapaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/chester-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.chestervapaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/chester-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://midlothianpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/midlothian-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.midlothianpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/midlothian-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://mechanicsvillepaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/mechanicsville-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.mechanicsvillepaving.com/*"
+  to = "https://jwordenasphaltpaving.com/locations/mechanicsville-va"
+  status = 301
+  force = true
+
+# ============================================================
+# OUT-OF-STATE GEO DOMAINS → root (no longer serving these markets;
+# redirect to Virginia-focused homepage rather than 404)
+# ============================================================
+[[redirects]]
+  from = "https://savannahpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.savannahpaving.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://atlantapavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.atlantapavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://augustapaving.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.augustapaving.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://charlottepavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.charlottepavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://raleighpavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.raleighpavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://greensboropaving.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.greensboropaving.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://charlestonpavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.charlestonpavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://columbiapavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.columbiapavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://kansascitypavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.kansascitypavingpros.com/*"
+  to = "https://jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+# ============================================================
+# LEGACY PATH REDIRECTS — old URLs that no longer exist
+# Send to /locations (most relevant) instead of 404
+# ============================================================
+[[redirects]]
+  from = "/locations/savannah-ga"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/atlanta-ga"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/charlotte-nc"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/raleigh-nc"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/outer-banks-nc"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/charleston-sc"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/columbia-sc"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/locations/kansas-city-mo"
+  to = "/locations"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/fredericksburg-va-paving"
+  to = "/locations/fredericksburg-va"
+  status = 301
+  force = true
+
+# ============================================================
+# SECURITY & PERFORMANCE HEADERS (Google ranking factors)
+# ============================================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(self), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+# Long cache for hashed assets — Core Web Vitals boost
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Short cache for HTML (so updates go live fast)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Sitemap & robots — short cache so updates are respected
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "application/xml"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "text/plain"
+
+# ============================================================
+# SPA FALLBACK — MUST BE LAST
+# ============================================================
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

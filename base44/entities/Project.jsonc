@@ -1,0 +1,50 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Project title"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "commercial",
+        "residential",
+        "industrial",
+        "municipal"
+      ],
+      "description": "Project category"
+    },
+    "location": {
+      "type": "string",
+      "description": "City / town and state"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short scope description"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "High-quality project image URL"
+    },
+    "sqft": {
+      "type": "number",
+      "description": "Square footage paved"
+    },
+    "year": {
+      "type": "number",
+      "description": "Year completed"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Highlight on homepage"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "image_url"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "name": "Referral",
+  "type": "object",
+  "properties": {
+    "referrer_email": {
+      "type": "string",
+      "description": "Email of the existing customer making the referral"
+    },
+    "referrer_name": {
+      "type": "string"
+    },
+    "referred_name": {
+      "type": "string",
+      "description": "Name of the person being referred"
+    },
+    "referred_email": {
+      "type": "string"
+    },
+    "referred_phone": {
+      "type": "string"
+    },
+    "referred_address": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "contacted",
+        "quoted",
+        "closed_won",
+        "closed_lost",
+        "credit_issued"
+      ],
+      "default": "pending"
+    },
+    "credit_amount": {
+      "type": "number",
+      "description": "USD credit earned by referrer when referred lead closes"
+    },
+    "credit_issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "linked_lead_id": {
+      "type": "string",
+      "description": "ID of the Lead entity created from this referral"
+    }
+  },
+  "required": [
+    "referrer_email",
+    "referred_name"
+  ]
+}

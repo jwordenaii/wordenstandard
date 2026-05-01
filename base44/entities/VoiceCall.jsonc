@@ -1,0 +1,85 @@
+{
+  "name": "VoiceCall",
+  "type": "object",
+  "properties": {
+    "vapi_call_id": {
+      "type": "string",
+      "description": "Unique call ID from Vapi"
+    },
+    "from_number": {
+      "type": "string",
+      "description": "Caller's phone number"
+    },
+    "to_number": {
+      "type": "string",
+      "description": "Our business number that was called"
+    },
+    "caller_name": {
+      "type": "string",
+      "description": "Caller name if identified"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "in_progress",
+        "completed",
+        "missed",
+        "voicemail",
+        "failed"
+      ],
+      "default": "in_progress",
+      "description": "Call status"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Call duration in seconds"
+    },
+    "transcript": {
+      "type": "string",
+      "description": "Full call transcript"
+    },
+    "summary": {
+      "type": "string",
+      "description": "AI-generated 2-3 sentence summary of the call"
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "new_quote",
+        "existing_customer",
+        "scheduling",
+        "complaint",
+        "general_inquiry",
+        "voicemail",
+        "other"
+      ],
+      "description": "Detected caller intent"
+    },
+    "booked_site_visit": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the agent successfully booked a site visit"
+    },
+    "lead_id": {
+      "type": "string",
+      "description": "Associated Lead ID if a lead was created or matched"
+    },
+    "recording_url": {
+      "type": "string",
+      "description": "URL to the call recording audio"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the call started"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the call ended"
+    }
+  },
+  "required": [
+    "vapi_call_id"
+  ]
+}

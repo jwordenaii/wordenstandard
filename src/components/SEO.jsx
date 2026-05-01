@@ -1,0 +1,127 @@
+import { useEffect } from 'react';
+import { PRIMARY_DOMAIN } from '@/lib/locations';
+
+/**
+ * SEO — comprehensive document head manager implementing Google's 2026 best practices.
+ * Sets title, description, canonical URL, Open Graph, Twitter, robots, geo, hreflang,
+ * and JSON-LD structured data.
+ */
+export default function SEO({
+  title,
+  description,
+  canonicalPath = '/',
+  ogImage = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+  ogType = 'website',
+  jsonLd,
+  noindex = false,
+  publishedTime,
+  modifiedTime,
+}) {
+  useEffect(() => {
+    if (title) document.title = title;
+
+    const setMeta = (selector, attr, value) => {
+      if (value === undefined || value === null || value === '') return;
+      let el = document.head.querySelector(selector);
+      if (!el) {
+        el = document.createElement('meta');
+        const [, key, val] = selector.match(/\[(.+?)="(.+?)"\]/) || [];
+        if (key && val) el.setAttribute(key, val);
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attr, value);
+    };
+
+    const canonicalUrl = `${PRIMARY_DOMAIN}${canonicalPath}`;
+
+    // Description
+    if (description) setMeta('meta[name="description"]', 'content', description);
+
+    // Robots directive — critical for controlling indexing
+    setMeta(
+      'meta[name="robots"]',
+      'content',
+      noindex
+        ? 'noindex, nofollow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+    );
+    // Googlebot-specific (redundant but Google's official recommendation)
+    setMeta(
+      'meta[name="googlebot"]',
+      'content',
+      noindex
+        ? 'noindex, nofollow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+    );
+
+    // Canonical link — always points to primary domain
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', canonicalUrl);
+
+    // hreflang — self-referencing for US English (Google best practice for local business)
+    let hreflang = document.head.querySelector('link[rel="alternate"][hreflang="en-US"]');
+    if (!hreflang) {
+      hreflang = document.createElement('link');
+      hreflang.setAttribute('rel', 'alternate');
+      hreflang.setAttribute('hreflang', 'en-US');
+      document.head.appendChild(hreflang);
+    }
+    hreflang.setAttribute('href', canonicalUrl);
+
+    let xDefault = document.head.querySelector('link[rel="alternate"][hreflang="x-default"]');
+    if (!xDefault) {
+      xDefault = document.createElement('link');
+      xDefault.setAttribute('rel', 'alternate');
+      xDefault.setAttribute('hreflang', 'x-default');
+      document.head.appendChild(xDefault);
+    }
+    xDefault.setAttribute('href', canonicalUrl);
+
+    // Open Graph
+    setMeta('meta[property="og:title"]', 'content', title || '');
+    setMeta('meta[property="og:description"]', 'content', description || '');
+    setMeta('meta[property="og:url"]', 'content', canonicalUrl);
+    setMeta('meta[property="og:image"]', 'content', ogImage);
+    setMeta('meta[property="og:image:width"]', 'content', '1200');
+    setMeta('meta[property="og:image:height"]', 'content', '630');
+    setMeta('meta[property="og:image:alt"]', 'content', title || 'J. Worden & Sons Asphalt Paving');
+    setMeta('meta[property="og:type"]', 'content', ogType);
+    setMeta('meta[property="og:site_name"]', 'content', 'J. Worden & Sons Asphalt Paving');
+    setMeta('meta[property="og:locale"]', 'content', 'en_US');
+
+    // Article-specific OG tags (for blog posts)
+    if (publishedTime) setMeta('meta[property="article:published_time"]', 'content', publishedTime);
+    if (modifiedTime) setMeta('meta[property="article:modified_time"]', 'content', modifiedTime);
+
+    // Twitter Card
+    setMeta('meta[name="twitter:card"]', 'content', 'summary_large_image');
+    setMeta('meta[name="twitter:title"]', 'content', title || '');
+    setMeta('meta[name="twitter:description"]', 'content', description || '');
+    setMeta('meta[name="twitter:image"]', 'content', ogImage);
+    setMeta('meta[name="twitter:image:alt"]', 'content', title || 'J. Worden & Sons Asphalt Paving');
+
+    // Geo tags — reinforce Virginia local business signal on every page
+    setMeta('meta[name="geo.region"]', 'content', 'US-VA');
+    setMeta('meta[name="geo.placename"]', 'content', 'Chester, Virginia');
+    setMeta('meta[name="geo.position"]', 'content', '37.3563;-77.4411');
+    setMeta('meta[name="ICBM"]', 'content', '37.3563, -77.4411');
+
+    // JSON-LD structured data — remove old, add new
+    const existingLd = document.head.querySelector('script[data-seo-jsonld="true"]');
+    if (existingLd) existingLd.remove();
+    if (jsonLd) {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-seo-jsonld', 'true');
+      script.text = JSON.stringify(jsonLd);
+      document.head.appendChild(script);
+    }
+  }, [title, description, canonicalPath, ogImage, ogType, jsonLd, noindex, publishedTime, modifiedTime]);
+
+  return null;
+}

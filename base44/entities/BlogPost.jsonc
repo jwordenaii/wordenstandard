@@ -1,0 +1,70 @@
+{
+  "name": "BlogPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Article title (also H1 and meta title)"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL slug, e.g. how-long-asphalt-lasts-virginia"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Short summary used for meta description and card preview"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full article body in markdown"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Hero image URL"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "maintenance",
+        "process",
+        "materials",
+        "local-guides",
+        "cost",
+        "commercial"
+      ],
+      "description": "Topic category"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "SEO keyword tags"
+    },
+    "read_time_minutes": {
+      "type": "number",
+      "description": "Estimated read time"
+    },
+    "author": {
+      "type": "string",
+      "default": "J. Worden & Sons",
+      "description": "Author name"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication date"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Pin to top of blog index"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "excerpt",
+    "content"
+  ]
+}

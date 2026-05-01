@@ -1,0 +1,228 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import { Loader2, Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import SEO from '../components/SEO';
+
+export default function BlogPost() {
+  const { slug } = useParams();
+  const [post, setPost] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    base44.entities.BlogPost.filter({ slug })
+      .then((results) => {
+        const safeResults = Array.isArray(results) ? results : [];
+        const found = safeResults[0];
+        setPost(found || null);
+        if (found) {
+          base44.entities.BlogPost.list('-published_date', 4)
+            .then((all) => {
+              const safeAll = Array.isArray(all) ? all : [];
+              setRelated(safeAll.filter((p) => p.id !== found.id).slice(0, 3));
+            })
+            .catch(() => setRelated([]));
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setPost(null);
+        setLoading(false);
+      });
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-background font-body">
+        <Navbar />
+        <div className="pt-32 pb-20 max-w-3xl mx-auto px-6 text-center">
+          <h1 className="font-display font-black text-foreground text-4xl uppercase">Article Not Found</h1>
+          <Link to="/blog" className="inline-flex items-center gap-2 mt-6 text-primary font-display tracking-wider uppercase text-sm">
+            <ArrowLeft className="w-4 h-4" /> Back to Blog
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt,
+    image: post.cover_image,
+    datePublished: post.published_date,
+    dateModified: post.updated_date || post.published_date,
+    author: {
+      '@type': 'Organization',
+      name: post.author || 'J. Worden & Sons',
+      url: 'https://jwordenasphaltpaving.com/',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'J. Worden & Sons Asphalt Paving',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://jwordenasphaltpaving.com/blog/${post.slug}`,
+    },
+    keywords: post.tags?.join(', '),
+  };
+
+  return (
+    <div className="min-h-screen bg-background font-body">
+      <SEO
+        title={`${post.title} | J. Worden & Sons Asphalt Paving`}
+        description={post.excerpt}
+        canonicalPath={`/blog/${post.slug}`}
+        ogImage={post.cover_image}
+        jsonLd={jsonLd}
+      />
+      <Navbar />
+
+      {/* Hero */}
+      <article>
+        <header className="pt-32 pb-10 border-b border-border">
+          <div className="max-w-3xl mx-auto px-6 lg:px-8">
+            <Link to="/blog" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary font-display tracking-wider uppercase text-xs mb-6 transition-colors">
+              <ArrowLeft className="w-3 h-3" /> All Articles
+            </Link>
+            {post.category && (
+              <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-4">
+                // {post.category.replace('-', ' ')}
+              </p>
+            )}
+            <h1 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight leading-[0.95]">
+              {post.title}
+            </h1>
+            <p className="font-body text-muted-foreground text-lg md:text-xl mt-6 leading-relaxed">
+              {post.excerpt}
+            </p>
+            <div className="flex flex-wrap gap-5 mt-8 pt-6 border-t border-border">
+              {post.published_date && (
+                <span className="flex items-center gap-2 text-muted-foreground font-display text-xs tracking-wider uppercase">
+                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                  {new Date(post.published_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              )}
+              {post.read_time_minutes && (
+                <span className="flex items-center gap-2 text-muted-foreground font-display text-xs tracking-wider uppercase">
+                  <Clock className="w-3.5 h-3.5 text-primary" />
+                  {post.read_time_minutes} min read
+                </span>
+              )}
+              <span className="font-display text-xs tracking-wider uppercase text-muted-foreground">
+                By {post.author || 'J. Worden & Sons'}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {post.cover_image && (
+          <div className="max-w-5xl mx-auto px-6 lg:px-8 -mt-px">
+            <div className="aspect-[21/9] overflow-hidden bg-muted border-b border-border">
+              <img
+                src={post.cover_image}
+                alt={`${post.title} — expert guide by J. Worden & Sons Asphalt Paving`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="py-12 md:py-16">
+          <div className="max-w-3xl mx-auto px-6 lg:px-8">
+            <div className="prose prose-invert prose-lg max-w-none
+              prose-headings:font-display prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-headings:text-foreground
+              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:border-t prose-h2:border-border prose-h2:pt-10
+              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+              prose-p:font-body prose-p:text-foreground/85 prose-p:leading-relaxed
+              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-foreground prose-strong:font-bold
+              prose-ul:font-body prose-li:text-foreground/85
+              prose-blockquote:border-l-primary prose-blockquote:text-foreground prose-blockquote:not-italic prose-blockquote:font-display prose-blockquote:font-bold
+              prose-code:text-primary prose-code:bg-muted prose-code:px-1 prose-code:rounded">
+              <ReactMarkdown>{post.content}</ReactMarkdown>
+            </div>
+
+            {post.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t border-border">
+                {post.tags.map((tag) => (
+                  <span key={tag} className="px-3 py-1 border border-border text-muted-foreground font-display text-[10px] tracking-[0.15em] uppercase">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
+
+      {/* CTA */}
+      <section className="border-t border-border bg-primary py-12">
+        <div className="max-w-3xl mx-auto px-6 lg:px-8 text-center">
+          <h3 className="font-display font-black text-primary-foreground text-2xl md:text-3xl uppercase tracking-tight">
+            Need a paving estimate?
+          </h3>
+          <p className="font-body text-primary-foreground/80 mt-2 mb-6">
+            40+ years across Central Virginia and the Southeast. Free site visits.
+          </p>
+          <Link
+            to="/#quote"
+            className="inline-flex items-center gap-2 bg-background text-foreground px-6 py-3 font-display font-bold text-xs tracking-[0.2em] uppercase hover:bg-foreground hover:text-background transition-colors"
+          >
+            Request Estimate <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Related */}
+      {related.length > 0 && (
+        <section className="py-16 border-t border-border">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <h3 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight mb-8">
+              More Articles
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {related.map((p) => (
+                <Link
+                  key={p.id}
+                  to={`/blog/${p.slug}`}
+                  className="group border border-border bg-card overflow-hidden hover:border-primary/40 transition-colors p-6"
+                >
+                  <h4 className="font-display font-black text-foreground text-base uppercase tracking-tight leading-tight mb-2 group-hover:text-primary transition-colors">
+                    {p.title}
+                  </h4>
+                  <p className="font-body text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                    {p.excerpt}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <Footer />
+    </div>
+  );
+}

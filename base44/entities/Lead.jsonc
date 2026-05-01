@@ -1,0 +1,144 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the lead"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "address": {
+      "type": "string",
+      "description": "Project address"
+    },
+    "surface_type": {
+      "type": "string",
+      "description": "Type of surface (driveway, parking_lot, etc.)"
+    },
+    "sqft": {
+      "type": "number",
+      "description": "Estimated square footage"
+    },
+    "material": {
+      "type": "string",
+      "description": "Selected material grade"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "flexible",
+        "standard",
+        "urgent"
+      ],
+      "description": "Project timeline urgency"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional project notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "quoted",
+        "won",
+        "lost"
+      ],
+      "default": "new",
+      "description": "Lead status"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "AI-predicted lead quality score 0-100 (higher = call first)"
+    },
+    "score_tier": {
+      "type": "string",
+      "enum": [
+        "hot",
+        "warm",
+        "cool",
+        "cold"
+      ],
+      "description": "Priority tier derived from score: hot (85+), warm (65-84), cool (40-64), cold (<40)"
+    },
+    "score_reasoning": {
+      "type": "string",
+      "description": "AI explanation of why the lead received this score"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "AI-estimated project value in USD"
+    },
+    "scored_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the AI scored this lead"
+    },
+    "closed_value": {
+      "type": "number",
+      "description": "Actual closed revenue in USD (set when status = won)"
+    },
+    "conversion_source": {
+      "type": "string",
+      "enum": [
+        "google_ads",
+        "google_organic",
+        "referral",
+        "direct",
+        "gmail_inbound",
+        "voice_ai",
+        "facebook",
+        "houzz",
+        "other"
+      ],
+      "description": "Attribution channel \u2014 where this lead originated"
+    },
+    "closed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the lead was marked won/lost"
+    },
+    "sms_followup_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once the 4-hour SMS follow-up has been sent"
+    },
+    "sms_followup_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the SMS follow-up was sent"
+    }
+  },
+  "required": [
+    "name",
+    "phone"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

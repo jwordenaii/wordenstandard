@@ -1,0 +1,53 @@
+{
+  "name": "ProjectDocument",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "ID of the Job this document belongs to"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Email of the client this document is shared with (must match the logged-in portal user)"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "invoice",
+        "warranty",
+        "progress_photo",
+        "contract",
+        "receipt",
+        "other"
+      ],
+      "description": "Type of document"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description or caption"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Public URL of the uploaded file"
+    },
+    "file_size_bytes": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "visible_to_client": {
+      "type": "boolean",
+      "default": true,
+      "description": "If false, document is internal-only and not shown in the portal"
+    }
+  },
+  "required": [
+    "job_id",
+    "document_type",
+    "title",
+    "file_url"
+  ]
+}

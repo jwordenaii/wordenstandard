@@ -1,0 +1,55 @@
+{
+  "name": "LeadCommunication",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "ID of the Lead this communication is attached to"
+    },
+    "lead_email": {
+      "type": "string",
+      "description": "Email of the lead \u2014 used for matching incoming messages"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email_inbound",
+        "email_outbound"
+      ],
+      "description": "Direction of the communication"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line"
+    },
+    "snippet": {
+      "type": "string",
+      "description": "Short preview of the message body (first ~200 chars)"
+    },
+    "from_email": {
+      "type": "string",
+      "description": "Sender email address"
+    },
+    "to_email": {
+      "type": "string",
+      "description": "Recipient email address"
+    },
+    "gmail_message_id": {
+      "type": "string",
+      "description": "Gmail message ID for dedup"
+    },
+    "gmail_thread_id": {
+      "type": "string",
+      "description": "Gmail thread ID"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent/received"
+    }
+  },
+  "required": [
+    "channel",
+    "gmail_message_id"
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Job title or description"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client name"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client email address \u2014 used to match jobs to the logged-in customer portal account"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Client phone number"
+    },
+    "address": {
+      "type": "string",
+      "description": "Job site address"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the job is scheduled"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Scheduled start time (e.g. 7:00 AM)"
+    },
+    "crew": {
+      "type": "string",
+      "description": "Crew or foreman assigned"
+    },
+    "surface_type": {
+      "type": "string",
+      "description": "Type of surface work"
+    },
+    "sqft": {
+      "type": "number",
+      "description": "Estimated square footage"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Special instructions or notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "scheduled",
+      "description": "Current job status"
+    },
+    "progress_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 0,
+      "description": "0-100 completion percentage shown in the customer portal"
+    },
+    "progress_notes": {
+      "type": "string",
+      "description": "Latest progress update shared with the customer"
+    },
+    "review_request_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once the post-completion review request email has been sent"
+    },
+    "review_request_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of when the review request email was sent"
+    },
+    "review_followup_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once the 7-day review follow-up nudge email has been sent"
+    },
+    "review_followup_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 7-day review follow-up was sent"
+    },
+    "review_submitted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Manually marked true when customer posts a public review \u2014 stops follow-up emails"
+    },
+    "gcal_event_id": {
+      "type": "string",
+      "description": "Google Calendar event ID \u2014 set when job was imported from a calendar event"
+    },
+    "weather_risk": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged true when weather forecast shows high rain probability on the scheduled date"
+    },
+    "weather_forecast": {
+      "type": "string",
+      "description": "Latest weather forecast summary (e.g. '75% rain, 62\u00b0F')"
+    },
+    "weather_checked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the forecast was last checked"
+    }
+  },
+  "required": [
+    "title",
+    "scheduled_date"
+  ]
+}

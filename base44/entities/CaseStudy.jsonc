@@ -1,0 +1,81 @@
+{
+  "name": "CaseStudy",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "URL-safe identifier (e.g. 'chesterfield-county-logistics-hub')"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client or property owner name"
+    },
+    "project_type": {
+      "type": "string",
+      "description": "Short label e.g. 'Commercial Parking Lot'"
+    },
+    "location": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string",
+      "description": "Big result headline, e.g. 'Saved Chesterfield County $40k on 2.1M sq ft resurfacing'"
+    },
+    "challenge": {
+      "type": "string",
+      "description": "The problem we solved"
+    },
+    "solution": {
+      "type": "string",
+      "description": "Our approach"
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Quantified wins (e.g. { metric: 'Savings vs. competitor bid', value: '$40,000' })"
+    },
+    "cover_image": {
+      "type": "string"
+    },
+    "gallery_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "testimonial_quote": {
+      "type": "string"
+    },
+    "testimonial_author": {
+      "type": "string"
+    },
+    "sqft": {
+      "type": "number"
+    },
+    "duration_days": {
+      "type": "number"
+    },
+    "year": {
+      "type": "number"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "slug",
+    "headline",
+    "client_name"
+  ]
+}
