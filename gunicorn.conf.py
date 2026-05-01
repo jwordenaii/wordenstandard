@@ -52,4 +52,4 @@ loglevel = "info"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
 # ── Performance ───────────────────────────────────────────────────────────────
-preload_app = True   # load app code before forking workers (saves memory via CoW)
+preload_app = False  # load app in each worker after forking so slow init doesn't block the master
