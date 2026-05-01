@@ -25,10 +25,13 @@ export default function AIConciergeBubble() {
   const [supportsSpeechIn, setSupportsSpeechIn] = useState(false);
   const [supportsSpeechOut, setSupportsSpeechOut] = useState(false);
   const [modelMode, setModelMode] = useState('probing');
+  const [founderVoiceName, setFounderVoiceName] = useState('Auto');
   const scrollRef = useRef(null);
   const recognitionRef = useRef(null);
   const handsFreeRestartRef = useRef(null);
   const lastAssistantMessageRef = useRef('');
+  const founderVoiceRef = useRef(null);
+  const ttsPacerRef = useRef(null);
 
   const avatarState = open
     ? (speaking || sending || booting ? 'talking' : listening ? 'listening' : 'idle')
@@ -47,6 +50,50 @@ export default function AIConciergeBubble() {
     if (typeof window === 'undefined') return;
     setSupportsSpeechIn(Boolean(window.SpeechRecognition || window.webkitSpeechRecognition));
     setSupportsSpeechOut(Boolean(window.speechSynthesis));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    const pickFounderVoice = (voices) => {
+      if (!Array.isArray(voices) || voices.length === 0) return null;
+      const candidates = voices.filter((v) => (v.lang || '').toLowerCase().startsWith('en'));
+      const pool = candidates.length > 0 ? candidates : voices;
+
+      const preferredTokens = [
+        'guy',
+        'davis',
+        'david',
+        'roger',
+        'andrew',
+        'matthew',
+        'google us english',
+        'microsoft david',
+      ];
+
+      for (const token of preferredTokens) {
+        const match = pool.find((v) => (v.name || '').toLowerCase().includes(token));
+        if (match) return match;
+      }
+
+      return pool[0] || null;
+    };
+
+    const refreshVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const selected = pickFounderVoice(voices);
+      founderVoiceRef.current = selected;
+      setFounderVoiceName(selected?.name || 'Auto');
+    };
+
+    refreshVoice();
+    window.speechSynthesis.onvoiceschanged = refreshVoice;
+
+    return () => {
+      if (window.speechSynthesis.onvoiceschanged === refreshVoice) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
   }, []);
 
   const stopListening = useCallback(() => {
@@ -79,25 +126,56 @@ export default function AIConciergeBubble() {
       if (!voiceOutputEnabled || !supportsSpeechOut || !('speechSynthesis' in window)) return;
       if (!text?.trim()) return;
 
+      const normalizedText = text
+        .replace(/\s+/g, ' ')
+        .replace(/\s-\s/g, ', ')
+        .replace(/\.{3,}/g, '...')
+        .trim();
+
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text.trim());
-      utterance.rate = 1.02;
-      utterance.pitch = 0.96;
+      if (ttsPacerRef.current) {
+        clearInterval(ttsPacerRef.current);
+        ttsPacerRef.current = null;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(normalizedText);
+
+      const wordCount = normalizedText.split(/\s+/).filter(Boolean).length;
+      const longForm = wordCount > 45;
+
+      utterance.rate = longForm ? 0.95 : 1.0;
+      utterance.pitch = 0.9;
       utterance.volume = 1;
+      utterance.voice = founderVoiceRef.current || null;
+
       utterance.onstart = () => {
         setSpeaking(true);
-        setSpeechPulse((p) => p + Math.max(1, Math.round(text.length / 6)));
+        setSpeechPulse((p) => p + Math.max(1, Math.round(normalizedText.length / 6)));
+
+        ttsPacerRef.current = setInterval(() => {
+          setSpeechPulse((p) => p + 1);
+        }, longForm ? 190 : 160);
       };
       utterance.onboundary = () => {
         setSpeechPulse((p) => p + 1);
       };
       utterance.onend = () => {
         setSpeaking(false);
+        if (ttsPacerRef.current) {
+          clearInterval(ttsPacerRef.current);
+          ttsPacerRef.current = null;
+        }
         if (voiceMode === 'handsfree' && open) {
           handsFreeRestartRef.current = setTimeout(() => startListening(), 350);
         }
       };
-      utterance.onerror = () => setSpeaking(false);
+      utterance.onerror = () => {
+        setSpeaking(false);
+        if (ttsPacerRef.current) {
+          clearInterval(ttsPacerRef.current);
+          ttsPacerRef.current = null;
+        }
+      };
       window.speechSynthesis.speak(utterance);
     },
     [voiceOutputEnabled, voiceMode, open, startListening, supportsSpeechOut]
@@ -210,6 +288,10 @@ export default function AIConciergeBubble() {
     if (!open) {
       stopListening();
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (ttsPacerRef.current) {
+        clearInterval(ttsPacerRef.current);
+        ttsPacerRef.current = null;
+      }
       setSpeaking(false);
       return;
     }
@@ -352,6 +434,9 @@ export default function AIConciergeBubble() {
                       {modelMode === 'model' ? 'Founder model live · voice ready' : 'Founder fallback · voice ready'}
                     </p>
                   </div>
+                  <p className="font-display text-muted-foreground text-[9px] tracking-wider uppercase mt-0.5">
+                    Voice profile: {founderVoiceName}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
