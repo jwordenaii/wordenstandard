@@ -22,6 +22,9 @@ export default function AIConciergeBubble() {
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [speechPulse, setSpeechPulse] = useState(0);
+  const [supportsSpeechIn, setSupportsSpeechIn] = useState(false);
+  const [supportsSpeechOut, setSupportsSpeechOut] = useState(false);
+  const [modelMode, setModelMode] = useState('probing');
   const scrollRef = useRef(null);
   const recognitionRef = useRef(null);
   const handsFreeRestartRef = useRef(null);
@@ -38,6 +41,12 @@ export default function AIConciergeBubble() {
     'How soon can you start in Chester?',
     'Is asphalt better than concrete for my project?',
   ];
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setSupportsSpeechIn(Boolean(window.SpeechRecognition || window.webkitSpeechRecognition));
+    setSupportsSpeechOut(Boolean(window.speechSynthesis));
+  }, []);
 
   const stopListening = useCallback(() => {
     if (handsFreeRestartRef.current) {
@@ -66,7 +75,7 @@ export default function AIConciergeBubble() {
 
   const speakAssistant = useCallback(
     (text) => {
-      if (!voiceOutputEnabled || !('speechSynthesis' in window)) return;
+      if (!voiceOutputEnabled || !supportsSpeechOut || !('speechSynthesis' in window)) return;
       if (!text?.trim()) return;
 
       window.speechSynthesis.cancel();
@@ -90,7 +99,7 @@ export default function AIConciergeBubble() {
       utterance.onerror = () => setSpeaking(false);
       window.speechSynthesis.speak(utterance);
     },
-    [voiceOutputEnabled, voiceMode, open, startListening]
+    [voiceOutputEnabled, voiceMode, open, startListening, supportsSpeechOut]
   );
 
   const initConversation = async () => {
@@ -141,7 +150,10 @@ export default function AIConciergeBubble() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      recognitionRef.current = null;
+      return;
+    }
 
     const rec = new SpeechRecognition();
     rec.lang = 'en-US';
@@ -200,10 +212,20 @@ export default function AIConciergeBubble() {
       setSpeaking(false);
       return;
     }
-    if (voiceMode === 'handsfree' && !speaking && !sending && !booting) {
+    if (voiceMode === 'handsfree' && supportsSpeechIn && !speaking && !sending && !booting) {
       startListening();
     }
-  }, [open, voiceMode, speaking, sending, booting, startListening, stopListening]);
+  }, [open, voiceMode, speaking, sending, booting, startListening, stopListening, supportsSpeechIn]);
+
+  const handleVoiceButtonDown = () => {
+    if (voiceMode !== 'push') return;
+    startListening();
+  };
+
+  const handleVoiceButtonUp = () => {
+    if (voiceMode !== 'push') return;
+    stopListening();
+  };
 
   const handleOpen = async () => {
     setOpen(true);
@@ -270,6 +292,7 @@ export default function AIConciergeBubble() {
                     mode={avatarState}
                     speechPulse={speechPulse}
                     speechIntensity={speaking ? 0.9 : 0.55}
+                    onModelModeChange={setModelMode}
                     className="w-full h-full"
                   />
                 </div>
@@ -314,6 +337,7 @@ export default function AIConciergeBubble() {
                     mode={avatarState}
                     speechPulse={speechPulse}
                     speechIntensity={speaking ? 0.95 : 0.5}
+                    onModelModeChange={setModelMode}
                     className="w-full h-full"
                   />
                 </div>
@@ -324,7 +348,7 @@ export default function AIConciergeBubble() {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                     <p className="font-display text-muted-foreground text-[10px] tracking-wider uppercase">
-                        WebGL persona · voice ready
+                      {modelMode === 'model' ? 'Real model · voice ready' : 'Fallback model · voice ready'}
                     </p>
                   </div>
                 </div>
@@ -333,20 +357,22 @@ export default function AIConciergeBubble() {
                 <button
                   type="button"
                   onClick={() => setVoiceOutputEnabled((v) => !v)}
-                  className="w-8 h-8 border border-border/80 hover:border-primary/60 flex items-center justify-center"
+                  disabled={!supportsSpeechOut}
+                  className="w-8 h-8 border border-border/80 hover:border-primary/60 flex items-center justify-center disabled:opacity-40"
                   aria-label={voiceOutputEnabled ? 'Mute voice output' : 'Enable voice output'}
-                  title={voiceOutputEnabled ? 'Voice output on' : 'Voice output off'}
+                  title={!supportsSpeechOut ? 'Speech output not supported in this browser' : voiceOutputEnabled ? 'Voice output on' : 'Voice output off'}
                 >
                   {voiceOutputEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                 </button>
                 <button
                   type="button"
                   onClick={() => setVoiceMode((m) => (m === 'handsfree' ? 'push' : 'handsfree'))}
+                  disabled={!supportsSpeechIn}
                   className={`w-8 h-8 border flex items-center justify-center ${
                     voiceMode === 'handsfree' ? 'border-primary text-primary' : 'border-border/80 hover:border-primary/60'
-                  }`}
+                  } disabled:opacity-40`}
                   aria-label="Toggle hands-free voice mode"
-                  title={voiceMode === 'handsfree' ? 'Hands-free mode on' : 'Push-to-talk mode'}
+                  title={!supportsSpeechIn ? 'Speech input not supported in this browser' : voiceMode === 'handsfree' ? 'Hands-free mode on' : 'Push-to-talk mode'}
                 >
                   <Radio className="w-4 h-4" />
                 </button>
@@ -410,15 +436,26 @@ export default function AIConciergeBubble() {
             <form onSubmit={handleSend} className="p-3 border-t border-border bg-card flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => (listening ? stopListening() : startListening())}
-                disabled={booting || sending}
+                onClick={() => {
+                  if (voiceMode === 'handsfree') {
+                    if (listening) stopListening();
+                    else startListening();
+                  }
+                }}
+                onPointerDown={handleVoiceButtonDown}
+                onPointerUp={handleVoiceButtonUp}
+                onPointerCancel={handleVoiceButtonUp}
+                onPointerLeave={handleVoiceButtonUp}
+                onTouchStart={handleVoiceButtonDown}
+                onTouchEnd={handleVoiceButtonUp}
+                disabled={booting || sending || !supportsSpeechIn}
                 className={`w-11 h-11 border flex items-center justify-center transition-colors ${
                   listening
                     ? 'border-primary bg-primary/15 text-primary'
                     : 'border-border text-muted-foreground hover:border-primary/60 hover:text-primary'
                 } disabled:opacity-50`}
                 aria-label={listening ? 'Stop voice input' : 'Start voice input'}
-                title={voiceMode === 'handsfree' ? 'Hands-free voice input' : 'Push-to-talk voice input'}
+                title={!supportsSpeechIn ? 'Speech input not supported in this browser' : voiceMode === 'handsfree' ? 'Hands-free voice input' : 'Press and hold to talk'}
               >
                 {listening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
               </button>

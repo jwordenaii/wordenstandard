@@ -142,6 +142,7 @@ export default function WebGLPersonaAvatar({
   speechPulse = 0,
   speechIntensity = 0.6,
   modelUrl,
+  onModelModeChange,
 }) {
   const mountRef = useRef(null)
   const rendererRef = useRef(null)
@@ -152,6 +153,16 @@ export default function WebGLPersonaAvatar({
   const clockRef = useRef(new THREE.Clock())
   const disposeFnsRef = useRef([])
   const speakingUntilRef = useRef(0)
+  const modeRef = useRef(mode)
+  const speechIntensityRef = useRef(speechIntensity)
+
+  useEffect(() => {
+    modeRef.current = mode
+  }, [mode])
+
+  useEffect(() => {
+    speechIntensityRef.current = speechIntensity
+  }, [speechIntensity])
 
   const resolvedModelCandidates = useMemo(() => {
     const envCandidates = getEnvModelCandidates()
@@ -205,6 +216,7 @@ export default function WebGLPersonaAvatar({
       const fallback = createFallbackAvatar()
       root.add(fallback)
       mouthRef.current = findBestMouthTarget(fallback)
+      onModelModeChange?.('fallback')
     }
 
     const loadModel = async () => {
@@ -224,6 +236,7 @@ export default function WebGLPersonaAvatar({
           model.scale.setScalar(1.05)
           root.add(model)
           mouthRef.current = findBestMouthTarget(model)
+          onModelModeChange?.('model')
         },
         undefined,
         () => {
@@ -247,15 +260,16 @@ export default function WebGLPersonaAvatar({
     const renderLoop = () => {
       const elapsed = clockRef.current.getElapsedTime()
       const rootObj = rootRef.current
+      const activeMode = modeRef.current
 
       if (rootObj) {
-        const idleAmp = mode === 'talking' ? 0.028 : 0.018
+        const idleAmp = activeMode === 'talking' ? 0.028 : 0.018
         rootObj.position.y = Math.sin(elapsed * 1.6) * idleAmp
         rootObj.rotation.y = Math.sin(elapsed * 0.85) * 0.1
 
-        if (mode === 'listening') {
+        if (activeMode === 'listening') {
           rootObj.rotation.x = Math.sin(elapsed * 1.2) * 0.05
-        } else if (mode === 'wave') {
+        } else if (activeMode === 'wave') {
           rootObj.rotation.z = Math.sin(elapsed * 3.6) * 0.08
         } else {
           rootObj.rotation.x = Math.sin(elapsed * 0.7) * 0.02
@@ -264,12 +278,12 @@ export default function WebGLPersonaAvatar({
       }
 
       const haloPulse = 0.16 + Math.max(0, Math.sin(elapsed * 2.4)) * 0.14
-      halo.material.opacity = mode === 'talking' ? haloPulse + 0.1 : haloPulse
+      halo.material.opacity = activeMode === 'talking' ? haloPulse + 0.1 : haloPulse
 
       const mouth = mouthRef.current
       if (mouth) {
-        const active = mode === 'talking' || Date.now() < speakingUntilRef.current
-        const pulse = active ? (0.6 + Math.abs(Math.sin(elapsed * 20)) * (0.8 + speechIntensity)) : 1
+        const active = activeMode === 'talking' || Date.now() < speakingUntilRef.current
+        const pulse = active ? (0.6 + Math.abs(Math.sin(elapsed * 20)) * (0.8 + speechIntensityRef.current)) : 1
         mouth.scale.y = pulse
       }
 
@@ -297,7 +311,7 @@ export default function WebGLPersonaAvatar({
       disposeFnsRef.current.forEach((fn) => fn())
       disposeFnsRef.current = []
     }
-  }, [resolvedModelCandidates, mode, speechIntensity])
+  }, [resolvedModelCandidates, onModelModeChange])
 
   useEffect(() => {
     const duration = 1200 + Math.round(speechPulse * 18)
