@@ -117,9 +117,9 @@ def _get_client() -> Any:
 
         kwargs: dict[str, Any] = {
             "hosts": [{"host": _ES_HOST, "port": _ES_PORT, "scheme": "http"}],
-            "request_timeout": 5,
-            "retry_on_timeout": True,
-            "max_retries": 2,
+            "request_timeout": 2,
+            "retry_on_timeout": False,
+            "max_retries": 0,
         }
         if _ES_USER and _ES_PASSWORD:
             kwargs["basic_auth"] = (_ES_USER, _ES_PASSWORD)
