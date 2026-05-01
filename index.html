@@ -3,11 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1a1a2e" />
-    <meta name="google-site-verification" content="VERIFICATION_CODE" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- ── SEO defaults (Helmet overrides per route) ─────────────────── -->
+    <meta
+      name="description"
+      content="J. Worden &amp; Sons Asphalt Paving — 4th-generation family-owned paving contractor since 1984. Asphalt paving, sealcoating, crack filling, parking lots, and driveways across Virginia. Free estimates · (804) 446-1296."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1" />
+    <meta name="format-detection" content="telephone=yes" />
+
+    <!-- ── Icons ─────────────────────────────────────────────────────── -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- ── Default Open Graph (per-route Helmet may override) ───────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="J. Worden &amp; Sons Asphalt Paving" />
+    <meta property="og:image" content="/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-default.jpg" />
+
+    <!-- ── Performance: preconnect / dns-prefetch / preload ─────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://codexbuildfreeofbase44-production.up.railway.app" />
+    <link rel="preconnect" href="https://codexbuildfreeofbase44-production.up.railway.app" crossorigin />
+    <link rel="preload" as="image" href="/hero-paving.webp" type="image/webp" fetchpriority="high" />
+
     <!-- Load Google Fonts asynchronously to eliminate render-blocking -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap"

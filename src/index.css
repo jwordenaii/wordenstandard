@@ -155,6 +155,36 @@
     transform: translateY(0);
   }
 
+  /* Outline (light) — for dark backgrounds: white text + amber border, fills gold on hover */
+  .btn-outline-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: #ffffff;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.8125rem 1.9375rem;
+    border-radius: 0.375rem;
+    border: 1.5px solid #f5a623;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .btn-outline-light:hover {
+    background: linear-gradient(135deg, #f5a623 0%, #e8961a 100%);
+    color: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(245, 166, 35, 0.35);
+  }
+
+  .btn-outline-light:active {
+    transform: translateY(0);
+  }
+
   /* Ghost — for dark backgrounds */
   .btn-ghost {
     display: inline-flex;

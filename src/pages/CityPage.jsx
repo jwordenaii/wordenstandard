@@ -156,7 +156,7 @@ export default function CityPage() {
               </Link>
               <a
                 href="tel:+18044461296"
-                className="btn-outline text-lg px-8 py-4"
+                className="btn-outline-light text-lg px-8 py-4"
                 onClick={() => trackEvent('phone_click', { location: `city_hero_${area.slug}` })}
               >
                 📞 (804) 446-1296

@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import FloatingCTA from './components/FloatingCTA'
 import ChatWidget from './components/ChatWidget'
+import MobileCallBar from './components/MobileCallBar'
 import ScrollToTop from './components/ScrollToTop'
 import ErrorBoundary from './components/ErrorBoundary'
 import AdvisoryGate from './components/AdvisoryGate'
@@ -103,6 +104,7 @@ export default function App() {
           </main>
           <Footer />
           <FloatingCTA />
+          <MobileCallBar />
           <ChatWidget />
         </div>
       </ErrorBoundary>

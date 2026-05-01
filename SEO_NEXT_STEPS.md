@@ -32,6 +32,40 @@ refactor, depends on external API keys, or is an ongoing content cadence.
 - [x] **`public/llms.txt`** — curated brand summary so ChatGPT,
       Perplexity, Claude, and Gemini cite the business consistently.
 
+## ✅ Phase 1.5 — done in the "site rescue" PR
+
+- [x] **Restored `EstimateWidget`** (240-line homepage quick-price form
+      had been gutted to a 10-line stub by an earlier "fix" commit).
+- [x] **Fixed dark-on-dark CTAs.** Added `.btn-outline-light` variant
+      (white text + amber border) and switched the Home hero, Home
+      service-areas strip, ServiceAreas hero, and CityPage hero "Call"
+      buttons. Previously they rendered charcoal-on-navy and were
+      effectively invisible.
+- [x] **Sticky mobile call bar** (`src/components/MobileCallBar.jsx`)
+      on every commercial-intent route — one-tap dial + Free Quote
+      button. Hidden on desktop and admin/visualizer routes. Strongest
+      mobile-conversion signal for a local trade and feeds Google's
+      click-to-call ranking.
+- [x] **Stopped image 404s.** Added `public/og-default.jpg` (1200×630),
+      `public/logo.png` (512×512), `public/apple-touch-icon.png`
+      (180×180), and `public/hero-paving.jpg`/`.webp` — all generated
+      from `logo.svg` via `scripts/generate_brand_images.py`. JSON-LD
+      `logo` references and OG cards now resolve. Real photography can
+      be swapped in later by replacing the files in `public/` without
+      touching code. Re-run the script to regenerate.
+- [x] **Wired hero image** into Home with `<picture>` + WebP/JPEG
+      `srcSet` + `fetchPriority="high"`, plus a dark gradient overlay
+      so hero text stays readable.
+- [x] **`public/site.webmanifest`** for PWA installability.
+- [x] **`index.html` hardened**: removed placeholder
+      `google-site-verification=VERIFICATION_CODE`; added default
+      `<meta name="description">` and
+      `<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">`;
+      added `<link rel="apple-touch-icon">`, `<link rel="manifest">`,
+      default OG/Twitter meta, dns-prefetch + preconnect for Railway
+      API origin, and `<link rel="preload">` for the hero WebP. Fixed
+      `theme-color` to match the actual brand-navy (`#1a1a1a`).
+
 ## ⬜ Phase 1 — deferred (recommended next PR: SSG migration)
 
 The plan called for adopting prerendering / SSG so every route ships as
