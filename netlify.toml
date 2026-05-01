@@ -1,3 +1,26 @@
+# ── Command Center — Edge Protection ───────────────────────────────────────
+# The edge function `command-center-auth` runs before the SPA is served for
+# every request to /command-center and /command-center/*.
+#
+# REQUIRED NETLIFY ENVIRONMENT VARIABLE (server-side — never VITE_):
+#   COMMAND_CENTER_PIN   Set this in Netlify UI → Site → Environment variables.
+#                        Use the 4-digit PIN you want to protect the page with.
+#                        Example: COMMAND_CENTER_PIN=1025
+#
+# The VITE_CC_PASSWORD variable provides a secondary client-side deterrent
+# (see CommandCenter.jsx), but COMMAND_CENTER_PIN is the real protection layer.
+
+[edge_functions]
+  directory = "netlify/edge-functions"
+
+[[edge_functions]]
+  path = "/command-center"
+  function = "command-center-auth"
+
+[[edge_functions]]
+  path = "/command-center/*"
+  function = "command-center-auth"
+
 [build]
   command = "npm run build"
   publish = "dist"
@@ -9,6 +32,17 @@
   PYTHON_VERSION = "3.11"
   VITE_API_BASE_URL = "https://codexbuildfreeofbase44-production.up.railway.app"
   VITE_SITE_URL = "https://www.jwordenasphaltpaving.com"
+
+# ── API proxy — forward /api/* to Railway backend ─────────────────────────────
+# This enables the frontend to use relative /api/... paths as a fallback when
+# VITE_API_BASE_URL is not set, and provides an edge-layer proxy for production.
+[[redirects]]
+  from = "/api/*"
+  to = "https://codexbuildfreeofbase44-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+  [redirects.headers]
+    X-Forwarded-Host = "www.jwordenasphaltpaving.com"
 
 # Exclude static files from SPA fallback
 [[redirects]]

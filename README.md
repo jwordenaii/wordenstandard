@@ -62,7 +62,61 @@ alembic stamp bc2d5f75bee4
 
 Set `AUTO_CREATE_TABLES=false` in production.
 
-## Payments (Stripe)
+## Command Center — Security Notes
+
+The `/command-center` route is an internal operations dashboard.
+
+### Edge-level PIN gate — primary protection (`COMMAND_CENTER_PIN`)
+
+`netlify/edge-functions/command-center-auth.ts` runs on Netlify's edge CDN
+**before** the SPA bundle is served.  Every request to `/command-center` (and
+`/command-center/*`) is intercepted and validated.
+
+#### How it works
+
+1. Unauthenticated visitors are shown a minimal PIN-entry form rendered by the
+   edge function — the SPA JavaScript never loads.
+2. On correct PIN submission the edge function sets an `HttpOnly; Secure` cookie
+   (`cc_auth`) valid for 8 hours and redirects back to `/command-center`.
+3. Subsequent requests within the session automatically pass through because the
+   cookie is present and valid.
+
+#### Configuration
+
+Set the `COMMAND_CENTER_PIN` environment variable in
+**Netlify UI → Site → Environment variables**.  
+This value is **server-side only** — never prefix it with `VITE_`.
+
+```
+COMMAND_CENTER_PIN=1025
+```
+
+> Netlify redeployment is not required when you change an environment variable;
+> edge functions re-read environment variables on every request.
+
+#### Access and logout
+
+- **Access:** Navigate to `/command-center` and enter the PIN in the form.
+- **Logout:** Navigate to `/command-center?logout=1` to clear the auth cookie, or
+  clear cookies manually in your browser's DevTools → Application → Cookies.
+
+### Client-side PIN gate — secondary deterrent (`VITE_CC_PASSWORD`)
+
+`VITE_CC_PASSWORD` enables an in-browser PIN form rendered by the React
+component.  **This is a convenience deterrent only — it is NOT real security.**
+`VITE_` variables are compiled into the browser JavaScript bundle and are visible
+to anyone who inspects the page source or network traffic.
+
+- When `VITE_CC_PASSWORD` is **not set or empty**, the page displays a "Not
+  Available" notice and **never auto-unlocks**.
+- When `VITE_CC_PASSWORD` **is set**, users must enter the correct PIN before
+  content is shown.
+
+The edge function is the real protection boundary; `VITE_CC_PASSWORD` adds a
+second layer for defence in depth.
+
+Do NOT store sensitive business data in frontend state — assume a determined user
+can always bypass a client-side gate.
 
 - Backend checkout session endpoint: `POST /api/v1/payments/checkout-session`
 - Backend webhook endpoint: `POST /api/v1/payments/webhook`

@@ -18,6 +18,7 @@
 #   POST /api/v1/math-ai/pavement-score      — PCI pavement condition scoring
 #   POST /api/v1/math-ai/cost-estimate       — project cost estimation
 #   POST /api/v1/math-ai/maintenance-forecast — maintenance schedule forecasting
+#   POST /api/v1/public/chat                  — Mr. Worden premium concierge chat (rate-limited)
 #
 # PROTECTED ENDPOINTS (require bearer token via verify_premium_security):
 #   POST /api/v1/ai/photo-inspect      — GPT-4 Vision analysis
@@ -222,6 +223,7 @@ from .routers import math_ai as math_ai_router
 from .routers import admin_2fa as admin_2fa_router
 from .routers import human_review as human_review_router
 from .routers import search as search_router
+from .routers import public_chat as public_chat_router
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
 
@@ -440,6 +442,9 @@ app.include_router(human_review_router.router)
 
 # Full-text search (Elasticsearch-backed)
 app.include_router(search_router.router)
+# Public concierge chat — Mr. Worden widget (no auth, rate-limited)
+app.include_router(public_chat_router.router)
+
 
 # ── Socket.IO ASGI mount ──────────────────────────────────────────────────────
 # Mount the Socket.IO server at /sio so it doesn't conflict with FastAPI routes.
