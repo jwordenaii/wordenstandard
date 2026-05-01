@@ -1,13 +1,17 @@
 """
 Admin dashboard router — served entirely from the backend (FastAPI + Jinja2).
 
-All routes under /admin require PIN-based authentication.
-The PIN is supplied via environment variable:
-  ADMIN_PIN  (required — no default; routes return 401 if unset or incorrect)
+All routes under /admin require authentication.  Two auth methods are supported
+and are selected automatically based on which environment variables are set:
 
-Pass the PIN on every request as a query parameter or POST body field:
-  GET  /admin/dashboard?pin=1234
-  POST /admin/content/new  (include pin=1234 in the form body)
+  1. PIN-based auth (legacy):
+       ADMIN_PIN  — pass the PIN on every request as a query parameter:
+         GET  /admin/dashboard?pin=1234
+         POST /admin/content/new  (include pin=1234 in the form body)
+
+  2. HTTP Basic auth (preferred when ADMIN_PIN is not set):
+       ADMIN_USERNAME + ADMIN_PASSWORD — send a standard Authorization header:
+         Authorization: Basic <base64(username:password)>
 
 The dashboard exposes:
   GET  /admin                      → redirect to /admin/dashboard
@@ -31,6 +35,7 @@ clients on other origins cannot reach them.
 
 from __future__ import annotations
 
+import base64
 import json
 import logging
 import os
@@ -66,44 +71,85 @@ templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 def _require_admin(
     request: Request,
     pin: str | None = Query(default=None),
+    authorization: str | None = Header(default=None),
     x_totp_token: str | None = Header(default=None, alias="X-TOTP-Token"),
 ) -> str:
     """
-    Verify the admin PIN against the ADMIN_PIN environment variable.
-    Uses secrets.compare_digest to prevent timing attacks.
+    Authenticate the admin user.  Two methods are supported, selected by which
+    environment variables are present:
 
-    The PIN must be supplied on every request via the ``pin`` query parameter
-    (e.g. ``/admin/dashboard?pin=1234``) or as a ``pin`` field in a POST body
-    (handled by individual route handlers that accept it as a Form field and
-    forward it through the dependency).
+    1. **PIN-based auth** (when ``ADMIN_PIN`` is set):
+       Pass the PIN via the ``pin`` query parameter on every request.
 
-    When 2FA is enabled for the admin user, a valid TOTP token (or backup code)
-    must also be supplied via the ``X-TOTP-Token`` request header.  Clients that
-    do not yet support the header will receive a 401 with a descriptive message
-    so they can prompt the user for the code.
+    2. **HTTP Basic auth** (when ``ADMIN_PIN`` is not set):
+       Set ``ADMIN_USERNAME`` and ``ADMIN_PASSWORD`` and send a standard
+       ``Authorization: Basic <base64(username:password)>`` header.
+
+    In both cases ``secrets.compare_digest`` is used for timing-attack-safe
+    comparison.  When 2FA is enabled, a valid TOTP token (or backup code) must
+    also be supplied via the ``X-TOTP-Token`` request header.
     """
     admin_pin = os.getenv("ADMIN_PIN", "")
 
-    if not admin_pin:
-        raise HTTPException(
-            status_code=503,
-            detail="Admin dashboard is not configured. Set ADMIN_PIN.",
-        )
+    if admin_pin:
+        # ── PIN-based auth ────────────────────────────────────────────────────
+        if not pin:
+            raise HTTPException(
+                status_code=401,
+                detail="Unauthorized — PIN required.",
+            )
 
-    if not pin:
-        raise HTTPException(
-            status_code=401,
-            detail="Unauthorized — PIN required.",
-        )
+        if not secrets.compare_digest(pin.encode(), admin_pin.encode()):
+            raise HTTPException(
+                status_code=401,
+                detail="Unauthorized — incorrect PIN.",
+            )
 
-    if not secrets.compare_digest(pin.encode(), admin_pin.encode()):
-        raise HTTPException(
-            status_code=401,
-            detail="Unauthorized — incorrect PIN.",
-        )
+        # Use a fixed identifier for the admin user (no username concept with PIN auth)
+        username = "admin"
 
-    # Use a fixed identifier for the admin user (no username concept with PIN auth)
-    username = "admin"
+    else:
+        # ── HTTP Basic auth ───────────────────────────────────────────────────
+        admin_username = os.getenv("ADMIN_USERNAME", "")
+        admin_password = os.getenv("ADMIN_PASSWORD", "")
+
+        if not admin_username or not admin_password:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "Admin dashboard is not configured. "
+                    "Set ADMIN_PIN, or set both ADMIN_USERNAME and ADMIN_PASSWORD."
+                ),
+            )
+
+        # Parse the Authorization header
+        cred_username: str = ""
+        cred_password: str = ""
+        if authorization and authorization.lower().startswith("basic "):
+            try:
+                decoded = base64.b64decode(authorization[6:]).decode("utf-8", errors="replace")
+                cred_username, _, cred_password = decoded.partition(":")
+            except Exception:
+                pass  # leave credentials empty — will fail comparison below
+
+        if not cred_username or not cred_password:
+            raise HTTPException(
+                status_code=401,
+                detail="Unauthorized — HTTP Basic auth credentials required.",
+                headers={"WWW-Authenticate": "Basic realm=\"Admin Dashboard\""},
+            )
+
+        username_ok = secrets.compare_digest(cred_username.encode(), admin_username.encode())
+        password_ok = secrets.compare_digest(cred_password.encode(), admin_password.encode())
+
+        if not username_ok or not password_ok:
+            raise HTTPException(
+                status_code=401,
+                detail="Unauthorized — incorrect username or password.",
+                headers={"WWW-Authenticate": "Basic realm=\"Admin Dashboard\""},
+            )
+
+        username = cred_username
 
     # ── 2FA check ─────────────────────────────────────────────────────────────
     # Import here to avoid a circular import at module load time.
@@ -159,6 +205,7 @@ def _require_admin(
                 )
 
     return username
+
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
