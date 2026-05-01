@@ -1,6 +1,55 @@
 # Deployment Guide
 
-Complete deployment checklist for the JWordenAI backend on Railway.
+Complete deployment checklist for the JWordenAI backend on Railway and frontend on Netlify.
+
+---
+
+## Quick-Start: Railway + Netlify (copy-paste ready)
+
+### Railway — API service settings
+
+**Start Command** (set in Railway dashboard → Service → Settings → Deploy → Start Command):
+
+```
+bash scripts/railway_start.sh
+```
+
+This script runs `alembic upgrade head` on every deploy before starting Gunicorn, so migrations are always applied automatically.
+
+**Required environment variables** (Railway dashboard → Service → Variables):
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Auto-set by Railway Postgres plugin when services are linked |
+| `PORT` | Auto-set by Railway (do not override) |
+| `SENTRY_DSN` | Your backend Sentry DSN from sentry.io → Project Settings → Client Keys |
+| `SENTRY_ENVIRONMENT` | `production` |
+| `SENTRY_TRACES_SAMPLE_RATE` | `0.1` (captures 10% of transactions; tune up/down as needed) |
+
+**Optional environment variables:**
+
+| Variable | Value |
+|---|---|
+| `SENTRY_RELEASE` | `${RAILWAY_GIT_COMMIT_SHA}` — links Sentry issues to the exact deploy commit |
+| `WEB_CONCURRENCY` | Number of Gunicorn workers (default: `2`; raise only if you have confirmed memory headroom) |
+
+### Netlify — frontend settings
+
+**Build settings** (Netlify dashboard → Site configuration → Build & deploy → Build settings):
+
+| Setting | Value |
+|---|---|
+| Build command | `npm ci && npm run build` |
+| Publish directory | `dist` |
+
+**Environment variables** (Netlify dashboard → Site configuration → Environment variables):
+
+| Variable | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://your-api-service.up.railway.app` (your Railway API URL) |
+| `VITE_SENTRY_DSN` | Your frontend Sentry DSN (optional, enables browser error tracking) |
+
+> The SPA fallback redirect (`/* → /index.html 200`) and the `/api/*` proxy to Railway are already configured in `netlify.toml`.
 
 ---
 
@@ -27,7 +76,9 @@ Set these in the Railway dashboard under each service's **Variables** tab. The A
 | `AUTO_CREATE_TABLES` | ✅ | Set to `false` in production; Alembic manages schema |
 | `OPENAI_API_KEY` | ⚠️ | Required for AI chat and photo inspection; endpoints fall back to stubs without it |
 | `SENTRY_DSN` | ⚠️ | Optional — enables Sentry error tracking |
+| `SENTRY_ENVIRONMENT` | ⚠️ | Set to `production` for Railway deploys |
 | `SENTRY_TRACES_SAMPLE_RATE` | ⚠️ | Float 0.0–1.0; defaults to `0.1` (10% of traces) |
+| `SENTRY_RELEASE` | ⚠️ | Optional — set to `${RAILWAY_GIT_COMMIT_SHA}` to link Sentry issues to commits |
 | `RESEND_API_KEY` | ⚠️ | Required for transactional email via Resend |
 | `RESEND_FROM_EMAIL` | ⚠️ | Sender address for Resend emails |
 | `SMTP_HOST` | ⚠️ | Fallback SMTP host if Resend is unavailable |
