@@ -39,7 +39,7 @@ def test_state_proposal_block_includes_compliance_facts():
 
     block_ca = _state_proposal_block("CA")
     assert "California" in block_ca
-    assert "license required: YES" in block_ca.lower() or "license required: yes" in block_ca.lower()
+    assert "license required: yes" in block_ca.lower()
     assert "prevailing wage" in block_ca.lower()
     assert "season" in block_ca.lower()
     assert "price index" in block_ca.lower()

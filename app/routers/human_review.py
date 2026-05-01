@@ -38,6 +38,7 @@ router = APIRouter(prefix="/api/v1/review", tags=["human-review"])
 class ReviewDecision(BaseModel):
     reviewer_notes:   Optional[str] = None
     corrected_answer: Optional[str] = None
+    pin:              Optional[str] = None  # 4-digit operator PIN (required when ESTIMATE_APPROVAL_PIN is set)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -90,11 +91,34 @@ async def approve_item(
     if item.status != "pending":
         raise HTTPException(400, f"Item is already '{item.status}'")
 
+    # Dashboard PIN gate: when JWORDEN_DASHBOARD_PIN / ESTIMATE_APPROVAL_PIN
+    # is configured, the 4-digit code must accompany every approval.
+    from ..services.estimate_approval import (  # noqa: PLC0415
+        PROPOSAL_DECISION_TYPE, dispatch_approved_proposal, pin_required, verify_pin,
+    )
+    if pin_required() and not verify_pin(body.pin):
+        raise HTTPException(403, "Invalid or missing 4-digit dashboard PIN")
+
     item.status           = "approved"
-    item.reviewer_notes   = body.reviewer_notes
-    item.corrected_answer = body.corrected_answer
-    item.reviewed_at      = datetime.now(timezone.utc)
+    item.reviewer_note    = body.reviewer_notes
+    item.resolved_at      = datetime.now(timezone.utc)
     db.commit()
+
+    # If this approval represents a staged customer-facing send (proposal /
+    # estimate), dispatch it now. Failure of dispatch must not roll back
+    # the approval — operator can use a re-send endpoint.
+    dispatch_result = None
+    try:
+        if item.decision_type == PROPOSAL_DECISION_TYPE:
+            dispatch_ok = dispatch_approved_proposal(item)
+            dispatch_result = "sent" if dispatch_ok else "send_failed"
+            # Annotate review item with dispatch outcome for audit
+            existing_note = item.reviewer_note or ""
+            item.reviewer_note = (existing_note + f"\n[dispatch: {dispatch_result}]").strip()
+            db.commit()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Approved-proposal dispatch hook failed: %s", exc)
+        dispatch_result = "dispatch_error"
 
     # Feature 2: Save correction to learning loop
     if body.corrected_answer:
@@ -110,8 +134,11 @@ async def approve_item(
         except Exception as exc:  # noqa: BLE001
             logger.warning("Could not save correction: %s", exc)
 
-    logger.info("Review item %d approved", item_id)
-    return {"status": "approved", "id": item_id}
+    logger.info("Review item %d approved (dispatch=%s)", item_id, dispatch_result)
+    response = {"status": "approved", "id": item_id}
+    if dispatch_result is not None:
+        response["dispatch"] = dispatch_result
+    return response
 
 
 @router.post("/queue/{item_id}/reject", summary="Reject an AI decision")
@@ -125,9 +152,14 @@ async def reject_item(
     if item.status != "pending":
         raise HTTPException(400, f"Item is already '{item.status}'")
 
+    # Dashboard PIN gate also applies to rejection — only the operator can clear items.
+    from ..services.estimate_approval import pin_required, verify_pin  # noqa: PLC0415
+    if pin_required() and not verify_pin(body.pin):
+        raise HTTPException(403, "Invalid or missing 4-digit dashboard PIN")
+
     item.status         = "rejected"
-    item.reviewer_notes = body.reviewer_notes
-    item.reviewed_at    = datetime.now(timezone.utc)
+    item.reviewer_note  = body.reviewer_notes
+    item.resolved_at    = datetime.now(timezone.utc)
     db.commit()
     logger.info("Review item %d rejected", item_id)
     return {"status": "rejected", "id": item_id}

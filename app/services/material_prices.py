@@ -433,10 +433,11 @@ def get_price_multiplier_with_materials(
 
     # Compose a human-readable note enumerating only the meaningful movers
     movers = [
-        commodities[c]["status_message"]
+        commodities[c].get("status_message", "")
         for c in weights
-        if c in commodities and abs(commodities[c]["pct_change"]) >= 1.0
+        if c in commodities and abs(commodities[c].get("pct_change", 0.0)) >= 1.0
     ]
+    movers = [m for m in movers if m]  # drop empty messages
     material_note = " · ".join(movers) if movers else "All input commodities at baseline"
 
     return {
