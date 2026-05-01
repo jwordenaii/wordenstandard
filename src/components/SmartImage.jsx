@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * SmartImage — drop-in <img> with a clean branded fallback.
@@ -26,6 +26,7 @@ import { useState } from 'react'
  */
 export default function SmartImage({
   src,
+  fallbackSrc,
   webpSrc,
   alt,
   label,
@@ -38,7 +39,22 @@ export default function SmartImage({
   sizes,
 }) {
   const [failed, setFailed] = useState(false)
-  const showFallback = !src || failed
+  const [activeSrc, setActiveSrc] = useState(src)
+
+  useEffect(() => {
+    setActiveSrc(src)
+    setFailed(false)
+  }, [src])
+
+  const showFallback = !activeSrc || failed
+
+  const handleError = () => {
+    if (fallbackSrc && activeSrc !== fallbackSrc) {
+      setActiveSrc(fallbackSrc)
+      return
+    }
+    setFailed(true)
+  }
 
   if (showFallback) {
     return (
@@ -77,7 +93,7 @@ export default function SmartImage({
 
   const imgEl = (
     <img
-      src={src}
+      src={activeSrc}
       alt={alt}
       width={width}
       height={height}
@@ -85,7 +101,7 @@ export default function SmartImage({
       decoding="async"
       fetchPriority={priority ? 'high' : 'auto'}
       sizes={sizes}
-      onError={() => setFailed(true)}
+      onError={handleError}
       className={className}
     />
   )

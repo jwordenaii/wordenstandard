@@ -3,6 +3,7 @@ import { Menu, X, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackPhoneClick } from '@/lib/analytics';
 import SmartImage from './SmartImage';
+import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
 const NAV_LINKS = [
 { label: 'Services', href: '#services' },
@@ -39,7 +40,8 @@ export default function Navbar() {
           {/* Logo — top left corner */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0" aria-label="J. Worden & Sons Paving — Home">
             <SmartImage
-              src="https://media.base44.com/images/public/69c853446b8987b1630018ff/920c45a44_generated_image.png"
+              src={PRIMARY_LOGO_URL}
+              fallbackSrc={FALLBACK_LOGO_URL}
               alt="J. Worden & Sons Paving — Quality Work. Built To Last."
               width={1400}
               height={420}

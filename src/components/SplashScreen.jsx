@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
-const LOGO_URL = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/920c45a44_generated_image.png';
 const SPLASH_KEY = 'jworden_splash_shown';
 
 export default function SplashScreen() {
@@ -18,6 +18,8 @@ export default function SplashScreen() {
     return () => clearTimeout(timer);
   }, [visible]);
 
+  const [logoSrc, setLogoSrc] = useState(PRIMARY_LOGO_URL);
+
   return (
     <AnimatePresence>
       {visible && (
@@ -28,8 +30,9 @@ export default function SplashScreen() {
           className="fixed inset-0 z-[9999] bg-background flex items-center justify-center"
         >
           <motion.img
-            src={LOGO_URL}
+            src={logoSrc}
             alt="J. Worden & Sons Paving"
+            onError={() => setLogoSrc(FALLBACK_LOGO_URL)}
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
