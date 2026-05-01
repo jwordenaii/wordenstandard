@@ -1,5 +1,6 @@
-import { lazy, Suspense, useState, useCallback } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { base44 } from '@/api/base44Client'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 
@@ -149,6 +150,170 @@ function CrmTable() {
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+function ChannelPerformancePanel() {
+  const [loading, setLoading] = useState(true)
+  const [leads, setLeads] = useState([])
+
+  useEffect(() => {
+    let active = true
+
+    const load = async () => {
+      try {
+        const all = await base44.entities.Lead.list('-created_date', 300)
+        if (active) setLeads(Array.isArray(all) ? all : [])
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const channelRows = useMemo(() => {
+    const since = new Date()
+    since.setDate(since.getDate() - 30)
+
+    const inWindow = leads.filter((lead) => {
+      const created = new Date(lead.created_date || lead.created_at || 0)
+      return created.toString() !== 'Invalid Date' && created >= since
+    })
+
+    const buckets = {
+      geofencing: { leads: 0, won: 0, pipeline: 0 },
+      backlink_partner: { leads: 0, won: 0, pipeline: 0 },
+      referral: { leads: 0, won: 0, pipeline: 0 },
+    }
+
+    inWindow.forEach((lead) => {
+      const source = String(lead.conversion_source || 'other')
+      if (!buckets[source]) return
+      buckets[source].leads += 1
+      if (lead.status === 'won') buckets[source].won += 1
+      if (lead.status !== 'won' && lead.status !== 'lost') {
+        buckets[source].pipeline += Number(lead.estimated_value) || 0
+      }
+    })
+
+    return Object.entries(buckets).map(([source, stats]) => ({
+      source,
+      ...stats,
+      closeRate: stats.leads > 0 ? Math.round((stats.won / stats.leads) * 100) : 0,
+    }))
+  }, [leads])
+
+  const topBacklinkDomains = useMemo(() => {
+    const domains = {}
+    leads.forEach((lead) => {
+      if (lead.conversion_source !== 'backlink_partner' || !lead.backlink_domain) return
+      const d = String(lead.backlink_domain).toLowerCase()
+      domains[d] = (domains[d] || 0) + 1
+    })
+
+    return Object.entries(domains)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+  }, [leads])
+
+  const topGeofenceCampaigns = useMemo(() => {
+    const campaigns = {}
+    leads.forEach((lead) => {
+      if (lead.conversion_source !== 'geofencing' || !lead.geofence_campaign) return
+      const c = String(lead.geofence_campaign)
+      campaigns[c] = (campaigns[c] || 0) + 1
+    })
+
+    return Object.entries(campaigns)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+  }, [leads])
+
+  const label = (source) => {
+    if (source === 'geofencing') return 'Geofencing'
+    if (source === 'backlink_partner') return 'Backlink Partner'
+    if (source === 'referral') return 'Referral'
+    return source
+  }
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
+          Backlink + Geofence Performance (30d)
+        </h3>
+        <span className="text-xs text-white/45">Live from Lead records</span>
+      </div>
+
+      {loading ? (
+        <div className="h-28 flex items-center justify-center text-white/50 text-sm">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading source intelligence...
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            {channelRows.map((row) => (
+              <div key={row.source} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-white/45">{label(row.source)}</p>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-white text-lg font-black leading-none">{row.leads}</p>
+                    <p className="text-[10px] text-white/45 uppercase mt-1">Leads</p>
+                  </div>
+                  <div>
+                    <p className="text-emerald-300 text-lg font-black leading-none">{row.closeRate}%</p>
+                    <p className="text-[10px] text-white/45 uppercase mt-1">Close</p>
+                  </div>
+                  <div>
+                    <p className="text-brand-amber text-lg font-black leading-none">${Math.round(row.pipeline / 1000)}k</p>
+                    <p className="text-[10px] text-white/45 uppercase mt-1">Pipeline</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Backlink Domains</p>
+              {topBacklinkDomains.length === 0 ? (
+                <p className="text-sm text-white/55">No backlink domain data yet.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {topBacklinkDomains.map(([domain, count]) => (
+                    <li key={domain} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                      <span className="truncate">{domain}</span>
+                      <span className="text-brand-amber font-semibold">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Geofence Campaigns</p>
+              {topGeofenceCampaigns.length === 0 ? (
+                <p className="text-sm text-white/55">No geofence campaign tags yet.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {topGeofenceCampaigns.map(([campaign, count]) => (
+                    <li key={campaign} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                      <span className="truncate">{campaign}</span>
+                      <span className="text-brand-amber font-semibold">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -312,6 +477,7 @@ export default function CommandCenter() {
             {activeTab === 'crm' && (
               <div className="space-y-4 md:space-y-5">
                 <CrmTable />
+                <ChannelPerformancePanel />
                 <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 md:px-5 py-4 text-sm text-white/70">
                   Priority Playbook: Focus calls on leads above 80 first, schedule site visits before 6 PM, and send proposal PDFs within 30 minutes of each visit.
                 </div>
