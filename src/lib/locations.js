@@ -500,10 +500,17 @@ export const LOCATIONS = [
     intro:
       'Fairfax properties demand disciplined asphalt planning due to commuter load, tight access constraints, and strict property standards. We support driveways, commercial lots, and phased paving programs with documented scope, drainage-first prep, and long-life installation quality.',
     neighborhoods: [
-      'Fairfax City', 'Fairfax Station', 'Oakton', 'Burke',
-      'Annandale', 'Centreville', 'Chantilly', 'Vienna',
+      'Aldie', 'Alexandria', 'Annandale', 'Arlington',
+      'Ashburn', 'Bristow', 'Broad Run', 'Burke',
+      'Catharpin', 'Centreville', 'Chantilly', 'Clifton',
+      'Fairfax', 'Fairfax County', 'Fairfax Station', 'Falls Church',
+      'Fauquier County', 'Gainesville', 'Great Falls', 'Haymarket',
+      'Herndon', 'Leesburg', 'Loudoun County', 'Manassas',
+      'McLean', 'Nokesville', 'Oak Hill', 'Oakton',
+      'Prince William County', 'Purcellville', 'Reston', 'Springfield',
+      'Sterling', 'Vienna', 'Warrenton', 'Woodbridge',
     ],
-    landmarks: ['Fairfax County Parkway', 'I-66 corridor', 'GMU area', 'Mosaic District', 'Route 50 and Route 29 corridors'],
+    landmarks: ['Fairfax County Parkway', 'I-66 corridor', 'I-495 Beltway', 'GMU area', 'Mosaic District', 'Route 50 and Route 29 corridors'],
     climate: {
       title: 'NOVA Commuter Load + Freeze-Thaw Wear',
       body: 'Fairfax asphalt surfaces see dense daily traffic and repeated freeze-thaw movement. We use base-prep discipline, drainage correction, and compaction control to reduce premature cracking and edge failure under NOVA conditions.',
@@ -519,7 +526,7 @@ export const LOCATIONS = [
       },
       {
         q: 'Do you serve rural and semi-rural areas between Richmond and Fairfax?',
-        a: 'Yes. We regularly service corridor markets and rural areas between major anchors when projects align with route scheduling and scope planning.',
+        a: 'Yes. We regularly service corridor markets and rural areas between major anchors, including Loudoun, Fauquier, and Prince William County localities, when projects align with route scheduling and scope planning.',
       },
     ],
     reviews: 39,
