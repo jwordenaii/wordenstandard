@@ -25,6 +25,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Add nullable, indexed state_code column to leads."""
+    # Guard: skip if the column already exists (e.g. Railway DB created from
+    # models.py directly without Alembic -- same idempotency pattern as 0e263db2f322).
+    conn = op.get_bind()
+    existing_cols = [c['name'] for c in sa.inspect(conn).get_columns('leads')]
+    if 'state_code' in existing_cols:
+        return
+
     with op.batch_alter_table('leads') as batch_op:
         batch_op.add_column(sa.Column('state_code', sa.String(length=2), nullable=True))
     op.create_index(op.f('ix_leads_state_code'), 'leads', ['state_code'], unique=False)
