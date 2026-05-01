@@ -251,21 +251,52 @@ async def lifespan(app: FastAPI):
         )
 
     # ── Elasticsearch initialisation check ────────────────────────────────────
-    from .services import search_service as _search_service  # noqa: PLC0415
-    _es_status = _search_service.health()
-    if _es_status.get("ok"):
+    # Elasticsearch is optional infrastructure.  Skip the probe entirely when
+    # ELASTICSEARCH_HOST is not explicitly configured so we never attempt a
+    # connection to localhost:9200 and trigger the retry/log storm that makes
+    # the app unresponsive on Railway.  When the host IS configured, run a
+    # single health check with a hard 5-second asyncio timeout so a slow or
+    # unreachable cluster cannot block startup or flood logs with retries.
+    _es_host_configured = bool(os.getenv("ELASTICSEARCH_HOST", "").strip())
+    if not _es_host_configured:
         logger.info(
-            "Elasticsearch connected: host=%s status=%s nodes=%d",
-            _es_status.get("host"),
-            _es_status.get("status"),
-            _es_status.get("number_of_nodes", 0),
+            "Elasticsearch not configured (ELASTICSEARCH_HOST unset) — "
+            "search features disabled. Set ELASTICSEARCH_HOST to enable."
         )
     else:
-        logger.warning(
-            "Elasticsearch unavailable at startup — search features will be disabled. "
-            "Set ELASTICSEARCH_HOST to enable full-text search. error=%s",
-            _es_status.get("error", "unknown"),
-        )
+        import asyncio  # noqa: PLC0415
+        from .services import search_service as _search_service  # noqa: PLC0415
+
+        try:
+            loop = asyncio.get_event_loop()
+            _es_status = await asyncio.wait_for(
+                loop.run_in_executor(None, _search_service.health),
+                timeout=5.0,
+            )
+            if _es_status.get("ok"):
+                logger.info(
+                    "Elasticsearch connected: host=%s status=%s nodes=%d",
+                    _es_status.get("host"),
+                    _es_status.get("status"),
+                    _es_status.get("number_of_nodes", 0),
+                )
+            else:
+                logger.warning(
+                    "Elasticsearch unavailable at startup — search features will be "
+                    "disabled. error=%s",
+                    _es_status.get("error", "unknown"),
+                )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "Elasticsearch health check timed out after 5 s — "
+                "search features disabled. App startup continues normally."
+            )
+        except Exception as _es_exc:  # noqa: BLE001
+            logger.warning(
+                "Elasticsearch health check failed — search features disabled. "
+                "error=%s",
+                _es_exc,
+            )
 
     yield
     logger.info("JWordenAI backend shutting down")
