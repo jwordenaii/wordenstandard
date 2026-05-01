@@ -165,7 +165,8 @@ export default function LocationsIndex() {
           <p className="font-body text-muted-foreground text-sm leading-relaxed max-w-4xl mb-6">
             We organize service pages around major anchor markets and all practical corridor markets between them.
             If a search originates from a rural or unincorporated area in-between, Google typically resolves intent to
-            the nearest strong city entity page. This structure increases match quality for in-between search demand.
+            the nearest strong city entity page. This structure increases match quality for in-between search demand,
+            especially for rural chip-and-tar and sealcoating intent.
           </p>
           <div className="flex flex-wrap gap-2">
             {strategicCorridorMarkets.map((loc) => (

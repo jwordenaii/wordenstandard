@@ -18,6 +18,7 @@ const BENEFITS = [
   'Excellent traction for driveways, private roads, and sloped surfaces',
   'Natural stone texture and color options for a custom look',
   'Strong weather performance with practical maintenance cycles',
+  'Great fit for rural properties, long lanes, and low-to-moderate traffic routes',
 ]
 
 const FAQS = [
@@ -32,6 +33,10 @@ const FAQS = [
   {
     q: 'How long does tar and chip paving last?',
     a: 'With proper prep, drainage, and maintenance, tar and chip surfaces can provide long service life and strong performance in Virginia weather conditions.',
+  },
+  {
+    q: 'Is chip and tar a good option for rural properties?',
+    a: 'Yes. Chip and tar is often a strong solution for rural driveways, farm lanes, private roads, and in-between corridor properties where traction and value are priorities.',
   },
   {
     q: 'Why are chip and tar plus sealcoating especially important in the I-81 corridor?',
@@ -204,6 +209,39 @@ export default function TarAndChip() {
               className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
             >
               Outer Banks Service Page
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-16 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Rural Coverage</p>
+          <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95] mb-6">
+            Chip And Tar Is A Strong Match For Rural Areas Too
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-4xl mb-6">
+            Rural properties between major cities often need long driveway runs, private lanes, and budget-aware surface systems.
+            Chip and tar provides traction, practical durability, and lifecycle value for these in-between service areas.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/locations/chester-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Chester And Rural Corridor
+            </Link>
+            <Link
+              to="/locations/fredericksburg-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Fredericksburg Corridor
+            </Link>
+            <Link
+              to="/locations/harrisonburg-va"
+              className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
+            >
+              Shenandoah Valley Rural Areas
             </Link>
           </div>
         </div>
