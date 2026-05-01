@@ -34,7 +34,13 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-black">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? 'bg-black/82 backdrop-blur-xl border-b border-primary/20 shadow-[0_12px_28px_rgba(0,0,0,0.45)]'
+          : 'bg-black/48 backdrop-blur-md border-b border-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo — top left corner */}
@@ -66,7 +72,7 @@ export default function Navbar() {
           <a
             href="tel:+18044461296"
             onClick={() => trackPhoneClick('navbar_desktop')}
-            className="hidden md:flex items-center gap-2 text-primary font-display font-bold text-sm tracking-wider uppercase hover:text-primary/80 transition-colors ml-auto mr-6"
+            className="hidden md:flex items-center gap-2 text-primary font-display font-bold text-sm tracking-[0.14em] uppercase hover:text-primary/80 transition-colors ml-auto mr-6"
             aria-label="Call (804) 446-1296"
           >
             <Phone className="w-4 h-4" />
@@ -86,7 +92,7 @@ export default function Navbar() {
             )}
             <button
               onClick={() => scrollTo('#quote')}
-              className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 font-display font-bold text-sm tracking-wider uppercase hover:bg-primary/90 transition-colors min-h-[48px]">
+              className="premium-cta flex items-center gap-2 text-primary-foreground px-5 py-3 font-display font-bold text-sm tracking-[0.16em] uppercase transition-all min-h-[48px]">
               
               <Phone className="w-4 h-4" />
               Free Estimate
@@ -111,14 +117,14 @@ export default function Navbar() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-background border-b border-border overflow-hidden">
+          className="md:hidden bg-black/95 backdrop-blur-xl border-b border-primary/20 overflow-hidden">
           
             <div className="px-6 py-6 space-y-1">
               {NAV_LINKS.map((link) =>
             <button
               key={link.label}
               onClick={() => scrollTo(link.href)}
-              className="block w-full text-left font-display text-lg tracking-widest uppercase text-muted-foreground hover:text-primary py-3 border-b border-border transition-colors min-h-[48px]">
+              className="block w-full text-left font-display text-lg tracking-widest uppercase text-muted-foreground hover:text-primary py-3 border-b border-border/70 transition-colors min-h-[48px]">
               
                   {link.label}
                 </button>

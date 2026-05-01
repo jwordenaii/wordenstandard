@@ -33,8 +33,10 @@ export default function HeroSection() {
           className="w-full h-full object-cover object-top quality-premium"
         />
         
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/58 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/45 to-transparent" />
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/22 blur-3xl" />
+        <div className="absolute top-1/3 -left-20 w-60 h-60 rounded-full bg-sky-400/14 blur-3xl" />
       </div>
 
       {/* Content */}
@@ -44,14 +46,14 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}>
           
-          <p className="font-display text-primary text-sm md:text-base tracking-[0.3em] uppercase mb-4 md:mb-6">
+          <p className="font-display text-primary text-sm md:text-base tracking-[0.34em] uppercase mb-4 md:mb-6">
             40 Years in Virginia · Family-Owned · Licensed & Insured
           </p>
 
-          <h1 className="font-display font-black text-foreground uppercase leading-[0.85] tracking-tight">
-            <span className="block text-[12vw] md:text-[8vw] lg:text-[6vw]">Asphalt</span>
-            <span className="block text-[12vw] md:text-[8vw] lg:text-[6vw]">Built To</span>
-            <span className="block text-[12vw] md:text-[8vw] lg:text-[6vw] text-primary">
+          <h1 className="font-display font-black text-foreground uppercase leading-[0.84] tracking-[0.02em]">
+            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw]">Asphalt</span>
+            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw]">Built To</span>
+            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw] text-primary">
               Last Decades
             </span>
           </h1>
@@ -66,7 +68,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-10 md:mt-14 flex flex-col sm:flex-row items-start sm:items-end gap-6 sm:gap-0 sm:justify-between border-t border-border pt-8">
+          className="premium-panel mt-10 md:mt-14 flex flex-col sm:flex-row items-start sm:items-end gap-6 sm:gap-0 sm:justify-between border-t border-primary/30 pt-8 px-6 md:px-8 pb-6 rounded-2xl">
           
           <div className="flex flex-wrap gap-8 md:gap-14">
             <div>
@@ -86,7 +88,7 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-4 items-center">
             <button
               onClick={scrollToQuote}
-              className="bg-primary text-primary-foreground px-8 py-4 font-display font-bold text-sm tracking-wider uppercase hover:bg-primary/90 transition-colors min-h-[48px]">
+              className="premium-cta text-primary-foreground px-8 py-4 font-display font-bold text-sm tracking-[0.16em] uppercase transition-all min-h-[48px]">
               
               Get My Free Estimate
             </button>
@@ -96,7 +98,7 @@ export default function HeroSection() {
                 trackEvent('hero_cta_click', { cta: 'call_now' });
                 trackPhoneClick('hero');
               }}
-              className="border border-primary text-primary px-6 py-4 font-display font-bold text-sm tracking-wider uppercase hover:bg-primary/10 transition-colors min-h-[48px] inline-flex items-center gap-2"
+              className="border border-primary/70 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors min-h-[48px] inline-flex items-center gap-2"
               aria-label="Call (804) 446-1296"
             >
               <Phone className="w-4 h-4" />

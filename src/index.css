@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,8 +6,8 @@
 
 @layer base {
   :root {
-    --font-display: 'Inter Tight', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Manrope', sans-serif;
 
     --background: 0 0% 26%;
     --foreground: 0 0% 98%;
@@ -87,6 +87,11 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 12% 18%, hsla(43, 100%, 50%, 0.14) 0%, transparent 28%),
+      radial-gradient(circle at 85% 10%, hsla(210, 30%, 45%, 0.16) 0%, transparent 34%),
+      linear-gradient(180deg, hsl(0 0% 24%) 0%, hsl(0 0% 18%) 46%, hsl(0 0% 14%) 100%);
+    background-attachment: fixed;
   }
 
   /* Body paragraphs: comfortable reading weight */
@@ -138,6 +143,23 @@
   image-rendering: auto;
   backface-visibility: hidden;
   transform: translateZ(0);
+}
+
+.premium-panel {
+  background: linear-gradient(145deg, hsla(0, 0%, 100%, 0.06), hsla(0, 0%, 100%, 0.02));
+  border: 1px solid hsla(43, 100%, 50%, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.premium-cta {
+  background: linear-gradient(135deg, hsl(43 100% 52%) 0%, hsl(36 95% 46%) 100%);
+  box-shadow: 0 12px 28px rgba(245, 166, 35, 0.35);
+}
+
+.premium-cta:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 16px 34px rgba(245, 166, 35, 0.42);
 }
 
 /* Focus states for accessibility */
