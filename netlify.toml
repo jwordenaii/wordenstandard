@@ -33,6 +33,17 @@
   VITE_API_BASE_URL = "https://codexbuildfreeofbase44-production.up.railway.app"
   VITE_SITE_URL = "https://www.jwordenasphaltpaving.com"
 
+# ── API proxy — forward /api/* to Railway backend ─────────────────────────────
+# This enables the frontend to use relative /api/... paths as a fallback when
+# VITE_API_BASE_URL is not set, and provides an edge-layer proxy for production.
+[[redirects]]
+  from = "/api/*"
+  to = "https://codexbuildfreeofbase44-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+  [redirects.headers]
+    X-Forwarded-Host = "www.jwordenasphaltpaving.com"
+
 # Exclude static files from SPA fallback
 [[redirects]]
   from = "/sitemap.xml"
