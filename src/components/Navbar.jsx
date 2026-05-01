@@ -11,6 +11,7 @@ const NAV_LINKS = [
 { label: 'Home Services', href: '/home-services' },
 { label: 'Tar & Chip', href: '/tar-and-chip' },
 { label: 'GC', href: '/general-contracting' },
+{ label: 'Contractor AI', href: '/contractor-ai' },
 { label: 'Our Work', href: '#proof' },
 { label: 'About', href: '#about' },
 { label: 'Blog', href: '/blog', external: true },
