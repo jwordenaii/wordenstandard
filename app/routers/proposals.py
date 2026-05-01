@@ -36,7 +36,12 @@ class ProposalRequest(BaseModel):
 
 
 def _build_lead_dict(lead: Lead) -> dict:
-    pricing = estimate_price(lead.service_type, lead.property_type, lead.project_size_sqft or 1000)
+    pricing = estimate_price(
+        lead.service_type,
+        lead.property_type,
+        lead.project_size_sqft or 1000,
+        state_code=lead.state_code,
+    )
     return {
         'id': lead.id,
         'name': lead.name,
@@ -47,6 +52,7 @@ def _build_lead_dict(lead: Lead) -> dict:
         'urgency': lead.urgency,
         'project_size_sqft': lead.project_size_sqft,
         'address': lead.address,
+        'state_code': lead.state_code,
         'message': lead.message,
         'price_low': pricing['low_usd'] if pricing else 'Contact for pricing',
         'price_high': pricing['high_usd'] if pricing else '',
