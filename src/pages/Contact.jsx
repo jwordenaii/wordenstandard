@@ -65,6 +65,36 @@ export default function Contact() {
     fetchSuggestion(form.message)
   }
 
+  const buildMessageBody = () => {
+    const meta = [
+      form.service_type ? `Service: ${form.service_type}` : null,
+      form.urgency ? `Urgency: ${form.urgency}` : null,
+      form.phone ? `Phone: ${form.phone}` : null,
+    ].filter(Boolean)
+    // Separate the metadata block from the user's message with a blank line
+    // (only when there is actually any metadata to separate).
+    return [...meta, ...(meta.length ? [''] : []), form.message].join('\n')
+  }
+
+  /** Fallback: if the backend can't be reached, open the user's email client
+   *  with a pre-filled message so the lead is never lost. */
+  const fallbackToMailto = () => {
+    const subject = encodeURIComponent(
+      `New website inquiry from ${form.name || 'a website visitor'}`
+    )
+    const bodyLines = [
+      `Name: ${form.name}`,
+      `Email: ${form.email}`,
+      form.phone ? `Phone: ${form.phone}` : '',
+      form.service_type ? `Service: ${form.service_type}` : '',
+      form.urgency ? `Urgency: ${form.urgency}` : '',
+      '',
+      form.message,
+    ].filter(Boolean)
+    const body = encodeURIComponent(bodyLines.join('\n'))
+    window.location.href = `mailto:j.wordenandsonspaving@gmail.com?subject=${subject}&body=${body}`
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setStatus('submitting')
@@ -73,13 +103,7 @@ export default function Contact() {
         name: form.name,
         email: form.email,
         phone: form.phone || undefined,
-        message: [
-          form.service_type ? `Service: ${form.service_type}` : '',
-          form.urgency ? `Urgency: ${form.urgency}` : '',
-          form.message,
-        ]
-          .filter(Boolean)
-          .join('\n'),
+        message: buildMessageBody(),
       })
       setStatus('success')
       setForm(INITIAL)
@@ -88,7 +112,7 @@ export default function Contact() {
     } catch (err) {
       setErrorMsg(err.message)
       setStatus('error')
-      trackEvent('contact_form_submit', { success: false })
+      trackEvent('contact_form_submit', { success: false, error: err.message })
     }
   }
 
@@ -281,8 +305,32 @@ export default function Contact() {
                 </div>
 
                 {status === 'error' && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm">
-                    {errorMsg || 'Something went wrong. Please try again.'}
+                  <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm space-y-2">
+                    <p>
+                      {errorMsg || 'Something went wrong sending your message.'}
+                    </p>
+                    <p className="font-semibold">
+                      Don&apos;t worry — your message is not lost. Use one of these
+                      to reach us right now:
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={fallbackToMailto}
+                        className="inline-flex items-center gap-1 bg-brand-navy text-white font-semibold px-3 py-2 rounded-md text-sm hover:bg-brand-navy/90 transition-colors"
+                      >
+                        📧 Email us instead
+                      </button>
+                      <a
+                        href="tel:+18044461296"
+                        className="inline-flex items-center gap-1 bg-brand-amber text-brand-navy font-semibold px-3 py-2 rounded-md text-sm hover:bg-brand-amber-dark transition-colors"
+                        onClick={() =>
+                          trackEvent('phone_click', { location: 'contact_form_error' })
+                        }
+                      >
+                        📞 Call (804) 446-1296
+                      </a>
+                    </div>
                   </div>
                 )}
 

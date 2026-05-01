@@ -25,19 +25,18 @@ def get_database_url() -> str:
 _DATABASE_URL = get_database_url()
 _connect_args = {'check_same_thread': False} if _DATABASE_URL.startswith('sqlite') else {}
 
-# Pool sizing: SQLite gets minimal settings; PostgreSQL gets a larger pool
-# for high-throughput iGrade processing.
+# Pool sizing: SQLite gets minimal settings; PostgreSQL gets a sane default
+# that keeps (workers × pool_size) within Railway/Render managed Postgres
+# connection limits (~100). With the gunicorn default of 2 workers, the
+# defaults below give us at most 2 × (5 + 10) = 30 connections — well within
+# any limit. Operators with bigger plans can raise via env vars.
 _pool_kwargs: dict = {}
 if not _DATABASE_URL.startswith("sqlite"):
     _pool_kwargs = {
-        # pool_size: steady-state connections kept open.
-        # Raised from 10 → 20 to handle concurrent request bursts without
-        # waiting for a new connection to be established.
-        "pool_size":    int(os.getenv("DB_POOL_SIZE",    "20")),
+        # pool_size: steady-state connections kept open per worker.
+        "pool_size":    int(os.getenv("DB_POOL_SIZE",    "5")),
         # max_overflow: extra connections allowed above pool_size during spikes.
-        # Raised from 20 → 40 so burst traffic (10× growth target) doesn't
-        # exhaust the pool and return 503s.
-        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "10")),
         # pool_recycle: close and replace connections idle for 30 minutes.
         # Prevents stale connections after PostgreSQL's idle timeout.
         "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "1800")),

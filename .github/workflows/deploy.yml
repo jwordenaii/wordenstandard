@@ -24,8 +24,21 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
     steps:
+      - name: Check Netlify credentials
+        id: check_netlify
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "has_netlify=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::NETLIFY_AUTH_TOKEN / NETLIFY_SITE_ID secrets are not set. The site is presumed to be auto-deployed by Netlify's git integration. Skipping CLI deploy."
+          else
+            echo "has_netlify=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -70,18 +83,12 @@ jobs:
 
       # ── Deploy to Netlify ──────────────────────────────────────────────────
       - name: Deploy to Netlify (production)
-        if: github.event.inputs.environment != 'preview'
+        if: steps.check_netlify.outputs.has_netlify == 'true' && github.event.inputs.environment != 'preview'
         run: npx netlify-cli deploy --dir=dist --prod
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
       - name: Deploy to Netlify (preview)
-        if: github.event.inputs.environment == 'preview'
+        if: steps.check_netlify.outputs.has_netlify == 'true' && github.event.inputs.environment == 'preview'
         run: npx netlify-cli deploy --dir=dist
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
   # ── Back-end: validate, test, build Docker ────────────────────────────────────
   deploy-backend:

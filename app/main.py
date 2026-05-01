@@ -283,9 +283,11 @@ _ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ] + _EXTRA_ORIGINS
 
-# Allow Netlify deploy-preview origins (e.g. https://deploy-preview-42--jworden.netlify.app).
-# Override or extend via EXTRA_CORS_ORIGINS env var on Railway for additional origins.
-_DEPLOY_PREVIEW_ORIGIN_REGEX = r"https://deploy-preview-\d+--jworden\.netlify\.app"
+# Allow Netlify deploy-preview origins (e.g. https://deploy-preview-42--jworden.netlify.app)
+# AND any *.netlify.app subdomain (so renamed Netlify sites and branch deploys keep
+# working without redeploying the backend).  Override or extend via EXTRA_CORS_ORIGINS
+# env var on Railway for additional origins.
+_DEPLOY_PREVIEW_ORIGIN_REGEX = r"https://([\w-]+--)?[\w-]+\.netlify\.app"
 
 app.add_middleware(
     CORSMiddleware,
