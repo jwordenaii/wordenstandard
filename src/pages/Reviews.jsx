@@ -51,25 +51,25 @@ function StarRating({ rating }) {
 function ReviewCard({ review, index }) {
   return (
     <motion.div
-      className="card p-6"
+      className="premium-panel p-6 rounded-2xl"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: (index % 3) * 0.1 }}
     >
       <StarRating rating={review.rating} />
-      <p className="mt-3 text-brand-navy/80 text-sm leading-relaxed">&ldquo;{review.text}&rdquo;</p>
+      <p className="mt-3 text-foreground/85 text-sm leading-relaxed">&ldquo;{review.text}&rdquo;</p>
       <div className="mt-4 flex items-center justify-between">
         <div>
-          <div className="font-semibold text-brand-navy text-sm">{review.author}</div>
-          <div className="text-xs text-brand-navy/40 mt-0.5">
+          <div className="font-semibold text-foreground text-sm">{review.author}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
             {new Date(review.date).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
             })}
           </div>
         </div>
-        <span className="text-xs text-brand-navy/30 bg-gray-100 px-2 py-1 rounded-full">
+        <span className="text-xs text-foreground/75 bg-primary/10 border border-primary/25 px-2 py-1 rounded-full">
           {review.source}
         </span>
       </div>
@@ -106,7 +106,9 @@ export default function Reviews() {
       />
 
       {/* Header */}
-      <div className="bg-brand-navy pt-32 pb-20 text-white text-center">
+      <div className="bg-brand-navy pt-32 pb-20 text-white text-center relative overflow-hidden">
+        <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-20 right-0 w-72 h-72 rounded-full bg-sky-400/15 blur-3xl" />
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="font-display font-black text-5xl md:text-6xl mb-4">
             Customer <span className="text-brand-amber">Reviews</span>
@@ -123,7 +125,7 @@ export default function Reviews() {
       </div>
 
       {/* Aggregate score */}
-      <section className="py-14 bg-white border-b border-gray-100">
+      <section className="py-14 bg-background border-b border-border/60">
         <div className="max-w-4xl mx-auto px-4 text-center">
           {loading ? (
             <div className="flex justify-center">
@@ -132,7 +134,7 @@ export default function Reviews() {
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
               <div>
-                <div className="font-display font-black text-7xl text-brand-navy">
+                <div className="font-display font-black text-7xl text-foreground">
                   {aggregate_rating}
                 </div>
                 <div className="flex gap-1 justify-center mt-1">
@@ -142,25 +144,25 @@ export default function Reviews() {
                     </span>
                   ))}
                 </div>
-                <div className="text-brand-navy/40 text-sm mt-1">
+                <div className="text-muted-foreground text-sm mt-1">
                   {total_reviews} Google reviews
                 </div>
               </div>
-              <div className="h-px w-20 sm:h-20 sm:w-px bg-gray-200" />
+              <div className="h-px w-20 sm:h-20 sm:w-px bg-border" />
               <div className="text-left">
                 {[5, 4, 3, 2, 1].map((star) => {
                   const count = reviews.filter((r) => r.rating === star).length
                   const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0
                   return (
                     <div key={star} className="flex items-center gap-3 mb-1">
-                      <span className="text-xs text-brand-navy/60 w-8">{star}★</span>
-                      <div className="w-36 h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <span className="text-xs text-muted-foreground w-8">{star}★</span>
+                      <div className="w-36 h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-brand-amber rounded-full"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="text-xs text-brand-navy/40">{count}</span>
+                      <span className="text-xs text-muted-foreground">{count}</span>
                     </div>
                   )
                 })}
@@ -171,7 +173,7 @@ export default function Reviews() {
       </section>
 
       {/* Review cards */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-background/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="flex justify-center py-20">

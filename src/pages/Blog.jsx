@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Calendar, Clock, Tag } from 'lucide-react';
+import { Loader2, Calendar, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
+import SmartImage from '../components/SmartImage';
 
 export default function Blog() {
   const [posts, setPosts] = useState([]);
@@ -55,7 +56,9 @@ export default function Blog() {
       />
       <Navbar />
 
-      <section className="pt-32 pb-12 border-b border-border">
+      <section className="pt-32 pb-12 border-b border-border relative overflow-hidden">
+        <div className="absolute -top-20 right-0 w-72 h-72 rounded-full bg-primary/16 blur-3xl" />
+        <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-sky-400/12 blur-3xl" />
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-3">
             // Knowledge Base
@@ -85,15 +88,18 @@ export default function Blog() {
                 <Link
                   key={post.id}
                   to={`/blog/${post.slug}`}
-                  className="group border border-border bg-card overflow-hidden hover:border-primary/40 transition-colors duration-300 flex flex-col"
+                  className="group premium-panel rounded-2xl overflow-hidden hover:border-primary/40 transition-colors duration-300 flex flex-col"
                 >
                   {post.cover_image && (
                     <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                      <img
+                      <SmartImage
                         src={post.cover_image}
                         alt={`${post.title} — J. Worden & Sons Asphalt Paving expert guide`}
+                        width={1280}
+                        height={800}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="w-full h-full object-cover quality-premium transition-transform duration-700 group-hover:scale-105"
                       />
                       {post.category && (
                         <span className="absolute top-4 left-4 px-3 py-1 bg-primary text-primary-foreground font-display font-bold text-[10px] tracking-[0.2em] uppercase">

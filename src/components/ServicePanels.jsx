@@ -51,7 +51,10 @@ export default function ServicePanels() {
   };
 
   return (
-    <section id="services" className="border-t border-border">
+    <section id="services" className="border-t border-border relative overflow-hidden">
+      <div className="absolute -top-20 right-0 w-72 h-72 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+
       {/* Section header */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 md:py-24">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -68,11 +71,11 @@ export default function ServicePanels() {
       </div>
 
       {/* Panels */}
-      <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border">
+      <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border/70 relative z-10">
         {SERVICES.map((service) => (
           <div
             key={service.id}
-            className="border-b md:border-b-0 md:border-r border-border last:border-r-0 last:border-b-0 group relative overflow-hidden"
+            className="border-b md:border-b-0 md:border-r border-border/70 last:border-r-0 last:border-b-0 group relative overflow-hidden"
             onMouseEnter={() => setActivePanel(service.id)}
             onMouseLeave={() => setActivePanel(null)}
           >
@@ -85,11 +88,15 @@ export default function ServicePanels() {
               <img
                 src={service.image}
                 alt={service.alt}
-                className="w-full h-full object-cover"
+                width="1200"
+                height="900"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover quality-premium"
               />
             </div>
 
-            <div className="relative z-10 p-8 md:p-10 lg:p-14 min-h-[400px] md:min-h-[600px] flex flex-col justify-between">
+            <div className="relative z-10 p-8 md:p-10 lg:p-14 min-h-[400px] md:min-h-[600px] flex flex-col justify-between premium-panel rounded-none">
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <span className="font-display text-primary text-sm tracking-[0.3em]">{service.label}</span>

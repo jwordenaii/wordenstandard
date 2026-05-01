@@ -9,11 +9,12 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-border">
+    <footer className="border-t border-border relative overflow-hidden">
+      <div className="absolute -top-16 left-10 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
           {/* Brand */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 premium-panel rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-primary flex items-center justify-center">
                 <span className="font-display font-black text-primary-foreground text-lg">JW</span>
@@ -33,7 +34,7 @@ export default function Footer() {
           </div>
 
           {/* Quick links */}
-          <div>
+          <div className="premium-panel rounded-2xl p-6">
             <h4 className="font-display font-bold text-foreground text-xs tracking-[0.2em] uppercase mb-6">Navigation</h4>
             <div className="space-y-3">
               {[
@@ -66,7 +67,7 @@ export default function Footer() {
           </div>
 
           {/* Services */}
-          <div>
+          <div className="premium-panel rounded-2xl p-6">
             <h4 className="font-display font-bold text-foreground text-xs tracking-[0.2em] uppercase mb-6">Services</h4>
             <div className="space-y-3">
               {['Residential Paving', 'Commercial Paving', 'Industrial Paving', 'Sealcoating', 'Crack Repair', 'Line Striping'].map((s) => (
@@ -76,7 +77,7 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="premium-panel rounded-2xl p-6">
             <h4 className="font-display font-bold text-foreground text-xs tracking-[0.2em] uppercase mb-6">Contact</h4>
             <div className="space-y-4">
               <a
