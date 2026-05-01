@@ -295,7 +295,7 @@ _ALLOWED_ORIGINS = [
     "https://jworden.netlify.app",
     "https://jwordenasphaltpaving.com",
     "https://www.jwordenasphaltpaving.com",
-    "https://frontend-production.up.railway.app",
+    "https://doooone.netlify.app",
     "http://localhost:5173",   # Vite dev server
     "http://localhost:3000",
 ] + _EXTRA_ORIGINS
