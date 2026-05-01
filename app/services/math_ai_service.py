@@ -72,6 +72,7 @@ _STATE_COST_MULTIPLIERS: dict[str, float] = {
     "OK": 0.85, "OR": 1.15, "PA": 1.07, "RI": 1.08, "SC": 0.87,
     "SD": 0.85, "TN": 0.87, "TX": 0.95, "UT": 0.93, "VT": 0.97,
     "VA": 1.02, "WA": 1.18, "WV": 0.88, "WI": 0.97, "WY": 0.90,
+    "DC": 1.25,
 }
 
 # Base cost rates ($/sqft) — low, mid, high — for paving service types
