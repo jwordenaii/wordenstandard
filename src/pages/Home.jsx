@@ -18,6 +18,7 @@ import Credentials from '../components/Credentials';
 import SafetyCompliance from '../components/SafetyCompliance';
 import TechStack from '../components/TechStack';
 import LocalReviews from '../components/LocalReviews';
+import LocalBidComparison from '../components/LocalBidComparison';
 import MaintenanceCalculator from '../components/MaintenanceCalculator';
 import AIPhotoInspector from '../components/AIPhotoInspector';
 import QuoteEngine from '../components/QuoteEngine';
@@ -45,6 +46,7 @@ export default function Home() {
       <NationalFootprintMap />
       <ProjectGallery />
       <LocalReviews />
+      <LocalBidComparison />
       <BeatAnyQuoteBadge />
       <Credentials />
       <SafetyCompliance />

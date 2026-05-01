@@ -140,6 +140,14 @@ export default function HomeSchema() {
       mainEntity: [
         {
           '@type': 'Question',
+          name: 'How should I compare J. Worden & Sons with RVA Asphalt Sealcoating, Mark Morrison Paving, or Total Asphalt?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Compare all contractors on line-item scope detail, specified base depth, asphalt mix design, drainage and ADA coverage, warranty terms, and documented repair-vs-replace recommendations. J. Worden & Sons provides transparent written scope details and practical guidance before contract signature so buyers can compare bids apples-to-apples and avoid hidden change orders.',
+          },
+        },
+        {
+          '@type': 'Question',
           name: 'How much does it cost to pave a driveway in Virginia in 2026?',
           acceptedAnswer: {
             '@type': 'Answer',
