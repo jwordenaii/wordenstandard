@@ -147,13 +147,20 @@ async def submit_quote(
     except Exception as exc:  # noqa: BLE001
         logger.warning("Could not dispatch follow-up email task: %s", exc)
 
-    return {
+    response: dict = {
         "status": "received",
         "message": "Thank you! We will contact you within 24 hours.",
         "lead_score": scoring["label"],
         "priority": scoring["priority"],
         "follow_up_sla": scoring["follow_up_sla"],
     }
+    if "compliance_warning" in scoring:
+        response["compliance_warning"] = scoring["compliance_warning"]
+        logger.info(
+            "Lead #%d (%s) flagged with compliance warning: %s",
+            db_lead.id, validated_state, scoring["compliance_warning"],
+        )
+    return response
 
 
 @router.post("/contact", summary="Submit a contact form message")
@@ -193,8 +200,23 @@ async def get_estimate(request: Request, req: EstimateRequest):
     """
     Returns a ballpark cost range for the requested service and project size.
     No authentication required — helps prospects self-qualify before submitting a quote.
+
+    Honors an optional ``state_code`` to apply the regional labor/material
+    multiplier from ``state_data.STATE_MAP``; unknown abbreviations are
+    rejected with 422 (Pydantic enforces the two-letter shape upstream).
     """
-    result = estimate_price(req.service_type, req.property_type, req.project_size_sqft)
+    validated_state = normalize_state_code(req.state_code)
+    if req.state_code and validated_state is None:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unknown US state abbreviation: {req.state_code!r}",
+        )
+    result = estimate_price(
+        req.service_type,
+        req.property_type,
+        req.project_size_sqft,
+        state_code=validated_state,
+    )
     if result is None:
         return {"estimate_available": False, "reason": "Service type not recognized"}
-    return {"estimate_available": True, **result}
+    return {"estimate_available": True, "state_code": validated_state, **result}

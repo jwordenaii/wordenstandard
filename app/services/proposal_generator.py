@@ -119,16 +119,44 @@ _SERVICE_SCOPE_HINTS: dict[str, str] = {
 }
 
 
+def _state_compliance_block(state_code: str | None) -> str:
+    """
+    Render a compact, human-readable state compliance block for proposals.
+
+    Pulled from ``state_data.get_state_summary`` so the AI prompt and the
+    template fallback both see the same source of truth (license required,
+    prevailing wage, state OSHA, SWPPP threshold). Returns an empty string
+    when the state is unknown or has no notable flags.
+    """
+    if not state_code:
+        return ""
+    try:
+        from .state_data import get_state_summary  # noqa: PLC0415
+    except Exception:  # noqa: BLE001
+        return ""
+    s = get_state_summary(state_code)
+    if not s or not s.get("complianceNotes"):
+        return ""
+    bullets = "\n".join(f"  • {note}" for note in s["complianceNotes"])
+    return (
+        f"STATE COMPLIANCE ({state_code} — {s['name']}):\n"
+        f"{bullets}\n"
+        f"  • Regional price index: {s['priceMultiplier']:.2f}x national average"
+    )
+
+
 def _build_gpt_prompt(lead: dict) -> str:
     service_key = (lead.get("service_type") or _DEFAULT_SERVICE_TYPE).lower().strip()
     scope_hint = _SERVICE_SCOPE_HINTS.get(service_key, "")
+    state_code = lead.get("state_code") or lead.get("state") or ""
+    compliance_block = _state_compliance_block(state_code) or "No state-specific compliance flags on file."
 
     return f"""Write a professional project proposal for the following client.
 
 CLIENT INFO:
   Name: {lead.get('name', 'Valued Customer')}
   Address: {lead.get('address', 'N/A')}
-  State: {lead.get('state_code') or lead.get('state', 'N/A')}
+  State: {state_code or 'N/A'}
   Email: {lead.get('email', 'N/A')}
   Phone: {lead.get('phone', 'N/A')}
 
@@ -144,6 +172,8 @@ PRICING RANGE: ${lead.get('price_low', 'TBD')} – ${lead.get('price_high', 'TBD
 SERVICE-SPECIFIC SCOPE GUIDANCE:
 {scope_hint}
 
+{compliance_block}
+
 Please write a complete proposal including:
 1. Professional greeting and project overview
 2. Detailed scope of work (tailored to the service type above)
@@ -153,6 +183,10 @@ Please write a complete proposal including:
 6. 1-year workmanship warranty terms
 7. Payment terms (50% mobilization, 50% on completion)
 8. Professional closing with call to action
+
+If state compliance items are listed above, weave the relevant disclosures
+(licensing, prevailing wage, state OSHA, SWPPP) naturally into the scope
+or terms section — do not invent compliance items not listed.
 
 Format with clear section headers."""
 
@@ -217,6 +251,9 @@ def _template_proposal(lead: dict) -> str:
     work_items = _SERVICE_WORK_ITEMS.get(service_key, _DEFAULT_WORK_ITEMS)
     work_block = "\n".join(work_items)
 
+    compliance_block = _state_compliance_block(lead.get("state_code"))
+    compliance_section = f"\n\n{compliance_block}\n" if compliance_block else ""
+
     return f"""J. WORDEN & SONS
 Project Proposal
 Date: {today}
@@ -241,7 +278,7 @@ WORK INCLUDES:
 
 PRICING SUMMARY:
 Estimated Total: {price_str}
-(Final price subject to site inspection and material costs at time of work)
+(Final price subject to site inspection and material costs at time of work){compliance_section}
 
 TIMELINE:
 • Mobilization within 5–10 business days of signed contract

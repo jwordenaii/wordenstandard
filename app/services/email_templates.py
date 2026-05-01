@@ -33,6 +33,20 @@ _LIGHT_BG = "#f9f9f9"
 # ── Shared layout helpers ──────────────────────────────────────────────────────
 
 
+def _field(obj: Any, key: str, default: Any = "") -> Any:
+    """
+    Read a field off either an ORM object or a dict, returning ``default``
+    when the value is missing or falsy. Centralised so we don't write the
+    ``getattr(...) or obj.get(...)`` pattern (which crashes when getattr
+    returns ``None`` on an ORM object that has no ``.get``).
+    """
+    if isinstance(obj, dict):
+        val = obj.get(key)
+    else:
+        val = getattr(obj, key, None)
+    return val if val not in (None, "") else default
+
+
 def _html_wrapper(title: str, body_content: str, unsubscribe_url: str = "") -> str:
     """Wrap content in a consistent branded HTML email shell."""
     unsubscribe_block = ""
@@ -134,6 +148,47 @@ def _cta_button(text: str, url: str) -> str:
     )
 
 
+def _compliance_footer_html(state_code: Any) -> str:
+    """
+    Render an HTML state compliance disclosure block for emails.
+
+    Returns an empty string when the state is unknown or has no notable
+    flags so the email layout is unchanged for non-state-aware sends.
+    """
+    if not state_code:
+        return ""
+    try:
+        from .state_data import get_state_summary  # noqa: PLC0415
+    except Exception:  # noqa: BLE001
+        return ""
+    s = get_state_summary(str(state_code))
+    if not s or not s.get("complianceNotes"):
+        return ""
+    items = "".join(f"<li style='margin:2px 0;'>{n}</li>" for n in s["complianceNotes"])
+    return (
+        f"<div style='margin-top:24px;padding:14px 16px;background:#fafafa;"
+        f"border:1px solid #ececec;border-radius:6px;font-size:12px;color:#666;line-height:1.5;'>"
+        f"<strong style='color:#444;'>State Compliance Notes — {state_code} ({s['name']}):</strong>"
+        f"<ul style='margin:6px 0 0;padding-left:18px;'>{items}</ul>"
+        f"</div>"
+    )
+
+
+def _compliance_footer_text(state_code: Any) -> str:
+    """Plain-text counterpart to ``_compliance_footer_html``."""
+    if not state_code:
+        return ""
+    try:
+        from .state_data import get_state_summary  # noqa: PLC0415
+    except Exception:  # noqa: BLE001
+        return ""
+    s = get_state_summary(str(state_code))
+    if not s or not s.get("complianceNotes"):
+        return ""
+    bullets = "\n".join(f"  - {n}" for n in s["complianceNotes"])
+    return f"\n\nState Compliance Notes ({state_code} — {s['name']}):\n{bullets}\n"
+
+
 # ── Template 1: Quote confirmation (customer) ──────────────────────────────────
 
 
@@ -147,12 +202,13 @@ def quote_confirmation(lead: Any) -> tuple[str, str, str]:
     Returns:
         (subject, html_body, plain_text_body)
     """
-    name = getattr(lead, "name", None) or lead.get("name", "Valued Customer")
-    service = getattr(lead, "service_type", None) or lead.get("service_type", "paving")
-    urgency = getattr(lead, "urgency", None) or lead.get("urgency", "flexible")
-    address = getattr(lead, "address", None) or lead.get("address", "")
-    message = getattr(lead, "message", None) or lead.get("message", "")
-    score_label = getattr(lead, "score_label", None) or lead.get("score_label", "")
+    name = _field(lead, "name", "Valued Customer")
+    service = _field(lead, "service_type", "paving")
+    urgency = _field(lead, "urgency", "flexible")
+    address = _field(lead, "address", "")
+    message = _field(lead, "message", "")
+    score_label = _field(lead, "score_label", "")
+    state_code = _field(lead, "state_code", "")
 
     service_display = service.replace("_", " ").title()
     urgency_display = urgency.replace("_", " ").title()
@@ -166,8 +222,12 @@ def quote_confirmation(lead: Any) -> tuple[str, str, str]:
         ("Service Requested", service_display),
         ("Urgency", urgency_display),
         ("Property Address", address or "Not provided"),
+        ("State", state_code or "Not provided"),
         ("Additional Notes", message or "None"),
     ]
+
+    compliance_html = _compliance_footer_html(state_code)
+    compliance_text = _compliance_footer_text(state_code)
 
     body_html = f"""
       <h2 style="margin:0 0 8px;font-size:20px;color:{_DARK_COLOR};">
@@ -192,6 +252,7 @@ def quote_confirmation(lead: Any) -> tuple[str, str, str]:
       <p style="margin:0;font-size:13px;color:#888;line-height:1.6;">
         — The {COMPANY_NAME} Team
       </p>
+      {compliance_html}
     """
 
     html_body = _html_wrapper(subject, body_html, unsubscribe_url=f"{COMPANY_WEBSITE}/unsubscribe")
@@ -203,10 +264,12 @@ def quote_confirmation(lead: Any) -> tuple[str, str, str]:
         f"Our team will follow up {sla}.\n\n"
         f"Service: {service_display}\n"
         f"Urgency: {urgency_display}\n"
-        f"Address: {address or 'Not provided'}\n\n"
+        f"Address: {address or 'Not provided'}\n"
+        f"State: {state_code or 'Not provided'}\n\n"
         f"Questions? Call us: {COMPANY_PHONE}\n"
         f"Website: {COMPANY_WEBSITE}\n\n"
-        f"— The {COMPANY_NAME} Team\n\n"
+        f"— The {COMPANY_NAME} Team"
+        f"{compliance_text}\n\n"
         f"To unsubscribe: {COMPANY_WEBSITE}/unsubscribe"
     )
 
