@@ -18,8 +18,8 @@ const SERVICES = [
     image: RESIDENTIAL_IMG,
     alt: 'Freshly paved residential driveway with fine-grain asphalt and clean edges against green lawn at golden hour',
     features: ['Hot-Mix Asphalt', 'Sealcoating', 'Crack Repair', 'Resurfacing'],
-    ctaLabel: 'Residential Details',
-    ctaHref: '/residential',
+    ctaLabel: 'Request Residential Estimate',
+    ctaHref: '/#quote',
   },
   {
     id: 'commercial',
@@ -44,8 +44,8 @@ const SERVICES = [
     image: INDUSTRIAL_IMG,
     alt: 'Heavy industrial asphalt paving at a logistics hub with yellow machinery rollers compacting thick asphalt at dawn',
     features: ['Heavy-Load Bases', 'Truck Yards', 'Loading Docks', 'Airport Taxiways'],
-    ctaLabel: 'GC Division Details',
-    ctaHref: '/general-contracting',
+    ctaLabel: 'Industrial Consultation',
+    ctaHref: '/commercial/richmond-va',
   },
 ];
 

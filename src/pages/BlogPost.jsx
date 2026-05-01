@@ -225,20 +225,17 @@ export default function BlogPost() {
             // Related Service Paths
           </p>
           <div className="flex flex-wrap gap-2">
-            <Link to="/residential" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
-              Residential Paving
-            </Link>
             <Link to="/commercial/richmond-va" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
               Commercial Paving
             </Link>
-            <Link to="/home-services" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
-              Home Services
-            </Link>
-            <Link to="/tar-and-chip" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
-              Tar And Chip
-            </Link>
             <Link to="/locations" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
               Service Areas
+            </Link>
+            <Link to="/#quote" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              Request Free Estimate
+            </Link>
+            <Link to="/blog" className="px-3 py-2 border border-border text-muted-foreground font-display text-[11px] tracking-wider hover:border-primary/40 hover:text-foreground transition-colors">
+              More Paving Guides
             </Link>
           </div>
         </div>

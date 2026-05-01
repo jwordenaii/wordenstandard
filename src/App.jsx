@@ -26,6 +26,7 @@ const HomeServices = lazy(() => import('./pages/HomeServices'));
 const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
 const ContractorAIPlatform = lazy(() => import('./pages/ContractorAIPlatform'));
+const CommandCenter = lazy(() => import('./pages/CommandCenter'));
 const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
@@ -78,16 +79,17 @@ const AuthenticatedApp = () => {
         <Route path="/locations" element={<LocationsIndex />} />
         <Route path="/locations/:slug" element={<LocationPage />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
-        <Route path="/residential" element={<ResidentialAsphalt />} />
-        <Route path="/home-services" element={<HomeServices />} />
-        <Route path="/general-contracting" element={<GeneralContracting />} />
-        <Route path="/tar-and-chip" element={<TarAndChip />} />
-        <Route path="/contractor-ai" element={<ContractorAIPlatform />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<CrewEta />} />
 
         {/* Back-office (auth required) */}
+        <Route path="/command-center" element={<RequireAuth><CommandCenter /></RequireAuth>} />
+        <Route path="/residential" element={<RequireAuth><ResidentialAsphalt /></RequireAuth>} />
+        <Route path="/home-services" element={<RequireAuth><HomeServices /></RequireAuth>} />
+        <Route path="/general-contracting" element={<RequireAuth><GeneralContracting /></RequireAuth>} />
+        <Route path="/tar-and-chip" element={<RequireAuth><TarAndChip /></RequireAuth>} />
+        <Route path="/contractor-ai" element={<RequireAuth><ContractorAIPlatform /></RequireAuth>} />
         <Route path="/consultant" element={<RequireAuth><LeadConsultant /></RequireAuth>} />
         <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="/job" element={<RequireAuth><JobDetail /></RequireAuth>} />
