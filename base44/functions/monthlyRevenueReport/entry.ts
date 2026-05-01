@@ -23,12 +23,42 @@ Deno.serve(async (req) => {
     const wonLeads = lastMonthLeads.filter((l) => l.status === 'won');
     const quotedLeads = lastMonthLeads.filter((l) => ['quoted', 'won'].includes(l.status));
 
-    // Estimate revenue from won leads using sqft-based rough calc
-    const estimatedRevenue = wonLeads.reduce((sum, lead) => {
-      const sqft = lead.sqft || 0;
-      // ~$5/sqft blended average (materials + labor)
-      return sum + sqft * 5;
+    // Prefer truth data from closed_value and closed_gross_profit.
+    const realizedRevenue = wonLeads.reduce((sum, lead) => {
+      return sum + (Number(lead.closed_value) || Number(lead.estimated_value) || 0);
     }, 0);
+
+    const realizedGrossProfit = wonLeads.reduce((sum, lead) => {
+      const explicit = Number(lead.closed_gross_profit);
+      if (Number.isFinite(explicit) && explicit > 0) return sum + explicit;
+      const estValue = Number(lead.closed_value) || Number(lead.estimated_value) || 0;
+      const marginPct = Number(lead.gross_margin_pct);
+      if (estValue > 0 && Number.isFinite(marginPct) && marginPct > 0) {
+        return sum + Math.round(estValue * (marginPct / 100));
+      }
+      return sum;
+    }, 0);
+
+    const sourceBreakdown = wonLeads.reduce((acc, lead) => {
+      const source = lead.conversion_source || 'other';
+      const revenue = Number(lead.closed_value) || Number(lead.estimated_value) || 0;
+      const grossProfit = Number(lead.closed_gross_profit) || 0;
+      if (!acc[source]) {
+        acc[source] = { count: 0, revenue: 0, grossProfit: 0 };
+      }
+      acc[source].count += 1;
+      acc[source].revenue += revenue;
+      acc[source].grossProfit += grossProfit;
+      return acc;
+    }, {});
+
+    const sourceLines = Object.entries(sourceBreakdown)
+      .sort((a, b) => (b[1].revenue || 0) - (a[1].revenue || 0))
+      .map(([source, stats]) => {
+        const label = source.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        return `  • ${label}: ${stats.count} won, $${Math.round(stats.revenue).toLocaleString('en-US')} revenue`;
+      })
+      .join('\n') || '  • No won leads by source';
 
     // Breakdown by surface type
     const byType = lastMonthLeads.reduce((acc, lead) => {
@@ -66,15 +96,19 @@ LEAD SUMMARY
   Leads Won:           ${wonLeads.length}
   Conversion Rate:     ${totalLeads > 0 ? Math.round((wonLeads.length / totalLeads) * 100) : 0}%
 
-ESTIMATED REVENUE (Won Leads)
-  Est. Revenue:        $${estimatedRevenue.toLocaleString('en-US')}
-  Avg. per Won Lead:   $${wonLeads.length > 0 ? Math.round(estimatedRevenue / wonLeads.length).toLocaleString('en-US') : 0}
+REALIZED REVENUE (Won Leads)
+  Revenue:             $${Math.round(realizedRevenue).toLocaleString('en-US')}
+  Avg. per Won Lead:   $${wonLeads.length > 0 ? Math.round(realizedRevenue / wonLeads.length).toLocaleString('en-US') : 0}
+  Gross Profit:        $${Math.round(realizedGrossProfit).toLocaleString('en-US')}
 
 LEADS BY SURFACE TYPE
 ${byTypeLines}
 
 LEADS BY TIMELINE
 ${urgencyLines}
+
+WON LEADS BY SOURCE
+${sourceLines}
 
 ${'─'.repeat(44)}
 Report generated: ${now.toLocaleString('en-US', { timeZone: 'America/New_York' })}
@@ -93,7 +127,15 @@ J. Worden & Sons Asphalt Specialist`;
       });
     }
 
-    return Response.json({ success: true, month: monthName, totalLeads, wonLeads: wonLeads.length, estimatedRevenue, emailsSent: admins.length });
+    return Response.json({
+      success: true,
+      month: monthName,
+      totalLeads,
+      wonLeads: wonLeads.length,
+      realizedRevenue,
+      realizedGrossProfit,
+      emailsSent: admins.length,
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

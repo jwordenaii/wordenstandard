@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import PavingCalculator from './PavingCalculator';
 import { base44 } from '@/api/base44Client';
 import { trackLeadSubmission, trackEvent, trackOfflineConversionReady } from '@/lib/analytics';
-import { getLeadAttributionFields, persistAttribution } from '@/lib/adsAttribution';
+import { getLeadAttributionFields, inferAttributionConversionSource, persistAttribution } from '@/lib/adsAttribution';
 
 const SURFACE_TYPES = [
   { id: 'driveway', label: 'Driveway', sub: 'Residential · Fine-grain mix', icon: '🏠' },
@@ -63,22 +63,6 @@ export default function QuoteEngine() {
     return false;
   };
 
-  // Attribution: detect the channel this visitor came from using UTM params + referrer.
-  const detectConversionSource = () => {
-    const params = new URLSearchParams(window.location.search);
-    const utm = (params.get('utm_source') || '').toLowerCase();
-    const gclid = params.get('gclid'); // Google Ads click ID
-    if (gclid || utm === 'google_ads' || utm === 'googleads' || utm === 'adwords') return 'google_ads';
-    if (utm === 'facebook' || utm === 'fb') return 'facebook';
-    if (utm === 'houzz') return 'houzz';
-    const ref = (document.referrer || '').toLowerCase();
-    if (ref.includes('google.')) return 'google_organic';
-    if (ref.includes('facebook.')) return 'facebook';
-    if (ref.includes('houzz.')) return 'houzz';
-    if (ref && !ref.includes('jwordenasphaltpaving.com')) return 'referral';
-    return 'direct';
-  };
-
   const handleSubmit = async () => {
     if (isSubmitting || !canProceed()) return;
 
@@ -96,7 +80,7 @@ export default function QuoteEngine() {
       urgency: formData.urgency,
       notes: formData.notes.trim(),
       status: 'new',
-      conversion_source: detectConversionSource(),
+      conversion_source: inferAttributionConversionSource(attribution, typeof document !== 'undefined' ? document.referrer : ''),
       ...attribution,
     };
     try {

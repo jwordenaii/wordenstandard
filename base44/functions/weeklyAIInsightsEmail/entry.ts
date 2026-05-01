@@ -28,6 +28,12 @@ Deno.serve(async (req) => {
       material: l.material,
       urgency: l.urgency,
       status: l.status,
+      score: l.score,
+      score_tier: l.score_tier,
+      estimated_value: l.estimated_value,
+      expected_gross_profit: l.expected_gross_profit,
+      gross_margin_band: l.gross_margin_band,
+      conversion_source: l.conversion_source,
       created: l.created_date,
     }));
 
@@ -43,6 +49,10 @@ Deno.serve(async (req) => {
       leads_7d: recentLeads.length,
       won: recentLeads.filter((l) => l.status === 'won').length,
       quoted: recentLeads.filter((l) => l.status === 'quoted').length,
+      hot: recentLeads.filter((l) => l.score_tier === 'hot').length,
+      warm: recentLeads.filter((l) => l.score_tier === 'warm').length,
+      expected_pipeline_value: recentLeads.reduce((sum, l) => sum + (Number(l.estimated_value) || 0), 0),
+      expected_pipeline_gross_profit: recentLeads.reduce((sum, l) => sum + (Number(l.expected_gross_profit) || 0), 0),
       jobs_7d: recentJobs.length,
       total_leads_all_time: allLeads.length,
     };
@@ -81,8 +91,10 @@ RISK FLAG
 
 Keep it tight, factual, no fluff. Write for a business owner who reads 50 emails before breakfast.`;
 
+    const enrichedPrompt = `${prompt}\n\nAdditional rules:\n- Prioritize recommendations by expected gross profit and score tiers (hot/warm), not lead volume alone.\n- Mention the strongest conversion_source in the last 7 days if the data supports it.\n- If margin mix is deteriorating (more low than high), include one margin-protection action in RECOMMENDED ACTIONS.`;
+
     const briefing = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt,
+      prompt: enrichedPrompt,
       model: 'gpt_5',
     });
 

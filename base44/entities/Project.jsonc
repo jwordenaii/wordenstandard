@@ -65,6 +65,8 @@
         "google_ads",
         "google_organic",
         "referral",
+        "backlink_partner",
+        "geofencing",
         "direct",
         "gmail_inbound",
         "voice_ai",

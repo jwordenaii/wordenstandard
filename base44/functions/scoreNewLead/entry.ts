@@ -23,6 +23,8 @@ const scoreSchema = {
 const SOURCE_SCORE_BONUS: Record<string, number> = {
   google_ads: 6,
   referral: 8,
+  backlink_partner: 7,
+  geofencing: 5,
   google_organic: 4,
   direct: 2,
   gmail_inbound: 2,

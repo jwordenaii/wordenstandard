@@ -151,12 +151,26 @@
       "format": "date-time",
       "description": "When this lead was exported to offline conversion workflow"
     },
+    "geofence_vendor": {
+      "type": "string",
+      "description": "Geofencing platform/vendor that originated this lead"
+    },
+    "geofence_campaign": {
+      "type": "string",
+      "description": "Geofence campaign identifier used for this lead"
+    },
+    "backlink_domain": {
+      "type": "string",
+      "description": "Partner or referring domain that generated this lead"
+    },
     "conversion_source": {
       "type": "string",
       "enum": [
         "google_ads",
         "google_organic",
         "referral",
+        "backlink_partner",
+        "geofencing",
         "direct",
         "gmail_inbound",
         "voice_ai",

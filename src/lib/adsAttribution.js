@@ -69,15 +69,50 @@ export function getAttributionEventParams() {
   }
 }
 
+export function inferAttributionConversionSource(attribution = {}, referrer = '') {
+  const source = String(attribution.utm_source || '').toLowerCase()
+  const medium = String(attribution.utm_medium || '').toLowerCase()
+  const campaign = String(attribution.utm_campaign || '').toLowerCase()
+  const ref = String(referrer || '').toLowerCase()
+
+  if (attribution.gclid || attribution.wbraid || attribution.gbraid) return 'google_ads'
+  if (source === 'google_ads' || source === 'googleads' || source === 'adwords') return 'google_ads'
+  if (source === 'facebook' || source === 'fb') return 'facebook'
+  if (source === 'houzz') return 'houzz'
+  if (medium.includes('geofence') || source.includes('geofence') || campaign.includes('geofence') || campaign.includes('geo_fence')) {
+    return 'geofencing'
+  }
+  if (medium.includes('backlink') || source.includes('backlink') || source.includes('partner')) {
+    return 'backlink_partner'
+  }
+  if (ref.includes('google.')) return 'google_organic'
+  if (ref.includes('facebook.')) return 'facebook'
+  if (ref.includes('houzz.')) return 'houzz'
+  if (ref && !ref.includes('jwordenasphaltpaving.com')) return 'referral'
+  return 'direct'
+}
+
 export function getLeadAttributionFields() {
   const a = getAttribution()
+  const inferredSource = inferAttributionConversionSource(a, typeof document !== 'undefined' ? document.referrer : '')
+  const referrerDomain = (() => {
+    try {
+      if (typeof document === 'undefined' || !document.referrer) return undefined
+      return new URL(document.referrer).hostname
+    } catch {
+      return undefined
+    }
+  })()
   return {
-    conversion_source: a.utm_source || 'direct',
+    conversion_source: inferredSource,
     attribution_snapshot: Object.keys(a).length ? JSON.stringify(a) : undefined,
     attribution_first_touch_at: a.captured_at || new Date().toISOString(),
     gclid: a.gclid || undefined,
     wbraid: a.wbraid || undefined,
     gbraid: a.gbraid || undefined,
+    geofence_vendor: a.utm_source && inferredSource === 'geofencing' ? a.utm_source : undefined,
+    geofence_campaign: inferredSource === 'geofencing' ? a.utm_campaign || undefined : undefined,
+    backlink_domain: inferredSource === 'backlink_partner' ? referrerDomain : undefined,
     offline_conversion_ready: Boolean(a.gclid || a.wbraid || a.gbraid),
   }
 }
