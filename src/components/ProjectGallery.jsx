@@ -73,7 +73,7 @@ const CATEGORIES = [
 
 // Specific images that were captured sideways and need a 90° clockwise rotation.
 const ROTATE_90_URLS = new Set([
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+  '/work/d77831126_20170408_185318649_iOS.jpg',
 ]);
 
 export default function ProjectGallery() {

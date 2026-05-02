@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio, Phone, Sparkles, ShieldCheck } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/base44Client';
 import WebGLPersonaAvatar from './WebGLPersonaAvatar';
 import SmartImage from './SmartImage';
 import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
@@ -331,21 +331,15 @@ export default function AIConciergeBubble() {
     if (conversation) return conversation;
     setBooting(true);
     try {
-      const conv = await base44.agents.createConversation({
-        agent_name: 'paving_consultant',
-        metadata: {
-          name: 'Website Visitor Chat',
-          description: 'Anonymous chat from jwordenasphaltpaving.com',
-        },
-      });
-      setConversation(conv);
+      const sessionId = `anon-${Date.now()}`;
+      setConversation(sessionId);
       setMessages([
         {
           role: 'assistant',
           content: "Recommendation: I can give you an instant price range, a repair-vs-replace decision, and the fastest start timeline. Why: I use your real property details, not generic guesses. Next step: Share your surface type, approximate square footage, and city and I will lay out the smartest plan. — Mr. Worden, Founder",
         },
       ]);
-      return conv;
+      return sessionId;
     } catch (e) {
       setMessages([
         { role: 'assistant', content: "I'm having trouble connecting. Please call (804) 446-1296 — we answer during business hours." },
@@ -354,17 +348,6 @@ export default function AIConciergeBubble() {
       setBooting(false);
     }
   };
-
-  // Subscribe to conversation updates
-  useEffect(() => {
-    if (!conversation?.id) return;
-    const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
-      if (Array.isArray(data?.messages) && data.messages.length > 0) {
-        setMessages(data.messages.map(styleFounderMessage));
-      }
-    });
-    return unsubscribe;
-  }, [conversation?.id]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -497,16 +480,14 @@ export default function AIConciergeBubble() {
     }
 
     try {
-      if (leadSyncRef.current.id) {
-        await base44.entities.Lead.update(leadSyncRef.current.id, payload);
-      } else {
-        const created = await base44.entities.Lead.create({
-          name: payload.name || 'Website Visitor',
-          phone: payload.phone || 'Not provided',
-          ...payload,
-        });
-        leadSyncRef.current.id = created?.id || null;
-      }
+      await api.submitContact({
+        name: payload.name || 'Website Visitor',
+        phone: payload.phone || 'Not provided',
+        email: payload.email || '',
+        service_type: payload.surface_type,
+        notes: payload.notes,
+        conversion_source: payload.conversion_source,
+      });
 
       leadSyncRef.current.profile = merged;
 
@@ -536,11 +517,29 @@ export default function AIConciergeBubble() {
       // Optimistically render the user message so the chat feels instant.
       setMessages((prev) => [...prev, { role: 'user', content: text }]);
 
-      const conv = conversation || (await initConversation());
-      if (!conv) return;
-      await base44.agents.addMessage(conv, { role: 'user', content: text });
+      const sessionId = conversation || (await initConversation());
+
+      // Build history for context (last 10 turns, exclude system messages)
+      const history = messages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .slice(-10)
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      const res = await api.publicChat({
+        message: text,
+        session_id: sessionId,
+        history,
+        page_context: 'homepage',
+      });
+
+      const reply = res?.message || "I'm having trouble connecting. Please call (804) 446-1296 — we answer during business hours.";
+      setMessages((prev) => [...prev, styleFounderMessage({ role: 'assistant', content: reply })]);
     } catch (err) {
       console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: "I'm having trouble connecting. Please call (804) 446-1296 — we answer during business hours." },
+      ]);
     } finally {
       setSending(false);
     }

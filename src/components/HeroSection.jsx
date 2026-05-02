@@ -5,7 +5,7 @@ import { trackEvent, trackPhoneClick } from '@/lib/analytics';
 import SmartImage from './SmartImage';
 import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
-const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
+const HERO_IMAGE = '/work/fd6e29837_20171212_192947499_iOS.jpg';
 
 export default function HeroSection() {
   const scrollToQuote = () => {

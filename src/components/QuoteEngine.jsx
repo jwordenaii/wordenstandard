@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ChevronRight, ChevronLeft, Check, MapPin, Ruler, Clock, User, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
 import PavingCalculator from './PavingCalculator';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/base44Client';
 import { trackLeadSubmission, trackEvent, trackOfflineConversionReady } from '@/lib/analytics';
 import { getLeadAttributionFields, inferAttributionConversionSource, persistAttribution } from '@/lib/adsAttribution';
 
@@ -84,25 +84,11 @@ export default function QuoteEngine() {
       ...attribution,
     };
     try {
-      const createdLead = await base44.entities.Lead.create(leadData);
+      const createdLead = await api.submitQuote(leadData);
 
       // Fire GA4 + Google Ads conversion
       trackLeadSubmission({ ...leadData, id: createdLead?.id });
       trackOfflineConversionReady({ ...leadData, id: createdLead?.id });
-
-      // TRIGGER AUTOMATION TRACKS
-      if (createdLead?.id) {
-        // 1. Score lead and enrich with local property data
-        base44.functions.invoke('scoreNewLead', { leadId: createdLead.id }).catch(() => {});
-        // 2. Immediate PDF Proposal Generation
-        base44.functions.invoke('generateInstantQuotePdf', { leadId: createdLead.id }).catch(() => {});
-        // 3. Dispatch Sales Alert (Slack + Email)
-        base44.functions.invoke('notifyNewLeadSlack', { leadId: createdLead.id }).catch(() => {});
-        base44.functions.invoke('notifyNewLeadEmail', { leadId: createdLead.id }).catch(() => {});
-        // 4. Send Welcome SMS (Conversion Hardening)
-        base44.functions.invoke('sendLeadWelcomeEmail', { leadId: createdLead.id }).catch(() => {});
-        base44.functions.invoke('sendSmsFollowup', { leadId: createdLead.id, type: 'welcome' }).catch(() => {});
-      }
 
       setSubmitted(true);
       toast.success("Estimate request submitted! We'll be in touch within 24 hours.");

@@ -3,9 +3,9 @@ import { motion } from 'framer-motion'
 import SchemaMarkup from '../components/SchemaMarkup'
 
 const LOCAL_PROJECT_IMAGES = [
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/e5adfa586_20180209_014945610_iOS.jpg',
+  '/work/fd6e29837_20171212_192947499_iOS.jpg',
+  '/work/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
+  '/work/e5adfa586_20180209_014945610_iOS.jpg',
 ]
 
 const FEATURES = [

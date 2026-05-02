@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, ArrowDown } from 'lucide-react';
 import SmartImage from '../SmartImage';
 
-const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/de5eca3e9_20180209_014725276_iOS.jpg';
+const HERO_IMAGE = '/work/de5eca3e9_20180209_014725276_iOS.jpg';
 
 export default function MarketHero({ city, state, region, headline, intro }) {
   const scrollDown = () => {
