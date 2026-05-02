@@ -70,19 +70,21 @@ function createFallbackAvatar() {
   const root = new THREE.Group()
 
   const suitMaterial = new THREE.MeshStandardMaterial({
-    color: '#151c2d',
-    roughness: 0.58,
-    metalness: 0.12,
+    color: '#141b2b',
+    roughness: 0.44,
+    metalness: 0.2,
   })
   const skinMaterial = new THREE.MeshStandardMaterial({
-    color: '#f2c19d',
-    roughness: 0.78,
-    metalness: 0.02,
+    color: '#efc3a3',
+    roughness: 0.62,
+    metalness: 0.05,
+    emissive: '#2f1a10',
+    emissiveIntensity: 0.06,
   })
   const hatMaterial = new THREE.MeshStandardMaterial({
     color: '#f5a623',
-    roughness: 0.52,
-    metalness: 0.1,
+    roughness: 0.32,
+    metalness: 0.28,
   })
 
   const body = new THREE.Mesh(
@@ -92,6 +94,28 @@ function createFallbackAvatar() {
   body.position.y = -0.08
   body.castShadow = true
   body.receiveShadow = true
+
+  const shoulderLeft = new THREE.Mesh(
+    new THREE.SphereGeometry(0.135, 20, 18),
+    suitMaterial
+  )
+  shoulderLeft.position.set(-0.225, 0.15, 0)
+  shoulderLeft.scale.set(1.1, 0.9, 1.05)
+  shoulderLeft.castShadow = true
+
+  const shoulderRight = shoulderLeft.clone()
+  shoulderRight.position.x = 0.225
+
+  const collarLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.11, 0.032),
+    new THREE.MeshStandardMaterial({ color: '#f2f2f2', roughness: 0.42, metalness: 0.08 })
+  )
+  collarLeft.position.set(-0.045, 0.28, 0.18)
+  collarLeft.rotation.z = 0.35
+
+  const collarRight = collarLeft.clone()
+  collarRight.position.x = 0.045
+  collarRight.rotation.z = -0.35
 
   const neck = new THREE.Mesh(
     new THREE.CylinderGeometry(0.08, 0.09, 0.12, 16),
@@ -134,7 +158,7 @@ function createFallbackAvatar() {
 
   const tie = new THREE.Mesh(
     new THREE.ConeGeometry(0.042, 0.19, 4),
-    new THREE.MeshStandardMaterial({ color: '#f59e0b', roughness: 0.42, metalness: 0.2 })
+    new THREE.MeshStandardMaterial({ color: '#f59e0b', roughness: 0.24, metalness: 0.36, emissive: '#663600', emissiveIntensity: 0.12 })
   )
   tie.position.set(0, 0.17, 0.2)
   tie.rotation.x = Math.PI / 5
@@ -185,15 +209,43 @@ function createFallbackAvatar() {
   mouth.name = 'lipSyncMouth'
   mouth.castShadow = true
 
+  const moustache = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.041, 0.07, 4, 14),
+    new THREE.MeshStandardMaterial({ color: '#4f2e1d', roughness: 0.75, metalness: 0.04 })
+  )
+  moustache.position.set(0, 0.505, 0.218)
+  moustache.rotation.z = Math.PI / 2
+  moustache.castShadow = true
+
+  const pocketSquare = new THREE.Mesh(
+    new THREE.BoxGeometry(0.05, 0.03, 0.008),
+    new THREE.MeshStandardMaterial({ color: '#f5f5f5', roughness: 0.38, metalness: 0.08 })
+  )
+  pocketSquare.position.set(0.115, 0.1, 0.205)
+  pocketSquare.rotation.z = 0.08
+
+  const tiePin = new THREE.Mesh(
+    new THREE.BoxGeometry(0.054, 0.008, 0.008),
+    new THREE.MeshStandardMaterial({ color: '#c8a24e', roughness: 0.28, metalness: 0.72 })
+  )
+  tiePin.position.set(0, 0.12, 0.216)
+  tiePin.castShadow = true
+
   root.add(
     body,
+    shoulderLeft,
+    shoulderRight,
     neck,
     head,
     hat,
     brim,
+    collarLeft,
+    collarRight,
     lapelLeft,
     lapelRight,
     tie,
+    tiePin,
+    pocketSquare,
     glasses,
     glasses2,
     bridge,
@@ -201,7 +253,8 @@ function createFallbackAvatar() {
     eyeRight,
     browLeft,
     browRight,
-    mouth
+    mouth,
+    moustache
   )
   return root
 }

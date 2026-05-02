@@ -642,7 +642,7 @@ export default function AIConciergeBubble() {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                     <p className="font-display text-muted-foreground text-[10px] tracking-wider uppercase">
-                      {modelMode === 'model' ? 'Founder model live · voice ready' : 'Founder fallback · voice ready'}
+                      {modelMode === 'model' ? 'Founder model live · voice ready' : 'Founder concierge live · voice ready'}
                     </p>
                   </div>
                   <p className="font-display text-muted-foreground text-[9px] tracking-wider uppercase mt-0.5">

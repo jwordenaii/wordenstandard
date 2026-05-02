@@ -64,7 +64,7 @@ const fadeUp = {
 
 export default function JwordenAI() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       <SchemaMarkup
         title="Virginia Asphalt Paving Expertise | J. Worden & Sons"
         description="Serving Virginia property owners for over 40 years with driveway paving, parking lot resurfacing, sealcoating, and asphalt repair." 
@@ -76,6 +76,7 @@ export default function JwordenAI() {
       />
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="bg-brand-navy pt-32 pb-24 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(245,166,35,0.24),transparent_35%),radial-gradient(circle_at_10%_88%,rgba(120,190,255,0.16),transparent_34%)]" aria-hidden="true" />
         {/* Subtle grid texture */}
         <div
           className="absolute inset-0 opacity-5"
@@ -94,7 +95,7 @@ export default function JwordenAI() {
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="inline-flex items-center gap-2 bg-brand-amber/15 border border-brand-amber/30 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-8"
+            className="inline-flex items-center gap-2 bg-brand-amber/18 border border-brand-amber/45 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-8 shadow-[0_10px_28px_rgba(0,0,0,0.35)]"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-brand-amber animate-pulse" />
             Serving Virginia For Over 40 Years
@@ -106,7 +107,7 @@ export default function JwordenAI() {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="font-display font-black text-5xl md:text-7xl mb-6 leading-none tracking-tight"
+            className="font-display font-black text-5xl md:text-7xl mb-6 leading-none tracking-tight [text-shadow:0_12px_34px_rgba(0,0,0,0.45)]"
           >
             JWORDENAI
             <span className="text-brand-amber align-super text-2xl md:text-3xl">™</span>
@@ -117,7 +118,7 @@ export default function JwordenAI() {
             animate="visible"
             variants={fadeUp}
             custom={2}
-            className="text-white/70 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-4"
+            className="text-white/80 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-4"
           >
             Since 1984, J. Worden &amp; Sons has helped homeowners and property managers across
             Chester, Richmond, Midlothian, Henrico, and surrounding communities protect and
@@ -129,7 +130,7 @@ export default function JwordenAI() {
             animate="visible"
             variants={fadeUp}
             custom={3}
-            className="text-white/40 text-sm max-w-xl mx-auto mb-12"
+            className="text-white/60 text-sm max-w-xl mx-auto mb-12"
           >
             Local crews. Honest recommendations. Lasting pavement work.
           </motion.p>
@@ -154,7 +155,7 @@ export default function JwordenAI() {
             </Link>
             <Link
               to="/services"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-colors text-base font-medium"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-white/30 text-white/90 hover:text-white hover:border-brand-amber/60 hover:bg-white/5 transition-colors text-base font-medium"
             >
               Explore Services
               <svg
@@ -195,16 +196,18 @@ export default function JwordenAI() {
       </section>
 
       {/* ── Feature cards ────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-background border-y border-border/80 relative overflow-hidden">
+        <div className="absolute -top-24 right-0 w-80 h-80 rounded-full bg-primary/16 blur-3xl" aria-hidden="true" />
+        <div className="absolute bottom-0 -left-20 w-72 h-72 rounded-full bg-sky-400/10 blur-3xl" aria-hidden="true" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
               Local service strengths
             </span>
-            <h2 className="font-display font-black text-4xl md:text-5xl text-brand-navy mt-3 mb-4">
+            <h2 className="font-display font-black text-4xl md:text-5xl text-foreground mt-3 mb-4 uppercase tracking-tight">
               Asphalt Guidance Built For Virginia Properties
             </h2>
-            <p className="text-brand-navy/60 max-w-2xl mx-auto text-lg">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Homeowners and property managers get clear options, local insight, and dependable
               execution from a team that has served the region for decades.
             </p>
@@ -212,11 +215,11 @@ export default function JwordenAI() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             {LOCAL_PROJECT_IMAGES.map((src, idx) => (
-              <div key={src} className="relative overflow-hidden rounded-2xl border border-brand-navy/10 bg-brand-navy/5">
+              <div key={src} className="relative overflow-hidden rounded-2xl border border-primary/30 bg-black/30 shadow-[0_20px_46px_rgba(0,0,0,0.35)]">
                 <img
                   src={src}
                   alt={`Virginia asphalt paving project ${idx + 1}`}
-                  className="w-full h-52 object-cover"
+                  className="w-full h-56 object-cover quality-premium"
                   loading="lazy"
                 />
               </div>
@@ -232,10 +235,10 @@ export default function JwordenAI() {
                 viewport={{ once: true }}
                 variants={fadeUp}
                 custom={i}
-                className="group rounded-2xl border border-brand-navy/10 bg-white p-8 hover:border-brand-amber/40 hover:shadow-xl transition-all duration-300"
+                className="group premium-panel rounded-2xl p-8 hover:border-primary/45 transition-all duration-300"
               >
                 {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-brand-navy/5 flex items-center justify-center text-3xl mb-6 group-hover:bg-brand-amber/10 transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-black/30 border border-primary/25 flex items-center justify-center text-3xl mb-6 group-hover:bg-primary/10 transition-colors">
                   {feature.icon}
                 </div>
 
@@ -245,19 +248,19 @@ export default function JwordenAI() {
                 </span>
 
                 {/* Title */}
-                <h3 className="font-display font-black text-2xl text-brand-navy mt-2 mb-4">
+                <h3 className="font-display font-black text-2xl text-foreground mt-2 mb-4 uppercase tracking-tight">
                   {feature.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-brand-navy/65 text-sm leading-relaxed mb-6">
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
                   {feature.description}
                 </p>
 
                 {/* Capabilities list */}
                 <ul className="space-y-2">
                   {feature.capabilities.map((cap) => (
-                    <li key={cap} className="flex items-start gap-2 text-sm text-brand-navy/70">
+                    <li key={cap} className="flex items-start gap-2 text-sm text-foreground/80">
                       <span className="text-brand-amber mt-0.5 shrink-0">✓</span>
                       {cap}
                     </li>
@@ -270,16 +273,16 @@ export default function JwordenAI() {
       </section>
 
       {/* ── Roadmap & Commitment to Development ─────────────────────────── */}
-      <section className="py-24 bg-white border-t border-brand-navy/5">
+      <section className="py-24 bg-muted/10 border-t border-border/70">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
               What local clients can expect
             </span>
-            <h2 className="font-display font-black text-4xl md:text-5xl text-brand-navy mt-3 mb-4">
+            <h2 className="font-display font-black text-4xl md:text-5xl text-foreground mt-3 mb-4 uppercase tracking-tight">
               Straight Answers And Reliable Work
             </h2>
-            <p className="text-brand-navy/60 max-w-2xl mx-auto text-lg">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               We focus on prep quality, proper paving methods, and clear communication so your
               driveway or lot lasts longer and looks better.
             </p>
@@ -293,7 +296,7 @@ export default function JwordenAI() {
               viewport={{ once: true }}
               variants={fadeUp}
               custom={0}
-              className="rounded-2xl border border-brand-navy/10 bg-brand-navy/[0.02] p-8"
+              className="premium-panel rounded-2xl p-8"
             >
               <div className="flex items-center gap-3 mb-5">
                 <span className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
@@ -301,10 +304,10 @@ export default function JwordenAI() {
                   Working now
                 </span>
               </div>
-              <h3 className="font-display font-black text-2xl text-brand-navy mb-2">
+              <h3 className="font-display font-black text-2xl text-foreground mb-2 uppercase tracking-tight">
                 Current Service Coverage
               </h3>
-              <p className="text-brand-navy/60 text-sm mb-6">
+              <p className="text-muted-foreground text-sm mb-6">
                 Real work delivered every week across residential and commercial properties.
               </p>
               <ul className="space-y-3">
@@ -318,7 +321,7 @@ export default function JwordenAI() {
                 ].map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-2.5 text-sm text-brand-navy/75"
+                    className="flex items-start gap-2.5 text-sm text-foreground/80"
                   >
                     <span className="text-emerald-600 mt-0.5 shrink-0">✓</span>
                     <span>{item}</span>
@@ -334,7 +337,7 @@ export default function JwordenAI() {
               viewport={{ once: true }}
               variants={fadeUp}
               custom={1}
-              className="rounded-2xl border border-brand-amber/30 bg-brand-amber/5 p-8"
+              className="rounded-2xl border border-brand-amber/35 bg-gradient-to-br from-brand-amber/12 to-black/10 p-8 shadow-[0_22px_52px_rgba(0,0,0,0.35)]"
             >
               <div className="flex items-center gap-3 mb-5">
                 <span className="inline-flex items-center gap-2 bg-brand-amber/20 text-brand-navy text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
@@ -342,10 +345,10 @@ export default function JwordenAI() {
                   Local expansion
                 </span>
               </div>
-              <h3 className="font-display font-black text-2xl text-brand-navy mb-2">
+              <h3 className="font-display font-black text-2xl text-foreground mb-2 uppercase tracking-tight">
                 Next Improvements
               </h3>
-              <p className="text-brand-navy/60 text-sm mb-6">
+              <p className="text-muted-foreground text-sm mb-6">
                 We keep improving customer clarity, faster estimates, and local service coverage.
               </p>
               <ul className="space-y-3">
@@ -359,7 +362,7 @@ export default function JwordenAI() {
                 ].map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-2.5 text-sm text-brand-navy/75"
+                    className="flex items-start gap-2.5 text-sm text-foreground/80"
                   >
                     <span className="text-brand-amber mt-0.5 shrink-0">◆</span>
                     <span>{item}</span>
@@ -378,10 +381,10 @@ export default function JwordenAI() {
             custom={2}
             className="mt-14 max-w-3xl mx-auto text-center"
           >
-            <h3 className="font-display font-black text-2xl text-brand-navy mb-3">
+            <h3 className="font-display font-black text-2xl text-foreground mb-3 uppercase tracking-tight">
               Our Local Commitment
             </h3>
-            <p className="text-brand-navy/65 leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed">
               We have served Virginia property owners for over 40 years. Every recommendation
               we give is grounded in real paving experience, local conditions, and long-term
               pavement performance.
@@ -391,7 +394,7 @@ export default function JwordenAI() {
       </section>
 
       {/* ── Local trust notice ───────────────────────────────────────────── */}
-      <section className="py-20 bg-brand-navy/5">
+      <section className="py-20 bg-brand-navy/20 border-t border-border/70">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial="hidden"
@@ -416,17 +419,17 @@ export default function JwordenAI() {
               Family Owned Since 1984
             </div>
 
-            <h2 className="font-display font-black text-4xl md:text-5xl text-brand-navy mb-6">
+            <h2 className="font-display font-black text-4xl md:text-5xl text-foreground mb-6 uppercase tracking-tight">
               Built In Virginia.{' '}
               <span className="text-brand-amber">Backed By 40+ Years Of Work.</span>
             </h2>
 
-            <p className="text-brand-navy/65 text-lg leading-relaxed max-w-3xl mx-auto mb-4">
+            <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mx-auto mb-4">
               From Chester neighborhoods to Richmond commercial corridors, our team delivers
               asphalt solutions that are practical, durable, and tailored to your property.
             </p>
 
-            <p className="text-brand-navy/45 text-sm max-w-2xl mx-auto mb-12">
+            <p className="text-foreground/60 text-sm max-w-2xl mx-auto mb-12">
               Ready for a driveway quote, lot resurfacing plan, or maintenance schedule? We are
               here to help with local guidance and a clear next step.
             </p>
@@ -445,7 +448,7 @@ export default function JwordenAI() {
               </Link>
               <Link
                 to="/services"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-brand-navy/20 text-brand-navy hover:border-brand-navy/40 hover:bg-brand-navy/5 transition-colors text-base font-medium"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-foreground/25 text-foreground hover:border-brand-amber/55 hover:bg-brand-amber/10 transition-colors text-base font-medium"
               >
                 Explore Services
                 <svg
