@@ -319,9 +319,9 @@ export default function WebGLPersonaAvatar({
     const mount = mountRef.current
     if (!mount) return undefined
 
-    const requestedQuality = String(import.meta.env.VITE_CONCIERGE_AVATAR_RENDER_QUALITY || 'ultra').toLowerCase()
+    const requestedQuality = String(import.meta.env.VITE_CONCIERGE_AVATAR_RENDER_QUALITY || 'cinematic').toLowerCase()
     const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
-    const isUltra = requestedQuality === 'ultra' || requestedQuality === '4k' || requestedQuality === 'cinematic'
+    const isUltra = requestedQuality === 'ultra' || requestedQuality === '4k' || requestedQuality === 'cinematic' || requestedQuality === 'max'
     const isHigh = isUltra || requestedQuality === 'high'
 
     const scene = new THREE.Scene()
@@ -337,12 +337,12 @@ export default function WebGLPersonaAvatar({
       powerPreference: 'high-performance',
       premultipliedAlpha: true,
     })
-    const maxDpr = isMobile ? 2 : isUltra ? 3 : isHigh ? 2.4 : 2
+    const maxDpr = isMobile ? (isUltra ? 2.4 : 2) : isUltra ? 3.5 : isHigh ? 2.6 : 2.2
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.physicallyCorrectLights = true
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = isUltra ? 1.14 : 1.08
+    renderer.toneMappingExposure = isUltra ? 1.2 : 1.1
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     rendererRef.current = renderer
@@ -351,7 +351,7 @@ export default function WebGLPersonaAvatar({
     const composer = new EffectComposer(renderer)
     const renderPass = new RenderPass(scene, camera)
     composer.addPass(renderPass)
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), isUltra ? 0.38 : 0.28, 0.56, 0.87)
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), isUltra ? 0.46 : 0.3, 0.62, 0.85)
     composer.addPass(bloomPass)
 
     const pmrem = new THREE.PMREMGenerator(renderer)

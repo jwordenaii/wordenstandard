@@ -566,7 +566,7 @@ export default function AIConciergeBubble() {
               <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/20 via-transparent to-sky-300/15 blur-xl pointer-events-none" />
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
-                <div className="w-[116px] h-[116px] rounded-full border border-primary/55 bg-black/60 overflow-hidden shadow-[0_22px_44px_rgba(0,0,0,0.52)]">
+                <div className="w-[128px] h-[128px] rounded-full border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
                   <WebGLPersonaAvatar
                     mode={avatarState}
                     speechPulse={speechPulse}
@@ -610,12 +610,12 @@ export default function AIConciergeBubble() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-6 right-4 sm:right-8 left-4 sm:left-auto z-50 w-auto sm:w-[440px] h-[640px] max-h-[84vh] bg-card/95 border border-primary/35 shadow-2xl rounded-2xl flex flex-col overflow-hidden backdrop-blur-sm"
+            className="absolute bottom-6 right-4 sm:right-8 left-4 sm:left-auto z-50 w-auto sm:w-[480px] h-[680px] max-h-[86vh] bg-card/95 border border-primary/40 shadow-[0_30px_72px_rgba(0,0,0,0.58)] rounded-2xl flex flex-col overflow-hidden backdrop-blur-md"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full border border-primary/50 overflow-hidden bg-black/55 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
+                <div className="w-14 h-14 rounded-full border border-primary/60 overflow-hidden bg-black/60 shadow-[0_12px_28px_rgba(0,0,0,0.42)]">
                   <WebGLPersonaAvatar
                     mode={avatarState}
                     speechPulse={speechPulse}
