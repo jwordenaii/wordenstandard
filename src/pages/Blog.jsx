@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import SmartImage from '../components/SmartImage';
 import { PRIMARY_DOMAIN } from '@/lib/locations';
+import { FALLBACK_BLOG_POSTS } from '@/lib/fallbackBlogPosts';
 
 const BLOG_FAQS = [
   {
@@ -39,7 +40,7 @@ export default function Blog() {
       });
   }, []);
 
-  const safePosts = Array.isArray(posts) ? posts : [];
+  const safePosts = Array.isArray(posts) && posts.length > 0 ? posts : FALLBACK_BLOG_POSTS;
 
   const jsonLd = {
     '@context': 'https://schema.org',

@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import { PRIMARY_DOMAIN } from '@/lib/locations';
+import { FALLBACK_BLOG_POSTS, getFallbackBlogPostBySlug } from '@/lib/fallbackBlogPosts';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -19,20 +20,25 @@ export default function BlogPost() {
     base44.entities.BlogPost.filter({ slug })
       .then((results) => {
         const safeResults = Array.isArray(results) ? results : [];
-        const found = safeResults[0];
+        const found = safeResults[0] || getFallbackBlogPostBySlug(slug);
         setPost(found || null);
         if (found) {
           base44.entities.BlogPost.list('-published_date', 4)
             .then((all) => {
               const safeAll = Array.isArray(all) ? all : [];
-              setRelated(safeAll.filter((p) => p.id !== found.id).slice(0, 3));
+              const merged = safeAll.length > 0 ? safeAll : FALLBACK_BLOG_POSTS;
+              setRelated(merged.filter((p) => p.slug !== found.slug).slice(0, 3));
             })
-            .catch(() => setRelated([]));
+            .catch(() => {
+              setRelated(FALLBACK_BLOG_POSTS.filter((p) => p.slug !== found.slug).slice(0, 3));
+            });
         }
         setLoading(false);
       })
       .catch(() => {
-        setPost(null);
+        const fallback = getFallbackBlogPostBySlug(slug);
+        setPost(fallback);
+        setRelated(FALLBACK_BLOG_POSTS.filter((p) => p.slug !== slug).slice(0, 3));
         setLoading(false);
       });
   }, [slug]);
