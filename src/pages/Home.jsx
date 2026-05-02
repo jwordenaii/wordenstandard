@@ -1,4 +1,5 @@
 import React from 'react';
+import SEO from '../components/SEO';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
 import TrustedBy from '../components/TrustedBy';
@@ -29,6 +30,10 @@ import HomeSchema from '../components/HomeSchema';
 export default function Home() {
   return (
     <div className="min-h-screen bg-background font-body relative">
+      <SEO 
+        title="J. Worden & Sons | Luxury Asphalt Paving & Engineering Virginia"
+        description="Over 40 years of precision asphalt paving in Richmond, Midlothian, and Central Virginia. Commercial masters and residential specialists. Built to last."
+      />
       <HomeSchema />
       <Navbar />
       <HeroSection />
