@@ -5,6 +5,21 @@ import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { trackPhotoAnalysis, trackEvent } from '@/lib/analytics';
 
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function polygonArea(points) {
+  if (!Array.isArray(points) || points.length < 3) return 0;
+  let sum = 0;
+  for (let i = 0; i < points.length; i += 1) {
+    const current = points[i];
+    const next = points[(i + 1) % points.length];
+    sum += current.x * next.y - next.x * current.y;
+  }
+  return Math.abs(sum / 2);
+}
+
 const GRADE_STYLES = {
   excellent: { bg: 'bg-green-500/10', border: 'border-green-500/40', text: 'text-green-400', icon: CheckCircle2, label: 'Excellent' },
   good: { bg: 'bg-primary/10', border: 'border-primary/40', text: 'text-primary', icon: CheckCircle2, label: 'Good' },
@@ -19,7 +34,9 @@ export default function AIPhotoInspector() {
   const [context, setContext] = useState('');
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [markupPoints, setMarkupPoints] = useState([]);
   const inputRef = useRef(null);
+  const markupRef = useRef(null);
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -31,6 +48,23 @@ export default function AIPhotoInspector() {
     setFile(selected);
     setPreviewUrl(URL.createObjectURL(selected));
     setAnalysis(null);
+    setMarkupPoints([]);
+  };
+
+  const handleMarkupPointer = (e) => {
+    if (!previewUrl || loading || analysis || !markupRef.current) return;
+
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    const rect = markupRef.current.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const point = {
+      x: clamp01((e.clientX - rect.left) / rect.width),
+      y: clamp01((e.clientY - rect.top) / rect.height),
+    };
+
+    setMarkupPoints((prev) => (prev.length >= 24 ? prev : [...prev, point]));
   };
 
   const handleAnalyze = async () => {
@@ -39,13 +73,31 @@ export default function AIPhotoInspector() {
     trackEvent('photo_analysis_started');
 
     try {
+      const markedAreaPercent = polygonArea(markupPoints) * 100;
+      const markup = {
+        points: markupPoints.map((p) => ({
+          x: Number(p.x.toFixed(4)),
+          y: Number(p.y.toFixed(4)),
+        })),
+        point_count: markupPoints.length,
+        marked_area_percent: Number(markedAreaPercent.toFixed(2)),
+      };
+
+      const markupSummary =
+        markupPoints.length >= 3
+          ? `Customer marked the target paving area with ${markup.point_count} points. Marked area estimate: ${markup.marked_area_percent}% of the photo frame. Use this region as the primary scope for condition findings and required prep before paving.`
+          : '';
+
+      const enrichedContext = [context.trim(), markupSummary].filter(Boolean).join(' ');
+
       // Upload file to get a public URL
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
       // Call the Claude Opus-powered backend function
       const response = await base44.functions.invoke('analyzeDrivewayPhoto', {
         imageUrl: file_url,
-        context: context.trim() || undefined,
+        context: enrichedContext || undefined,
+        markup: markupPoints.length ? markup : undefined,
       });
 
       const result = response.data?.analysis;
@@ -71,6 +123,7 @@ export default function AIPhotoInspector() {
     setPreviewUrl(null);
     setContext('');
     setAnalysis(null);
+    setMarkupPoints([]);
     if (inputRef.current) inputRef.current.value = '';
   };
 
@@ -111,11 +164,53 @@ export default function AIPhotoInspector() {
                 className="hidden"
               />
               {previewUrl ? (
-                <div className="relative aspect-video overflow-hidden bg-background">
+                <div
+                  ref={markupRef}
+                  className="relative aspect-video overflow-hidden bg-background touch-none"
+                  onPointerDown={handleMarkupPointer}
+                >
                   <img src={previewUrl} alt="Pavement to analyze" className="w-full h-full object-cover" />
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    {markupPoints.length >= 3 && (
+                      <polygon
+                        points={markupPoints.map((p) => `${(p.x * 100).toFixed(2)},${(p.y * 100).toFixed(2)}`).join(' ')}
+                        fill="rgba(22,163,74,0.20)"
+                        stroke="rgba(34,197,94,0.95)"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    )}
+                    {markupPoints.map((point, idx) => (
+                      <g key={`pt-${idx}`}>
+                        <circle
+                          cx={(point.x * 100).toFixed(2)}
+                          cy={(point.y * 100).toFixed(2)}
+                          r="1.1"
+                          fill="rgba(34,197,94,1)"
+                          stroke="rgba(255,255,255,0.95)"
+                          strokeWidth="0.35"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                        <text
+                          x={(point.x * 100 + 1.4).toFixed(2)}
+                          y={(point.y * 100 - 1.2).toFixed(2)}
+                          fill="white"
+                          fontSize="2.6"
+                          fontWeight="700"
+                        >
+                          {idx + 1}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent flex items-end justify-center pb-6">
-                    <span className="font-display text-foreground text-xs tracking-wider uppercase bg-background/80 px-4 py-2">
-                      Click to change photo
+                    <span className="font-display text-foreground text-xs tracking-wider uppercase bg-background/80 px-4 py-2 text-center">
+                      Tap image to mark paving area, or click to change photo
                     </span>
                   </div>
                 </div>
@@ -133,6 +228,40 @@ export default function AIPhotoInspector() {
                 </div>
               )}
             </label>
+
+            {previewUrl && (
+              <div className="mt-4 border border-border bg-muted/30 p-4 space-y-3">
+                <p className="font-display text-muted-foreground text-[11px] tracking-[0.25em] uppercase">
+                  Property Markup (Phone-Friendly)
+                </p>
+                <p className="font-body text-muted-foreground text-xs leading-relaxed">
+                  Tap around the exact pavement zone you want inspected. This helps the AI focus the condition scan and prep recommendations before paving.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setMarkupPoints((prev) => prev.slice(0, -1))}
+                    disabled={!markupPoints.length || loading}
+                    className="border border-border text-foreground font-display font-bold text-[11px] tracking-wider uppercase px-3 py-2 min-h-[40px] disabled:opacity-50"
+                  >
+                    Undo Point
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMarkupPoints([])}
+                    disabled={!markupPoints.length || loading}
+                    className="border border-border text-foreground font-display font-bold text-[11px] tracking-wider uppercase px-3 py-2 min-h-[40px] disabled:opacity-50"
+                  >
+                    Clear Markup
+                  </button>
+                </div>
+                <p className="font-body text-muted-foreground text-xs">
+                  {markupPoints.length >= 3
+                    ? `Marked points: ${markupPoints.length} · Estimated marked frame area: ${(polygonArea(markupPoints) * 100).toFixed(1)}%`
+                    : 'Add at least 3 points to define a marked area polygon.'}
+                </p>
+              </div>
+            )}
 
             {/* Optional context */}
             <div className="mt-6">
@@ -274,6 +403,42 @@ export default function AIPhotoInspector() {
                   <p className="font-body text-muted-foreground text-sm leading-relaxed italic">
                     {analysis.technical_notes}
                   </p>
+                </div>
+              )}
+
+              {(analysis.required_prep_before_paving?.length > 0 || analysis.prep_notes) && (
+                <div className="border border-brand-navy/20 bg-brand-navy/5 p-6 space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-display text-brand-navy text-xs tracking-[0.3em] uppercase">Required Prep Before Paving</p>
+                    {analysis.prep_priority && (
+                      <span className="font-display font-bold text-[11px] uppercase tracking-wider text-brand-navy/80 border border-brand-navy/30 px-2 py-1">
+                        Priority: {String(analysis.prep_priority).replace(/_/g, ' ')}
+                      </span>
+                    )}
+                  </div>
+
+                  {analysis.required_prep_before_paving?.length > 0 && (
+                    <ul className="space-y-2">
+                      {analysis.required_prep_before_paving.map((step, idx) => (
+                        <li key={`prep-${idx}`} className="flex items-start gap-3 font-body text-foreground text-sm">
+                          <span className="mt-0.5 text-brand-navy font-bold">{idx + 1}.</span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {(analysis.surface_drainage_risk || analysis.base_failure_risk) && (
+                    <p className="font-body text-muted-foreground text-xs">
+                      Drainage risk: {analysis.surface_drainage_risk || 'n/a'} · Base failure risk: {analysis.base_failure_risk || 'n/a'}
+                    </p>
+                  )}
+
+                  {analysis.prep_notes && (
+                    <p className="font-body text-muted-foreground text-sm leading-relaxed">
+                      {analysis.prep_notes}
+                    </p>
+                  )}
                 </div>
               )}
 
