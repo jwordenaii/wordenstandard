@@ -134,7 +134,7 @@ export default function ContractorAIPlatform() {
                 <img
                   src={src}
                   alt={`Local Virginia paving project ${idx + 1}`}
-                  className="w-full h-56 object-cover"
+                  className={`w-full h-56 object-cover ${idx === 0 ? 'rotate-90 scale-[1.28] origin-center' : ''}`}
                   loading="lazy"
                 />
               </div>
