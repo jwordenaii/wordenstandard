@@ -5,8 +5,7 @@ import { base44 } from '@/api/base44Client'
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
 const AUTH_DISABLED = ['none', 'off', 'disabled', '0', 'false'].includes(AUTH_MODE)
-const INTERNAL_STRATEGY_MODE = String(import.meta.env.VITE_INTERNAL_STRATEGY_MODE || 'on').toLowerCase()
-const INTERNAL_STRATEGY_ENABLED = ['1', 'true', 'on', 'enabled', 'strict', 'internal'].includes(INTERNAL_STRATEGY_MODE)
+const INTERNAL_STRATEGY_ENABLED = true
 
 // ⚠️  SECURITY NOTE — client-side PIN is NOT real access control.
 // VITE_ variables are bundled into the browser JavaScript bundle and are
