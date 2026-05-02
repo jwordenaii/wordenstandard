@@ -1,18 +1,27 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const DEFAULT_MODEL_URL = '/models/mr-worden.glb'
-const MODEL_PATH_CANDIDATES = [DEFAULT_MODEL_URL, '/mr-worden.glb', '/models/mr-worden.gltf']
+const MODEL_PATH_CANDIDATES = [
+  '/models/mr-worden-hq.glb',
+  '/models/mr-worden-hq.gltf',
+  DEFAULT_MODEL_URL,
+  '/mr-worden.glb',
+  '/models/mr-worden.gltf',
+]
 
 function getEnvModelCandidates() {
+  const hq = (import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_HQ_URL || '').trim()
   const single = (import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URL || '').trim()
   const list = (import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URLS || '')
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean)
 
-  return [single, ...list].filter(Boolean)
+  return [hq, single, ...list].filter(Boolean)
 }
 
 function looksLikeGlb(buffer) {
@@ -57,44 +66,87 @@ async function findValidModelUrl(candidates) {
 function createFallbackAvatar() {
   const root = new THREE.Group()
 
+  const suitMaterial = new THREE.MeshStandardMaterial({
+    color: '#151c2d',
+    roughness: 0.58,
+    metalness: 0.12,
+  })
+  const skinMaterial = new THREE.MeshStandardMaterial({
+    color: '#f2c19d',
+    roughness: 0.78,
+    metalness: 0.02,
+  })
+  const hatMaterial = new THREE.MeshStandardMaterial({
+    color: '#f5a623',
+    roughness: 0.52,
+    metalness: 0.1,
+  })
+
   const body = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.22, 0.5, 6, 12),
-    new THREE.MeshStandardMaterial({ color: '#1a1a2e', roughness: 0.7 })
+    new THREE.CapsuleGeometry(0.26, 0.56, 10, 24),
+    suitMaterial
   )
-  body.position.y = -0.05
+  body.position.y = -0.08
+  body.castShadow = true
+  body.receiveShadow = true
 
   const neck = new THREE.Mesh(
     new THREE.CylinderGeometry(0.08, 0.09, 0.12, 16),
-    new THREE.MeshStandardMaterial({ color: '#f0b98f', roughness: 0.75 })
+    skinMaterial
   )
-  neck.position.y = 0.34
+  neck.position.y = 0.33
+  neck.castShadow = true
 
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.22, 24, 24),
-    new THREE.MeshStandardMaterial({ color: '#f4c3a1', roughness: 0.75 })
+    new THREE.SphereGeometry(0.235, 36, 28),
+    skinMaterial
   )
   head.position.y = 0.54
+  head.castShadow = true
 
   const hat = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.24, 0.2, 0.12, 24),
-    new THREE.MeshStandardMaterial({ color: '#f5a623', roughness: 0.6, metalness: 0.05 })
+    new THREE.CylinderGeometry(0.25, 0.205, 0.12, 32),
+    hatMaterial
   )
   hat.position.y = 0.76
+  hat.castShadow = true
 
   const brim = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.3, 0.3, 0.02, 24),
-    new THREE.MeshStandardMaterial({ color: '#d4880a', roughness: 0.7 })
+    new THREE.CylinderGeometry(0.31, 0.31, 0.02, 36),
+    new THREE.MeshStandardMaterial({ color: '#d4880a', roughness: 0.62, metalness: 0.12 })
   )
   brim.position.y = 0.7
+  brim.castShadow = true
+
+  const lapelLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.11, 0.2, 0.05),
+    new THREE.MeshStandardMaterial({ color: '#1d2538', roughness: 0.55, metalness: 0.1 })
+  )
+  lapelLeft.position.set(-0.08, 0.1, 0.18)
+  lapelLeft.rotation.z = 0.25
+
+  const lapelRight = lapelLeft.clone()
+  lapelRight.position.x = 0.08
+  lapelRight.rotation.z = -0.25
+
+  const tie = new THREE.Mesh(
+    new THREE.ConeGeometry(0.042, 0.19, 4),
+    new THREE.MeshStandardMaterial({ color: '#f59e0b', roughness: 0.42, metalness: 0.2 })
+  )
+  tie.position.set(0, 0.17, 0.2)
+  tie.rotation.x = Math.PI / 5
+  tie.castShadow = true
 
   const glasses = new THREE.Mesh(
-    new THREE.TorusGeometry(0.06, 0.008, 12, 28),
-    new THREE.MeshStandardMaterial({ color: '#4a4a4a', roughness: 0.5, metalness: 0.25 })
+    new THREE.TorusGeometry(0.058, 0.0075, 12, 36),
+    new THREE.MeshStandardMaterial({ color: '#34373f', roughness: 0.38, metalness: 0.42 })
   )
   glasses.position.set(-0.08, 0.57, 0.19)
+  glasses.rotation.y = 0.03
 
   const glasses2 = glasses.clone()
   glasses2.position.x = 0.08
+  glasses2.rotation.y = -0.03
 
   const bridge = new THREE.Mesh(
     new THREE.BoxGeometry(0.05, 0.008, 0.008),
@@ -102,22 +154,71 @@ function createFallbackAvatar() {
   )
   bridge.position.set(0, 0.57, 0.19)
 
+  const eyeLeft = new THREE.Mesh(
+    new THREE.SphereGeometry(0.023, 18, 16),
+    new THREE.MeshStandardMaterial({ color: '#2c1e10', roughness: 0.15, metalness: 0.05, emissive: '#1b1008', emissiveIntensity: 0.2 })
+  )
+  eyeLeft.position.set(-0.08, 0.57, 0.205)
+
+  const eyeRight = eyeLeft.clone()
+  eyeRight.position.x = 0.08
+
+  const browLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.008, 0.015),
+    new THREE.MeshStandardMaterial({ color: '#6e3f25', roughness: 0.8 })
+  )
+  browLeft.position.set(-0.08, 0.61, 0.2)
+  browLeft.rotation.z = 0.22
+
+  const browRight = browLeft.clone()
+  browRight.position.x = 0.08
+  browRight.rotation.z = -0.22
+
   const mouth = new THREE.Mesh(
-    new THREE.BoxGeometry(0.11, 0.022, 0.02),
+    new THREE.BoxGeometry(0.115, 0.026, 0.02),
     new THREE.MeshStandardMaterial({ color: '#9a4f30', roughness: 0.8 })
   )
   mouth.position.set(0, 0.47, 0.205)
   mouth.name = 'lipSyncMouth'
+  mouth.castShadow = true
 
-  const tie = new THREE.Mesh(
-    new THREE.ConeGeometry(0.04, 0.16, 4),
-    new THREE.MeshStandardMaterial({ color: '#f5a623', roughness: 0.5 })
+  root.add(
+    body,
+    neck,
+    head,
+    hat,
+    brim,
+    lapelLeft,
+    lapelRight,
+    tie,
+    glasses,
+    glasses2,
+    bridge,
+    eyeLeft,
+    eyeRight,
+    browLeft,
+    browRight,
+    mouth
   )
-  tie.position.set(0, 0.2, 0.17)
-  tie.rotation.x = Math.PI / 5
-
-  root.add(body, neck, head, hat, brim, glasses, glasses2, bridge, mouth, tie)
   return root
+}
+
+function frameObjectToCamera(object, camera) {
+  const box = new THREE.Box3().setFromObject(object)
+  if (box.isEmpty()) return
+
+  const size = box.getSize(new THREE.Vector3())
+  const center = box.getCenter(new THREE.Vector3())
+
+  object.position.sub(center)
+  object.position.y -= size.y * 0.08
+
+  const maxDim = Math.max(size.x, size.y, size.z)
+  const fov = (camera.fov * Math.PI) / 180
+  const distance = Math.max((maxDim * 0.9) / (2 * Math.tan(fov / 2)), 1.2)
+  camera.position.set(0, size.y * 0.08, distance * 1.18)
+  camera.lookAt(0, size.y * 0.08, 0)
+  camera.updateProjectionMatrix()
 }
 
 function findBestMouthTarget(root) {
@@ -217,21 +318,55 @@ export default function WebGLPersonaAvatar({
     sceneRef.current = scene
 
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50)
-    camera.position.set(0, 0.45, 2.1)
+    camera.position.set(0, 0.42, 2)
     cameraRef.current = camera
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+      premultipliedAlpha: true,
+    })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.4))
     renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.physicallyCorrectLights = true
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.08
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
     rendererRef.current = renderer
     mount.appendChild(renderer.domElement)
 
-    const ambient = new THREE.AmbientLight('#ffe7b3', 0.9)
-    const key = new THREE.DirectionalLight('#fff2d1', 1.15)
-    key.position.set(1.6, 2, 2.3)
-    const rim = new THREE.DirectionalLight('#8ab7ff', 0.55)
-    rim.position.set(-2, 1.4, -1.2)
-    scene.add(ambient, key, rim)
+    const pmrem = new THREE.PMREMGenerator(renderer)
+    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.035)
+    scene.environment = envRT.texture
+
+    const ambient = new THREE.AmbientLight('#ffe7b3', 0.58)
+    const hemi = new THREE.HemisphereLight('#ffe8cc', '#0f1725', 0.62)
+    const key = new THREE.DirectionalLight('#fff2d1', 2.1)
+    key.position.set(1.55, 2.35, 2.55)
+    key.castShadow = true
+    key.shadow.mapSize.set(1024, 1024)
+    key.shadow.camera.near = 0.2
+    key.shadow.camera.far = 8
+    key.shadow.camera.left = -1.4
+    key.shadow.camera.right = 1.4
+    key.shadow.camera.top = 1.4
+    key.shadow.camera.bottom = -1.4
+
+    const fill = new THREE.DirectionalLight('#ffe1ba', 0.62)
+    fill.position.set(-1.8, 1.25, 1.2)
+    const rim = new THREE.DirectionalLight('#8ab7ff', 0.72)
+    rim.position.set(-2.1, 1.35, -1.5)
+    scene.add(ambient, hemi, key, fill, rim)
+
+    const contactShadow = new THREE.Mesh(
+      new THREE.CircleGeometry(0.78, 48),
+      new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.2 })
+    )
+    contactShadow.rotation.x = -Math.PI / 2
+    contactShadow.position.set(0, -0.43, 0.02)
+    scene.add(contactShadow)
 
     const halo = new THREE.Mesh(
       new THREE.RingGeometry(0.62, 0.73, 48),
@@ -246,12 +381,16 @@ export default function WebGLPersonaAvatar({
 
     let cancelled = false
     const loader = new GLTFLoader()
+    const draco = new DRACOLoader()
+    draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/')
+    loader.setDRACOLoader(draco)
 
     const loadFallback = () => {
       if (cancelled) return
       root.clear()
       const fallback = createFallbackAvatar()
       root.add(fallback)
+      frameObjectToCamera(fallback, camera)
       lipRigRef.current = {
         kind: 'scale',
         mesh: findBestMouthTarget(fallback),
@@ -347,9 +486,24 @@ export default function WebGLPersonaAvatar({
           if (cancelled) return
           root.clear()
           const model = gltf.scene
-          model.position.set(0, -0.1, 0)
+          model.position.set(0, -0.08, 0)
           model.scale.setScalar(1.05)
+
+          model.traverse((node) => {
+            if (!node.isMesh) return
+            node.castShadow = true
+            node.receiveShadow = true
+            if (node.material && !Array.isArray(node.material)) {
+              node.material.envMapIntensity = Math.max(node.material.envMapIntensity || 0, 1.18)
+              if (typeof node.material.roughness === 'number') {
+                node.material.roughness = Math.min(node.material.roughness, 0.92)
+              }
+              node.material.needsUpdate = true
+            }
+          })
+
           root.add(model)
+          frameObjectToCamera(model, camera)
           lipRigRef.current = findLipRig(model)
 
           if (Array.isArray(gltf.animations) && gltf.animations.length > 0) {
@@ -398,16 +552,16 @@ export default function WebGLPersonaAvatar({
       }
 
       if (rootObj) {
-        const idleAmp = activeMode === 'talking' ? 0.028 : 0.018
+        const idleAmp = activeMode === 'talking' ? 0.022 : 0.014
         rootObj.position.y = Math.sin(elapsed * 1.6) * idleAmp
-        rootObj.rotation.y = Math.sin(elapsed * 0.85) * 0.1
+        rootObj.rotation.y = Math.sin(elapsed * 0.85) * 0.07
 
         if (activeMode === 'listening') {
-          rootObj.rotation.x = Math.sin(elapsed * 1.2) * 0.05
+          rootObj.rotation.x = Math.sin(elapsed * 1.2) * 0.035
         } else if (activeMode === 'wave') {
-          rootObj.rotation.z = Math.sin(elapsed * 3.6) * 0.08
+          rootObj.rotation.z = Math.sin(elapsed * 3.6) * 0.06
         } else {
-          rootObj.rotation.x = Math.sin(elapsed * 0.7) * 0.02
+          rootObj.rotation.x = Math.sin(elapsed * 0.7) * 0.014
           rootObj.rotation.z = 0
         }
       }
@@ -439,6 +593,9 @@ export default function WebGLPersonaAvatar({
     disposeFnsRef.current.push(() => {
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(raf)
+      draco.dispose()
+      pmrem.dispose()
+      envRT.dispose()
       renderer.dispose()
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose()

@@ -566,7 +566,7 @@ export default function AIConciergeBubble() {
               <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/20 via-transparent to-sky-300/15 blur-xl pointer-events-none" />
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
-                <div className="w-[104px] h-[104px] rounded-full border border-primary/45 bg-black/55 overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
+                <div className="w-[116px] h-[116px] rounded-full border border-primary/55 bg-black/60 overflow-hidden shadow-[0_22px_44px_rgba(0,0,0,0.52)]">
                   <WebGLPersonaAvatar
                     mode={avatarState}
                     speechPulse={speechPulse}
@@ -615,7 +615,7 @@ export default function AIConciergeBubble() {
             {/* Header */}
             <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full border border-primary/40 overflow-hidden bg-black/50">
+                <div className="w-12 h-12 rounded-full border border-primary/50 overflow-hidden bg-black/55 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
                   <WebGLPersonaAvatar
                     mode={avatarState}
                     speechPulse={speechPulse}
