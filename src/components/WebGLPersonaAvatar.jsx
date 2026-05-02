@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
 const DEFAULT_MODEL_URL = '/models/mr-worden.glb'
 const MODEL_PATH_CANDIDATES = [
@@ -259,6 +262,8 @@ export default function WebGLPersonaAvatar({
   const mixerRef = useRef(null)
   const actionsRef = useRef({})
   const activeActionRef = useRef(null)
+  const pointerTargetRef = useRef({ x: 0, y: 0 })
+  const pointerCurrentRef = useRef({ x: 0, y: 0 })
 
   const selectClipByMode = (actions, activeMode) => {
     const modeOrder = {
@@ -314,6 +319,11 @@ export default function WebGLPersonaAvatar({
     const mount = mountRef.current
     if (!mount) return undefined
 
+    const requestedQuality = String(import.meta.env.VITE_CONCIERGE_AVATAR_RENDER_QUALITY || 'ultra').toLowerCase()
+    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+    const isUltra = requestedQuality === 'ultra' || requestedQuality === '4k' || requestedQuality === 'cinematic'
+    const isHigh = isUltra || requestedQuality === 'high'
+
     const scene = new THREE.Scene()
     sceneRef.current = scene
 
@@ -327,15 +337,22 @@ export default function WebGLPersonaAvatar({
       powerPreference: 'high-performance',
       premultipliedAlpha: true,
     })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.4))
+    const maxDpr = isMobile ? 2 : isUltra ? 3 : isHigh ? 2.4 : 2
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.physicallyCorrectLights = true
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.08
+    renderer.toneMappingExposure = isUltra ? 1.14 : 1.08
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     rendererRef.current = renderer
     mount.appendChild(renderer.domElement)
+
+    const composer = new EffectComposer(renderer)
+    const renderPass = new RenderPass(scene, camera)
+    composer.addPass(renderPass)
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), isUltra ? 0.38 : 0.28, 0.56, 0.87)
+    composer.addPass(bloomPass)
 
     const pmrem = new THREE.PMREMGenerator(renderer)
     const envRT = pmrem.fromScene(new RoomEnvironment(), 0.035)
@@ -346,7 +363,8 @@ export default function WebGLPersonaAvatar({
     const key = new THREE.DirectionalLight('#fff2d1', 2.1)
     key.position.set(1.55, 2.35, 2.55)
     key.castShadow = true
-    key.shadow.mapSize.set(1024, 1024)
+    const shadowSize = isUltra ? 2048 : 1024
+    key.shadow.mapSize.set(shadowSize, shadowSize)
     key.shadow.camera.near = 0.2
     key.shadow.camera.far = 8
     key.shadow.camera.left = -1.4
@@ -533,11 +551,30 @@ export default function WebGLPersonaAvatar({
       const w = mount.clientWidth || 220
       const h = mount.clientHeight || 220
       renderer.setSize(w, h, false)
+      composer.setSize(w, h)
+      bloomPass.setSize(w, h)
       camera.aspect = w / h
       camera.updateProjectionMatrix()
     }
     resize()
     window.addEventListener('resize', resize)
+
+    const onPointerMove = (event) => {
+      const rect = mount.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      const nx = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      const ny = ((event.clientY - rect.top) / rect.height) * 2 - 1
+      pointerTargetRef.current.x = Math.max(-1, Math.min(1, nx))
+      pointerTargetRef.current.y = Math.max(-1, Math.min(1, ny))
+    }
+
+    const onPointerLeave = () => {
+      pointerTargetRef.current.x = 0
+      pointerTargetRef.current.y = 0
+    }
+
+    mount.addEventListener('pointermove', onPointerMove)
+    mount.addEventListener('pointerleave', onPointerLeave)
 
     let raf = 0
     const renderLoop = () => {
@@ -545,6 +582,15 @@ export default function WebGLPersonaAvatar({
       const rootObj = rootRef.current
       const activeMode = modeRef.current
       const delta = clockRef.current.getDelta()
+
+      pointerCurrentRef.current.x += (pointerTargetRef.current.x - pointerCurrentRef.current.x) * 0.06
+      pointerCurrentRef.current.y += (pointerTargetRef.current.y - pointerCurrentRef.current.y) * 0.06
+
+      const parallaxX = pointerCurrentRef.current.x * 0.1
+      const parallaxY = pointerCurrentRef.current.y * 0.06
+      camera.position.x += (parallaxX - camera.position.x) * 0.06
+      camera.position.y += ((0.42 - parallaxY) - camera.position.y) * 0.06
+      camera.lookAt(0, 0.08, 0)
 
       if (mixerRef.current) {
         applyActionForMode(activeMode)
@@ -585,17 +631,20 @@ export default function WebGLPersonaAvatar({
         }
       }
 
-      renderer.render(scene, camera)
+      composer.render()
       raf = requestAnimationFrame(renderLoop)
     }
     raf = requestAnimationFrame(renderLoop)
 
     disposeFnsRef.current.push(() => {
       window.removeEventListener('resize', resize)
+      mount.removeEventListener('pointermove', onPointerMove)
+      mount.removeEventListener('pointerleave', onPointerLeave)
       cancelAnimationFrame(raf)
       draco.dispose()
       pmrem.dispose()
       envRT.dispose()
+      composer.dispose()
       renderer.dispose()
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose()
