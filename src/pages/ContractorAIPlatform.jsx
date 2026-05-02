@@ -7,7 +7,7 @@ import SEO from '@/components/SEO'
 import { trackPhoneClick } from '@/lib/analytics'
 
 const REAL_PROJECT_IMAGES = [
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg',
   'https://media.base44.com/images/public/69c853446b8987b1630018ff/f509f8a57_20180209_014704733_iOS.jpg',
   'https://media.base44.com/images/public/69c853446b8987b1630018ff/08ae6c2a8_20180209_021155875_iOS.jpg',
 ]
