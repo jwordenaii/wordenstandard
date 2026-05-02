@@ -1,149 +1,121 @@
-const makeId = () => `local_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+/**
+ * API client — reads VITE_API_BASE_URL at build time.
+ * Falls back to relative paths so the frontend still works when
+ * the backend is not yet deployed.
+ *
+ * All requests include a 10-second AbortController timeout so the UI
+ * never hangs indefinitely on a slow/down backend.
+ */
 
-const readStore = (name) => {
+const BASE = import.meta.env.VITE_API_BASE_URL || ''
+const DEFAULT_TIMEOUT_MS = 10_000
+
+async function request(method, path, body) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
+
+  const headers = { 'Content-Type': 'application/json' }
+
+  const opts = {
+    method,
+    headers,
+    signal: controller.signal,
+  }
+  if (body) opts.body = JSON.stringify(body)
+
   try {
-    return JSON.parse(localStorage.getItem(`jworden_${name}`) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const writeStore = (name, rows) => {
-  try {
-    localStorage.setItem(`jworden_${name}`, JSON.stringify(rows));
-  } catch {
-    // Ignore storage failures so the public site never crashes.
-  }
-};
-
-const makeEntity = (name) => ({
-  async list() {
-    return readStore(name);
-  },
-  async filter(criteria = {}) {
-    const rows = readStore(name);
-    return rows.filter((row) =>
-      Object.entries(criteria).every(([key, value]) => row?.[key] === value)
-    );
-  },
-  async get(id) {
-    return readStore(name).find((row) => row.id === id) || null;
-  },
-  async create(payload = {}) {
-    const rows = readStore(name);
-    const row = {
-      id: makeId(),
-      created_date: new Date().toISOString(),
-      ...payload
-    };
-    rows.unshift(row);
-    writeStore(name, rows);
-    return row;
-  },
-  async update(id, payload = {}) {
-    const rows = readStore(name);
-    const updated = rows.map((row) => (row.id === id ? { ...row, ...payload } : row));
-    writeStore(name, updated);
-    return updated.find((row) => row.id === id) || null;
-  },
-  async delete(id) {
-    writeStore(name, readStore(name).filter((row) => row.id !== id));
-    return { success: true };
-  }
-});
-
-const fallbackReviews = {
-  configured: false,
-  rating: 5,
-  total: 0,
-  reviews: [],
-  mapsUri: "https://www.google.com/search?q=J.+Worden+%26+Sons+Paving"
-};
-
-const functionHandlers = {
-  async fetchGoogleReviews() {
-    return { data: fallbackReviews };
-  },
-  async analyzeDrivewayPhoto() {
-    return {
-      data: {
-        summary: "Photo analysis is disabled in this standalone Netlify build until an AI backend is connected.",
-        recommendation: "Call 804-446-1296 for a field review.",
-        pci_score: null
-      }
-    };
-  },
-  async generateInstantQuotePdf() {
-    return { data: { success: false, message: "PDF generation requires backend reconnection." } };
-  },
-  async generateProposalPDF() {
-    return { data: { success: false, message: "Proposal generation requires backend reconnection." } };
-  },
-  async submitReferral(payload) {
-    const referral = await base44.entities.Referral.create(payload);
-    return { data: referral };
-  },
-  async checkWeatherForJobs() {
-    return { data: { configured: false, alerts: [] } };
-  }
-};
-
-export const base44 = {
-  auth: {
-    async me() {
-      throw new Error("Standalone build has no Base44 auth session.");
-    },
-    logout() {
-      return null;
-    },
-    redirectToLogin() {
-      alert("Admin login is disabled in this standalone Netlify build.");
+    const res = await fetch(`${BASE}${path}`, opts)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail || `HTTP ${res.status}`)
     }
-  },
-  entities: {
-    AppSettings: makeEntity("AppSettings"),
-    BeforeAfter: makeEntity("BeforeAfter"),
-    BlogPost: makeEntity("BlogPost"),
-    CaseStudy: makeEntity("CaseStudy"),
-    Job: makeEntity("Job"),
-    Lead: makeEntity("Lead"),
-    LeadCommunication: makeEntity("LeadCommunication"),
-    Project: makeEntity("Project"),
-    ProjectDocument: makeEntity("ProjectDocument"),
-    Referral: makeEntity("Referral"),
-    SyncState: makeEntity("SyncState"),
-    User: makeEntity("User"),
-    VoiceCall: makeEntity("VoiceCall")
-  },
-  functions: {
-    async invoke(name, payload = {}) {
-      if (functionHandlers[name]) return functionHandlers[name](payload);
-      return { data: { success: false, message: `${name} is not connected in standalone mode.` } };
+    return res.json()
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
     }
-  },
-  integrations: {
-    Core: {
-      async UploadFile({ file }) {
-        return { file_url: URL.createObjectURL(file) };
-      },
-      async SendEmail() {
-        return { success: false, message: "Email backend not connected." };
-      },
-      async InvokeLLM() {
-        return { success: false, message: "AI backend not connected." };
-      }
-    }
-  },
-  agents: {
-    async createConversation() {
-      return { id: makeId(), messages: [] };
-    },
-    subscribeToConversation(_id, cb) {
-      cb?.({ messages: [] });
-      return () => null;
-    },
-    async addMessage() {
-      return { success: true };
-    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
   }
-};
+}
+
+/** Build a query string from an object, omitting null/undefined/empty values. */
+function buildQS(params) {
+  const qs = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+    )
+  ).toString()
+  return qs ? `?${qs}` : ''
+}
+
+export const api = {
+  submitQuote: (data) => request('POST', '/api/v1/leads/quote', data),
+  submitContact: (data) => request('POST', '/api/v1/leads/contact', data),
+  getReviews: () => request('GET', '/api/v1/reviews'),
+  getSchema: () => request('GET', '/api/v1/schema/local-business'),
+  askAI: (data) => request('POST', '/api/v1/ai/chat', data),
+  // Mr. Worden premium public concierge — structured response with quick replies + handoff
+  publicChat: (data) => request('POST', '/api/v1/public/chat', data),
+  // AI-assisted contact form field suggestions (page_context + message → service_type + hint)
+  contactSuggest: (data) => request('POST', '/api/v1/ai/contact-suggest', data),
+  // Content blocks managed via the admin Webpage Maker.
+  // The frontend uses these as optional overrides — hardcoded defaults remain
+  // in place if a block is missing (graceful degradation).
+  getContent: () => request('GET', '/api/v1/content'),
+  getContentBlock: (key) => request('GET', `/api/v1/content/${key}`),
+  // ── Geospatial ─────────────────────────────────────────────────────────────
+  getSites: () => request('GET', '/api/v1/geo/sites'),
+  createSite: (data) => request('POST', '/api/v1/geo/sites', data),
+  updateSite: (id, data) => request('PUT', `/api/v1/geo/sites/${id}`, data),
+  getPermitLeads: (params = {}) => {
+    return request('GET', `/api/v1/geo/permit-leads${buildQS(params)}`)
+  },
+  triggerScrape: (maxPages = 5) =>
+    request('POST', `/api/v1/geo/permit-leads/scrape?max_pages=${maxPages}`),
+  radiusQuery: (lat, lng, miles = 20) =>
+    request('GET', `/api/v1/geo/radius-query?lat=${lat}&lng=${lng}&radius_miles=${miles}`),
+  getTrucks: () => request('GET', '/api/v1/geo/trucks'),
+  pingTruck: (id, data) => request('POST', `/api/v1/geo/trucks/${id}`, data),
+  // ── Virtual Foreman ────────────────────────────────────────────────────────
+  askForeman: (data) => request('POST', '/api/v1/foreman/chat', data),
+  getForemanStatus: () => request('GET', '/api/v1/foreman/status'),
+  getVisionResult: (jobId) => request('GET', `/api/v1/ai/vision-result/${jobId}`),
+  // ── Property Visualizer (public, anonymous) ───────────────────────────────
+  scanParcel: (data) => request('POST', '/api/v1/visualizer/parcel', data),
+  submitVisualProposal: (data) => request('POST', '/api/v1/visualizer/proposal', data),
+  getAIDesignSuggestions: (data) => request('POST', '/api/v1/visualizer/ai-suggestions', data),
+  // ── Proposals + Stripe checkout (post-quote pipeline) ─────────────────────
+  generateProposal: (leadId) =>
+    request('POST', '/api/v1/proposals/generate', { lead_id: leadId, include_pdf: true }),
+  sendProposal: (leadId) => request('POST', `/api/v1/proposals/${leadId}/send`),
+  createCheckoutSession: (leadId, successUrl, cancelUrl) =>
+    request('POST', '/api/v1/payments/checkout-session', {
+      lead_id: leadId,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    }),
+  // ── National permit feed (Command Center) ─────────────────────────────────
+  getNationalPermits: (states, keyword, limit = 50) => {
+    const params = { keyword, limit }
+    if (Array.isArray(states) && states.length) params.states = states.join(',')
+    return request('GET', `/api/v1/permits/national${buildQS(params)}`)
+  },
+}
+
+// ── GA4 event helpers ─────────────────────────────────────────────────────────
+export function trackEvent(eventName, params = {}) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, params)
+  }
+}
+
+export function trackPageView(path, title) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'page_view', {
+      page_path: path,
+      page_title: title,
+    })
+  }
+}
