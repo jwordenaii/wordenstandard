@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Save, Send, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 
 const SETTINGS_KEY = 'slack_config';
 const DEFAULTS = {
@@ -21,7 +21,7 @@ export default function SlackSettingsForm() {
 
   useEffect(() => {
     (async () => {
-      const list = await base44.entities.AppSettings.filter({ key: SETTINGS_KEY });
+      const list = await api.entities.AppSettings.filter({ key: SETTINGS_KEY });
       if (list?.[0]) {
         setRecordId(list[0].id);
         setSettings({ ...DEFAULTS, ...list[0] });
@@ -45,9 +45,9 @@ export default function SlackSettingsForm() {
         slack_enabled: settings.slack_enabled,
       };
       if (recordId) {
-        await base44.entities.AppSettings.update(recordId, payload);
+        await api.entities.AppSettings.update(recordId, payload);
       } else {
-        const created = await base44.entities.AppSettings.create(payload);
+        const created = await api.entities.AppSettings.create(payload);
         setRecordId(created.id);
       }
       toast.success('Slack settings saved.');
@@ -65,7 +65,7 @@ export default function SlackSettingsForm() {
     }
     setTesting(true);
     try {
-      const response = await base44.functions.invoke('notifyNewLeadSlack', {
+      const response = await api.functions.invoke('notifyNewLeadSlack', {
         data: {
           name: 'TEST — Jane Homeowner',
           phone: '(804) 555-0123',

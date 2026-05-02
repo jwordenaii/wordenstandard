@@ -627,6 +627,273 @@ class ProjectRetrospective(Base):
         return f"<ProjectRetrospective id={self.id} project={self.project_name!r}>"
 
 
+# ── Site metrics / dashboard ──────────────────────────────────────────────────
+
+class SiteEvaluation(Base):
+    """
+    Monthly compliance + ad-ROI snapshot used by the Command Center dashboard.
+
+    Records are inserted once per month (or on demand via admin tooling).
+    The ``compliance_score`` is a 0-100 percentage; ``ad_roi`` is a multiplier
+    (e.g. 3.1 means $3.10 returned per $1 spent).
+    """
+
+    __tablename__ = "site_evaluations"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    compliance_score = Column(Float,   nullable=False)          # 0-100
+    ad_roi           = Column(Float,   nullable=False)          # e.g. 3.1
+    notes            = Column(Text,    nullable=True)
+    tenant_id        = Column(String(60), nullable=True, index=True, default="default")
+    last_checked     = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<SiteEvaluation id={self.id} compliance={self.compliance_score} roi={self.ad_roi}>"
+
+
+# ── Regional Base Evaluator ───────────────────────────────────────────────────
+
+class RegionalBaseEvaluation(Base):
+    """
+    Per-site regional base evaluation driven by local DOT specs, soil data,
+    and environmental conditions.  Replaces the flat 6-inch base assumption
+    with a calculated depth for each site location.
+
+    Fields:
+      site_location       — Human-readable address / area (e.g. "Tuckahoe, VA")
+      dot_standard        — VDOT or state DOT spec applied (e.g. "VDOT SM-9.5A")
+      soil_type           — 0.0 (very soft/clay) to 1.0 (hard/rock) bearing index
+      required_base_depth — Calculated minimum aggregate base depth in inches
+      compliance_status   — Pending | Compliant | NonCompliant | Waived
+      evaluated_by        — Who/what engine ran the evaluation (e.g. "SupremeCourtAI")
+      notes               — Free-text evaluation notes / recommendations
+      tenant_id           — Multi-tenant isolation key
+    """
+
+    __tablename__ = "regional_base_evaluations"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    site_location       = Column(String(300), nullable=False)
+    dot_standard        = Column(String(120), nullable=True)
+    soil_type           = Column(Float,       nullable=True)   # 0.0–1.0
+    required_base_depth = Column(Float,       nullable=True)   # inches
+    compliance_status   = Column(String(30),  nullable=False, default="Pending")
+    evaluated_by        = Column(String(80),  nullable=True, default="SupremeCourtAI")
+    notes               = Column(Text,        nullable=True)
+    tenant_id           = Column(String(60),  nullable=True, index=True, default="default")
+    created_at          = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at          = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<RegionalBaseEvaluation id={self.id} "
+            f"location={self.site_location!r} depth={self.required_base_depth}in "
+            f"status={self.compliance_status!r}>"
+        )
+
+
+# ── Compaction telemetry ──────────────────────────────────────────────────────
+
+class CompactionLog(Base):
+    """
+    GPS-tagged compaction pass record from intelligent rollers.
+
+    Each ping represents one compaction pass at a specific lat/lng.
+    Aggregate these records by project_site_id to render a heat map of
+    pass count and mat density across the paving surface.
+
+    Fields:
+      roller_id         — Equipment ID or tail number
+      pass_number       — Sequential pass count at this location
+      mat_temp_f        — Asphalt mat temperature at time of pass (°F)
+      mat_thickness_in  — Measured mat thickness (inches)
+      density_pct       — Achieved density as % of target (e.g. 96.5)
+      speed_mph         — Roller ground speed during pass
+      gps_accuracy_ft   — GPS fix accuracy (feet)
+    """
+
+    __tablename__ = "compaction_logs"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    project_site_id   = Column(Integer, nullable=True, index=True)
+    roller_id         = Column(String(60), nullable=False, index=True)
+    operator_name     = Column(String(120), nullable=True)
+    lat               = Column(Float, nullable=False)
+    lng               = Column(Float, nullable=False)
+    pass_number       = Column(Integer, nullable=True)
+    mat_temp_f        = Column(Float, nullable=True)
+    mat_thickness_in  = Column(Float, nullable=True)
+    density_pct       = Column(Float, nullable=True)   # % of target density
+    speed_mph         = Column(Float, nullable=True)
+    gps_accuracy_ft   = Column(Float, nullable=True)
+    notes             = Column(Text,  nullable=True)
+    tenant_id         = Column(String(60), nullable=True, index=True, default="default")
+    logged_at         = Column(DateTime(timezone=True), default=_utcnow, nullable=False, index=True)
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<CompactionLog id={self.id} roller={self.roller_id!r} "
+            f"site={self.project_site_id} density={self.density_pct}%>"
+        )
+
+
+# ── Drone scan records ────────────────────────────────────────────────────────
+
+class DroneScan(Base):
+    """
+    Drone-based site capture record (photogrammetry, LiDAR, or thermal).
+
+    Stores the scan metadata, AI-detected findings, and a GeoJSON summary
+    of detected deviations or missing elements against the design model.
+
+    Fields:
+      scan_type         — photogrammetry | lidar | thermal | rgb
+      resolution_cm     — Ground sample distance (cm); lower = more precise
+      coverage_sqft     — Area covered by the flight
+      geojson_summary   — FeatureCollection JSON of detected anomalies
+      findings_json     — Structured list of AI-flagged issues
+      deviation_count   — Number of deviations vs design model
+      risk_level        — LOW | MEDIUM | HIGH | CRITICAL
+    """
+
+    __tablename__ = "drone_scans"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    project_site_id   = Column(Integer, nullable=False, index=True)
+    scan_type         = Column(String(60), nullable=False, default="photogrammetry")
+    operator_name     = Column(String(120), nullable=True)
+    drone_model       = Column(String(120), nullable=True)
+    flight_altitude_ft = Column(Float, nullable=True)
+    coverage_sqft     = Column(Float, nullable=True)
+    resolution_cm     = Column(Float, nullable=True)   # ground sample distance
+    geojson_url       = Column(String(500), nullable=True)   # remote storage URL
+    geojson_summary   = Column(Text, nullable=True)          # FeatureCollection JSON
+    findings_json     = Column(Text, nullable=True)          # [{issue, severity, lat, lng}]
+    ai_summary        = Column(Text, nullable=True)
+    deviation_count   = Column(Integer, nullable=True, default=0)
+    risk_level        = Column(String(20), nullable=False, default="UNKNOWN")
+    notes             = Column(Text, nullable=True)
+    tenant_id         = Column(String(60), nullable=True, index=True, default="default")
+    scanned_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False, index=True)
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<DroneScan id={self.id} site={self.project_site_id} "
+            f"type={self.scan_type!r} risk={self.risk_level!r}>"
+        )
+
+
+# ── 50-State License Compliance ───────────────────────────────────────────────
+
+class LicenseVerificationLog(Base):
+    """
+    Immutable audit record for every contractor/subcontractor license check.
+
+    Each time the compliance engine verifies a license (scheduled daily or
+    on-demand), a new row is inserted.  Never updated — query by
+    ``license_number + state_code`` ordered by ``checked_at`` desc for the
+    latest status.
+
+    Fields:
+      entity_name     — Business name on the license (as returned by the API)
+      state_code      — Two-letter state code (e.g. "VA", "CA")
+      license_number  — License ID from the state board
+      license_type    — e.g. "Class A Contractor", "C-32 Asphalt"
+      status          — Active | Expired | Suspended | Cancelled | Unknown
+      expiration_date — Parsed expiration date (nullable)
+      days_until_exp  — Computed days remaining at time of check
+      is_compliant    — True when status == Active and not within 7-day window
+      api_source      — Which provider returned the result (Apify | Shovels | stub)
+      raw_json        — Full API response blob for audit
+      subcontractor_id — FK to subcontractor roster (soft ref, nullable)
+      tenant_id       — Multi-tenant isolation key
+    """
+
+    __tablename__ = "license_verification_logs"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    entity_name      = Column(String(200), nullable=True)
+    state_code       = Column(String(2),   nullable=False, index=True)
+    license_number   = Column(String(100), nullable=False, index=True)
+    license_type     = Column(String(120), nullable=True)
+    status           = Column(String(40),  nullable=False, default="Unknown")
+    expiration_date  = Column(DateTime(timezone=True), nullable=True)
+    days_until_exp   = Column(Integer, nullable=True)
+    is_compliant     = Column(Boolean, nullable=False, default=False)
+    api_source       = Column(String(60), nullable=True)
+    raw_json         = Column(Text, nullable=True)
+    subcontractor_id = Column(Integer, nullable=True, index=True)
+    tenant_id        = Column(String(60), nullable=True, index=True, default="default")
+    checked_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False, index=True)
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<LicenseVerificationLog id={self.id} "
+            f"state={self.state_code} lic={self.license_number!r} "
+            f"status={self.status!r} compliant={self.is_compliant}>"
+        )
+
+
+# ── Advertising Intelligence ──────────────────────────────────────────────────
+
+class AdUrlExclusion(Base):
+    """
+    URL path patterns excluded from Google Ads AI Max URL expansion.
+
+    Prevents the AI Max system from routing paid traffic to non-converting
+    pages (blog, careers, FAQ, legal, admin).  Default patterns are hardcoded
+    in ad_signals.py; this table stores operator-added custom exclusions.
+    """
+
+    __tablename__ = "ad_url_exclusions"
+
+    id           = Column(Integer, primary_key=True, index=True)
+    path_pattern = Column(String(300), nullable=False, unique=True)
+    reason       = Column(String(200), nullable=True)
+    created_by   = Column(String(120), nullable=True)
+    tenant_id    = Column(String(60),  nullable=True, index=True, default="default")
+    is_active    = Column(Boolean,     nullable=False, default=True)
+    created_at   = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<AdUrlExclusion id={self.id} pattern={self.path_pattern!r} active={self.is_active}>"
+
+
+class AnomalyAlert(Base):
+    """
+    Persistent anomaly detection alerts for key business metrics.
+
+    Generated by anomaly_detector.run_all_checks() and persisted by
+    persist_anomalies().  The Celery beat task runs every 30 minutes.
+    Alerts are resolved manually via the /api/v1/ads/anomalies/{id}/resolve
+    endpoint, or automatically when the underlying condition clears.
+
+    Metrics: lead_volume_24h | hot_lead_rate | cool_lead_surge | zero_lead_gap
+    Severity: LOW | MEDIUM | HIGH | CRITICAL
+    """
+
+    __tablename__ = "anomaly_alerts"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    metric_name     = Column(String(80),  nullable=False, index=True)
+    current_value   = Column(Float,       nullable=False)
+    baseline_value  = Column(Float,       nullable=False)
+    z_score         = Column(Float,       nullable=True)
+    severity        = Column(String(10),  nullable=False, index=True)
+    message         = Column(String(500), nullable=False)
+    resolved_at     = Column(DateTime(timezone=True), nullable=True)
+    tenant_id       = Column(String(60),  nullable=True, index=True, default="default")
+    detected_at     = Column(DateTime(timezone=True), nullable=False, default=_utcnow, index=True)
+    created_at      = Column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+    def __repr__(self) -> str:
+        return f"<AnomalyAlert id={self.id} metric={self.metric_name!r} severity={self.severity!r}>"
+
+
 # ── Safety ────────────────────────────────────────────────────────────────────
 
 class SafetyToolboxTalk(Base):
@@ -916,3 +1183,70 @@ class TwoFactorSecret(Base):
 
     def __repr__(self) -> str:
         return f"<TwoFactorSecret user_id={self.user_id!r} enabled={self.enabled}>"
+
+
+# ── GC Cost Catalog + Project Estimates ───────────────────────────────────────
+
+class ProductItem(Base):
+    """
+    Material/labor price catalog for the General Contracting cost estimator.
+
+    Each item defines a unit cost (base_rate) and optional separate labor_rate.
+    The estimator multiplies quantity × (base_rate + labor_rate) × (1 + markup_pct)
+    to produce a line-item total.
+
+    Common units: sq_ft | linear_ft | ea | ton | cubic_yd | hour
+    Categories:   flooring | framing | roofing | concrete | asphalt |
+                  electrical | plumbing | mechanical | finishes | other
+    """
+
+    __tablename__ = "product_catalog"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    category    = Column(String(60),  nullable=False, index=True, default="other")
+    name        = Column(String(200), nullable=False)
+    unit        = Column(String(30),  nullable=False)   # sq_ft | linear_ft | ea | ton …
+    base_rate   = Column(Float,       nullable=False, default=0.0)   # $/unit material
+    labor_rate  = Column(Float,       nullable=False, default=0.0)   # $/unit labor
+    description = Column(String(300), nullable=True)
+    is_active   = Column(Boolean,     nullable=False, default=True)
+    tenant_id   = Column(String(60),  nullable=True, index=True, default="default")
+    created_at  = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at  = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ProductItem id={self.id} name={self.name!r} unit={self.unit!r}>"
+
+
+class ProjectEstimate(Base):
+    """
+    Line-item cost estimate for a GC project.
+
+    Each row ties one ProductItem to a project site with a calculated quantity,
+    producing a total_cost.  A project can have many estimate lines.
+    Totaling all active lines for a project_site_id gives the project estimate.
+
+    The markup_pct column supports per-line profit margin control
+    (e.g. 0.20 = 20% markup over base+labor cost).
+    """
+
+    __tablename__ = "project_estimates"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    project_site_id  = Column(Integer, nullable=True, index=True)   # FK to project_sites (soft ref)
+    item_id          = Column(Integer, nullable=True, index=True)   # FK to product_catalog (soft ref)
+    item_name        = Column(String(200), nullable=True)           # Snapshot of name at estimate time
+    unit             = Column(String(30),  nullable=True)
+    quantity         = Column(Float, nullable=False, default=0.0)
+    base_rate        = Column(Float, nullable=False, default=0.0)   # Snapshot at estimate time
+    labor_rate       = Column(Float, nullable=False, default=0.0)
+    markup_pct       = Column(Float, nullable=False, default=0.15)  # Default 15% GC markup
+    total_cost       = Column(Float, nullable=False, default=0.0)   # Computed: qty×(base+labor)×(1+markup)
+    notes            = Column(String(300), nullable=True)
+    created_by       = Column(String(120), nullable=True)
+    tenant_id        = Column(String(60),  nullable=True, index=True, default="default")
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at       = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ProjectEstimate id={self.id} site_id={self.project_site_id} item={self.item_name!r} total=${self.total_cost:.2f}>"

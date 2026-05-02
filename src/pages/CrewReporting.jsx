@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Users, TrendingUp, Zap, Calendar } from 'lucide-react';
 
@@ -11,7 +11,7 @@ export default function CrewReporting() {
 
   useEffect(() => {
     const fetchMetrics = async () => {
-      const response = await base44.functions.invoke('crewMetrics', {});
+      const response = await api.functions.invoke('crewMetrics', {});
       setMetrics(response.data);
       setLoading(false);
     };

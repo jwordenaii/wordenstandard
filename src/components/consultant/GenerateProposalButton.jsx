@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { FileText, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -16,7 +16,7 @@ export default function GenerateProposalButton({ lead, onGenerated }) {
     setGenerating(true);
     setResult(null);
     try {
-      const response = await base44.functions.invoke('generateProposalPDF', {
+      const response = await api.functions.invoke('generateProposalPDF', {
         lead_id: lead.id,
       });
       const data = response?.data || response;

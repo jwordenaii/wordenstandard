@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Loader2, Sparkles, Camera, AlertTriangle, CheckCircle2, Wrench } from 'lucide-react';
+import { Loader2, Sparkles, Camera, AlertTriangle, CheckCircle2, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { trackPhotoAnalysis, trackEvent } from '@/lib/analytics';
 
 function clamp01(value) {
@@ -91,10 +91,10 @@ export default function AIPhotoInspector() {
       const enrichedContext = [context.trim(), markupSummary].filter(Boolean).join(' ');
 
       // Upload file to get a public URL
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.integrations.Core.UploadFile({ file });
 
       // Call the Claude Opus-powered backend function
-      const response = await base44.functions.invoke('analyzeDrivewayPhoto', {
+      const response = await api.functions.invoke('analyzeDrivewayPhoto', {
         imageUrl: file_url,
         context: enrichedContext || undefined,
         markup: markupPoints.length ? markup : undefined,

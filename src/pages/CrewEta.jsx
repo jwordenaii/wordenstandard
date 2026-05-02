@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { MapPin, Truck, Users, Clock, Phone, Loader2, CheckCircle2 } from 'lucide-react';
 
 /**
@@ -25,7 +25,7 @@ export default function CrewEta() {
 
     const load = async () => {
       try {
-        const j = await base44.entities.Job.get(jobId);
+        const j = await api.entities.Job.get(jobId);
         setJob(j);
       } catch {
         setError('Could not load job details');

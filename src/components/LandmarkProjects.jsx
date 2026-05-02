@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 // Landmark commercial projects — high-profile, nationally recognized jobs
 // that validate J. Worden & Sons' ability to execute at the highest tier.
@@ -13,7 +13,7 @@ const LANDMARKS = [
     description:
       'At J. Worden & Sons Paving LLC, we\'ve completed parking lot paving, asphalt repairs, sealcoating, and line striping for major brands including KFC, Taco Bell, Arby\'s, and Wendy\'s across multiple states. Our team understands the demands of high-traffic commercial properties and delivers durable, professional results that meet strict standards.\n\nWe were also selected to perform asphalt patching, sealcoating, and precision line striping at one of America\'s most recognizable roadside landmarks—home to the iconic 56-foot steel rooster listed on the National Register. This high-traffic site required careful scheduling, attention to detail, and a clean, long-lasting finish while keeping the property fully operational.',
     image:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/f1a0645cc_big.jpg',
+      'https://media.api.com/images/public/69c853446b8987b1630018ff/f1a0645cc_big.jpg',
     badge: 'National Landmark',
     details: [
       { label: 'Location', value: 'Marietta, Georgia' },
@@ -30,7 +30,7 @@ const LANDMARKS = [
     description:
       'Executed every square foot of concrete and asphalt work on this flagship "3-in-1" combo restaurant — one of the most complex QSR builds in the country, combining three major brands under one roof. 34,000 sq ft of paved surface, drive-thru lanes, and engineered drainage — delivered on spec, on time.',
     image:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/a07dfd0b9_20171113_184141474_iOS.jpg',
+      'https://media.api.com/images/public/69c853446b8987b1630018ff/a07dfd0b9_20171113_184141474_iOS.jpg',
     badge: 'Flagship Build',
     details: [
       { label: 'Location', value: 'Overland Park, KS' },

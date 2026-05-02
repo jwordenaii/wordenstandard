@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio, Phone, Sparkles, ShieldCheck } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import WebGLPersonaAvatar from './WebGLPersonaAvatar';
 import SmartImage from './SmartImage';
 import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
@@ -331,7 +331,7 @@ export default function AIConciergeBubble() {
     if (conversation) return conversation;
     setBooting(true);
     try {
-      const conv = await base44.agents.createConversation({
+      const conv = await api.agents.createConversation({
         agent_name: 'paving_consultant',
         metadata: {
           name: 'Website Visitor Chat',
@@ -358,7 +358,7 @@ export default function AIConciergeBubble() {
   // Subscribe to conversation updates
   useEffect(() => {
     if (!conversation?.id) return;
-    const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
+    const unsubscribe = api.agents.subscribeToConversation(conversation.id, (data) => {
       if (Array.isArray(data?.messages) && data.messages.length > 0) {
         setMessages(data.messages.map(styleFounderMessage));
       }
@@ -498,9 +498,9 @@ export default function AIConciergeBubble() {
 
     try {
       if (leadSyncRef.current.id) {
-        await base44.entities.Lead.update(leadSyncRef.current.id, payload);
+        await api.entities.Lead.update(leadSyncRef.current.id, payload);
       } else {
-        const created = await base44.entities.Lead.create({
+        const created = await api.entities.Lead.create({
           name: payload.name || 'Website Visitor',
           phone: payload.phone || 'Not provided',
           ...payload,
@@ -538,7 +538,7 @@ export default function AIConciergeBubble() {
 
       const conv = conversation || (await initConversation());
       if (!conv) return;
-      await base44.agents.addMessage(conv, { role: 'user', content: text });
+      await api.agents.addMessage(conv, { role: 'user', content: text });
     } catch (err) {
       console.error(err);
     } finally {
@@ -848,7 +848,6 @@ export default function AIConciergeBubble() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={listening ? 'Listening… speak now' : 'Ask about pricing, timing, materials...'}
                 placeholder={listening ? 'Listening… speak now' : 'Type: driveway, square footage, city, and timeline for instant guidance'}
                 disabled={sending || booting}
                 className="flex-1 bg-muted border border-border px-3 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:opacity-50"

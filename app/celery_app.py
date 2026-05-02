@@ -33,6 +33,7 @@ celery_app = Celery(
         "app.tasks.cache_warmer",
         "app.tasks.email_tasks",
         "app.tasks.vector_tasks",
+        "app.tasks.anomaly_beat",
     ],
 )
 
@@ -71,6 +72,12 @@ celery_app.conf.update(
         "warm-cache-every-5m": {
             "task": "app.tasks.cache_warmer.warm_cache_task",
             "schedule": crontab(minute="*/5"),
+        },
+        # Continuous anomaly detection — scans lead volume, HOT rate, COOL surge,
+        # and zero-lead gap every 30 minutes during all hours.
+        "anomaly-scan-every-30m": {
+            "task": "app.tasks.anomaly_beat.run_anomaly_scan_task",
+            "schedule": crontab(minute="*/30"),
         },
     },
 )

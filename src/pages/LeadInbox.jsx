@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { useNavigate } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock, Loader2, DollarSign, Sparkles, RefreshCw } from 'lucide-react';
 import LeadScoreBadge from '@/components/LeadScoreBadge';
@@ -24,13 +24,13 @@ export default function LeadInbox() {
 
   useEffect(() => {
     const load = async () => {
-      const all = await base44.entities.Lead.list('-created_date', 200);
+      const all = await api.entities.Lead.list('-created_date', 200);
       setLeads(Array.isArray(all) ? all : []);
       setLoading(false);
     };
     load();
 
-    const unsubscribe = base44.entities.Lead.subscribe((event) => {
+    const unsubscribe = api.entities.Lead.subscribe((event) => {
       if (event.type === 'create') {
         setLeads((prev) => [event.data, ...prev]);
       } else if (event.type === 'update') {
@@ -77,7 +77,7 @@ export default function LeadInbox() {
   const rescore = async (lead) => {
     setRescoring(lead.id);
     try {
-      await base44.functions.invoke('scoreNewLead', { data: lead, event: { entity_id: lead.id } });
+      await api.functions.invoke('scoreNewLead', { data: lead, event: { entity_id: lead.id } });
     } finally {
       setRescoring(null);
     }

@@ -21,7 +21,7 @@ export default function HomeSchema() {
       url: 'https://www.jwordenasphaltpaving.com/',
       mainEntityOfPage: 'https://www.jwordenasphaltpaving.com/',
       logo: 'https://www.jwordenasphaltpaving.com/logo.png',
-      image: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
+      image: 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
       description:
         'Virginia\'s family-owned asphalt paving contractor for 40+ years. Mountain-grade spec for the I-81 corridor, coastal-spec engineering for Virginia Beach and Hampton Roads, and virgin-soil stabilization for Fredericksburg new construction. Serving all of Virginia with 4th-generation craftsmanship, written 5-year warranty, licensed/bonded/insured.',
       disambiguatingDescription:

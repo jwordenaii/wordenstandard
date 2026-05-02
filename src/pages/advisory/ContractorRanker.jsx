@@ -298,7 +298,7 @@ export default function ContractorRanker() {
 
   useEffect(() => {
     if (activeTab === 'optimizer' || activeTab === 'lien') loadOptimizerData()
-  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab])  
 
   const optimizedStates = useMemo(
     () => (licensingData ? optimizeLicenseStates(licensingData) : []),

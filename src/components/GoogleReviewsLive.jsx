@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, ExternalLink, Quote, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { Star, ExternalLink, Quote } from 'lucide-react';
+import { api } from '@/api/client';
 
 const StarRow = ({ rating, size = 'w-4 h-4' }) => (
   <div className="flex items-center gap-0.5">
@@ -19,7 +19,7 @@ export default function GoogleReviewsLive() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.functions.invoke('fetchGoogleReviews', {})
+    api.functions.invoke('fetchGoogleReviews', {})
       .then((res) => setData(res?.data || null))
       .catch(() => setData(null))
       .finally(() => setLoading(false));

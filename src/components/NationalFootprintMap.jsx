@@ -1,46 +1,32 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { motion } from 'framer-motion';
-import { MapPin } from 'lucide-react';
 import { JOB_LOCATIONS } from '@/lib/job-locations';
-import LocationPhotoPanel from './LocationPhotoPanel';
 
-// Custom red pin icon — pure SVG, no asset downloads
-const redPinIcon = L.divIcon({
-  className: 'custom-red-pin',
+// Custom gold pin icon — pure SVG
+const goldPinIcon = L.divIcon({
+  className: 'custom-gold-pin',
   html: `
     <div style="
-      width: 28px;
-      height: 28px;
-      background: #ef4444;
-      border: 3px solid #fff;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    ">
-      <div style="
-        width: 10px;
-        height: 10px;
-        background: #fff;
-        border-radius: 50%;
-        transform: rotate(45deg);
-      "></div>
-    </div>
+      width: 14px;
+      height: 14px;
+      background: #C5A059;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(197, 160, 89, 0.8);
+    "></div>
   `,
-  iconSize: [28, 28],
-  iconAnchor: [14, 28],
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
 });
 
 export default function NationalFootprintMap() {
   const [selected, setSelected] = useState(null);
 
   return (
-    <section id="footprint" className="py-20 md:py-28 border-t border-border">
+    <section id="footprint" className="py-24 bg-[#0A0A0A] border-t border-zinc-900">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -48,103 +34,66 @@ export default function NationalFootprintMap() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-10 md:mb-12"
+          className="mb-16"
         >
-          <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-3">
-            // Virginia Service Area
+          <p className="font-display text-primary text-sm tracking-[0.4em] uppercase mb-4">
+            // LOGISTICS FOOTPRINT
           </p>
-          <h2 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight leading-[0.95] max-w-3xl">
-            Commercial & Residential<br />
-            <span className="text-primary">Jobsites Across Virginia</span>
+          <h2 className="font-display font-black text-foreground text-5xl md:text-7xl uppercase tracking-tight leading-[0.9] max-w-4xl">
+            REGIONAL AUTHORITY.<br />
+            <span className="text-primary">NATIONAL CAPABILITIES.</span>
           </h2>
-          <p className="font-body text-muted-foreground text-base md:text-lg mt-6 max-w-2xl leading-relaxed">
-            Red pins mark completed commercial builds, lot rebuilds, and residential projects throughout Virginia — from Hampton Roads to the Blue Ridge. Click any pin to load jobsite photos.
+          <p className="font-body text-zinc-500 text-lg mt-8 max-w-2xl leading-relaxed">
+            Strategic asset management for national portfolios. While rooted in the Mid-Atlantic, our specialized heavy-duty crews deploy across logistics corridors to maintain critical industrial infrastructure.
           </p>
         </motion.div>
 
         {/* Map */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.15 }}
-          className="border border-border bg-card overflow-hidden"
-          style={{ height: 480 }}
+          transition={{ duration: 1 }}
+          className="border border-zinc-800 bg-zinc-900/20 overflow-hidden relative"
+          style={{ height: 600 }}
         >
           <MapContainer
-            center={[39.5, -88]}
-            zoom={5}
+            center={[38.5, -78]}
+            zoom={6}
             minZoom={4}
             scrollWheelZoom={false}
-            style={{ height: '100%', width: '100%', background: 'hsl(0 0% 10%)' }}
+            style={{ height: '100%', width: '100%', background: '#0A0A0A' }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             />
             {JOB_LOCATIONS.map((loc) => (
               <Marker
                 key={loc.id}
                 position={[loc.lat, loc.lng]}
-                icon={redPinIcon}
-                eventHandlers={{
-                  click: () => {
-                    setSelected(loc);
-                    // Smooth-scroll the photo panel into view
-                    setTimeout(() => {
-                      const el = document.getElementById('location-photos');
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  },
-                }}
+                icon={goldPinIcon}
               >
-                <Popup>
-                  <div style={{ fontFamily: 'Inter, sans-serif', minWidth: 160 }}>
-                    <strong style={{ color: '#111', fontSize: 14 }}>
-                      {loc.client} · {loc.city}, {loc.state}
-                    </strong>
-                    <br />
-                    <span style={{ color: '#555', fontSize: 12 }}>
-                      {loc.jobType} · {loc.year}
-                    </span>
-                    <br />
-                    <span style={{ color: '#777', fontSize: 11 }}>Click pin to view photos</span>
-                  </div>
-                </Popup>
               </Marker>
             ))}
           </MapContainer>
+          
+          {/* Legend/Overlay */}
+          <div className="absolute top-8 left-8 z-[1000] bg-zinc-900/90 border border-zinc-800 p-6 backdrop-blur-md">
+            <h4 className="font-display text-white text-xl mb-4 tracking-wide uppercase">Operational Hubs</h4>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-primary rounded-full shadow-[0_0_8px_#C5A059]"></div>
+                <span className="text-zinc-400 text-xs uppercase tracking-widest font-display">Active Industrial Project</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-px bg-zinc-700"></div>
+                <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-display">National Logistics Route</span>
+              </div>
+            </div>
+          </div>
         </motion.div>
-
-        {/* Location chip list — quick-access under the map */}
-        <div className="flex flex-wrap gap-2 mt-6">
-          {JOB_LOCATIONS.map((loc) => (
-            <button
-              key={loc.id}
-              onClick={() => {
-                setSelected(loc);
-                setTimeout(() => {
-                  const el = document.getElementById('location-photos');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 50);
-              }}
-              className={`flex items-center gap-2 border px-3 py-2 font-display text-xs tracking-wider uppercase transition-colors ${
-                selected?.id === loc.id
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
-              }`}
-            >
-              <MapPin className="w-3 h-3" />
-              {loc.city}, {loc.state}
-            </button>
-          ))}
-        </div>
-
-        {/* Photo panel — lazy rendered */}
-        <div id="location-photos">
-          <LocationPhotoPanel location={selected} onClose={() => setSelected(null)} />
-        </div>
       </div>
-    </section>
+        </section>
   );
 }

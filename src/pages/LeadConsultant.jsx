@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { MessageBubble } from '@/components/consultant/MessageBubble';
 import { LeadSelector } from '@/components/consultant/LeadSelector';
 import EmailTimeline from '@/components/consultant/EmailTimeline';
@@ -17,7 +17,7 @@ export default function LeadConsultant() {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    base44.entities.Lead.list()
+    api.entities.Lead.list()
       .then((data) => setLeads(Array.isArray(data) ? data : []))
       .catch(() => setLeads([]));
   }, []);
@@ -48,7 +48,7 @@ export default function LeadConsultant() {
       `Current Status: ${lead.status}`,
     ].filter(Boolean).join('\n');
 
-    const conv = await base44.agents.createConversation({
+    const conv = await api.agents.createConversation({
       agent_name: 'paving_consultant',
       metadata: { name: `${lead.name} — ${lead.surface_type || 'Project'}` },
     });
@@ -56,12 +56,12 @@ export default function LeadConsultant() {
     setConversation(conv);
 
     // Subscribe to live updates
-    base44.agents.subscribeToConversation(conv.id, (data) => {
+    api.agents.subscribeToConversation(conv.id, (data) => {
       setMessages([...data.messages]);
     });
 
     // Seed the conversation with lead context
-    await base44.agents.addMessage(conv, {
+    await api.agents.addMessage(conv, {
       role: 'user',
       content: `Please greet this lead and open with a proactive, personalized message based on their project details:\n\n${intro}`,
     });
@@ -74,7 +74,7 @@ export default function LeadConsultant() {
     const text = input.trim();
     setInput('');
     setSending(true);
-    await base44.agents.addMessage(conversation, { role: 'user', content: text });
+    await api.agents.addMessage(conversation, { role: 'user', content: text });
     setSending(false);
   };
 

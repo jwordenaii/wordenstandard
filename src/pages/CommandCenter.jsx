@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react'
 import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw } from 'lucide-react'
-import { base44 } from '@/api/base44Client'
+import { api } from '@/api/client'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
@@ -512,7 +512,7 @@ function MrWordenAutopilotPanel() {
   const [leads, setLeads] = useState([])
 
   const loadLeads = useCallback(async () => {
-    const all = await base44.entities.Lead.list('-created_date', 300)
+    const all = await api.entities.Lead.list('-created_date', 300)
     setLeads(Array.isArray(all) ? all : [])
     setLoading(false)
   }, [])
@@ -555,7 +555,7 @@ function MrWordenAutopilotPanel() {
       for (const lead of autopilotQueue) {
         const existingNotes = String(lead.notes || '')
         const nextAction = `Autopilot follow-up queued (${now}): Call now and send estimate intake link.`
-        await base44.entities.Lead.update(lead.id, {
+        await api.entities.Lead.update(lead.id, {
           status: 'contacted',
           sms_followup_sent: true,
           sms_followup_sent_at: now,
@@ -627,7 +627,7 @@ function MrWordenAutopilotPanel() {
         return
       }
 
-      const existing = await base44.entities.Lead.list('-created_date', 500)
+      const existing = await api.entities.Lead.list('-created_date', 500)
       const pool = Array.isArray(existing) ? existing : []
 
       let created = 0
@@ -673,13 +673,13 @@ function MrWordenAutopilotPanel() {
         }
 
         if (match?.id) {
-          await base44.entities.Lead.update(match.id, {
+          await api.entities.Lead.update(match.id, {
             ...payload,
             notes: [String(match.notes || ''), note].filter(Boolean).join('\n\n'),
           })
           updated += 1
         } else {
-          const createdLead = await base44.entities.Lead.create(payload)
+          const createdLead = await api.entities.Lead.create(payload)
           if (createdLead?.id) pool.unshift(createdLead)
           created += 1
         }
@@ -870,7 +870,7 @@ function OperationsNerveCenterPanel() {
   }, [])
 
   const loadLeadBreaches = useCallback(async () => {
-    const all = await base44.entities.Lead.list('-created_date', 400)
+    const all = await api.entities.Lead.list('-created_date', 400)
     const now = Date.now()
     const rows = (Array.isArray(all) ? all : [])
       .map((lead) => {
@@ -1059,7 +1059,7 @@ function ChannelPerformancePanel() {
 
     const load = async () => {
       try {
-        const all = await base44.entities.Lead.list('-created_date', 300)
+        const all = await api.entities.Lead.list('-created_date', 300)
         if (active) setLeads(Array.isArray(all) ? all : [])
       } finally {
         if (active) setLoading(false)
@@ -1923,7 +1923,7 @@ function TempInAppOpsFallbackPanel() {
     setBusy(true)
     setNote('')
     try {
-      const leads = await base44.entities.Lead.list('-created_date', 300)
+      const leads = await api.entities.Lead.list('-created_date', 300)
       const rows = (Array.isArray(leads) ? leads : []).map((lead) => {
         const score = Number(lead.score || 0)
         const tier = String(lead.score_tier || toTier(score))
@@ -2534,3 +2534,4 @@ export default function CommandCenter() {
     </div>
   )
 }
+

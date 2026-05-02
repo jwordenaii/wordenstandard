@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { HardHat, FileCheck2, Download, ClipboardCheck } from 'lucide-react';
 
 const SAFETY_FORM_URL =
-  'https://media.base44.com/files/public/69c853446b8987b1630018ff/ae5514883_TailgateSafetyMeetingFormrevisedFrisbiedocx.pdf';
+  'https://media.api.com/files/public/69c853446b8987b1630018ff/ae5514883_TailgateSafetyMeetingFormrevisedFrisbiedocx.pdf';
 
 const COMPLIANCE_ITEMS = [
   {

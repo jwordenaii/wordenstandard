@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { Mail, ArrowDownLeft, ArrowUpRight, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 
 export default function EmailTimeline({ lead }) {
@@ -10,7 +10,7 @@ export default function EmailTimeline({ lead }) {
   useEffect(() => {
     if (!lead?.id) return;
     setLoading(true);
-    base44.entities.LeadCommunication
+    api.entities.LeadCommunication
       .filter({ lead_id: lead.id }, '-sent_at', 50)
       .then((data) => setComms(Array.isArray(data) ? data : []))
       .catch(() => setComms([]))

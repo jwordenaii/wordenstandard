@@ -2,28 +2,10 @@ import React from 'react';
 import SEO from '../components/SEO';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
-import TrustedBy from '../components/TrustedBy';
 import ServicePanels from '../components/ServicePanels';
-import StatsBar from '../components/StatsBar';
-import FeaturedProjectBanner from '../components/FeaturedProjectBanner';
-import CommercialCapabilities from '../components/CommercialCapabilities';
-import LandmarkProjects from '../components/LandmarkProjects';
 import NationalFootprintMap from '../components/NationalFootprintMap';
-import ServiceAreaMap from '../components/ServiceAreaMap';
-import ProjectGallery from '../components/ProjectGallery';
-import BeforeAfterGallery from '../components/BeforeAfterGallery';
 import CaseStudyPreview from '../components/CaseStudyPreview';
-import BeatAnyQuoteBadge from '../components/BeatAnyQuoteBadge';
-import AboutSection from '../components/AboutSection';
-import Credentials from '../components/Credentials';
-import SafetyCompliance from '../components/SafetyCompliance';
-import TechStack from '../components/TechStack';
-import LocalReviews from '../components/LocalReviews';
-import LocalBidComparison from '../components/LocalBidComparison';
-import MaintenanceCalculator from '../components/MaintenanceCalculator';
-import AIPhotoInspector from '../components/AIPhotoInspector';
 import QuoteEngine from '../components/QuoteEngine';
-import FAQSection from '../components/FAQSection';
 import Footer from '../components/Footer';
 import HomeSchema from '../components/HomeSchema';
 
@@ -31,33 +13,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background font-body relative">
       <SEO 
-        title="J. Worden & Sons | Luxury Asphalt Paving & Engineering Virginia"
-        description="Over 40 years of precision asphalt paving in Richmond, Midlothian, and Central Virginia. Commercial masters and residential specialists. Built to last."
+        title="J. Worden | The Premier Pavement Asset Partner"
+        description="Institutional-grade paving solutions for national logistics, healthcare, and industrial infrastructure. 40+ years of technical excellence."
       />
       <HomeSchema />
       <Navbar />
       <HeroSection />
-      <TrustedBy />
-      <ServicePanels />
-      <StatsBar />
-      <CommercialCapabilities />
-      <FeaturedProjectBanner />
-      <BeforeAfterGallery />
-      <LandmarkProjects />
-      <CaseStudyPreview />
-      <AboutSection />
-      <ServiceAreaMap />
       <NationalFootprintMap />
-      <ProjectGallery />
-      <LocalReviews />
-      <LocalBidComparison />
-      <BeatAnyQuoteBadge />
-      <Credentials />
-      <SafetyCompliance />
-      <TechStack />
-      <MaintenanceCalculator />
-      <AIPhotoInspector />
-      <FAQSection />
+      <ServicePanels />
+      <CaseStudyPreview />
       <QuoteEngine />
       <Footer />
     </div>

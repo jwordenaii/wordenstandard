@@ -221,6 +221,16 @@ from .routers import gallery as gallery_router
 from .routers import chat as chat_router
 from .routers import email as email_router
 from .routers import math_ai as math_ai_router
+from .routers import site_metrics as site_metrics_router
+from .routers import kickserv as kickserv_router
+from .routers import google_reporting as google_reporting_router
+from .routers import compaction as compaction_router
+from .routers import drone_scan as drone_scan_router
+from .routers import live_site as live_site_router
+from .routers import compliance as compliance_router
+from .routers import schedule_sim as schedule_sim_router
+from .routers import ads_intelligence as ads_intelligence_router
+from .routers import spatial_ai as spatial_ai_router
 from .routers import admin_2fa as admin_2fa_router
 from .routers import human_review as human_review_router
 from .routers import search as search_router
@@ -427,6 +437,37 @@ app.include_router(email_router.router)
 
 # Mathematical AI (pavement scoring, cost estimation, lead quality, maintenance)
 app.include_router(math_ai_router.router)
+
+# Command Center site metrics (compliance + ad ROI for Tremor dashboard)
+app.include_router(site_metrics_router.router)
+
+# Kickserv integration + dump-truck nearest-neighbor route optimization
+app.include_router(kickserv_router.router)
+
+# Unified Google Reporting (Ads + Search Console + GA4 combined KPI summary)
+app.include_router(google_reporting_router.router)
+
+# Intelligent compaction telemetry (IoT roller pings + density heat map)
+app.include_router(compaction_router.router)
+
+# Drone scan ingest (photogrammetry / LiDAR / thermal per project site)
+app.include_router(drone_scan_router.router)
+
+# Live site SSE stream (truck positions + compaction pings every 5s)
+app.include_router(live_site_router.router)
+
+# 50-State license verification + compliance tracking + site PPE inspection
+app.include_router(compliance_router.router)
+
+# Agentic what-if schedule simulator (GPT-4o or rule-based fallback)
+app.include_router(schedule_sim_router.router)
+
+# Autonomous Agentic Ads Intelligence: URL exclusions, CRM export, lead qualifier, anomaly detection
+app.include_router(ads_intelligence_router.router)
+
+# Spatial AI (as-built deviation check) + GC Cost Catalog & Estimates
+app.include_router(spatial_ai_router.router)
+app.include_router(spatial_ai_router.catalog_router)
 
 # Admin 2FA (TOTP enrollment, verify, disable, status)
 app.include_router(admin_2fa_router.router)

@@ -141,7 +141,7 @@ export default function BuildConfigurator({ config, onChange }) {
     if (isStructure && !EXTERIOR_MATERIALS.find((m) => m.value === exteriorMaterial)) {
       update({ exteriorMaterial: 'brick' })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isStructure])
 
   return (

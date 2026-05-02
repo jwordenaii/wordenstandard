@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 
 export default function JobProgressEditor({ job, onSaved }) {
   const [percent, setPercent] = useState(job.progress_percent || 0);
@@ -19,7 +19,7 @@ export default function JobProgressEditor({ job, onSaved }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await base44.entities.Job.update(job.id, {
+      await api.entities.Job.update(job.id, {
         progress_percent: Number(percent),
         progress_notes: notes,
         status,

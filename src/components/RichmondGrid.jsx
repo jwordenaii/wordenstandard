@@ -209,7 +209,7 @@ export default function RichmondGrid({ sites = [], permitLeads = [], onPolygonSa
       map.remove()
       mapInstanceRef.current = null
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])  
 
   const handleSavePolygon = async () => {
     if (!drawing || !saveName.trim()) return

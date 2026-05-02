@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, TrendingUp } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { api } from '@/api/client';
 
 export default function CaseStudyPreview() {
   const [studies, setStudies] = useState([]);
 
   useEffect(() => {
-    base44.entities.CaseStudy.filter({ featured: true }, '-year', 3)
+    api.entities.CaseStudy.filter({ featured: true }, '-year', 3)
       .then((d) => setStudies(Array.isArray(d) ? d : []))
       .catch(() => setStudies([]));
   }, []);

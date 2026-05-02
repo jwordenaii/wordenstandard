@@ -550,7 +550,7 @@ export default function ChatWidget() {
       if (prev.some((msg) => msg.isHint && msg.text === hintText)) return prev
       return [...prev, { id: Date.now(), role: 'bot', text: hintText, isHint: true }]
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [pathname])
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { CloudRain, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -10,7 +10,7 @@ export default function WeatherCheckButton() {
   const runCheck = async () => {
     setChecking(true);
     try {
-      const res = await base44.functions.invoke('checkWeatherForJobs', {});
+      const res = await api.functions.invoke('checkWeatherForJobs', {});
       const data = res?.data || {};
       setLastResult(data);
       if (data.at_risk > 0) {

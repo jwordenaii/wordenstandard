@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Ruler, Calendar, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { MapPin, Ruler, Loader2 } from 'lucide-react';
+import { api } from '@/api/client';
 import { RICHMOND_COMMERCIAL_PROOF } from '@/lib/richmondCommercialProof';
 
 // Build rich, keyword-dense alt text for each photo — critical for Google Images SEO.
@@ -73,7 +73,7 @@ const CATEGORIES = [
 
 // Specific images that were captured sideways and need a 90° clockwise rotation.
 const ROTATE_90_URLS = new Set([
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+  'https://media.api.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
 ]);
 
 export default function ProjectGallery() {
@@ -82,7 +82,7 @@ export default function ProjectGallery() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Project.list('-year', 100)
+    api.entities.Project.list('-year', 100)
       .then((data) => {
         setProjects(Array.isArray(data) ? data : []);
         setLoading(false);

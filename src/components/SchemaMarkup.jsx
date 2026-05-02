@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Helmet, HelmetData } from 'react-helmet-async'
 import { SITE_URL } from '../lib/schemas'
 

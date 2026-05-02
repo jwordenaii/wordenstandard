@@ -7,30 +7,30 @@
 @layer base {
   :root {
     --font-display: 'Bebas Neue', sans-serif;
-    --font-editorial: 'Playfair Display', serif;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
+    --font-heading: 'Bebas Neue', sans-serif;
+    --font-body: 'Inter', sans-serif;
 
-    /* High-End Obsidian & Gold Premium Palette */
-    --background: 240 10% 2%; 
-    --foreground: 0 0% 100%;
-    --card: 240 10% 4.9%;
+    /* Industrial Luxury Palette: Obsidian, Zinc, Brushed Gold */
+    --background: 0 0% 4%; /* #0A0A0A */
+    --foreground: 0 0% 98%;
+    --card: 240 5% 9%; /* Zinc-900 */
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 5% 9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 43 100% 50%; /* Pure Gold */
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 43 100% 50%; /* Gold for accents */
+    --primary: 41 51% 56%; /* #C5A059 Brushed Gold */
+    --primary-foreground: 0 0% 4%;
+    --secondary: 240 5% 15%; /* Zinc-800 */
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 12%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 43 100% 50%;
-    --accent-foreground: 0 0% 98%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 41 51% 56%;
+    --accent-foreground: 0 0% 4%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 43 100% 50%;
-    --radius: 1.5rem; /* Larger, softer radius for premium feel */
+    --border: 240 5% 15%; /* Zinc-800 */
+    --input: 240 5% 15%;
+    --ring: 41 51% 56%;
+    --radius: 0rem; /* Sharp industrial edges */
   }
 }
 
@@ -39,19 +39,39 @@
     @apply border-border;
   }
 
+  ::selection {
+    background-color: #C5A059;
+    color: #0A0A0A;
+  }
+
   body {
     @apply bg-background text-foreground;
-    /* Ultra-premium Mesh Gradient Background */
-    background-color: #030303;
+    /* Mesh Gradient: Obsidian to Zinc depth */
+    background-color: #0A0A0A;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(43, 100%, 50%, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(240, 30%, 20%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(43, 100%, 50%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(0, 0%, 100%, 0.02) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(240, 5%, 15%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(41, 51%, 56%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(240, 5%, 10%, 0.5) 0px, transparent 50%);
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    font-family: 'Inter', sans-serif;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bebas Neue', sans-serif;
+  }
+}
+
+/* Industrial Utility Classes */
+.border-industrial {
+  @apply border border-zinc-800;
+}
+
+.mesh-gradient-hero {
+  background: radial-gradient(at 0% 0%, #18181b 0%, transparent 50%),
+              radial-gradient(at 100% 0%, #0a0a0a 0%, transparent 50%),
+              radial-gradient(at 50% 50%, #18181b 0%, #0a0a0a 100%);
 }
 
 /* Luxury Surfaces */

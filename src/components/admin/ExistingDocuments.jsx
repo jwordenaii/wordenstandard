@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, Eye, EyeOff, Trash2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 
 const TYPE_LABELS = {
   invoice: 'Invoice',
@@ -15,7 +15,7 @@ const TYPE_LABELS = {
 export default function ExistingDocuments({ documents, onChange }) {
   const handleToggleVisible = async (doc) => {
     try {
-      await base44.entities.ProjectDocument.update(doc.id, {
+      await api.entities.ProjectDocument.update(doc.id, {
         visible_to_client: !doc.visible_to_client,
       });
       toast.success(`Document ${!doc.visible_to_client ? 'shown' : 'hidden'} in portal.`);
@@ -28,7 +28,7 @@ export default function ExistingDocuments({ documents, onChange }) {
   const handleDelete = async (doc) => {
     if (!confirm(`Delete "${doc.title}"? This cannot be undone.`)) return;
     try {
-      await base44.entities.ProjectDocument.delete(doc.id);
+      await api.entities.ProjectDocument.delete(doc.id);
       toast.success('Document deleted.');
       onChange?.();
     } catch (error) {

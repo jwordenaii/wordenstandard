@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Ruler, Calendar, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import BeforeAfterSlider from './BeforeAfterSlider';
 
 export default function BeforeAfterGallery() {
@@ -9,7 +9,7 @@ export default function BeforeAfterGallery() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.BeforeAfter.list('display_order', 12)
+    api.entities.BeforeAfter.list('display_order', 12)
       .then((d) => setItems(Array.isArray(d) ? d : []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));

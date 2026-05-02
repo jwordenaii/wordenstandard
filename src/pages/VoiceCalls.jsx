@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { Phone, PhoneIncoming, PhoneMissed, Voicemail, Loader2, Clock, PlayCircle, CheckCircle2 } from 'lucide-react';
 
 const INTENT_LABELS = {
@@ -40,14 +40,14 @@ export default function VoiceCalls() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    base44.entities.VoiceCall.list('-started_at', 100)
+    api.entities.VoiceCall.list('-started_at', 100)
       .then((data) => {
         setCalls(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
 
-    const unsub = base44.entities.VoiceCall.subscribe((event) => {
+    const unsub = api.entities.VoiceCall.subscribe((event) => {
       if (event.type === 'create') setCalls((prev) => [event.data, ...prev]);
       else if (event.type === 'update') setCalls((prev) => prev.map((c) => (c.id === event.id ? event.data : c)));
       else if (event.type === 'delete') setCalls((prev) => prev.filter((c) => c.id !== event.id));
@@ -263,3 +263,4 @@ export default function VoiceCalls() {
     </div>
   );
 }
+

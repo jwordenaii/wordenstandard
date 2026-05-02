@@ -1,11 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown, Phone } from 'lucide-react';
-import { trackEvent, trackPhoneClick } from '@/lib/analytics';
+import { trackEvent } from '@/lib/analytics';
 import SmartImage from './SmartImage';
-import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
-const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
+const HERO_IMAGE = 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
 
 export default function HeroSection() {
   const scrollToQuote = () => {
@@ -27,131 +25,76 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden">
+    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden mesh-gradient-hero">
       {/* Background image */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden opacity-40">
         <SmartImage
           src={HERO_IMAGE}
-          alt="Heavy asphalt paving machine laying fresh hot-mix asphalt at golden hour with steam rising from the surface"
+          alt="Technical milling and paving operation in an industrial setting"
           width={2560}
           height={1440}
           priority
           sizes="100vw"
-          className="w-full h-full object-cover object-top quality-premium"
+          className="w-full h-full object-cover object-top filter grayscale contrast-125"
         />
         
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/58 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/45 to-transparent" />
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/22 blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 rounded-full bg-sky-400/14 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-12 pt-32 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}>
-
-          <div className="inline-flex items-center gap-4 rounded-xl border border-primary/30 bg-black/35 backdrop-blur-md px-4 py-3 mb-5 md:mb-7">
-            <SmartImage
-              src={PRIMARY_LOGO_URL}
-              fallbackSrc={FALLBACK_LOGO_URL}
-              alt="J. Worden & Sons Asphalt Paving logo"
-              width={380}
-              height={120}
-              priority
-              sizes="(max-width: 768px) 160px, 220px"
-              className="h-9 md:h-11 w-auto object-contain"
-            />
-            <span className="hidden sm:block h-8 w-px bg-primary/35" aria-hidden="true" />
-            <span className="font-display text-[10px] md:text-xs tracking-[0.22em] uppercase text-muted-foreground">
-              Trusted Virginia Paving Since 1984
-            </span>
-          </div>
-          
-          <p className="font-display text-primary text-sm md:text-base tracking-[0.34em] uppercase mb-4 md:mb-6">
-            Educate First · Pave Second · 40 Years in Virginia
-          </p>
-
-          <h1 className="font-display font-black text-foreground uppercase leading-[0.84] tracking-[0.02em]">
-            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw]">Asphalt</span>
-            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw]">Built To</span>
-            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw] text-primary">
-              Last Decades
-            </span>
-          </h1>
-
-          <p className="font-body text-foreground/90 mt-6 text-lg md:text-xl max-w-2xl leading-relaxed md:mt-8">
-            We explain what your pavement actually needs before we recommend a job. Get transparent guidance on repair vs replace, clear scope options, and a quote only when you are ready.
-          </p>
-
-          <p className="font-body text-foreground/75 mt-3 text-sm md:text-base max-w-2xl leading-relaxed">
-            Trusted across Richmond, Chester, Midlothian, and Central Virginia for residential driveways and commercial parking lot paving.
-          </p>
-
-          <p className="font-display text-muted-foreground text-xs md:text-sm tracking-[0.18em] uppercase mt-4">
-            No pressure sales • no vague line items • no surprise change orders
-          </p>
-        </motion.div>
-
-        {/* Stats bar */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-24 pt-32 w-full">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="premium-panel mt-10 md:mt-14 flex flex-col sm:flex-row items-start sm:items-end gap-6 sm:gap-0 sm:justify-between border-t border-primary/30 pt-8 px-6 md:px-8 pb-6 rounded-2xl">
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+
+          <div className="inline-flex items-center gap-4 border-l-2 border-primary bg-zinc-900/80 px-4 py-2 mb-8">
+            <span className="font-display text-xs tracking-[0.3em] uppercase text-primary">
+              Institutional Grade Infrastructure
+            </span>
+          </div>
           
-          <div className="flex flex-wrap gap-8 md:gap-14">
-            <div>
-              <p className="font-display font-black text-primary text-4xl md:text-5xl">40+</p>
-              <p className="font-body text-muted-foreground text-sm mt-1 tracking-wider uppercase">Years in Business</p>
-            </div>
-            <div>
-              <p className="font-display font-black text-foreground text-4xl md:text-5xl">2.4M</p>
-              <p className="font-body text-muted-foreground text-sm mt-1 tracking-wider uppercase">Sq Ft Paved</p>
-            </div>
-            <div>
-              <p className="font-display font-black text-foreground text-4xl md:text-5xl">1,200+</p>
-              <p className="font-body text-muted-foreground text-sm mt-1 tracking-wider uppercase">Projects Complete</p>
-            </div>
+          <h1 className="font-display font-black text-foreground uppercase leading-[0.9] tracking-tight">
+            <span className="block text-[12vw] md:text-[8vw] lg:text-[7vw]">THE PREMIER</span>
+            <span className="block text-[12vw] md:text-[8vw] lg:text-[7vw] text-primary">PAVEMENT ASSET</span>
+            <span className="block text-[12vw] md:text-[8vw] lg:text-[7vw]">PARTNER</span>
+          </h1>
+
+          <p className="font-body text-zinc-400 mt-8 text-lg md:text-xl max-w-2xl leading-relaxed">
+            Providing Institutional-Grade Paving Solutions for National Logistics, Healthcare, and Industrial Infrastructure.
+          </p>
+
+          <div className="mt-12 flex flex-wrap gap-6">
+            <button 
+              onClick={scrollToQuote}
+              className="px-8 py-4 bg-primary text-black font-display text-lg tracking-wider uppercase hover:bg-white transition-colors"
+            >
+              Technical Consultation
+            </button>
+            <button 
+              onClick={scrollToServices}
+              className="px-8 py-4 border border-zinc-700 text-white font-display text-lg tracking-wider uppercase hover:bg-zinc-800 transition-colors"
+            >
+              Our Solutions
+            </button>
           </div>
 
-          <div className="flex flex-wrap gap-4 items-center">
-            <button
-              onClick={scrollToFaq}
-              className="border border-primary/70 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors min-h-[48px]"
-            >
-              Help Me Diagnose First
-            </button>
-            <button
-              onClick={scrollToQuote}
-              className="premium-cta text-primary-foreground px-8 py-4 font-display font-bold text-sm tracking-[0.16em] uppercase transition-all min-h-[48px]">
-              
-              I Know What I Need
-            </button>
-            <a
-              href="tel:+18044461296"
-              onClick={() => {
-                trackEvent('hero_cta_click', { cta: 'call_now' });
-                trackPhoneClick('hero');
-              }}
-              className="border border-primary/70 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors min-h-[48px] inline-flex items-center gap-2"
-              aria-label="Call (804) 446-1296"
-            >
-              <Phone className="w-4 h-4" />
-              Call (804) 446-1296
-            </a>
-            <button
-              onClick={scrollToServices}
-              className="border border-border text-foreground px-4 py-4 hover:border-primary hover:text-primary transition-colors min-h-[48px]"
-              aria-label="Scroll to services">
-              
-              <ArrowDown className="w-5 h-5" />
-            </button>
+          <div className="mt-16 pt-8 border-t border-zinc-800 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col">
+              <span className="text-3xl font-display text-white">40+ YEARS</span>
+              <span className="text-xs text-zinc-500 uppercase tracking-widest mt-1">Operational Excellence</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-3xl font-display text-white">5,000+ PROJECTS</span>
+              <span className="text-xs text-zinc-500 uppercase tracking-widest mt-1">Institutional Scale</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-3xl font-display text-white">$500M+ ASSETS</span>
+              <span className="text-xs text-zinc-500 uppercase tracking-widest mt-1">Managed Infrastructure</span>
+            </div>
           </div>
         </motion.div>
       </div>
-    </section>);
-
+        </section>
+  );
 }

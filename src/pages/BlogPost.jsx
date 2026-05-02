@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Loader2, Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
@@ -17,13 +17,13 @@ export default function BlogPost() {
 
   useEffect(() => {
     setLoading(true);
-    base44.entities.BlogPost.filter({ slug })
+    api.entities.BlogPost.filter({ slug })
       .then((results) => {
         const safeResults = Array.isArray(results) ? results : [];
         const found = safeResults[0] || getFallbackBlogPostBySlug(slug);
         setPost(found || null);
         if (found) {
-          base44.entities.BlogPost.list('-published_date', 4)
+          api.entities.BlogPost.list('-published_date', 4)
             .then((all) => {
               const safeAll = Array.isArray(all) ? all : [];
               const merged = safeAll.length > 0 ? safeAll : FALLBACK_BLOG_POSTS;

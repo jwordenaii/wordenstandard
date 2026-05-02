@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { DollarSign, TrendingUp, Target, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -32,7 +32,7 @@ export default function RevenueDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Lead.list('-created_date', 1000).then((d) => {
+    api.entities.Lead.list('-created_date', 1000).then((d) => {
       setLeads(Array.isArray(d) ? d : []);
       setLoading(false);
     });

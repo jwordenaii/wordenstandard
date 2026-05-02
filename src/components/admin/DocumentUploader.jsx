@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Loader2, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 
 const DOC_TYPES = [
   { id: 'invoice', label: 'Invoice' },
@@ -49,8 +49,8 @@ export default function DocumentUploader({ job, onUploaded }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.ProjectDocument.create({
+      const { file_url } = await api.integrations.Core.UploadFile({ file });
+      await api.entities.ProjectDocument.create({
         job_id: job.id,
         client_email: job.client_email,
         document_type: docType,

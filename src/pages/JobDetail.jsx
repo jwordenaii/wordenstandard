@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { ArrowLeft, Mail, Loader2, Check, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,7 +21,7 @@ export default function JobDetail() {
     }
 
     const fetchJob = async () => {
-      const data = await base44.entities.Job.get(jobId);
+      const data = await api.entities.Job.get(jobId);
       setJob(data);
       setLoading(false);
     };
@@ -34,7 +34,7 @@ export default function JobDetail() {
     setInvoiceStatus(null);
 
     try {
-      const response = await base44.functions.invoke('generateAndEmailInvoice', { jobId });
+      const response = await api.functions.invoke('generateAndEmailInvoice', { jobId });
       setInvoiceStatus({ type: 'success', message: 'Invoice sent successfully!' });
       setTimeout(() => setInvoiceStatus(null), 3000);
     } catch (error) {

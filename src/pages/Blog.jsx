@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Calendar, Clock } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
@@ -29,7 +29,7 @@ export default function Blog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.BlogPost.list('-published_date', 100)
+    api.entities.BlogPost.list('-published_date', 100)
       .then((data) => {
         setPosts(Array.isArray(data) ? data : []);
         setLoading(false);

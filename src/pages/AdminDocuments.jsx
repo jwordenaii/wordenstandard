@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, ShieldOff } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -20,13 +20,13 @@ export default function AdminDocuments() {
 
   const { data: jobs = [], isLoading: jobsLoading } = useQuery({
     queryKey: ['admin-jobs'],
-    queryFn: () => base44.entities.Job.list('-scheduled_date', 500),
+    queryFn: () => api.entities.Job.list('-scheduled_date', 500),
     enabled: isAdmin,
   });
 
   const { data: documents = [] } = useQuery({
     queryKey: ['admin-job-docs', selectedJobId],
-    queryFn: () => base44.entities.ProjectDocument.filter({ job_id: selectedJobId }),
+    queryFn: () => api.entities.ProjectDocument.filter({ job_id: selectedJobId }),
     enabled: isAdmin && !!selectedJobId,
   });
 

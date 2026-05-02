@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import ReactGA from 'react-ga4';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -26,6 +27,7 @@ const RichmondCommercial = lazy(() => import('./pages/RichmondCommercial'));
 const ResidentialAsphalt = lazy(() => import('./pages/ResidentialAsphalt'));
 const HomeServices = lazy(() => import('./pages/HomeServices'));
 const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
+const FloorPlanStudio = lazy(() => import('./pages/FloorPlanStudio'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
 const ContractorAIPlatform = lazy(() => import('./pages/ContractorAIPlatform'));
 const CommandCenter = lazy(() => import('./pages/CommandCenter'));
@@ -45,6 +47,12 @@ const CrewEta = lazy(() => import('./pages/CrewEta'));
 
 const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
 const AUTH_DISABLED = ['none', 'off', 'disabled', '0', 'false'].includes(AUTH_MODE)
+
+// Initialise GA4 once — silently skipped when the measurement ID is not set.
+const GA4_ID = import.meta.env.VITE_GA4_ID
+if (GA4_ID) {
+  ReactGA.initialize(GA4_ID)
+}
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -74,6 +82,11 @@ const RequireAuth = ({ children }) => {
 
 const AuthenticatedApp = () => {
   const { isLoadingPublicSettings } = useAuth();
+
+  // Fire a GA4 pageview on every navigation when GA4 is configured.
+  useEffect(() => {
+    if (GA4_ID) ReactGA.send({ hitType: 'pageview', page: window.location.pathname + window.location.search });
+  });
 
   // Wait for app public settings to load before rendering routes
   if (isLoadingPublicSettings) {
@@ -105,6 +118,7 @@ const AuthenticatedApp = () => {
         <Route path="/residential" element={<RequireAuth><ResidentialAsphalt /></RequireAuth>} />
         <Route path="/home-services" element={<RequireAuth><HomeServices /></RequireAuth>} />
         <Route path="/general-contracting" element={<RequireAuth><GeneralContracting /></RequireAuth>} />
+        <Route path="/floor-plan-studio" element={<RequireAuth><FloorPlanStudio /></RequireAuth>} />
         <Route path="/tar-and-chip" element={<RequireAuth><TarAndChip /></RequireAuth>} />
         <Route path="/contractor-ai" element={<RequireAuth><ContractorAIPlatform /></RequireAuth>} />
         <Route path="/consultant" element={<RequireAuth><LeadConsultant /></RequireAuth>} />

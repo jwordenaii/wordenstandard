@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Gift, Send, Check, Loader2, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { toast } from 'sonner';
 
 export default function ReferralCard({ userEmail }) {
@@ -19,7 +19,7 @@ export default function ReferralCard({ userEmail }) {
 
   useEffect(() => {
     if (!userEmail) return;
-    base44.entities.Referral.filter({ referrer_email: userEmail }, '-created_date', 20)
+    api.entities.Referral.filter({ referrer_email: userEmail }, '-created_date', 20)
       .then((d) => setMyReferrals(Array.isArray(d) ? d : []))
       .catch(() => setMyReferrals([]));
   }, [userEmail, submitted]);
@@ -37,7 +37,7 @@ export default function ReferralCard({ userEmail }) {
     }
     setSubmitting(true);
     try {
-      const res = await base44.functions.invoke('submitReferral', form);
+      const res = await api.functions.invoke('submitReferral', form);
       if (res?.data?.success) {
         setSubmitted(true);
         setForm({ referred_name: '', referred_phone: '', referred_email: '', referred_address: '', notes: '' });

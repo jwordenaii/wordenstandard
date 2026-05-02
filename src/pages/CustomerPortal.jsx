@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, LogOut, Phone, Mail, FolderOpen } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { useAuth } from '@/lib/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -19,14 +19,14 @@ export default function CustomerPortal() {
   // SECURITY: filter strictly by the authenticated user's email.
   const { data: jobs = [], isLoading: jobsLoading } = useQuery({
     queryKey: ['portal-jobs', user?.email],
-    queryFn: () => base44.entities.Job.filter({ client_email: user.email }),
+    queryFn: () => api.entities.Job.filter({ client_email: user.email }),
     enabled: !!user?.email,
   });
 
   const { data: documents = [], isLoading: docsLoading } = useQuery({
     queryKey: ['portal-docs', user?.email],
     queryFn: () =>
-      base44.entities.ProjectDocument.filter({
+      api.entities.ProjectDocument.filter({
         client_email: user.email,
         visible_to_client: true,
       }),
