@@ -2,47 +2,53 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import SchemaMarkup from '../components/SchemaMarkup'
 
+const LOCAL_PROJECT_IMAGES = [
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/e5adfa586_20180209_014945610_iOS.jpg',
+]
+
 const FEATURES = [
   {
-    icon: '🧠',
-    title: 'Advisory AI',
-    tagline: 'Intelligent insights & recommendations',
+    icon: '🏡',
+    title: 'Driveway Experts Since 1984',
+    tagline: 'Serving Chester, Richmond, and Midlothian',
     description:
-      'JWORDENAI™ analyzes project conditions, site data, and industry patterns to surface intelligent recommendations — helping owners and operators make faster, more confident decisions at every stage of a paving or construction project.',
+      'Homeowners trust us to inspect asphalt honestly, explain the right repair plan, and deliver clean paving work that holds up in Virginia weather.',
     capabilities: [
-      'Site condition analysis & risk flagging',
-      'Scope recommendation engine',
-      'Regulatory & compliance guidance',
-      'Cost-benefit scenario modeling',
-      'Vendor & material intelligence',
+      'Driveway resurfacing and replacement',
+      'Crack filling and sealcoating',
+      'Drainage-aware prep before paving',
+      'Clear written scope and timeline',
+      'Friendly local crew communication',
     ],
   },
   {
-    icon: '⚙️',
-    title: 'Automation Tools',
-    tagline: 'Project planning & management',
+    icon: '🏢',
+    title: 'Commercial Lot Reliability',
+    tagline: 'Built for businesses, churches, and HOAs',
     description:
-      'Purpose-built automation tools that eliminate manual bottlenecks across the project lifecycle — from initial takeoff and scheduling through documentation, change orders, and closeout. Built for the pace of real field operations.',
+      'From neighborhood shopping centers to church lots, we build phased paving plans that reduce downtime and keep your property safe and professional.',
     capabilities: [
-      'Automated project scheduling & sequencing',
-      'Takeoff & quantity estimation',
-      'Document generation & management',
-      'Change order tracking & approval workflows',
-      'Crew coordination & dispatch logic',
+      'Parking lot patching and overlay',
+      'Traffic-friendly project phasing',
+      'Line striping and finishing coordination',
+      'Maintenance planning by budget year',
+      'Large-area paving execution support',
     ],
   },
   {
-    icon: '📡',
-    title: 'Predictive Technologies',
-    tagline: 'Maintenance forecasting',
+    icon: '🛣️',
+    title: 'Virginia Climate Smart Planning',
+    tagline: 'Prep first, pave right, protect longer',
     description:
-      'Proprietary predictive models trained on pavement lifecycle data to forecast maintenance windows, surface degradation timelines, and capital expenditure needs — before failure becomes the only option.',
+      'Our recommendations are based on what local asphalt faces every year: heat, rain, freeze-thaw cycles, and heavy daily traffic across Central Virginia.',
     capabilities: [
-      'Pavement condition decay modeling',
-      'Maintenance window forecasting',
-      'Capital expenditure planning',
-      'Lifecycle cost optimization',
-      'Proactive intervention triggers',
+      'Season-aware scheduling windows',
+      'Subgrade and base prep guidance',
+      'Drainage correction prioritization',
+      'Practical long-term maintenance plans',
+      'Property-specific pavement recommendations',
     ],
   },
 ]
@@ -60,12 +66,12 @@ export default function JwordenAI() {
   return (
     <div className="min-h-screen bg-white">
       <SchemaMarkup
-        title="JWORDENAI™ — Predictive Paving Technology & Automation"
-        description="JWORDENAI™ delivers AI-powered project insights, automation tools, and predictive maintenance forecasting for paving contractors and property owners."
+        title="Virginia Asphalt Paving Expertise | J. Worden & Sons"
+        description="Serving Virginia property owners for over 40 years with driveway paving, parking lot resurfacing, sealcoating, and asphalt repair." 
         canonical="/jwordenai"
         breadcrumb={[
           { name: 'Home', path: '/' },
-          { name: 'JWORDENAI™', path: '/jwordenai' },
+          { name: 'Virginia Asphalt Expertise', path: '/jwordenai' },
         ]}
       />
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
@@ -91,7 +97,7 @@ export default function JwordenAI() {
             className="inline-flex items-center gap-2 bg-brand-amber/15 border border-brand-amber/30 text-brand-amber text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-8"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-brand-amber animate-pulse" />
-            Proprietary AI Technology
+            Serving Virginia For Over 40 Years
           </motion.div>
 
           {/* Wordmark */}
@@ -113,8 +119,9 @@ export default function JwordenAI() {
             custom={2}
             className="text-white/70 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-4"
           >
-            J&#39;s proprietary AI platform for the paving industry — built from decades of field
-            experience and engineered to give operators an unfair advantage.
+            Since 1984, J. Worden &amp; Sons has helped homeowners and property managers across
+            Chester, Richmond, Midlothian, Henrico, and surrounding communities protect and
+            restore their asphalt the right way.
           </motion.p>
 
           <motion.p
@@ -124,8 +131,7 @@ export default function JwordenAI() {
             custom={3}
             className="text-white/40 text-sm max-w-xl mx-auto mb-12"
           >
-            Advisory intelligence. Operational automation. Predictive maintenance forecasting.
-            Purpose-built for asphalt and construction professionals.
+            Local crews. Honest recommendations. Lasting pavement work.
           </motion.p>
 
           {/* CTAs */}
@@ -144,7 +150,7 @@ export default function JwordenAI() {
                   window.gtag('event', 'cta_click', { location: 'jwordenai_hero_primary' })
               }}
             >
-              Contact for Premium Access
+              Book A Free Site Visit
             </Link>
             <Link
               to="/services"
@@ -176,8 +182,8 @@ export default function JwordenAI() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 text-brand-navy text-center">
             {[
               { value: '40+', label: 'Years of field data' },
-              { value: '3', label: 'Core AI capability pillars' },
-              { value: '100%', label: 'Paving-industry focused' },
+              { value: '1984', label: 'Family business founded' },
+              { value: '100%', label: 'Virginia paving focus' },
             ].map(({ value, label }) => (
               <div key={label}>
                 <p className="font-display font-black text-2xl">{value}</p>
@@ -193,15 +199,28 @@ export default function JwordenAI() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
-              Platform capabilities
+              Local service strengths
             </span>
             <h2 className="font-display font-black text-4xl md:text-5xl text-brand-navy mt-3 mb-4">
-              Three Pillars of JWORDENAI™
+              Asphalt Guidance Built For Virginia Properties
             </h2>
             <p className="text-brand-navy/60 max-w-2xl mx-auto text-lg">
-              Each capability is purpose-built for the realities of paving and construction
-              operations — not adapted from generic enterprise software.
+              Homeowners and property managers get clear options, local insight, and dependable
+              execution from a team that has served the region for decades.
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+            {LOCAL_PROJECT_IMAGES.map((src, idx) => (
+              <div key={src} className="relative overflow-hidden rounded-2xl border border-brand-navy/10 bg-brand-navy/5">
+                <img
+                  src={src}
+                  alt={`Virginia asphalt paving project ${idx + 1}`}
+                  className="w-full h-52 object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -255,14 +274,14 @@ export default function JwordenAI() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <span className="text-brand-amber text-xs font-bold uppercase tracking-widest">
-              Roadmap &amp; commitment
+              What local clients can expect
             </span>
             <h2 className="font-display font-black text-4xl md:text-5xl text-brand-navy mt-3 mb-4">
-              Live Today. Building Tomorrow.
+              Straight Answers And Reliable Work
             </h2>
             <p className="text-brand-navy/60 max-w-2xl mx-auto text-lg">
-              JWORDENAI™ is in active development. Here&apos;s a teaser of what&apos;s working
-              right now — and where we&apos;re heading next.
+              We focus on prep quality, proper paving methods, and clear communication so your
+              driveway or lot lasts longer and looks better.
             </p>
           </div>
 
@@ -279,24 +298,23 @@ export default function JwordenAI() {
               <div className="flex items-center gap-3 mb-5">
                 <span className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live today
+                  Working now
                 </span>
               </div>
               <h3 className="font-display font-black text-2xl text-brand-navy mb-2">
-                Current Abilities
+                Current Service Coverage
               </h3>
               <p className="text-brand-navy/60 text-sm mb-6">
-                Capabilities running in production for J. Worden &amp; Sons operations
-                and qualified premium partners.
+                Real work delivered every week across residential and commercial properties.
               </p>
               <ul className="space-y-3">
                 {[
-                  'Advisory chat trained on 50-state construction law & permitting',
-                  'AI-assisted quote & proposal drafting from a single intake form',
-                  'Site-condition analysis with thermal, drone, and GPR data inputs',
-                  'Pavement-condition decay modeling & maintenance-window forecasting',
-                  'Real-time field telemetry & truck/crew coordination',
-                  'Automated takeoff, scheduling, and document generation',
+                  'Residential driveways and private lanes',
+                  'Commercial lots, HOA streets, and church properties',
+                  'Sealcoating and crack fill maintenance programs',
+                  'Prep-first planning before any paving starts',
+                  'Photo-based condition review for fast early guidance',
+                  'Clear scheduling and project communication',
                 ].map((item) => (
                   <li
                     key={item}
@@ -321,24 +339,23 @@ export default function JwordenAI() {
               <div className="flex items-center gap-3 mb-5">
                 <span className="inline-flex items-center gap-2 bg-brand-amber/20 text-brand-navy text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand-amber animate-pulse" />
-                  In development
+                  Local expansion
                 </span>
               </div>
               <h3 className="font-display font-black text-2xl text-brand-navy mb-2">
-                Future Tech
+                Next Improvements
               </h3>
               <p className="text-brand-navy/60 text-sm mb-6">
-                Where we&apos;re investing next — engineered in the field, not
-                a marketing roadmap.
+                We keep improving customer clarity, faster estimates, and local service coverage.
               </p>
               <ul className="space-y-3">
                 {[
-                  'Autonomous go/no-go foreman with real-time weather & thermal gating',
-                  '4-D project visualizer with live crew, truck, and material overlays',
-                  'Predictive cash-flow & lien-calendar agents for every active job',
-                  'Vector-search knowledge base across 40+ years of project records',
-                  'Computer-vision pavement scoring from phone, drone, and truck cameras',
-                  'Subcontractor & material-supplier intelligence with bid scoring',
+                  'Expanded city pages for Richmond metro local SEO',
+                  'More neighborhood-specific project galleries',
+                  'Faster mobile quote and photo review workflows',
+                  'Richer prep-before-paving guidance for customers',
+                  'More transparent status updates during active jobs',
+                  'Broader local service-area education resources',
                 ].map((item) => (
                   <li
                     key={item}
@@ -362,19 +379,18 @@ export default function JwordenAI() {
             className="mt-14 max-w-3xl mx-auto text-center"
           >
             <h3 className="font-display font-black text-2xl text-brand-navy mb-3">
-              Our Commitment to Development
+              Our Local Commitment
             </h3>
             <p className="text-brand-navy/65 leading-relaxed">
-              We ship to production every week. Every capability above came out of a
-              real problem on a real job — not a slide deck. JWORDENAI™ will keep
-              evolving as long as there are slow processes, manual bottlenecks, and
-              avoidable failures left to remove from this industry.
+              We have served Virginia property owners for over 40 years. Every recommendation
+              we give is grounded in real paving experience, local conditions, and long-term
+              pavement performance.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* ── Proprietary notice ───────────────────────────────────────────── */}
+      {/* ── Local trust notice ───────────────────────────────────────────── */}
       <section className="py-20 bg-brand-navy/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
@@ -397,23 +413,22 @@ export default function JwordenAI() {
                   clipRule="evenodd"
                 />
               </svg>
-              Proprietary Platform
+              Family Owned Since 1984
             </div>
 
             <h2 className="font-display font-black text-4xl md:text-5xl text-brand-navy mb-6">
-              Built in the Field.{' '}
-              <span className="text-brand-amber">Not in a Boardroom.</span>
+              Built In Virginia.{' '}
+              <span className="text-brand-amber">Backed By 40+ Years Of Work.</span>
             </h2>
 
             <p className="text-brand-navy/65 text-lg leading-relaxed max-w-3xl mx-auto mb-4">
-              JWORDENAI™ is the result of four decades of paving knowledge encoded into intelligent
-              systems. The underlying models, methodologies, and data structures are proprietary to
-              J. Worden &amp; Sons and are not publicly disclosed.
+              From Chester neighborhoods to Richmond commercial corridors, our team delivers
+              asphalt solutions that are practical, durable, and tailored to your property.
             </p>
 
             <p className="text-brand-navy/45 text-sm max-w-2xl mx-auto mb-12">
-              Premium access is available to qualified operators and partners. Contact us to discuss
-              how JWORDENAI™ can be applied to your operation.
+              Ready for a driveway quote, lot resurfacing plan, or maintenance schedule? We are
+              here to help with local guidance and a clear next step.
             </p>
 
             {/* Dual CTAs */}
@@ -426,7 +441,7 @@ export default function JwordenAI() {
                     window.gtag('event', 'cta_click', { location: 'jwordenai_bottom_primary' })
                 }}
               >
-                Contact for Premium Access
+                Request Your Free Estimate
               </Link>
               <Link
                 to="/services"

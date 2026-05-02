@@ -6,53 +6,59 @@ import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
 import { trackPhoneClick } from '@/lib/analytics'
 
+const REAL_PROJECT_IMAGES = [
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/f509f8a57_20180209_014704733_iOS.jpg',
+  'https://media.base44.com/images/public/69c853446b8987b1630018ff/08ae6c2a8_20180209_021155875_iOS.jpg',
+]
+
 const PILLARS = [
   {
     id: 'data-pipeline',
     icon: BarChart3,
-    title: 'Closed-Loop Data Pipeline',
-    body: 'Capture and connect live lead, estimate, dispatch, crew, weather, production, and billing data so every job improves the next one.',
+    title: 'Local Project Planning',
+    body: 'We build clear scopes for driveways and parking lots using property conditions, drainage patterns, and local traffic realities.',
   },
   {
     id: 'estimate-intel',
     icon: Bot,
-    title: 'Estimate And Profit Intelligence',
-    body: 'Track estimate-vs-actual outcomes by service and market, then adjust pricing and scope recommendations based on real margin performance.',
+    title: 'Honest Estimate Guidance',
+    body: 'Property owners receive straightforward options with practical budget ranges for repair, overlay, and full replacement.',
   },
   {
     id: 'dispatch-routing',
     icon: Route,
-    title: 'Dispatch And Routing Optimization',
-    body: 'Use AI to sequence jobs, assign crews, and optimize routes around traffic, weather windows, and equipment availability.',
+    title: 'Weather-Aware Scheduling',
+    body: 'We sequence paving work around weather windows and traffic needs to keep projects moving safely and efficiently.',
   },
   {
     id: 'vision-qa-reputation',
     icon: Camera,
-    title: 'Vision QA And Reputation Automation',
-    body: 'Detect field quality risks from photos, reduce callbacks, and automate review workflows with rapid response for negative feedback.',
+    title: 'Photo-Based Site Clarity',
+    body: 'Customers can share site photos from iPhone or Android so we can evaluate conditions early and recommend the right prep before paving.',
   },
   {
     id: 'expansion-intelligence',
     icon: Map,
-    title: 'Expansion Intelligence By Corridor',
-    body: 'Prioritize markets using demand, permits, service fit, and competitor gaps so growth decisions are data-backed instead of guesswork.',
+    title: 'Regional Service Coverage',
+    body: 'Serving Chester, Richmond, Midlothian, and surrounding Virginia markets with over 40 years of asphalt paving experience.',
   },
 ]
 
 const KPI_LIST = [
-  'Cost per booked lead (CAC)',
-  'Close rate by service and market',
-  'Gross margin by job type',
-  'Rework rate and callback frequency',
-  'Cycle time from lead to invoice',
-  'On-time completion percentage',
+  'Driveway and parking lot condition clarity',
+  'Prep-before-paving completion quality',
+  'On-time start and completion cadence',
+  'Drainage and edge-detail attention',
+  'Customer communication responsiveness',
+  'Long-term pavement durability outcomes',
 ]
 
 export default function ContractorAIPlatform() {
   const canonicalPath = '/contractor-ai'
-  const title = 'Contractor AI System | J. Worden & Sons'
+  const title = 'Virginia Asphalt Planning And Delivery | J. Worden & Sons'
   const description =
-    'The five-part Contractor AI system for data, estimating, dispatch, quality, and growth intelligence across paving operations.'
+    'Serving Virginia for over 40 years with practical driveway and parking lot planning, prep guidance, and dependable paving delivery.'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -62,11 +68,12 @@ export default function ContractorAIPlatform() {
         '@id': 'https://www.jwordenasphaltpaving.com/contractor-ai#page',
         url: 'https://www.jwordenasphaltpaving.com/contractor-ai',
         name: 'Contractor AI System',
+        name: 'Virginia Asphalt Planning And Delivery',
         description,
       },
       {
         '@type': 'ItemList',
-        name: 'Contractor AI Priority Stack',
+        name: 'Virginia Asphalt Service Framework',
         itemListElement: PILLARS.map((p, i) => ({
           '@type': 'ListItem',
           position: i + 1,
@@ -77,7 +84,7 @@ export default function ContractorAIPlatform() {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.jwordenasphaltpaving.com/' },
-          { '@type': 'ListItem', position: 2, name: 'Contractor AI', item: 'https://www.jwordenasphaltpaving.com/contractor-ai' },
+          { '@type': 'ListItem', position: 2, name: 'Asphalt Planning And Delivery', item: 'https://www.jwordenasphaltpaving.com/contractor-ai' },
         ],
       },
     ],
@@ -91,12 +98,13 @@ export default function ContractorAIPlatform() {
       <section className="relative border-b border-border pt-32 pb-16 md:pb-20 overflow-hidden">
         <div className="absolute -top-16 right-0 w-72 h-72 rounded-full bg-primary/12 blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-4">Contractor AI Platform</p>
+          <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-4">Serving Virginia For Over 40 Years</p>
           <h1 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight leading-[0.95] max-w-5xl">
-            The 5-Part System To Build The Best Contractor AI In The World
+            Local Asphalt Planning And Delivery You Can Trust
           </h1>
           <p className="text-muted-foreground text-base md:text-lg mt-6 max-w-3xl leading-relaxed">
-            This framework turns field operations into a compounding intelligence engine for better pricing, faster execution, and stronger margins.
+            We help homeowners, HOAs, churches, and commercial properties make smart paving
+            decisions with practical prep, clear timelines, and reliable workmanship.
           </p>
 
           <div className="flex flex-wrap gap-3 mt-8">
@@ -112,17 +120,34 @@ export default function ContractorAIPlatform() {
               to="/general-contracting"
               className="border border-primary/50 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
             >
-              See GC Delivery Layer
+              View Local Services
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-10 border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {REAL_PROJECT_IMAGES.map((src, idx) => (
+              <div key={src} className="rounded-2xl overflow-hidden border border-border bg-card">
+                <img
+                  src={src}
+                  alt={`Local Virginia paving project ${idx + 1}`}
+                  className="w-full h-56 object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       <section className="py-14 md:py-18 border-b border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Priority Stack</p>
+          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Service Priorities</p>
           <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95] mb-8">
-            Add All 5
+            Five Local-Focused Commitments
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -144,9 +169,9 @@ export default function ContractorAIPlatform() {
       <section className="py-14 md:py-16 border-b border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="premium-panel rounded-2xl p-7 md:p-10">
-            <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Execution Metrics</p>
+            <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">How We Measure Quality</p>
             <h2 className="font-display font-black text-foreground text-3xl md:text-4xl uppercase tracking-tight mb-5">
-              Track Weekly Or The System Fails
+              Every Project Gets A Prep-First Standard
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {KPI_LIST.map((kpi) => (
@@ -164,9 +189,10 @@ export default function ContractorAIPlatform() {
           <div className="premium-panel rounded-2xl p-7 md:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Next Move</p>
-              <h2 className="font-display font-black text-foreground text-3xl uppercase tracking-tight">Deploy The 5-Part AI Stack</h2>
+              <h2 className="font-display font-black text-foreground text-3xl uppercase tracking-tight">Get A Local Paving Plan</h2>
               <p className="text-muted-foreground text-sm md:text-base mt-3 max-w-2xl leading-relaxed">
-                We can phase implementation by highest ROI first: data, estimating, dispatch, QA, then expansion intelligence.
+                Tell us your property goals and we will recommend the best scope for your driveway
+                or lot, including any required prep before paving.
               </p>
             </div>
             <a
@@ -175,7 +201,7 @@ export default function ContractorAIPlatform() {
               className="premium-cta inline-flex items-center gap-2 px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase text-primary-foreground"
             >
               <Bot className="w-4 h-4" />
-              Start AI Buildout
+              Start Your Free Quote
             </a>
           </div>
         </div>
