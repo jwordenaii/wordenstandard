@@ -163,6 +163,17 @@ export const api = {
       return res.json()
     } finally { clearTimeout(tId) }
   },
+
+  // ── SCC Business Verification ──────────────────────────────────────────────
+  verifySccEntity: (params) => request('GET', `/api/v1/scc/verify${buildQS(params)}`),
+  verifySccBatch: (entities) => request('POST', '/api/v1/scc/verify-batch', { entities }),
+  getSccStatus: () => request('GET', '/api/v1/scc/status'),
+
+  // ── VDOT Bid Board ─────────────────────────────────────────────────────────
+  getVdotBids: (params) => request('GET', `/api/v1/vdot-bids${buildQS(params)}`),
+  getVdotBid: (id) => request('GET', `/api/v1/vdot-bids/${id}`),
+  triggerVdotScan: (maxResults = 50) => request('POST', `/api/v1/vdot-bids/scan?max_results=${maxResults}`),
+  getVdotStatus: () => request('GET', '/api/v1/vdot-bids/status'),
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

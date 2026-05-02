@@ -28,6 +28,7 @@ const ResidentialAsphalt = lazy(() => import('./pages/ResidentialAsphalt'));
 const HomeServices = lazy(() => import('./pages/HomeServices'));
 const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
 const FloorPlanStudio = lazy(() => import('./pages/FloorPlanStudio'));
+const VirginiaStatewide = lazy(() => import('./pages/VirginiaStatewide'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
 const ContractorAIPlatform = lazy(() => import('./pages/ContractorAIPlatform'));
 const CommandCenter = lazy(() => import('./pages/CommandCenter'));
@@ -119,6 +120,7 @@ const AuthenticatedApp = () => {
         <Route path="/home-services" element={<RequireAuth><HomeServices /></RequireAuth>} />
         <Route path="/general-contracting" element={<RequireAuth><GeneralContracting /></RequireAuth>} />
         <Route path="/floor-plan-studio" element={<RequireAuth><FloorPlanStudio /></RequireAuth>} />
+        <Route path="/virginia-statewide" element={<RequireAuth><VirginiaStatewide /></RequireAuth>} />
         <Route path="/tar-and-chip" element={<RequireAuth><TarAndChip /></RequireAuth>} />
         <Route path="/contractor-ai" element={<RequireAuth><ContractorAIPlatform /></RequireAuth>} />
         <Route path="/consultant" element={<RequireAuth><LeadConsultant /></RequireAuth>} />

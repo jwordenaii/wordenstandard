@@ -34,6 +34,7 @@ celery_app = Celery(
         "app.tasks.email_tasks",
         "app.tasks.vector_tasks",
         "app.tasks.anomaly_beat",
+        "app.tasks.vdot_scraper",
     ],
 )
 
@@ -78,6 +79,12 @@ celery_app.conf.update(
         "anomaly-scan-every-30m": {
             "task": "app.tasks.anomaly_beat.run_anomaly_scan_task",
             "schedule": crontab(minute="*/30"),
+        },
+        # VDOT bid board — scrape daily at 07:00 UTC before business hours EST
+        "scrape-vdot-bids-daily": {
+            "task": "app.tasks.vdot_scraper.scrape_vdot_bids_task",
+            "schedule": crontab(minute=0, hour=7),
+            "kwargs": {"max_results": 100},
         },
     },
 )

@@ -1250,3 +1250,96 @@ class ProjectEstimate(Base):
 
     def __repr__(self) -> str:
         return f"<ProjectEstimate id={self.id} site_id={self.project_site_id} item={self.item_name!r} total=${self.total_cost:.2f}>"
+
+
+# ── Statewide Intelligence: SCC + VDOT ───────────────────────────────────────
+
+class SccVerificationLog(Base):
+    """
+    Immutable audit record for every Virginia SCC business entity check.
+
+    Fields:
+      entity_id        — SCC entity ID (e.g. "S1234567")
+      entity_name      — Registered legal name
+      entity_type      — LLC / Corporation / LP / etc.
+      status           — Active | Delinquent | Dissolved | Suspended | Unknown
+      is_good_standing — True when status == Active
+      registered_agent — Registered agent name (nullable)
+      principal_office — Principal office address (nullable)
+      date_formed      — Formation/registration date (nullable)
+      source           — "scc_api" | "stub"
+      requested_by     — User email or system that triggered the check
+      tenant_id        — Multi-tenant isolation key
+    """
+
+    __tablename__ = "scc_verification_logs"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    entity_id        = Column(String(60),  nullable=True,  index=True)
+    entity_name      = Column(String(200), nullable=True)
+    entity_type      = Column(String(80),  nullable=True)
+    status           = Column(String(40),  nullable=False, default="Unknown")
+    is_good_standing = Column(Boolean,     nullable=False, default=False)
+    registered_agent = Column(String(200), nullable=True)
+    principal_office = Column(String(300), nullable=True)
+    date_formed      = Column(String(20),  nullable=True)
+    source           = Column(String(30),  nullable=True)
+    requested_by     = Column(String(120), nullable=True)
+    tenant_id        = Column(String(60),  nullable=True, index=True, default="default")
+    checked_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False, index=True)
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<SccVerificationLog id={self.id} entity={self.entity_id!r} "
+            f"status={self.status!r} standing={self.is_good_standing}>"
+        )
+
+
+class VdotBid(Base):
+    """
+    VDOT bid board opportunity scraped daily from the Virginia DOT bid board.
+
+    Fields:
+      contract_id     — VDOT contract ID (e.g. "C000123456"), unique
+      title           — Project description / title
+      district        — VDOT district name (Bristol, Richmond, etc.)
+      county          — Primary county
+      category        — Bid category (Asphalt Surface Treatment, etc.)
+      contract_type   — Maintenance | Construction | Emergency | Minor
+      estimated_value — Engineer's estimate in USD (nullable)
+      open_date       — Date bid was advertised
+      close_date      — Bid letting/close date (nullable)
+      location_desc   — Freeform location description
+      prime_eligible  — True if open to prime contractors
+      is_active       — False when bid is closed/awarded
+      source          — "vdot_api" | "stub"
+      tenant_id       — Multi-tenant isolation key
+    """
+
+    __tablename__ = "vdot_bids"
+
+    id              = Column(Integer,  primary_key=True, index=True)
+    contract_id     = Column(String(30),  nullable=False, unique=True, index=True)
+    title           = Column(String(300), nullable=False)
+    district        = Column(String(60),  nullable=True, index=True)
+    county          = Column(String(80),  nullable=True, index=True)
+    category        = Column(String(100), nullable=True)
+    contract_type   = Column(String(30),  nullable=True)
+    estimated_value = Column(Float,       nullable=True)
+    open_date       = Column(DateTime(timezone=True), nullable=True)
+    close_date      = Column(DateTime(timezone=True), nullable=True, index=True)
+    location_desc   = Column(String(300), nullable=True)
+    prime_eligible  = Column(Boolean,     nullable=False, default=True)
+    is_active       = Column(Boolean,     nullable=False, default=True, index=True)
+    source          = Column(String(30),  nullable=True)
+    tenant_id       = Column(String(60),  nullable=True, index=True, default="default")
+    scraped_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at      = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+    created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<VdotBid id={self.id} contract={self.contract_id!r} "
+            f"district={self.district!r} value=${self.estimated_value}>"
+        )
