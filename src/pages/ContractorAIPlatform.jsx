@@ -7,9 +7,18 @@ import SEO from '@/components/SEO'
 import { trackPhoneClick } from '@/lib/analytics'
 
 const REAL_PROJECT_IMAGES = [
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg',
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/f509f8a57_20180209_014704733_iOS.jpg',
-  'https://media.base44.com/images/public/69c853446b8987b1630018ff/08ae6c2a8_20180209_021155875_iOS.jpg',
+  {
+    segment: 'Residential Driveway',
+    src: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg',
+  },
+  {
+    segment: 'Commercial Lot',
+    src: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
+  },
+  {
+    segment: 'HOA / Private Road',
+    src: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+  },
 ]
 
 const PILLARS = [
@@ -67,7 +76,6 @@ export default function ContractorAIPlatform() {
         '@type': 'WebPage',
         '@id': 'https://www.jwordenasphaltpaving.com/contractor-ai#page',
         url: 'https://www.jwordenasphaltpaving.com/contractor-ai',
-        name: 'Contractor AI System',
         name: 'Virginia Asphalt Planning And Delivery',
         description,
       },
@@ -129,14 +137,17 @@ export default function ContractorAIPlatform() {
       <section className="py-10 border-b border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {REAL_PROJECT_IMAGES.map((src, idx) => (
-              <div key={src} className="rounded-2xl overflow-hidden border border-border bg-card">
+            {REAL_PROJECT_IMAGES.map((image, idx) => (
+              <div key={image.src} className="rounded-2xl overflow-hidden border border-border bg-card relative">
                 <img
-                  src={src}
-                  alt={`Local Virginia paving project ${idx + 1}`}
+                  src={image.src}
+                  alt={`${image.segment} paving project in Virginia`}
                   className={`w-full h-56 object-cover ${idx === 0 ? 'rotate-90 scale-[1.28] origin-center' : ''}`}
                   loading="lazy"
                 />
+                <div className="absolute left-3 bottom-3 bg-brand-navy/85 text-white text-[11px] uppercase tracking-[0.14em] px-3 py-1.5 rounded-full border border-white/20">
+                  {image.segment}
+                </div>
               </div>
             ))}
           </div>
