@@ -45,6 +45,10 @@ These must be set for the application to start and function correctly in product
 | Variable | Sensitivity | Used By | Notes |
 |---|---|---|---|
 | `OPENAI_API_KEY` | 🔴 SECRET | `/api/v1/ai/photo-inspect`, `/api/v1/ai/chat`, `/api/v1/ai/contact-suggest`, `/api/v1/blog/draft`, `/api/v1/project-metrics/{id}/case-study` | Required for all AI features. Endpoints return stubs or 500 without it. |
+| `GEMINI_API_KEY` | 🔴 SECRET | Planned multi-provider AI router | Google Gemini provider key for Google-aligned workflows and grounded content generation. |
+| `PERPLEXITY_API_KEY` | 🔴 SECRET | Planned multi-provider AI router | Perplexity provider key for web-grounded competitive research briefs. |
+| `ANTHROPIC_API_KEY` | 🔴 SECRET | Planned multi-provider AI router | Claude provider key for long-context and math-heavy reasoning workflows. |
+| `OPENAI_CODEX_MODEL` | 🟡 INTERNAL | Planned multi-provider AI router | Optional codex model override for file/code task routing (example: `gpt-5.3-codex`). |
 | `GOOGLE_API_KEY` | 🔴 SECRET | Geo endpoints, review fetching | Required for live Google Maps / Places data. |
 | `STRIPE_SECRET_KEY` | 🔴 SECRET | `/api/v1/payments/checkout-session` | Stripe secret key. Use `sk_test_...` for staging, `sk_live_...` for production. |
 | `STRIPE_WEBHOOK_SECRET` | 🔴 SECRET | `/api/v1/payments/webhook` | Stripe webhook signing secret. Obtained from the Stripe dashboard → Webhooks. |
@@ -77,6 +81,7 @@ These must be set for the application to start and function correctly in product
 | `SENTRY_TRACES_SAMPLE_RATE` | 🟢 SAFE | `0.1` | Fraction of transactions sent to Sentry (0.0–1.0). `0.1` = 10% sampling. |
 | `LOG_FORMAT` | 🟢 SAFE | `text` | Log output format. Use `json` in production for Railway log aggregation; `text` for local development. |
 | `LOG_LEVEL` | 🟢 SAFE | `INFO` | Minimum log level: `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
+| `VITE_INTERNAL_STRATEGY_MODE` | 🟢 SAFE | `off` | Frontend toggle for internal strategy panels in Command Center (`on/off`). Panels are additionally route-locked to `/command-center`. |
 
 ---
 
@@ -86,6 +91,15 @@ These must be set for the application to start and function correctly in product
 |---|---|---|---|
 | `AUTO_CREATE_TABLES` | 🟢 SAFE | `true` | Automatically create DB tables on startup. Set to `false` in production — Alembic manages schema. |
 | `EXTRA_CORS_ORIGINS` | 🟢 SAFE | *(none)* | Comma-separated list of additional allowed CORS origins. Built-in origins: `https://jworden.netlify.app`, `https://jwordenasphaltpaving.com`, `http://localhost:5173`, `http://localhost:3000`. |
+| `VITE_PROVIDER_GEMINI_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Gemini provider display. |
+| `VITE_PROVIDER_PERPLEXITY_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Perplexity provider display. |
+| `VITE_PROVIDER_CLAUDE_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Claude provider display. |
+| `VITE_PROVIDER_CODEX_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Codex provider display. |
+| `VITE_PROVIDER_GROK_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Grok provider display. |
+| `VITE_PROVIDER_DROPBOX_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Dropbox ingest display. |
+| `VITE_PROVIDER_GPHOTOS_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for Google Photos ingest display. |
+| `VITE_PROVIDER_X_STATUS` | 🟢 SAFE | *(none)* | Optional Command Center status flag (`up/down`) for X API display. |
+| `VITE_PROVIDER_SENTRY_STATUS` | 🟢 SAFE | *(none)* | Optional fallback status flag (`up/down`) for Sentry provider display when backend metrics are unavailable. |
 
 ---
 
@@ -201,6 +215,10 @@ AUTO_CREATE_TABLES=true
 | `ADMIN_USERNAME` | ✅ | — | — |
 | `ADMIN_PASSWORD` | ✅ | — | — |
 | `OPENAI_API_KEY` | ✅ | ✅ | — |
+| `GEMINI_API_KEY` | ✅ | ✅ | — |
+| `PERPLEXITY_API_KEY` | ✅ | ✅ | — |
+| `ANTHROPIC_API_KEY` | ✅ | ✅ | — |
+| `OPENAI_CODEX_MODEL` | ✅ | ✅ | — |
 | `SENTRY_DSN` | ✅ | ✅ | — |
 | `STRIPE_SECRET_KEY` | ✅ | — | — |
 | `STRIPE_WEBHOOK_SECRET` | ✅ | — | — |

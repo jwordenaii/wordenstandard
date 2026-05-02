@@ -5,6 +5,31 @@
     "sync_token": {
       "type": "string",
       "description": "Google Calendar incremental sync token"
+    },
+    "ai_research_last_run_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the latest AI construction research scan"
+    },
+    "ai_research_sources": {
+      "type": "string",
+      "description": "JSON array of source URLs used in the latest research scan"
+    },
+    "ai_research_digest": {
+      "type": "string",
+      "description": "Short text digest summarizing the latest research findings"
+    },
+    "ai_research_opportunities": {
+      "type": "string",
+      "description": "JSON array of prioritized build opportunities from the latest scan"
+    },
+    "ai_research_watchlist": {
+      "type": "string",
+      "description": "JSON array of lower-confidence trends to monitor"
+    },
+    "ai_research_countermoves": {
+      "type": "string",
+      "description": "JSON array of concrete internal actions with owners and ETA"
     }
   },
   "required": []

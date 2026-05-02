@@ -13,10 +13,12 @@ lastVerified: 2026-04-25
 from __future__ import annotations
 from typing import Optional
 
+TOTAL_US_JURISDICTIONS = 51  # 50 states + DC
+
 # (abbr, name, region, laborIdx, matPrem, aspMonths,
 #  prevWage, stateLic, stateOsha, swpppAcres, qsrDensity)
 _RAW: list[tuple] = [
-    ("AL","Alabama",       "Southeast", 0.82,1.40,9, False,True, False,1.0,"medium"),
+    ("AL","Alabama",       "Southeast", 0.82,0.92,9, False,True, False,1.0,"medium"),
     ("AK","Alaska",        "West",      1.40,1.35,4, False,False,True, 1.0,"low"),
     ("AZ","Arizona",       "Southwest", 0.92,0.96,10,False,True, True, 1.0,"medium"),
     ("AR","Arkansas",      "Southeast", 0.80,0.91,8, False,True, False,1.0,"medium"),
@@ -149,4 +151,74 @@ def normalize_state_code(code: Optional[str]) -> Optional[str]:
         return None
     upper = code.strip().upper()
     return upper if upper in STATE_MAP else None
+
+
+def verify_state_logic_integrity(raise_on_error: bool = True) -> dict:
+    """
+    Validate parity across backend state datasets.
+
+    Checks:
+      - state_data table includes all 50 states + DC
+      - SupremeCourtAI compliance table has the exact same jurisdiction keys
+      - Compliance booleans + SWPPP threshold match between both modules
+    """
+    issues: list[str] = []
+
+    if len(STATE_MAP) != TOTAL_US_JURISDICTIONS:
+        issues.append(
+            f"STATE_MAP contains {len(STATE_MAP)} rows (expected {TOTAL_US_JURISDICTIONS})."
+        )
+
+    # Import lazily to avoid creating a module-level circular dependency.
+    from .ai_brain import _STATE_COMPLIANCE  # noqa: PLC0415
+
+    state_keys = set(STATE_MAP.keys())
+    compliance_keys = set(_STATE_COMPLIANCE.keys())
+
+    missing_in_compliance = sorted(state_keys - compliance_keys)
+    missing_in_state_map = sorted(compliance_keys - state_keys)
+
+    if missing_in_compliance:
+        issues.append(
+            "Missing in SupremeCourtAI _STATE_COMPLIANCE: "
+            + ", ".join(missing_in_compliance)
+        )
+    if missing_in_state_map:
+        issues.append("Missing in STATE_MAP: " + ", ".join(missing_in_state_map))
+
+    for abbr in sorted(state_keys & compliance_keys):
+        row = STATE_MAP[abbr]
+        lic_required, has_prev_wage, has_state_osha, swppp_acres = _STATE_COMPLIANCE[abbr]
+
+        if bool(row["hasStateLicensing"]) != bool(lic_required):
+            issues.append(
+                f"{abbr} licensing mismatch (state_data={row['hasStateLicensing']} compliance={lic_required})."
+            )
+        if bool(row["hasPrevailingWage"]) != bool(has_prev_wage):
+            issues.append(
+                f"{abbr} prevailing wage mismatch (state_data={row['hasPrevailingWage']} compliance={has_prev_wage})."
+            )
+        if bool(row["hasStateOsha"]) != bool(has_state_osha):
+            issues.append(
+                f"{abbr} state OSHA mismatch (state_data={row['hasStateOsha']} compliance={has_state_osha})."
+            )
+        if float(row["swpppAcres"]) != float(swppp_acres):
+            issues.append(
+                f"{abbr} SWPPP mismatch (state_data={row['swpppAcres']} compliance={swppp_acres})."
+            )
+
+    ok = len(issues) == 0
+    result = {
+        "ok": ok,
+        "jurisdiction_count": len(STATE_MAP),
+        "expected_count": TOTAL_US_JURISDICTIONS,
+        "issues": issues,
+    }
+
+    if (not ok) and raise_on_error:
+        raise RuntimeError(
+            "State logic integrity check failed: " + " | ".join(issues)
+        )
+
+    return result
 

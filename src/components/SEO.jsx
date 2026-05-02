@@ -9,7 +9,7 @@ import { PRIMARY_DOMAIN } from '@/lib/locations';
 export default function SEO({
   title,
   description,
-  canonicalPath = '/',
+  canonicalPath,
   ogImage = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
   ogType = 'website',
   jsonLd,
@@ -32,7 +32,32 @@ export default function SEO({
       el.setAttribute(attr, value);
     };
 
-    const canonicalUrl = `${PRIMARY_DOMAIN}${canonicalPath}`;
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+    const rawPath = canonicalPath || currentPath || '/';
+    const pathOnly = String(rawPath).split('?')[0].split('#')[0] || '/';
+    const normalizedPath = pathOnly !== '/' ? pathOnly.replace(/\/+$/, '') : '/';
+    const canonicalUrl = `${PRIMARY_DOMAIN}${normalizedPath}`;
+
+    const isInternalRoute = [
+      '/command-center',
+      '/dashboard',
+      '/consultant',
+      '/job',
+      '/crew-reporting',
+      '/dns-migration',
+      '/portal',
+      '/admin',
+      '/leads',
+      '/voice-calls',
+      '/revenue',
+      '/residential',
+      '/home-services',
+      '/general-contracting',
+      '/tar-and-chip',
+      '/contractor-ai',
+      '/advisory',
+    ].some((prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`));
+    const shouldNoindex = Boolean(noindex || isInternalRoute);
 
     // Description
     if (description) setMeta('meta[name="description"]', 'content', description);
@@ -41,7 +66,7 @@ export default function SEO({
     setMeta(
       'meta[name="robots"]',
       'content',
-      noindex
+      shouldNoindex
         ? 'noindex, nofollow'
         : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
     );
@@ -49,7 +74,7 @@ export default function SEO({
     setMeta(
       'meta[name="googlebot"]',
       'content',
-      noindex
+      shouldNoindex
         ? 'noindex, nofollow'
         : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
     );

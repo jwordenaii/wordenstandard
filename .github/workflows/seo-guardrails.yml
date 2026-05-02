@@ -1,0 +1,45 @@
+name: SEO Guardrails
+
+on:
+  push:
+    branches: [main, "copilot/**"]
+    paths:
+      - "public/sitemap.xml"
+      - "public/robots.txt"
+      - "src/lib/landingPages.js"
+      - "src/components/SEO.jsx"
+      - "scripts/repo-preflight.ps1"
+      - "scripts/seo-guardrails.ps1"
+      - "scripts/seo-self-heal.ps1"
+      - "netlify.toml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "public/sitemap.xml"
+      - "public/robots.txt"
+      - "src/lib/landingPages.js"
+      - "src/components/SEO.jsx"
+      - "scripts/repo-preflight.ps1"
+      - "scripts/seo-guardrails.ps1"
+      - "scripts/seo-self-heal.ps1"
+      - "netlify.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-guardrails-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guardrails:
+    name: SEO Schema + Sitemap Guardrails
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run SEO guardrails
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File scripts/seo-guardrails.ps1 -MaxAgeDays 45

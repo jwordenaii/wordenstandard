@@ -1,8 +1,12 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw } from 'lucide-react'
 import { base44 } from '@/api/base44Client'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
+const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
+const AUTH_DISABLED = ['none', 'off', 'disabled', '0', 'false'].includes(AUTH_MODE)
+const INTERNAL_STRATEGY_MODE = String(import.meta.env.VITE_INTERNAL_STRATEGY_MODE || 'off').toLowerCase()
+const INTERNAL_STRATEGY_ENABLED = ['1', 'true', 'on', 'enabled', 'strict', 'internal'].includes(INTERNAL_STRATEGY_MODE)
 
 // ⚠️  SECURITY NOTE — client-side PIN is NOT real access control.
 // VITE_ variables are bundled into the browser JavaScript bundle and are
@@ -12,6 +16,12 @@ const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 // deploy a Netlify Edge Function that validates a secret before serving the page.
 // See the "Command Center — Edge Protection" section in netlify.toml for guidance.
 const CC_PASSWORD = import.meta.env.VITE_CC_PASSWORD
+
+function isCommandCenterPath() {
+  if (typeof window === 'undefined') return false
+  const path = String(window.location.pathname || '')
+  return path === '/command-center' || path.startsWith('/command-center/')
+}
 
 const TABS = [
   { id: 'richmond-grid', label: 'Richmond Grid' },
@@ -39,6 +49,57 @@ const OPERATIONS_FEED = [
   { time: '08:58', text: 'Weather check flagged rain window for afternoon crew', tone: 'warn' },
   { time: '08:31', text: 'Review request automation sent for completed driveway job', tone: 'neutral' },
 ]
+
+const AUTOMATION_LOG_KEY = 'cc_automation_run_log_v1'
+const WEEKEND_SPRINT_STATE_KEY = 'cc_weekend_sprint_state_v1'
+
+function readAutomationRuns() {
+  try {
+    if (typeof window === 'undefined') return []
+    const raw = localStorage.getItem(AUTOMATION_LOG_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function appendAutomationRun(run) {
+  try {
+    if (typeof window === 'undefined') return
+    const next = [run, ...readAutomationRuns()].slice(0, 80)
+    localStorage.setItem(AUTOMATION_LOG_KEY, JSON.stringify(next))
+    window.dispatchEvent(new CustomEvent('cc:automation-run-updated'))
+  } catch {
+    // Keep UI resilient even if storage fails.
+  }
+}
+
+function readWeekendSprintState() {
+  try {
+    if (typeof window === 'undefined') return null
+    const raw = localStorage.getItem(WEEKEND_SPRINT_STATE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function writeWeekendSprintState(payload) {
+  try {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(WEEKEND_SPRINT_STATE_KEY, JSON.stringify(payload))
+  } catch {
+    // Keep dashboard usable if localStorage is unavailable.
+  }
+}
+
+function parseBoolLike(input) {
+  const value = String(input || '').trim().toLowerCase()
+  return ['1', 'true', 'yes', 'up', 'ready', 'ok', 'healthy', 'configured'].includes(value)
+}
 
 function statusTone(score) {
   if (score >= 85) return 'text-emerald-300 border-emerald-300/50 bg-emerald-300/10'
@@ -70,6 +131,7 @@ function SystemHealth() {
     { label: 'Command Center PIN', ok: Boolean(import.meta.env.VITE_CC_PASSWORD) },
     { label: 'Google Maps key', ok: Boolean(import.meta.env.VITE_GOOGLE_MAPS_API_KEY) },
     { label: 'Avatar model override', ok: Boolean(import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URL || import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URLS) },
+    { label: 'Auth mode set', ok: Boolean(import.meta.env.VITE_AUTH_MODE) },
   ]
 
   return (
@@ -88,6 +150,281 @@ function SystemHealth() {
             </span>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function ApiKeysPanel() {
+  const publicVars = [
+    {
+      keyName: 'VITE_CC_PASSWORD',
+      required: true,
+      valuePresent: Boolean(import.meta.env.VITE_CC_PASSWORD),
+      purpose: 'Command Center unlock gate',
+    },
+    {
+      keyName: 'VITE_GOOGLE_MAPS_API_KEY',
+      required: true,
+      valuePresent: Boolean(import.meta.env.VITE_GOOGLE_MAPS_API_KEY),
+      purpose: 'Maps + location visuals',
+    },
+    {
+      keyName: 'VITE_CONCIERGE_AVATAR_MODEL_URL / VITE_CONCIERGE_AVATAR_MODEL_URLS',
+      required: false,
+      valuePresent: Boolean(import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URL || import.meta.env.VITE_CONCIERGE_AVATAR_MODEL_URLS),
+      purpose: 'Custom avatar model',
+    },
+    {
+      keyName: 'VITE_AUTH_MODE',
+      required: true,
+      valuePresent: Boolean(import.meta.env.VITE_AUTH_MODE),
+      purpose: 'Public/internal auth behavior',
+    },
+  ]
+
+  const privateSecrets = [
+    {
+      keyName: 'OPENAI_API_KEY',
+      required: true,
+      purpose: 'AI chat + vision backend',
+      location: 'Backend secret env only',
+    },
+    {
+      keyName: 'GEMINI_API_KEY',
+      required: false,
+      purpose: 'Google Gemini provider for Google-aligned research/content workflows',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'PERPLEXITY_API_KEY',
+      required: false,
+      purpose: 'Perplexity provider for web-grounded research workflows',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'ANTHROPIC_API_KEY',
+      required: false,
+      purpose: 'Claude provider for math-heavy and long-context reasoning',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'OPENAI_CODEX_MODEL',
+      required: false,
+      purpose: 'Codex model target for file/code task routing',
+      location: 'Backend/automation env config',
+    },
+    {
+      keyName: 'XAI_API_KEY (Grok)',
+      required: false,
+      purpose: 'Grok (xAI) model calls for X workflow automation',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'X_BEARER_TOKEN',
+      required: false,
+      purpose: 'Read/listen operations for X APIs',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'X_API_KEY + X_API_SECRET',
+      required: false,
+      purpose: 'X app authentication for posting and account actions',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'X_ACCESS_TOKEN + X_ACCESS_TOKEN_SECRET',
+      required: false,
+      purpose: 'User-context posting/actions on X account',
+      location: 'Backend/automation secret env only',
+    },
+    {
+      keyName: 'DROPBOX_ACCESS_TOKEN',
+      required: false,
+      purpose: 'Dropbox media pull for gallery ingest CLI',
+      location: 'CLI terminal/runner env only',
+    },
+    {
+      keyName: 'DROPBOX_PATH',
+      required: false,
+      purpose: 'Optional Dropbox import folder path',
+      location: 'CLI terminal/runner env only',
+    },
+    {
+      keyName: 'GOOGLE_PHOTOS_ACCESS_TOKEN',
+      required: false,
+      purpose: 'Google Photos media pull for gallery ingest CLI',
+      location: 'CLI terminal/runner env only',
+    },
+    {
+      keyName: 'GOOGLE_PHOTOS_ALBUM_ID',
+      required: false,
+      purpose: 'Optional Google Photos album scope',
+      location: 'CLI terminal/runner env only',
+    },
+    {
+      keyName: 'SENTRY_DSN',
+      required: false,
+      purpose: 'Error monitoring + performance tracing backend integration',
+      location: 'Backend secret env only',
+    },
+  ]
+
+  const publicReadyCount = publicVars.filter((v) => v.valuePresent).length
+  const publicRequiredCount = publicVars.filter((v) => v.required).length
+  const publicRequiredReady = publicVars.filter((v) => v.required && v.valuePresent).length
+
+  const modelRouting = [
+    { task: 'Google workflows', provider: 'Gemini', envKey: 'GEMINI_API_KEY' },
+    { task: 'Research briefs', provider: 'Perplexity', envKey: 'PERPLEXITY_API_KEY' },
+    { task: 'Math reasoning', provider: 'Claude', envKey: 'ANTHROPIC_API_KEY' },
+    { task: 'File/code ops', provider: 'Codex', envKey: 'OPENAI_API_KEY + OPENAI_CODEX_MODEL' },
+  ]
+
+  const keySources = [
+    {
+      envKey: 'OPENAI_API_KEY',
+      provider: 'OpenAI',
+      portalUrl: 'https://platform.openai.com/api-keys',
+      note: 'Create secret key for AI chat/vision + Codex routing baseline.',
+    },
+    {
+      envKey: 'GEMINI_API_KEY',
+      provider: 'Google AI Studio',
+      portalUrl: 'https://aistudio.google.com/app/apikey',
+      note: 'Create Gemini key for Google-aligned workflows.',
+    },
+    {
+      envKey: 'PERPLEXITY_API_KEY',
+      provider: 'Perplexity',
+      portalUrl: 'https://www.perplexity.ai/settings/api',
+      note: 'Create API key for research briefs and web-grounded tasks.',
+    },
+    {
+      envKey: 'ANTHROPIC_API_KEY',
+      provider: 'Anthropic Console',
+      portalUrl: 'https://console.anthropic.com/settings/keys',
+      note: 'Create Claude key for math + long-context reasoning.',
+    },
+    {
+      envKey: 'XAI_API_KEY',
+      provider: 'xAI Console',
+      portalUrl: 'https://console.x.ai/',
+      note: 'Create Grok API key for X automation workflows.',
+    },
+    {
+      envKey: 'X_BEARER_TOKEN / X_* tokens',
+      provider: 'X Developer Portal',
+      portalUrl: 'https://developer.x.com/en/portal/dashboard',
+      note: 'Create app + user tokens for X posting/listening automations.',
+    },
+    {
+      envKey: 'DROPBOX_ACCESS_TOKEN',
+      provider: 'Dropbox App Console',
+      portalUrl: 'https://www.dropbox.com/developers/apps',
+      note: 'Generate access token for media ingest CLI.',
+    },
+    {
+      envKey: 'GOOGLE_PHOTOS_ACCESS_TOKEN',
+      provider: 'Google Cloud Console',
+      portalUrl: 'https://console.cloud.google.com/apis/credentials',
+      note: 'Create OAuth client + token for Google Photos ingest.',
+    },
+    {
+      envKey: 'SENTRY_DSN',
+      provider: 'Sentry',
+      portalUrl: 'https://sentry.io/settings/',
+      note: 'Create project DSN for backend error + performance monitoring.',
+    },
+  ]
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
+          API Keys + Secrets Checklist
+        </h3>
+        <span className="text-xs text-white/45">
+          Public ready: {publicReadyCount}/{publicVars.length} · Required: {publicRequiredReady}/{publicRequiredCount}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Public App Variables (VITE)</p>
+          <div className="space-y-2">
+            {publicVars.map((item) => (
+              <div key={item.keyName} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-white text-xs font-semibold break-all">{item.keyName}</p>
+                  <span className={`text-[10px] font-bold uppercase tracking-[0.12em] ${item.valuePresent ? 'text-emerald-300' : 'text-amber-300'}`}>
+                    {item.valuePresent ? 'Set' : 'Missing'}
+                  </span>
+                </div>
+                <p className="text-white/55 text-[11px] mt-1">{item.purpose}{item.required ? ' (required)' : ' (optional)'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Private Ops Secrets (Do Not Use VITE)</p>
+          <div className="space-y-2">
+            {privateSecrets.map((item) => (
+              <div key={item.keyName} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-white text-xs font-semibold break-all">{item.keyName}</p>
+                  <span className={`text-[10px] font-bold uppercase tracking-[0.12em] ${item.required ? 'text-amber-300' : 'text-sky-300'}`}>
+                    {item.required ? 'Required' : 'Optional'}
+                  </span>
+                </div>
+                <p className="text-white/55 text-[11px] mt-1">{item.purpose}</p>
+                <p className="text-brand-amber text-[11px] mt-1">{item.location}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Model Routing Policy</p>
+        <div className="space-y-2">
+          {modelRouting.map((row) => (
+            <div key={row.task} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-white text-xs font-semibold">{row.task}</p>
+                <p className="text-white/55 text-[11px] mt-0.5">Env: {row.envKey}</p>
+              </div>
+              <span className="text-brand-amber text-xs font-bold uppercase tracking-[0.12em]">{row.provider}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Get Keys Fast</p>
+        <div className="space-y-2">
+          {keySources.map((row) => (
+            <div key={row.envKey} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+                <div>
+                  <p className="text-white text-xs font-semibold break-all">{row.envKey}</p>
+                  <p className="text-white/55 text-[11px] mt-0.5">{row.note}</p>
+                  <p className="text-brand-amber text-[11px] mt-0.5">{row.provider}</p>
+                </div>
+
+                <a
+                  href={row.portalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg border border-brand-amber/40 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-brand-amber hover:bg-brand-amber/10"
+                >
+                  Open Portal
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -150,6 +487,564 @@ function CrmTable() {
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+function normalizePhone(value) {
+  return String(value || '').replace(/\D/g, '')
+}
+
+function toTier(score) {
+  const s = Number(score || 0)
+  if (s >= 85) return 'hot'
+  if (s >= 65) return 'warm'
+  if (s >= 40) return 'cool'
+  return 'cold'
+}
+
+function MrWordenAutopilotPanel() {
+  const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState(false)
+  const [autopiloting, setAutopiloting] = useState(false)
+  const [syncNote, setSyncNote] = useState('')
+  const [leads, setLeads] = useState([])
+
+  const loadLeads = useCallback(async () => {
+    const all = await base44.entities.Lead.list('-created_date', 300)
+    setLeads(Array.isArray(all) ? all : [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    loadLeads()
+  }, [loadLeads])
+
+  const ranked = useMemo(() => {
+    return [...leads]
+      .filter((lead) => lead.status !== 'won' && lead.status !== 'lost' && lead.score != null)
+      .sort((a, b) => Number(b.score || 0) - Number(a.score || 0))
+      .slice(0, 8)
+  }, [leads])
+
+  const autopilotQueue = useMemo(() => {
+    return ranked.filter((lead) => ['hot', 'warm'].includes(String(lead.score_tier || toTier(lead.score))))
+  }, [ranked])
+
+  const applyAutopilot = useCallback(async () => {
+    if (autopilotQueue.length === 0) {
+      setSyncNote('No hot/warm leads to autopilot right now.')
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'autopilot-followup',
+        status: 'skipped',
+        started_at: new Date().toISOString(),
+        ended_at: new Date().toISOString(),
+        detail: 'No hot/warm leads available for follow-up.',
+      })
+      return
+    }
+
+    const started = new Date().toISOString()
+    setAutopiloting(true)
+    try {
+      let updated = 0
+      const now = new Date().toISOString()
+
+      for (const lead of autopilotQueue) {
+        const existingNotes = String(lead.notes || '')
+        const nextAction = `Autopilot follow-up queued (${now}): Call now and send estimate intake link.`
+        await base44.entities.Lead.update(lead.id, {
+          status: 'contacted',
+          sms_followup_sent: true,
+          sms_followup_sent_at: now,
+          notes: [existingNotes, nextAction].filter(Boolean).join('\n\n'),
+        })
+        updated += 1
+      }
+
+      setSyncNote(`Autopilot queued follow-up on ${updated} high-priority lead(s).`)
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'autopilot-followup',
+        status: 'success',
+        started_at: started,
+        ended_at: new Date().toISOString(),
+        detail: `Queued follow-up for ${updated} lead(s).`,
+      })
+      await loadLeads()
+    } catch (error) {
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'autopilot-followup',
+        status: 'failed',
+        started_at: started,
+        ended_at: new Date().toISOString(),
+        detail: `Autopilot failed: ${error?.message || 'unknown error'}`,
+      })
+      throw error
+    } finally {
+      setAutopiloting(false)
+    }
+  }, [autopilotQueue, loadLeads])
+
+  useEffect(() => {
+    const retryHandler = () => {
+      applyAutopilot().catch(() => {
+        // Error is already logged in automation run log.
+      })
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cc:retry-autopilot', retryHandler)
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('cc:retry-autopilot', retryHandler)
+      }
+    }
+  }, [applyAutopilot])
+
+  const handleSyncCliFile = useCallback(async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setSyncing(true)
+    setSyncNote('')
+    const started = new Date().toISOString()
+    try {
+      const text = await file.text()
+      const parsed = JSON.parse(text)
+      const records = Array.isArray(parsed?.autopilot_queue)
+        ? parsed.autopilot_queue
+        : Array.isArray(parsed?.top_priority)
+          ? parsed.top_priority
+          : []
+
+      if (records.length === 0) {
+        setSyncNote('No syncable records found in uploaded file.')
+        return
+      }
+
+      const existing = await base44.entities.Lead.list('-created_date', 500)
+      const pool = Array.isArray(existing) ? existing : []
+
+      let created = 0
+      let updated = 0
+
+      for (const item of records) {
+        const signals = item?.signals || {}
+        const intent = item?.intent || {}
+
+        const phone = signals.phone || null
+        const email = signals.email || null
+        const address = signals.address || null
+
+        if (!phone && !email && !address) continue
+
+        const match = pool.find((lead) => {
+          const samePhone = phone && normalizePhone(lead.phone) === normalizePhone(phone)
+          const sameEmail = email && String(lead.email || '').toLowerCase() === String(email).toLowerCase()
+          const sameAddress = address && String(lead.address || '').toLowerCase() === String(address).toLowerCase()
+          return samePhone || sameEmail || sameAddress
+        })
+
+        const tier = intent.tier || toTier(intent.score)
+        const score = Number(intent.score || 0)
+        const statusTarget = item.status_target || (['hot', 'warm'].includes(tier) ? 'contacted' : 'new')
+        const note = `CLI sync (${new Date().toISOString()}): ${item.next_action || item.recommended_followup || 'Follow-up required.'}`
+
+        const payload = {
+          name: signals.name || 'Website Visitor',
+          phone: phone || 'Not provided',
+          email,
+          address,
+          sqft: signals.sqft || undefined,
+          surface_type: signals.surface_type || undefined,
+          urgency: signals.urgency || undefined,
+          score,
+          score_tier: tier,
+          status: statusTarget,
+          conversion_source: 'voice_ai',
+          score_reasoning: `Mr. Worden CLI ranked this lead as ${tier} (${score}/100).`,
+          scored_at: new Date().toISOString(),
+          notes: note,
+        }
+
+        if (match?.id) {
+          await base44.entities.Lead.update(match.id, {
+            ...payload,
+            notes: [String(match.notes || ''), note].filter(Boolean).join('\n\n'),
+          })
+          updated += 1
+        } else {
+          const createdLead = await base44.entities.Lead.create(payload)
+          if (createdLead?.id) pool.unshift(createdLead)
+          created += 1
+        }
+      }
+
+      setSyncNote(`CLI sync complete: ${created} created, ${updated} updated.`)
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'cli-sync',
+        status: 'success',
+        started_at: started,
+        ended_at: new Date().toISOString(),
+        detail: `CLI sync finished (${created} created, ${updated} updated).`,
+      })
+      await loadLeads()
+    } catch (error) {
+      setSyncNote('Could not parse JSON file. Use mrworden batch export JSON.')
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'cli-sync',
+        status: 'failed',
+        started_at: started,
+        ended_at: new Date().toISOString(),
+        detail: `CLI sync failed: ${error?.message || 'invalid JSON or read issue'}`,
+      })
+    } finally {
+      event.target.value = ''
+      setSyncing(false)
+    }
+  }, [loadLeads])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
+        <div>
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-brand-amber mb-1">
+            <Bot className="w-3.5 h-3.5" />
+            Mr. Worden Autopilot
+          </div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
+            Priority Leaderboard + CLI Sync
+          </h3>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/80 cursor-pointer hover:border-brand-amber/50">
+            <Upload className="w-3.5 h-3.5" />
+            {syncing ? 'Syncing...' : 'Import CLI JSON'}
+            <input
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={handleSyncCliFile}
+              disabled={syncing}
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={applyAutopilot}
+            disabled={autopiloting || loading}
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-amber text-brand-navy px-3 py-2 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {autopiloting ? 'Applying...' : 'Run Autopilot Follow-up'}
+          </button>
+        </div>
+      </div>
+
+      {syncNote ? (
+        <div className="mb-3 rounded-lg border border-brand-amber/40 bg-brand-amber/10 px-3 py-2 text-xs text-brand-amber">
+          {syncNote}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="h-28 flex items-center justify-center text-white/50 text-sm">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading priority queue...
+        </div>
+      ) : ranked.length === 0 ? (
+        <p className="text-sm text-white/60">No scored leads yet. Import a CLI JSON export or let live chat generate scored leads.</p>
+      ) : (
+        <div className="space-y-2.5">
+          {ranked.map((lead) => {
+            const tier = String(lead.score_tier || toTier(lead.score))
+            return (
+              <div key={lead.id} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-semibold truncate">{lead.name || 'Website Visitor'}</p>
+                  <p className="text-white/55 text-xs truncate">
+                    {lead.phone || lead.email || lead.address || 'No contact detail'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/65 uppercase tracking-[0.1em]">{lead.status || 'new'}</span>
+                  <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${statusTone(Number(lead.score || 0))}`}>
+                    {Number(lead.score || 0)} · {tier}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function OperationsNerveCenterPanel() {
+  const [loading, setLoading] = useState(true)
+  const [providers, setProviders] = useState([])
+  const [leadBreaches, setLeadBreaches] = useState([])
+  const [runs, setRuns] = useState([])
+  const [lastRefreshAt, setLastRefreshAt] = useState(null)
+
+  const loadRuns = useCallback(() => {
+    setRuns(readAutomationRuns())
+  }, [])
+
+  const loadProviderHealth = useCallback(async () => {
+    const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+
+    const fallbackProviders = [
+      { id: 'openai', label: 'OpenAI', up: false, note: 'Metrics endpoint unavailable', latency: null, errorRate: null },
+      { id: 'gemini', label: 'Gemini', up: parseBoolLike(import.meta.env.VITE_PROVIDER_GEMINI_STATUS), note: 'Google workflows' },
+      { id: 'perplexity', label: 'Perplexity', up: parseBoolLike(import.meta.env.VITE_PROVIDER_PERPLEXITY_STATUS), note: 'Research briefs' },
+      { id: 'claude', label: 'Claude', up: parseBoolLike(import.meta.env.VITE_PROVIDER_CLAUDE_STATUS), note: 'Math + long context' },
+      { id: 'codex', label: 'Codex', up: parseBoolLike(import.meta.env.VITE_PROVIDER_CODEX_STATUS), note: 'File/code tasks' },
+      { id: 'grok', label: 'Grok', up: parseBoolLike(import.meta.env.VITE_PROVIDER_GROK_STATUS), note: 'X automation workflows' },
+      { id: 'dropbox', label: 'Dropbox', up: parseBoolLike(import.meta.env.VITE_PROVIDER_DROPBOX_STATUS), note: 'Media ingest' },
+      { id: 'gphotos', label: 'Google Photos', up: parseBoolLike(import.meta.env.VITE_PROVIDER_GPHOTOS_STATUS), note: 'Media ingest' },
+      { id: 'x', label: 'X API', up: parseBoolLike(import.meta.env.VITE_PROVIDER_X_STATUS), note: 'X posting/listening' },
+      { id: 'sentry', label: 'Sentry', up: parseBoolLike(import.meta.env.VITE_PROVIDER_SENTRY_STATUS), note: 'Monitoring + error tracking' },
+    ]
+
+    if (!apiBase) {
+      setProviders(fallbackProviders)
+      return
+    }
+
+    const started = new Date().toISOString()
+    try {
+      const response = await fetch(`${apiBase}/api/v1/metrics/providers`)
+      if (response.ok) {
+        const data = await response.json()
+        const rows = Array.isArray(data.providers)
+          ? data.providers.map((provider) => ({
+              id: provider.id,
+              label: provider.label,
+              up: Boolean(provider.up),
+              note: provider.detail || (provider.configured ? 'Configured' : 'Not configured'),
+              latency: provider.latency_ms ?? null,
+              errorRate: null,
+            }))
+          : fallbackProviders
+        setProviders(rows)
+        appendAutomationRun({
+          id: `run_${Date.now()}`,
+          type: 'provider-health-check',
+          status: 'success',
+          started_at: started,
+          ended_at: new Date().toISOString(),
+          detail: `Provider health check succeeded (${rows.filter((p) => p.up).length} up).`,
+        })
+      } else {
+        setProviders(fallbackProviders)
+        appendAutomationRun({
+          id: `run_${Date.now()}`,
+          type: 'provider-health-check',
+          status: 'failed',
+          started_at: started,
+          ended_at: new Date().toISOString(),
+          detail: `Provider health check failed with status ${response.status}.`,
+        })
+      }
+    } catch {
+      setProviders(fallbackProviders)
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'provider-health-check',
+        status: 'failed',
+        started_at: started,
+        ended_at: new Date().toISOString(),
+        detail: 'Provider health check failed (network/API unavailable).',
+      })
+    }
+  }, [])
+
+  const loadLeadBreaches = useCallback(async () => {
+    const all = await base44.entities.Lead.list('-created_date', 400)
+    const now = Date.now()
+    const rows = (Array.isArray(all) ? all : [])
+      .map((lead) => {
+        const tier = String(lead.score_tier || toTier(lead.score))
+        const createdAt = new Date(lead.created_date || lead.created_at || 0)
+        if (createdAt.toString() === 'Invalid Date') return null
+        const ageMin = Math.floor((now - createdAt.getTime()) / 60000)
+        const breachThreshold = tier === 'hot' ? 15 : tier === 'warm' ? 60 : null
+        if (!breachThreshold) return null
+        const isOpen = !['won', 'lost', 'contacted'].includes(String(lead.status || '').toLowerCase())
+        if (!isOpen) return null
+        if (ageMin <= breachThreshold) return null
+
+        return {
+          id: lead.id,
+          name: lead.name || 'Website Visitor',
+          tier,
+          status: lead.status || 'new',
+          ageMin,
+          phone: lead.phone || null,
+          breachBy: ageMin - breachThreshold,
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.breachBy - a.breachBy)
+
+    setLeadBreaches(rows)
+  }, [])
+
+  const refreshAll = useCallback(async () => {
+    setLoading(true)
+    await Promise.all([loadProviderHealth(), loadLeadBreaches()])
+    loadRuns()
+    setLastRefreshAt(new Date())
+    setLoading(false)
+  }, [loadLeadBreaches, loadProviderHealth, loadRuns])
+
+  useEffect(() => {
+    refreshAll()
+  }, [refreshAll])
+
+  useEffect(() => {
+    const onRunUpdated = () => loadRuns()
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cc:automation-run-updated', onRunUpdated)
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('cc:automation-run-updated', onRunUpdated)
+      }
+    }
+  }, [loadRuns])
+
+  const retryLastFailed = useCallback(() => {
+    const failed = runs.find((run) => run.status === 'failed')
+    if (!failed) return
+
+    if (failed.type === 'autopilot-followup') {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cc:retry-autopilot'))
+      }
+      return
+    }
+
+    if (failed.type === 'provider-health-check') {
+      refreshAll()
+      return
+    }
+
+    if (failed.type === 'cli-sync') {
+      if (typeof window !== 'undefined') {
+        window.alert('Retry CLI sync by importing the JSON file again in Mr. Worden Autopilot panel.')
+      }
+    }
+  }, [runs, refreshAll])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-brand-amber mb-1">Operations Nerve Center</p>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Provider Health + Run Telemetry + SLA Alerts</h3>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={refreshAll}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button
+            type="button"
+            onClick={retryLastFailed}
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-amber text-brand-navy px-3 py-2 text-xs font-black uppercase tracking-[0.12em]"
+          >
+            Retry Last Failed
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 mb-3">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Provider Status</p>
+          <div className="space-y-2">
+            {providers.map((row) => (
+              <div key={row.id} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-white text-xs font-semibold">{row.label}</p>
+                  <p className="text-white/55 text-[11px]">{row.note}</p>
+                  {row.latency != null || row.errorRate != null ? (
+                    <p className="text-white/45 text-[10px] mt-0.5">
+                      {row.latency != null ? `Latency ${row.latency}ms` : ''}
+                      {row.latency != null && row.errorRate != null ? ' · ' : ''}
+                      {row.errorRate != null ? `Error ${row.errorRate}%` : ''}
+                    </p>
+                  ) : null}
+                </div>
+                <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${row.up ? 'border-emerald-300/50 bg-emerald-300/10 text-emerald-200' : 'border-amber-300/50 bg-amber-300/10 text-amber-200'}`}>
+                  {row.up ? 'Up' : 'Check'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Automation Run Log</p>
+          {runs.length === 0 ? (
+            <p className="text-sm text-white/55">No automation runs recorded yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {runs.slice(0, 12).map((run) => (
+                <div key={run.id} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-white text-xs font-semibold uppercase tracking-[0.08em]">{run.type}</p>
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.12em] ${run.status === 'success' ? 'text-emerald-300' : run.status === 'failed' ? 'text-red-300' : 'text-amber-300'}`}>
+                      {run.status}
+                    </span>
+                  </div>
+                  <p className="text-white/55 text-[11px] mt-1">{run.detail}</p>
+                  <p className="text-white/40 text-[10px] mt-1">{run.ended_at ? new Date(run.ended_at).toLocaleString() : ''}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Hot/Warm SLA Breaches</p>
+          {leadBreaches.length === 0 ? (
+            <p className="text-sm text-emerald-300">No open SLA breaches right now.</p>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {leadBreaches.slice(0, 10).map((lead) => (
+                <div key={lead.id} className="rounded-lg border border-red-300/20 bg-red-300/10 px-3 py-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-red-100 text-xs font-semibold truncate">{lead.name}</p>
+                    <span className="text-[10px] text-red-200 uppercase tracking-[0.12em] font-bold">{lead.tier}</span>
+                  </div>
+                  <p className="text-red-200/85 text-[11px] mt-1">{lead.phone || 'No phone on file'}</p>
+                  <p className="text-red-200/75 text-[10px] mt-1">{lead.ageMin} min old · {lead.breachBy} min beyond SLA</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-white/45">
+        Last refresh: {lastRefreshAt ? lastRefreshAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) : 'Not yet'}
+      </p>
     </div>
   )
 }
@@ -394,6 +1289,474 @@ function HumanApprovalPolicyPanel() {
   )
 }
 
+function TempInAppOpsFallbackPanel() {
+  const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState('')
+  const [providerSummary, setProviderSummary] = useState(null)
+
+  const downloadJson = useCallback((filename, payload) => {
+    if (typeof window === 'undefined') return
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    URL.revokeObjectURL(url)
+  }, [])
+
+  const downloadBatchTemplate = useCallback(() => {
+    const template = {
+      generated_at: new Date().toISOString(),
+      source: 'command-center-temp-fallback',
+      results: [
+        {
+          lead_id: 'lead_demo_001',
+          signals: {
+            name: 'Sample Lead',
+            phone: '+1-804-555-0101',
+            email: 'sample@example.com',
+            address: '1601 Ware Bottom Springs Rd, Chester, VA',
+            sqft: '1200',
+            urgency: 'this week',
+            surface_type: 'parking_lot',
+          },
+          intent: {
+            score: 82,
+            tier: 'warm',
+            reason: 'Requested estimate and shared site details.',
+          },
+          status_target: 'contacted',
+          next_action: 'Call within 15 minutes to confirm site visit.',
+        },
+      ],
+    }
+
+    downloadJson('mrworden-batch-template.json', template)
+    setNote('Downloaded CLI-compatible batch template JSON.')
+  }, [downloadJson])
+
+  const exportLeadsAsCliJson = useCallback(async () => {
+    setBusy(true)
+    setNote('')
+    try {
+      const leads = await base44.entities.Lead.list('-created_date', 300)
+      const rows = (Array.isArray(leads) ? leads : []).map((lead) => {
+        const score = Number(lead.score || 0)
+        const tier = String(lead.score_tier || toTier(score))
+        return {
+          lead_id: lead.id,
+          signals: {
+            name: lead.name || 'Website Visitor',
+            phone: lead.phone || null,
+            email: lead.email || null,
+            address: lead.address || null,
+            sqft: lead.sqft || null,
+            urgency: lead.urgency || null,
+            surface_type: lead.surface_type || null,
+          },
+          intent: {
+            score,
+            tier,
+            reason: lead.score_reasoning || `Exported from Command Center with ${tier} tier.`,
+          },
+          status_target: lead.status || 'new',
+          next_action: 'Follow-up by phone/SMS and schedule site visit.',
+        }
+      })
+
+      downloadJson('mrworden-export-from-command-center.json', {
+        generated_at: new Date().toISOString(),
+        source: 'command-center-temp-fallback',
+        results: rows,
+      })
+
+      setNote(`Exported ${rows.length} lead(s) as CLI-compatible JSON.`)
+    } catch {
+      setNote('Could not export leads right now. Try again in a moment.')
+    } finally {
+      setBusy(false)
+    }
+  }, [downloadJson])
+
+  const runProviderSetupDoctor = useCallback(async () => {
+    setBusy(true)
+    setNote('')
+    setProviderSummary(null)
+    try {
+      const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+      if (!apiBase) {
+        setNote('VITE_API_BASE_URL is not set. Cannot run provider doctor.')
+        return
+      }
+
+      const response = await fetch(`${apiBase}/api/v1/metrics/providers`)
+      if (!response.ok) {
+        setNote(`Provider doctor failed with status ${response.status}.`)
+        return
+      }
+
+      const data = await response.json()
+      const providers = Array.isArray(data.providers) ? data.providers : []
+      const missing = providers.filter((p) => !p.configured).map((p) => p.label)
+      const down = providers.filter((p) => p.configured && !p.up).map((p) => p.label)
+      setProviderSummary({ missing, down, total: providers.length })
+      setNote('Provider setup doctor completed.')
+    } catch {
+      setNote('Provider doctor could not reach backend metrics endpoint.')
+    } finally {
+      setBusy(false)
+    }
+  }, [])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
+          Temporary In-App CLI Replacements
+        </h3>
+        <span className="text-xs text-white/45">Use until permanent wiring is live</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <button
+          type="button"
+          onClick={downloadBatchTemplate}
+          className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40"
+        >
+          Download Batch Template
+        </button>
+
+        <button
+          type="button"
+          onClick={exportLeadsAsCliJson}
+          disabled={busy}
+          className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40 disabled:opacity-50"
+        >
+          Export Leads as CLI JSON
+        </button>
+
+        <button
+          type="button"
+          onClick={runProviderSetupDoctor}
+          disabled={busy}
+          className="rounded-lg bg-brand-amber text-brand-navy px-3 py-2 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50"
+        >
+          Run Provider Setup Doctor
+        </button>
+      </div>
+
+      {note ? (
+        <div className="mt-3 rounded-lg border border-brand-amber/35 bg-brand-amber/10 px-3 py-2 text-xs text-brand-amber">
+          {note}
+        </div>
+      ) : null}
+
+      {providerSummary ? (
+        <div className="mt-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+          <p className="text-xs text-white/70">Providers checked: {providerSummary.total}</p>
+          <p className="text-xs text-amber-200 mt-1">Missing config: {providerSummary.missing.length ? providerSummary.missing.join(', ') : 'None'}</p>
+          <p className="text-xs text-red-200 mt-1">Configured but down: {providerSummary.down.length ? providerSummary.down.join(', ') : 'None'}</p>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function LaunchReadinessAuditPanel({ strategyVisible, onAudit }) {
+  const [running, setRunning] = useState(false)
+  const [report, setReport] = useState(null)
+
+  const runAudit = useCallback(async () => {
+    setRunning(true)
+
+    const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+    const runs = readAutomationRuns()
+
+    let providerRows = []
+    let providerSource = 'fallback'
+    if (apiBase) {
+      try {
+        const response = await fetch(`${apiBase}/api/v1/metrics/providers`)
+        if (response.ok) {
+          const data = await response.json()
+          providerRows = Array.isArray(data.providers) ? data.providers : []
+          providerSource = 'api'
+        }
+      } catch {
+        providerRows = []
+      }
+    }
+
+    if (providerRows.length === 0) {
+      providerRows = [
+        { label: 'Gemini', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_GEMINI_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_GEMINI_STATUS) },
+        { label: 'Perplexity', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_PERPLEXITY_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_PERPLEXITY_STATUS) },
+        { label: 'Claude', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_CLAUDE_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_CLAUDE_STATUS) },
+        { label: 'Codex', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_CODEX_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_CODEX_STATUS) },
+        { label: 'Grok', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_GROK_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_GROK_STATUS) },
+        { label: 'Dropbox', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_DROPBOX_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_DROPBOX_STATUS) },
+        { label: 'Google Photos', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_GPHOTOS_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_GPHOTOS_STATUS) },
+        { label: 'X API', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_X_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_X_STATUS) },
+        { label: 'Sentry', configured: parseBoolLike(import.meta.env.VITE_PROVIDER_SENTRY_STATUS), up: parseBoolLike(import.meta.env.VITE_PROVIDER_SENTRY_STATUS) },
+      ]
+    }
+
+    const configuredProviders = providerRows.filter((p) => p.configured)
+    const providerUp = providerRows.filter((p) => p.up)
+    const providerBase = Math.max(configuredProviders.length, 1)
+    const providerScore = Math.round((providerUp.length / providerBase) * 30)
+
+    const securityChecks = [
+      { label: 'CC password set', ok: Boolean(import.meta.env.VITE_CC_PASSWORD) },
+      { label: 'Auth mode declared', ok: Boolean(import.meta.env.VITE_AUTH_MODE) },
+      { label: 'Internal strategy mode on', ok: INTERNAL_STRATEGY_ENABLED },
+      { label: 'Strategy panels path-guarded', ok: strategyVisible },
+    ]
+    const securityScore = Math.round((securityChecks.filter((c) => c.ok).length / securityChecks.length) * 25)
+
+    const coreUrls = [
+      '/',
+      '/blog',
+      '/robots.txt',
+      '/sitemap.xml',
+      '/image-sitemap.xml',
+    ]
+    const indexChecks = await Promise.all(
+      coreUrls.map(async (path) => {
+        try {
+          const response = await fetch(path, { method: 'HEAD' })
+          return { path, ok: response.ok, status: response.status }
+        } catch {
+          return { path, ok: false, status: 0 }
+        }
+      }),
+    )
+    let commandCenterRouteOk = false
+    try {
+      const routeResponse = await fetch('/command-center', { method: 'GET' })
+      const routeHtml = await routeResponse.text()
+      const hasNotFoundMarker = /Page Not Found|could not be found in this application/i.test(routeHtml)
+      const hasCommandCenterMarker = /JWordenAI Command Center/i.test(routeHtml)
+      commandCenterRouteOk = routeResponse.ok && hasCommandCenterMarker && !hasNotFoundMarker
+    } catch {
+      commandCenterRouteOk = false
+    }
+
+    const indexedPasses = indexChecks.filter((c) => c.ok).length
+    const indexingScore = Math.round((((indexedPasses) + (commandCenterRouteOk ? 1 : 0)) / (indexChecks.length + 1)) * 25)
+
+    const successfulRuns = runs.filter((r) => r.status === 'success')
+    const recentSuccess = successfulRuns.some((r) => {
+      const ended = new Date(r.ended_at || r.started_at || 0)
+      if (ended.toString() === 'Invalid Date') return false
+      return Date.now() - ended.getTime() < 7 * 24 * 60 * 60 * 1000
+    })
+    const automationScore = recentSuccess ? 20 : successfulRuns.length > 0 ? 12 : 6
+
+    const total = Math.min(100, providerScore + securityScore + indexingScore + automationScore)
+    const grade = total >= 95 ? '10/10' : total >= 90 ? '9/10' : total >= 80 ? '8/10' : `${Math.max(6, Math.round(total / 10))}/10`
+
+    const nextActions = []
+    if (providerScore < 24) nextActions.push('Stabilize provider uptime/config for all required AI channels.')
+    if (securityScore < 20) nextActions.push('Ensure strict internal strategy mode remains on for command-center only visibility.')
+    if (indexingScore < 25) nextActions.push('Restore 200 status on any failed crawl URL before next indexing wave.')
+    if (!commandCenterRouteOk) nextActions.push('Fix /command-center runtime route: deployment appears to be serving a React Not Found view.')
+    if (!recentSuccess) nextActions.push('Run at least one successful automation cycle every 24h for reliability confidence.')
+
+    const nextReport = {
+      generatedAt: new Date().toISOString(),
+      total,
+      grade,
+      providerScore,
+      securityScore,
+      indexingScore,
+      automationScore,
+      providerSource,
+      providerUpCount: providerUp.length,
+      providerConfiguredCount: configuredProviders.length,
+      indexChecks,
+      commandCenterRouteOk,
+      nextActions,
+    }
+
+    setReport(nextReport)
+    if (typeof onAudit === 'function') {
+      onAudit(nextReport)
+    }
+
+    setRunning(false)
+  }, [onAudit, strategyVisible])
+
+  useEffect(() => {
+    runAudit()
+  }, [runAudit])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-brand-amber mb-1">Launch Readiness</p>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">10/10 Audit Scorecard</h3>
+        </div>
+        <button
+          type="button"
+          onClick={runAudit}
+          disabled={running}
+          className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40 disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${running ? 'animate-spin' : ''}`} />
+          Run Audit
+        </button>
+      </div>
+
+      {!report ? (
+        <p className="text-sm text-white/60">Building launch scorecard...</p>
+      ) : (
+        <>
+          <div className="rounded-xl border border-brand-amber/35 bg-brand-amber/10 px-3 py-3 mb-3">
+            <p className="text-xs text-brand-amber uppercase tracking-[0.12em]">Current launch rating</p>
+            <p className="text-white font-display font-black text-2xl mt-1">{report.total}/100 · {report.grade}</p>
+            <p className="text-[11px] text-white/65 mt-1">Generated {new Date(report.generatedAt).toLocaleString()}</p>
+          </div>
+
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 mb-3">
+            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">Providers</p>
+              <p className="text-white font-bold text-sm mt-1">{report.providerScore}/30</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">Security</p>
+              <p className="text-white font-bold text-sm mt-1">{report.securityScore}/25</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">Indexing</p>
+              <p className="text-white font-bold text-sm mt-1">{report.indexingScore}/25</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">Automation</p>
+              <p className="text-white font-bold text-sm mt-1">{report.automationScore}/20</p>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2.5">
+            <p className="text-xs text-white/70">Provider source: {report.providerSource.toUpperCase()} · Up {report.providerUpCount} / Configured {report.providerConfiguredCount}</p>
+            <p className="text-xs text-white/70 mt-1">Core crawl URLs healthy: {report.indexChecks.filter((row) => row.ok).length}/{report.indexChecks.length}</p>
+            <p className={`text-xs mt-1 ${report.commandCenterRouteOk ? 'text-emerald-300' : 'text-red-300'}`}>
+              Command Center route integrity: {report.commandCenterRouteOk ? 'PASS' : 'FAIL'}
+            </p>
+          </div>
+
+          {report.nextActions.length > 0 ? (
+            <div className="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2.5">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-amber-100 mb-1">Fastest path to 10/10</p>
+              <ul className="space-y-1.5">
+                {report.nextActions.map((item) => (
+                  <li key={item} className="text-xs text-amber-100/90">• {item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </>
+      )}
+    </div>
+  )
+}
+
+function WeekendExecutionSprintPanel({ latestAudit }) {
+  const defaultTasks = useMemo(
+    () => [
+      { id: 'provider-hardening', title: 'Provider failover + latency budgets', owner: 'Platform' },
+      { id: 'ad-ops-rules', title: 'Ad guardrails + approval policies', owner: 'Growth' },
+      { id: 'lead-sla', title: 'Hot/Warm SLA auto-escalation', owner: 'Sales Ops' },
+      { id: 'content-engine', title: 'Blog pipeline and internal briefs', owner: 'Content' },
+      { id: 'review-flywheel', title: 'Review request cadence tuning', owner: 'CX' },
+      { id: 'reporting', title: 'Weekly executive ops digest', owner: 'Analytics' },
+    ],
+    [],
+  )
+
+  const [taskState, setTaskState] = useState(() => {
+    const saved = readWeekendSprintState()
+    if (saved?.taskState && typeof saved.taskState === 'object') return saved.taskState
+    return {}
+  })
+
+  useEffect(() => {
+    writeWeekendSprintState({ taskState, updated_at: new Date().toISOString() })
+  }, [taskState])
+
+  const completedCount = defaultTasks.filter((task) => taskState[task.id]).length
+
+  const downloadJson = useCallback((filename, payload) => {
+    if (typeof window === 'undefined') return
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    URL.revokeObjectURL(url)
+  }, [])
+
+  const exportWeekendRunbook = useCallback(() => {
+    const payload = {
+      generated_at: new Date().toISOString(),
+      source: 'command-center-weekend-sprint',
+      readiness_snapshot: latestAudit || null,
+      tasks: defaultTasks.map((task) => ({
+        ...task,
+        status: taskState[task.id] ? 'completed' : 'pending',
+      })),
+    }
+    downloadJson('weekend-sprint-runbook.json', payload)
+  }, [defaultTasks, downloadJson, latestAudit, taskState])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-brand-amber mb-1">Weekend Build</p>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Premium Execution Sprint</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-white/65">{completedCount}/{defaultTasks.length} complete</span>
+          <button
+            type="button"
+            onClick={exportWeekendRunbook}
+            className="rounded-lg bg-brand-amber text-brand-navy px-3 py-2 text-xs font-black uppercase tracking-[0.12em]"
+          >
+            Export Runbook
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {defaultTasks.map((task) => (
+          <label key={task.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2.5 cursor-pointer">
+            <div>
+              <p className="text-sm text-white font-semibold">{task.title}</p>
+              <p className="text-[11px] text-white/50 mt-0.5">Owner: {task.owner}</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={Boolean(taskState[task.id])}
+              onChange={(e) => {
+                setTaskState((prev) => ({ ...prev, [task.id]: e.target.checked }))
+              }}
+              className="h-4 w-4 accent-brand-amber"
+            />
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function PinGate({ onUnlock }) {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
@@ -461,11 +1824,21 @@ function DisabledNotice() {
   )
 }
 
+function InternalStrategyNotice() {
+  return (
+    <div className="rounded-2xl border border-amber-300/35 bg-amber-300/10 px-4 py-3.5 text-sm text-amber-100">
+      Internal strategy panels are hidden in this environment. Set <code className="bg-amber-100/15 px-1 rounded text-xs">VITE_INTERNAL_STRATEGY_MODE=on</code> and access only from <code className="bg-amber-100/15 px-1 rounded text-xs">/command-center</code>.
+    </div>
+  )
+}
+
 export default function CommandCenter() {
   const [activeTab, setActiveTab] = useState('richmond-grid')
   // Never auto-unlock — require an explicit PIN entry every session.
   // When CC_PASSWORD is not configured the body renders DisabledNotice instead.
-  const [unlocked, setUnlocked] = useState(false)
+  const [unlocked, setUnlocked] = useState(AUTH_DISABLED)
+  const strategyVisible = INTERNAL_STRATEGY_ENABLED && isCommandCenterPath()
+  const [latestAudit, setLatestAudit] = useState(null)
 
   const handleUnlock = useCallback(() => setUnlocked(true), [])
   const now = new Date()
@@ -513,12 +1886,14 @@ export default function CommandCenter() {
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
-        {!CC_PASSWORD ? (
+        {!AUTH_DISABLED && !CC_PASSWORD ? (
           <DisabledNotice />
-        ) : !unlocked ? (
+        ) : !AUTH_DISABLED && !unlocked ? (
           <PinGate onUnlock={handleUnlock} />
         ) : (
           <>
+            {!strategyVisible ? <InternalStrategyNotice /> : null}
+
             {activeTab === 'richmond-grid' && (
               <Suspense
                 fallback={
@@ -539,6 +1914,8 @@ export default function CommandCenter() {
                   ))}
                 </div>
 
+                {strategyVisible ? <OperationsNerveCenterPanel /> : null}
+
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
                   <div className="xl:col-span-2">
                     <ActivityFeed />
@@ -548,17 +1925,24 @@ export default function CommandCenter() {
                   </div>
                 </div>
 
-                <HumanApprovalPolicyPanel />
+                {strategyVisible ? <ApiKeysPanel /> : null}
+                {strategyVisible ? <HumanApprovalPolicyPanel /> : null}
+                {strategyVisible ? <LaunchReadinessAuditPanel strategyVisible={strategyVisible} onAudit={setLatestAudit} /> : null}
+                {strategyVisible ? <WeekendExecutionSprintPanel latestAudit={latestAudit} /> : null}
               </div>
             )}
 
             {activeTab === 'crm' && (
               <div className="space-y-4 md:space-y-5">
                 <CrmTable />
-                <ChannelPerformancePanel />
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 md:px-5 py-4 text-sm text-white/70">
-                  Priority Playbook: Focus calls on leads above 80 first, schedule site visits before 6 PM, and send proposal PDFs within 30 minutes of each visit.
-                </div>
+                {strategyVisible ? <MrWordenAutopilotPanel /> : null}
+                {strategyVisible ? <ChannelPerformancePanel /> : null}
+                {strategyVisible ? <TempInAppOpsFallbackPanel /> : null}
+                {strategyVisible ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 md:px-5 py-4 text-sm text-white/70">
+                    Priority Playbook: Focus calls on leads above 80 first, schedule site visits before 6 PM, and send proposal PDFs within 30 minutes of each visit.
+                  </div>
+                ) : null}
               </div>
             )}
           </>

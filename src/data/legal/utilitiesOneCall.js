@@ -981,4 +981,25 @@ export default [
     notes: '',
     lastVerified: '2026-01-01',
   },
+  {
+    state: 'Washington DC',
+    abbr: 'DC',
+    oneCallCenterName: 'DC 811 (Miss Utility of Delmarva / DC Service Area)',
+    oneCallPhone: '811',
+    oneCallUrl: 'https://www.missutility.net',
+    noticePeriodHours: 48,
+    noticePeriodNote:
+      '2 business days minimum (not including day of notification); ticket validity per utility response window',
+    markingColorStandard: 'APWA',
+    toleranceZoneInches: 18,
+    emergencyLocateAvailable: true,
+    emergencyLocateNote: 'Emergency response available 24/7 through 811 dispatch routing',
+    penaltyCivil: 'Civil penalties may apply under D.C. utility damage prevention enforcement',
+    penaltyCriminal: 'Willful damage may trigger misdemeanor liability depending on impact',
+    citation: 'D.C. Code utility excavation damage prevention provisions and implementing regulations',
+    whiteLiningRequired: true,
+    notes:
+      'Projects in the District can involve federal facilities and additional agency permit controls; verify jurisdiction-specific requirements before excavation.',
+    lastVerified: '2026-01-01',
+  },
 ]

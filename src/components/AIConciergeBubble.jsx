@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio } from 'lucide-react';
+import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio, Phone, Sparkles, ShieldCheck } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import WebGLPersonaAvatar from './WebGLPersonaAvatar';
+import SmartImage from './SmartImage';
+import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
+import { trackEvent, trackQualifiedLeadSignal } from '@/lib/analytics';
 
 function splitSentences(text) {
   return (text || '')
@@ -17,15 +20,15 @@ function southernFounderStyle(text) {
   const source = (text || '').trim();
   if (!source) return '';
 
-  const lower = source.toLowerCase();
-  if (lower.includes('mr. worden, founder')) return source;
-
   const sentences = splitSentences(source);
   if (sentences.length === 0) return source;
 
-  const recommendation = (sentences[0] || '').replace(/^[^a-zA-Z0-9]+/, '');
-  const whyItWorks = sentences[1] || '';
-  const practicalNextStep = sentences.slice(2).join(' ');
+  const recommendation = (sentences[0] || '').replace(/^[^a-zA-Z0-9]+/, '') || 'Start with a field inspection so we solve root issues first.';
+  const whyItWorks = sentences[1] || 'This protects your budget by matching the fix to your pavement condition and traffic.';
+  const scopeOptions = sentences[2] || 'Scope options: targeted repair, resurfacing, or full replacement based on condition and base stability.';
+  const priceRange = sentences.find((s) => /\$|sq\s*ft|square\s*feet|range/i.test(s)) || 'Typical pricing depends on square footage, prep depth, drainage, and edge conditions.';
+  const timeline = sentences.find((s) => /day|week|timeline|schedule|start/i.test(s)) || 'Most projects can be scoped quickly, then scheduled by urgency and weather window.';
+  const practicalNextStep = sentences.slice(3).join(' ') || 'Share your address, approximate size, and target timeline and I will map your smartest next step.';
 
   const compactRecommendation = recommendation.endsWith('.') ? recommendation : `${recommendation}.`;
   const compactWhy = whyItWorks
@@ -33,13 +36,24 @@ function southernFounderStyle(text) {
       ? whyItWorks
       : `${whyItWorks}.`
     : 'That approach holds up better in Virginia weather and daily traffic.';
+  const compactScope = scopeOptions.endsWith('.') ? scopeOptions : `${scopeOptions}.`;
+  const compactPrice = priceRange.endsWith('.') ? priceRange : `${priceRange}.`;
+  const compactTimeline = timeline.endsWith('.') ? timeline : `${timeline}.`;
   const compactNextStep = practicalNextStep
     ? practicalNextStep.endsWith('.') || practicalNextStep.endsWith('!') || practicalNextStep.endsWith('?')
       ? practicalNextStep
       : `${practicalNextStep}.`
     : 'If you want, I can map out the smartest next step for your property right now.';
 
-  return `Recommendation: ${compactRecommendation} Why: ${compactWhy} Next step: ${compactNextStep} — Mr. Worden, Founder`;
+  return [
+    `Recommendation: ${compactRecommendation}`,
+    `Why: ${compactWhy}`,
+    `Scope options: ${compactScope}`,
+    `Price range context: ${compactPrice}`,
+    `Timeline: ${compactTimeline}`,
+    `Next step: ${compactNextStep}`,
+    '— Mr. Worden, Founder',
+  ].join(' ');
 }
 
 function styleFounderMessage(message) {
@@ -48,6 +62,62 @@ function styleFounderMessage(message) {
     ...message,
     content: southernFounderStyle(message.content),
   };
+}
+
+function classifySurfaceType(text = '') {
+  const source = text.toLowerCase();
+  if (/parking\s*lot|lot/.test(source)) return 'parking_lot';
+  if (/driveway/.test(source)) return 'driveway';
+  if (/road|street|lane|private\s*road/.test(source)) return 'roadway';
+  if (/church/.test(source)) return 'church_lot';
+  if (/hoa/.test(source)) return 'hoa';
+  return 'asphalt';
+}
+
+function detectUrgency(text = '') {
+  const source = text.toLowerCase();
+  if (/asap|urgent|this week|immediately|right away|emergency/.test(source)) return 'urgent';
+  if (/this month|soon|next week|next month/.test(source)) return 'standard';
+  return 'flexible';
+}
+
+function extractLeadSignals(text = '') {
+  const source = String(text || '');
+  const emailMatch = source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  const phoneMatch = source.match(/(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/);
+  const sqftMatch = source.match(/(\d{3,6})\s*(?:sq\s*ft|sqft|square\s*feet)/i);
+  const nameMatch = source.match(/(?:i\s*am|this\s*is|my\s*name\s*is)\s+([A-Za-z][A-Za-z'\-\s]{1,40})/i);
+  const addressHint = source.match(/\d{2,6}\s+[A-Za-z0-9.\-\s]{3,80}(?:rd|road|st|street|ave|avenue|dr|drive|blvd|lane|ln|ct|court)\b/i);
+
+  return {
+    name: nameMatch?.[1]?.trim(),
+    email: emailMatch?.[0]?.trim(),
+    phone: phoneMatch?.[0]?.trim(),
+    sqft: sqftMatch ? Number(sqftMatch[1]) : undefined,
+    address: addressHint?.[0]?.trim(),
+    urgency: detectUrgency(source),
+    surface_type: classifySurfaceType(source),
+  };
+}
+
+function scoreIntent(text = '', signals = {}) {
+  const source = text.toLowerCase();
+  let score = 30;
+
+  if (signals.phone) score += 20;
+  if (signals.email) score += 12;
+  if (signals.address) score += 10;
+  if (signals.sqft) score += 12;
+  if (/quote|estimate|price|cost|bid/.test(source)) score += 10;
+  if (/book|schedule|start|when can you/.test(source)) score += 10;
+  if (signals.urgency === 'urgent') score += 15;
+  if (/call me|call now|phone me/.test(source)) score += 12;
+
+  const finalScore = Math.max(0, Math.min(100, score));
+  if (finalScore >= 85) return { score: finalScore, tier: 'hot' };
+  if (finalScore >= 65) return { score: finalScore, tier: 'warm' };
+  if (finalScore >= 40) return { score: finalScore, tier: 'cool' };
+  return { score: finalScore, tier: 'cold' };
 }
 
 /**
@@ -78,6 +148,7 @@ export default function AIConciergeBubble() {
   const lastAssistantMessageRef = useRef('');
   const founderVoiceRef = useRef(null);
   const ttsPacerRef = useRef(null);
+  const leadSyncRef = useRef({ id: null, profile: {} });
 
   const avatarState = open
     ? (speaking || sending || booting ? 'talking' : listening ? 'listening' : 'idle')
@@ -90,6 +161,12 @@ export default function AIConciergeBubble() {
     'How much does a driveway usually cost?',
     'How soon can you start in Chester?',
     'Is asphalt better than concrete for my project?',
+  ];
+
+  const TRUST_SIGNALS = [
+    '40+ Years',
+    'Licensed + Insured',
+    'Founder-level guidance',
   ];
 
   useEffect(() => {
@@ -357,14 +434,85 @@ export default function AIConciergeBubble() {
   };
 
   const handleOpen = async () => {
+    trackEvent('mr_worden_chat_open', { source: 'floating_bubble' });
     setOpen(true);
     if (!conversation) await initConversation();
   };
+
+  const upsertLeadFromChat = useCallback(async (rawText) => {
+    const text = String(rawText || '').trim();
+    if (!text) return;
+
+    const signals = extractLeadSignals(text);
+    const intent = scoreIntent(text, signals);
+    const now = new Date().toISOString();
+
+    const previous = leadSyncRef.current.profile || {};
+    const merged = {
+      ...previous,
+      ...Object.fromEntries(Object.entries(signals).filter(([, v]) => v !== undefined && v !== null && v !== '')),
+    };
+
+    const payload = {
+      ...merged,
+      status: 'new',
+      conversion_source: 'voice_ai',
+      score: intent.score,
+      score_tier: intent.tier,
+      score_reasoning: `Mr. Worden AI chat intent score from live conversation (${intent.tier}).`,
+      scored_at: now,
+      notes: [
+        previous.notes,
+        `Chat update (${now}): ${text.slice(0, 380)}`,
+      ].filter(Boolean).join('\n\n'),
+    };
+
+    const hasStrongIdentity = Boolean(payload.phone || payload.email || payload.address);
+    if (!hasStrongIdentity) {
+      leadSyncRef.current.profile = merged;
+      return;
+    }
+
+    try {
+      if (leadSyncRef.current.id) {
+        await base44.entities.Lead.update(leadSyncRef.current.id, payload);
+      } else {
+        const created = await base44.entities.Lead.create({
+          name: payload.name || 'Website Visitor',
+          phone: payload.phone || 'Not provided',
+          ...payload,
+        });
+        leadSyncRef.current.id = created?.id || null;
+      }
+
+      leadSyncRef.current.profile = merged;
+
+      trackEvent('mr_worden_lead_intelligence_sync', {
+        lead_score: intent.score,
+        lead_tier: intent.tier,
+        has_phone: Boolean(payload.phone),
+        has_email: Boolean(payload.email),
+        has_address: Boolean(payload.address),
+        has_sqft: Boolean(payload.sqft),
+      });
+
+      if (intent.tier === 'hot' || intent.tier === 'warm') {
+        trackQualifiedLeadSignal({}, `mr_worden_${intent.tier}_intent`);
+      }
+    } catch (err) {
+      console.error('Lead intelligence sync failed', err);
+    }
+  }, []);
 
   const sendMessage = async (text) => {
     if (!text || sending) return;
     setSending(true);
     try {
+      await upsertLeadFromChat(text);
+
+      // Optimistically render the user message so the chat feels instant.
+      setMessages((prev) => [...prev, { role: 'user', content: text }]);
+
       const conv = conversation || (await initConversation());
       if (!conv) return;
       await base44.agents.addMessage(conv, { role: 'user', content: text });
@@ -385,6 +533,7 @@ export default function AIConciergeBubble() {
 
   const handleQuickPrompt = async (text) => {
     if (sending || booting) return;
+    trackEvent('mr_worden_quick_prompt_click', { prompt: text.slice(0, 60) });
     setInput('');
     await sendMessage(text);
   };
@@ -408,15 +557,16 @@ export default function AIConciergeBubble() {
               transition={{ repeat: Infinity, duration: 4.6, ease: 'easeInOut' }}
               className="relative"
             >
-              <div className="absolute inset-0 rounded-full bg-primary/25 blur-xl scale-110 pointer-events-none" />
+              <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl scale-125 pointer-events-none" />
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ repeat: Infinity, duration: 15, ease: 'linear' }}
-                className="absolute -inset-2 rounded-full border border-primary/30 pointer-events-none"
+                className="absolute -inset-2 rounded-full border border-primary/35 pointer-events-none"
               />
+              <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/20 via-transparent to-sky-300/15 blur-xl pointer-events-none" />
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
-                <div className="w-[96px] h-[96px] rounded-full border border-primary/40 bg-black/40 overflow-hidden">
+                <div className="w-[104px] h-[104px] rounded-full border border-primary/45 bg-black/55 overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
                   <WebGLPersonaAvatar
                     mode={avatarState}
                     speechPulse={speechPulse}
@@ -427,20 +577,24 @@ export default function AIConciergeBubble() {
                 </div>
               </button>
               <span className="absolute top-4 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_12px_rgba(34,197,94,.8)]" />
+              <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-[9px] font-display font-bold tracking-[0.14em] uppercase border border-primary/40">
+                AI
+              </div>
             </motion.div>
 
-            <div className="absolute right-[5.3rem] bottom-4 sm:bottom-6 text-left leading-none bg-black/80 border border-primary/40 px-3 py-2 backdrop-blur-sm whitespace-nowrap">
+            <div className="absolute right-[6rem] bottom-4 sm:bottom-6 text-left leading-none bg-black/85 border border-primary/45 px-3 py-2 backdrop-blur-md whitespace-nowrap rounded-lg shadow-[0_10px_28px_rgba(0,0,0,0.42)]">
               <button
                 type="button"
                 onClick={handleOpen}
                 className="text-left"
                 aria-label="Open AI consultant chat"
               >
-                <p className="font-display font-black text-[11px] tracking-[0.15em] uppercase text-primary">
+                <p className="font-display font-black text-[11px] tracking-[0.15em] uppercase text-primary flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3" />
                   Meet Mr. Worden
                 </p>
                 <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-80 mt-0.5 text-foreground">
-                  Founder concierge · 24/7
+                  Premium founder concierge · 24/7
                 </p>
               </button>
             </div>
@@ -456,7 +610,7 @@ export default function AIConciergeBubble() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-6 right-4 sm:right-8 left-4 sm:left-auto z-50 w-auto sm:w-[430px] h-[620px] max-h-[82vh] bg-card/95 border border-primary/30 shadow-2xl rounded-xl flex flex-col overflow-hidden backdrop-blur-sm"
+            className="absolute bottom-6 right-4 sm:right-8 left-4 sm:left-auto z-50 w-auto sm:w-[440px] h-[640px] max-h-[84vh] bg-card/95 border border-primary/35 shadow-2xl rounded-2xl flex flex-col overflow-hidden backdrop-blur-sm"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
@@ -471,6 +625,17 @@ export default function AIConciergeBubble() {
                   />
                 </div>
                 <div>
+                  <div className="mb-1">
+                    <SmartImage
+                      src={PRIMARY_LOGO_URL}
+                      fallbackSrc={FALLBACK_LOGO_URL}
+                      alt="J. Worden and Sons logo"
+                      width={320}
+                      height={100}
+                      sizes="120px"
+                      className="w-24 h-7 object-contain"
+                    />
+                  </div>
                   <p className="font-display font-black text-foreground text-sm uppercase tracking-wider">
                     Mr. Worden · Founder
                   </p>
@@ -518,6 +683,27 @@ export default function AIConciergeBubble() {
               </div>
             </div>
 
+            <div className="px-4 py-2.5 border-b border-primary/20 bg-gradient-to-r from-primary/10 via-transparent to-sky-300/10">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  {TRUST_SIGNALS.map((item) => (
+                    <span key={item} className="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-display tracking-[0.12em] uppercase border border-primary/30 text-foreground/90 bg-black/25 rounded-full">
+                      <ShieldCheck className="w-3 h-3 text-primary" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                <a
+                  href="tel:+18044461296"
+                  className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-display font-bold tracking-[0.12em] uppercase bg-primary text-primary-foreground rounded-md"
+                  aria-label="Call now"
+                >
+                  <Phone className="w-3 h-3" />
+                  Call Now
+                </a>
+              </div>
+            </div>
+
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
               {booting && messages.length === 0 && (
@@ -530,8 +716,8 @@ export default function AIConciergeBubble() {
                   <div
                     className={`max-w-[85%] px-4 py-2.5 text-sm leading-relaxed ${
                       m.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border border-border text-foreground'
+                        ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm shadow-[0_8px_20px_rgba(0,0,0,0.2)]'
+                        : 'bg-card border border-border text-foreground rounded-2xl rounded-bl-sm'
                     }`}
                   >
                     {m.content}

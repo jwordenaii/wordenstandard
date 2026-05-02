@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowDown, Phone } from 'lucide-react';
 import { trackEvent, trackPhoneClick } from '@/lib/analytics';
 import SmartImage from './SmartImage';
+import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
 const HERO_IMAGE = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/1c52a6398_generated_image.png';
 
@@ -51,6 +52,23 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}>
+
+          <div className="inline-flex items-center gap-4 rounded-xl border border-primary/30 bg-black/35 backdrop-blur-md px-4 py-3 mb-5 md:mb-7">
+            <SmartImage
+              src={PRIMARY_LOGO_URL}
+              fallbackSrc={FALLBACK_LOGO_URL}
+              alt="J. Worden & Sons Asphalt Paving logo"
+              width={380}
+              height={120}
+              priority
+              sizes="(max-width: 768px) 160px, 220px"
+              className="h-9 md:h-11 w-auto object-contain"
+            />
+            <span className="hidden sm:block h-8 w-px bg-primary/35" aria-hidden="true" />
+            <span className="font-display text-[10px] md:text-xs tracking-[0.22em] uppercase text-muted-foreground">
+              Trusted Virginia Paving Since 1984
+            </span>
+          </div>
           
           <p className="font-display text-primary text-sm md:text-base tracking-[0.34em] uppercase mb-4 md:mb-6">
             Educate First · Pave Second · 40 Years in Virginia

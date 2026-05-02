@@ -17,7 +17,10 @@ from __future__ import annotations
 import logging
 import os
 import time
+from typing import Any
+from urllib.parse import urlparse
 
+import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
@@ -35,6 +38,67 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/metrics", tags=["metrics"])
 
 _REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+
+def _is_configured(value: str | None) -> bool:
+    return bool((value or "").strip())
+
+
+def _sentry_probe_url_from_dsn(dsn: str | None) -> str | None:
+    raw = (dsn or "").strip()
+    if not raw:
+        return None
+    parsed = urlparse(raw)
+    if not parsed.scheme or not parsed.netloc:
+        return None
+    return f"{parsed.scheme}://{parsed.netloc}/api/0/"
+
+
+async def _probe_provider(
+    client: httpx.AsyncClient,
+    *,
+    method: str,
+    url: str,
+    configured: bool,
+    headers: dict[str, str] | None = None,
+    json_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not configured:
+        return {
+            "up": False,
+            "status": "not_configured",
+            "status_code": None,
+            "latency_ms": None,
+            "detail": "Missing credentials",
+        }
+
+    t0 = time.monotonic()
+    try:
+        response = await client.request(
+            method,
+            url,
+            headers=headers,
+            json=json_payload,
+        )
+        latency_ms = round((time.monotonic() - t0) * 1000, 2)
+        up = 200 <= response.status_code < 300
+        detail = "ok" if up else f"HTTP {response.status_code}"
+        return {
+            "up": up,
+            "status": "ok" if up else "degraded",
+            "status_code": response.status_code,
+            "latency_ms": latency_ms,
+            "detail": detail,
+        }
+    except Exception as exc:  # noqa: BLE001
+        latency_ms = round((time.monotonic() - t0) * 1000, 2)
+        return {
+            "up": False,
+            "status": "error",
+            "status_code": None,
+            "latency_ms": latency_ms,
+            "detail": str(exc),
+        }
 
 
 # ── Celery metrics ────────────────────────────────────────────────────────────
@@ -244,4 +308,187 @@ async def cache_metrics(
     return {
         **stats,
         "note": "Counters are per-process and reset on worker restart.",
+    }
+
+
+@router.get("/providers", summary="Provider heartbeat status for AI + automation integrations")
+@limiter.limit(HEALTH_LIMIT)
+async def provider_metrics(
+    request: Request,
+    _: dict = Depends(verify_premium_security),
+):
+    """
+    Return backend-observed provider heartbeat statuses.
+
+    This endpoint uses lightweight API probes and reports whether each provider
+    is configured and currently reachable from the backend environment.
+    """
+    openai_api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    gemini_api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    perplexity_api_key = os.getenv("PERPLEXITY_API_KEY", "").strip()
+    anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+    xai_api_key = os.getenv("XAI_API_KEY", "").strip()
+    x_bearer_token = os.getenv("X_BEARER_TOKEN", "").strip()
+    dropbox_access_token = os.getenv("DROPBOX_ACCESS_TOKEN", "").strip()
+    google_photos_access_token = os.getenv("GOOGLE_PHOTOS_ACCESS_TOKEN", "").strip()
+    sentry_dsn = os.getenv("SENTRY_DSN", "").strip()
+    codex_model = os.getenv("OPENAI_CODEX_MODEL", "gpt-5.3-codex").strip()
+    sentry_probe_url = _sentry_probe_url_from_dsn(sentry_dsn)
+
+    timeout = httpx.Timeout(connect=3.0, read=4.0, write=4.0, pool=4.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        openai = await _probe_provider(
+            client,
+            method="GET",
+            url="https://api.openai.com/v1/models",
+            configured=_is_configured(openai_api_key),
+            headers={"Authorization": f"Bearer {openai_api_key}"},
+        )
+        gemini = await _probe_provider(
+            client,
+            method="GET",
+            url=f"https://generativelanguage.googleapis.com/v1beta/models?key={gemini_api_key}",
+            configured=_is_configured(gemini_api_key),
+        )
+        perplexity = await _probe_provider(
+            client,
+            method="GET",
+            url="https://api.perplexity.ai/models",
+            configured=_is_configured(perplexity_api_key),
+            headers={"Authorization": f"Bearer {perplexity_api_key}"},
+        )
+        claude = await _probe_provider(
+            client,
+            method="GET",
+            url="https://api.anthropic.com/v1/models",
+            configured=_is_configured(anthropic_api_key),
+            headers={
+                "x-api-key": anthropic_api_key,
+                "anthropic-version": "2023-06-01",
+            },
+        )
+        grok = await _probe_provider(
+            client,
+            method="GET",
+            url="https://api.x.ai/v1/models",
+            configured=_is_configured(xai_api_key),
+            headers={"Authorization": f"Bearer {xai_api_key}"},
+        )
+        x_api = await _probe_provider(
+            client,
+            method="GET",
+            url="https://api.x.com/2/users/me",
+            configured=_is_configured(x_bearer_token),
+            headers={"Authorization": f"Bearer {x_bearer_token}"},
+        )
+        dropbox = await _probe_provider(
+            client,
+            method="POST",
+            url="https://api.dropboxapi.com/2/users/get_current_account",
+            configured=_is_configured(dropbox_access_token),
+            headers={
+                "Authorization": f"Bearer {dropbox_access_token}",
+                "Content-Type": "application/json",
+            },
+            json_payload={},
+        )
+        gphotos = await _probe_provider(
+            client,
+            method="GET",
+            url="https://photoslibrary.googleapis.com/v1/albums?pageSize=1",
+            configured=_is_configured(google_photos_access_token),
+            headers={"Authorization": f"Bearer {google_photos_access_token}"},
+        )
+        sentry = await _probe_provider(
+            client,
+            method="GET",
+            url=sentry_probe_url or "https://sentry.io/api/0/",
+            configured=_is_configured(sentry_dsn),
+        )
+
+    if _is_configured(sentry_dsn) and not sentry_probe_url:
+        sentry = {
+            "up": False,
+            "status": "error",
+            "status_code": None,
+            "latency_ms": None,
+            "detail": "Invalid SENTRY_DSN format",
+        }
+
+    providers: list[dict[str, Any]] = [
+        {
+            "id": "openai",
+            "label": "OpenAI",
+            "configured": _is_configured(openai_api_key),
+            **openai,
+        },
+        {
+            "id": "gemini",
+            "label": "Gemini",
+            "configured": _is_configured(gemini_api_key),
+            **gemini,
+        },
+        {
+            "id": "perplexity",
+            "label": "Perplexity",
+            "configured": _is_configured(perplexity_api_key),
+            **perplexity,
+        },
+        {
+            "id": "claude",
+            "label": "Claude",
+            "configured": _is_configured(anthropic_api_key),
+            **claude,
+        },
+        {
+            "id": "codex",
+            "label": "Codex",
+            "configured": _is_configured(openai_api_key),
+            "model": codex_model,
+            **openai,
+        },
+        {
+            "id": "grok",
+            "label": "Grok",
+            "configured": _is_configured(xai_api_key),
+            **grok,
+        },
+        {
+            "id": "x",
+            "label": "X API",
+            "configured": _is_configured(x_bearer_token),
+            **x_api,
+        },
+        {
+            "id": "dropbox",
+            "label": "Dropbox",
+            "configured": _is_configured(dropbox_access_token),
+            **dropbox,
+        },
+        {
+            "id": "gphotos",
+            "label": "Google Photos",
+            "configured": _is_configured(google_photos_access_token),
+            **gphotos,
+        },
+        {
+            "id": "sentry",
+            "label": "Sentry",
+            "configured": _is_configured(sentry_dsn),
+            **sentry,
+        },
+    ]
+
+    up_count = sum(1 for p in providers if p.get("up"))
+    configured_count = sum(1 for p in providers if p.get("configured"))
+
+    return {
+        "status": "ok",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "summary": {
+            "providers_total": len(providers),
+            "providers_up": up_count,
+            "providers_configured": configured_count,
+        },
+        "providers": providers,
     }

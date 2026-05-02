@@ -388,43 +388,67 @@ export function getLandingBySlug(slug) {
 
 export function buildLandingJsonLd(page) {
   const url = `${PRIMARY_DOMAIN}${page.canonicalPath}`
+  const howToSteps = Array.isArray(page.howToSteps) && page.howToSteps.length > 0
+    ? page.howToSteps
+    : [
+        'Schedule an on-site pavement assessment and traffic-flow review.',
+        'Receive a repair-vs-overlay recommendation with phased execution options.',
+        'Approve scope, mobilization window, and QA checkpoints.',
+        'Complete paving, striping, and final safety verification.',
+      ]
+
+  const graph = [
+    {
+      '@type': 'Service',
+      name: page.title,
+      serviceType: page.primaryKeyword,
+      areaServed: {
+        '@type': 'City',
+        name: page.serviceArea,
+      },
+      provider: {
+        '@type': 'LocalBusiness',
+        name: 'J. Worden & Sons Asphalt Paving',
+        url: PRIMARY_DOMAIN,
+        telephone: '+18044461296',
+      },
+      url,
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: (Array.isArray(page.faq) ? page.faq : []).map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.a,
+        },
+      })),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: PRIMARY_DOMAIN },
+        { '@type': 'ListItem', position: 2, name: 'Commercial Asphalt Services', item: `${PRIMARY_DOMAIN}/locations` },
+        { '@type': 'ListItem', position: 3, name: page.title, item: url },
+      ],
+    },
+    {
+      '@type': 'HowTo',
+      name: `How ${page.title} Projects Are Planned`,
+      description: page.metaDescription,
+      totalTime: 'P14D',
+      step: howToSteps.map((step, index) => ({
+        '@type': 'HowToStep',
+        position: index + 1,
+        name: `Step ${index + 1}`,
+        text: step,
+      })),
+    },
+  ]
+
   return {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'Service',
-        name: page.title,
-        serviceType: page.primaryKeyword,
-        areaServed: {
-          '@type': 'City',
-          name: page.serviceArea,
-        },
-        provider: {
-          '@type': 'LocalBusiness',
-          name: 'J. Worden & Sons Asphalt Paving',
-          url: PRIMARY_DOMAIN,
-          telephone: '+18044461296',
-        },
-        url,
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: page.faq.map((item) => ({
-          '@type': 'Question',
-          name: item.q,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: item.a,
-          },
-        })),
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: PRIMARY_DOMAIN },
-          { '@type': 'ListItem', position: 2, name: 'Landing Page', item: url },
-        ],
-      },
-    ],
+    '@graph': graph,
   }
 }

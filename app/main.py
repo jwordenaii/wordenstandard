@@ -177,6 +177,7 @@ from .core.limiter import limiter
 from .database import create_all_tables, should_auto_create_tables
 from . import models  # noqa: F401 — registers ORM models with Base.metadata
 from .services.ai_brain import SupremeCourtAI
+from .services.state_data import verify_state_logic_integrity
 from .services.telemetry import FleetOperations
 from .routers import leads, reviews, schema_ld, ai as ai_router
 from .routers import admin as admin_router, content as content_router
@@ -234,6 +235,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("JWordenAI backend starting up (FastAPI %s)", __import__("fastapi").__version__)
+    verify_state_logic_integrity(raise_on_error=True)
+    logger.info("State logic integrity check passed (50 states + DC parity).")
     if should_auto_create_tables():
         create_all_tables()
     else:

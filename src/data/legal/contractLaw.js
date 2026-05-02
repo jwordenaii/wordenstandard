@@ -1283,4 +1283,30 @@ export default [
       'Wyoming anti-indemnity statute applies to both construction and oil and gas contracts. Wyoming has relatively few construction-specific statutes compared to other states.',
     lastVerified: '2026-01-01',
   },
+  {
+    state: 'Washington DC',
+    abbr: 'DC',
+    statuteOfLimitationsWrittenYears: 3,
+    statuteOfLimitationsOralYears: 3,
+    statuteOfReposeYears: 10,
+    statSOLCitation: 'D.C. Code § 12-301',
+    statSORCitation: 'D.C. Code § 12-310',
+    impliedWarrantyConstruction: true,
+    impliedWarrantyNote:
+      'District courts recognize implied warranties in construction and residential habitability contexts based on common-law contract principles.',
+    rightToRepairLaw: false,
+    rightToRepairCitation: '',
+    payIfPaidEnforceable: true,
+    antiIndemnityLaw: true,
+    antiIndemnityNote:
+      "D.C. Code § 27A-202 limits unenforceable indemnity language that attempts to shift liability for a party's own negligence in construction contexts.",
+    noLienWaiverUntilPaid: false,
+    pooledBondingAllowed: false,
+    liquidatedDamagesEnforceable: true,
+    forceMajeureCodified: false,
+    citation: 'D.C. Code § 12-301; § 12-310; § 27A-202',
+    notes:
+      'District procurement and construction contracts often layer federal and local requirements; verify agency-specific clauses on public work.',
+    lastVerified: '2026-01-01',
+  },
 ]

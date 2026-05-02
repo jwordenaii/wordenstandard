@@ -1,6 +1,8 @@
 import React from 'react';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { trackPhoneClick } from '@/lib/analytics';
+import SmartImage from '@/components/SmartImage';
+import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
 export default function Footer() {
   const scrollTo = (href) => {
@@ -16,9 +18,17 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1 premium-panel rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                <span className="font-display font-black text-primary-foreground text-lg">JW</span>
-              </div>
+              <SmartImage
+                src={PRIMARY_LOGO_URL}
+                fallbackSrc={FALLBACK_LOGO_URL}
+                alt="J. Worden & Sons logo"
+                label="J. Worden"
+                sublabel="Logo"
+                width={220}
+                height={90}
+                className="w-32 h-12 object-contain bg-white/5 border border-white/10 rounded-md p-1"
+                sizes="128px"
+              />
               <div>
                 <p className="font-display font-bold text-foreground text-sm tracking-widest uppercase leading-none">
                   J. Worden & Sons

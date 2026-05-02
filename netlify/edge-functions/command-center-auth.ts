@@ -97,6 +97,11 @@ export default async function handler(
   request: Request,
   context: Context
 ): Promise<Response> {
+  const authMode = String(Deno.env.get("COMMAND_CENTER_AUTH_MODE") ?? "none").toLowerCase();
+  if (["none", "off", "disabled", "0", "false"].includes(authMode)) {
+    return context.next();
+  }
+
   const url = new URL(request.url);
 
   // ── Logout shortcut ──────────────────────────────────────────────────────

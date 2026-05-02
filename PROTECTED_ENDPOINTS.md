@@ -324,6 +324,7 @@ curl -s -X POST "$BASE/api/v1/voice/transcribe" \
 | `GET` | `/api/v1/metrics/redis` | Redis memory, key count, connected clients |
 | `GET` | `/api/v1/metrics/database` | Postgres pool stats and query latency |
 | `GET` | `/api/v1/metrics/ai` | OpenAI call counts, latency, error rate |
+| `GET` | `/api/v1/metrics/providers` | Live provider heartbeats (OpenAI, Gemini, Perplexity, Claude, Codex, Grok, X, Dropbox, Google Photos, Sentry) |
 | `GET` | `/api/v1/metrics/cache` | Redis cache hit/miss ratio |
 
 ```bash

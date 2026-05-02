@@ -7,6 +7,17 @@ Follow this checklist for every production deployment, no matter how small.
 
 ## Before Deploying
 
+### One-Command Web Route Guard
+
+- [ ] Run the one-command guard to catch repo drift, indexing regressions, and SPA route-level 404 issues:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/deploy-route-guard.ps1 -Domain https://www.jwordenasphaltpaving.com
+```
+
+- [ ] Confirm it prints `RESULT: PASS`.
+- [ ] If it fails on Command Center route integrity, redeploy frontend and rerun guard before launch.
+
 ### Code Quality
 
 - [ ] All changes are committed and pushed to a feature branch
@@ -176,7 +187,7 @@ curl -s "$BASE/api/v1/metrics/celery" \
 
 ```bash
 # All metrics endpoints should return 200
-for endpoint in celery redis database ai cache; do
+for endpoint in celery redis database ai providers cache; do
   status=$(curl -s -o /dev/null -w "%{http_code}" \
     "$BASE/api/v1/metrics/$endpoint" \
     -H "Authorization: Bearer $MASTER_KEY")

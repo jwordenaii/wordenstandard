@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import RouteLoader from '@/components/RouteLoader';
 import SplashScreen from '@/components/SplashScreen';
+import AIConciergeBubble from '@/components/AIConciergeBubble';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
@@ -42,6 +43,9 @@ const RevenueDashboard = lazy(() => import('./pages/RevenueDashboard'));
 const CrewEta = lazy(() => import('./pages/CrewEta'));
 // Add page imports here
 
+const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
+const AUTH_DISABLED = ['none', 'off', 'disabled', '0', 'false'].includes(AUTH_MODE)
+
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center">
     <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -50,6 +54,8 @@ const LoadingSpinner = () => (
 
 // Gate only back-office pages behind auth. Public pages render without any auth check.
 const RequireAuth = ({ children }) => {
+  if (AUTH_DISABLED) return children;
+
   const { isAuthenticated, isLoadingAuth, authError, navigateToLogin } = useAuth();
 
   if (isLoadingAuth) return <LoadingSpinner />;
@@ -129,6 +135,7 @@ function App() {
           <Router>
             <SplashScreen />
             <AuthenticatedApp />
+            <AIConciergeBubble />
           </Router>
           <Toaster />
         </QueryClientProvider>

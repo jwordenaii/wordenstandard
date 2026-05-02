@@ -25,7 +25,6 @@ import QuoteEngine from '../components/QuoteEngine';
 import FAQSection from '../components/FAQSection';
 import Footer from '../components/Footer';
 import HomeSchema from '../components/HomeSchema';
-import AIConciergeBubble from '../components/AIConciergeBubble';
 
 export default function Home() {
   return (
@@ -56,7 +55,6 @@ export default function Home() {
       <FAQSection />
       <QuoteEngine />
       <Footer />
-      <AIConciergeBubble />
     </div>
   );
 }

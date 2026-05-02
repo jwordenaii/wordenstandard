@@ -120,12 +120,82 @@ EXPERTISE (answer confidently):
 
 RESPONSE RULES:
 • Speak as J. Worden Sr. in first person ("I" or "we" for the company) — stay in character always
-• Keep responses conversational and warm — 2–3 sentences for simple Q&A
+• Keep responses conversational and warm — concise and practical for field decisions
 • After answering, always nudge toward the next stage — ask a follow-up, offer a quote, suggest scheduling
 • When someone seems ready to hire: "Let's get you on our schedule — head to /quote, it takes two minutes and a small deposit holds your spot"
 • For legal questions: "I'm a paver, not a lawyer — but our Advisory Board at /advisory has every state's laws laid out plain and clear"
 • For pricing: always mention the free on-site quote at /quote
+• Use this premium response framework whenever practical:
+  Recommendation: <best action>
+  Why: <technical/business reasoning>
+  Scope options: <repair vs overlay vs replace>
+  Price range context: <ballpark with uncertainty factors>
+  Timeline: <typical sequencing and schedule note>
+  Next step: <specific CTA>
 • Never invent project names or details not listed above"""
+
+
+def _enforce_founder_framework(answer: str) -> str:
+    """
+    Normalize AI output into a premium decision framework.
+
+    This prevents thin or generic replies by guaranteeing practical structure,
+    while preserving the model's original recommendation language.
+    """
+    source = (answer or "").strip()
+    if not source:
+        return (
+            "Recommendation: Start with a free on-site inspection so we can diagnose base condition, drainage, and traffic before pricing. "
+            "Why: The right scope prevents overspending and extends pavement life. "
+            "Scope options: Spot repair, resurfacing, or full replacement based on structural condition. "
+            "Price range context: Final pricing depends on square footage, prep depth, thickness, edges, and access. "
+            "Timeline: Most projects can be scoped quickly and scheduled around weather and crew availability. "
+            "Next step: Head to /quote and share your property details so we can get your project moving."
+        )
+
+    lower = source.lower()
+    required_tokens = [
+        "recommendation:",
+        "why:",
+        "scope options:",
+        "price range context:",
+        "timeline:",
+        "next step:",
+    ]
+    if all(token in lower for token in required_tokens):
+        return source
+
+    sentences = [s.strip() for s in source.replace("\n", " ").split(".") if s.strip()]
+
+    recommendation = sentences[0] if sentences else "Start with a free on-site inspection so we can diagnose the right fix."
+    why = sentences[1] if len(sentences) > 1 else "That protects your budget by matching the solution to real pavement conditions."
+    scope = (
+        sentences[2]
+        if len(sentences) > 2
+        else "We can compare spot repair, resurfacing, and full replacement based on base stability and distress level"
+    )
+    price = (
+        next((s for s in sentences if "$" in s or "sqft" in s.lower() or "square" in s.lower()), "")
+        or "Pricing varies by square footage, prep, thickness, drainage, and access"
+    )
+    timeline = (
+        next((s for s in sentences if any(k in s.lower() for k in ["day", "week", "timeline", "schedule", "start"])), "")
+        or "Most projects are scoped quickly and then scheduled by urgency and weather window"
+    )
+    next_step = (
+        sentences[-1]
+        if len(sentences) > 3
+        else "Share your address, approximate size, and target timing and we will lay out the smartest next step"
+    )
+
+    return (
+        f"Recommendation: {recommendation.rstrip('.')}. "
+        f"Why: {why.rstrip('.')}. "
+        f"Scope options: {scope.rstrip('.')}. "
+        f"Price range context: {price.rstrip('.')}. "
+        f"Timeline: {timeline.rstrip('.')}. "
+        f"Next step: {next_step.rstrip('.')}."
+    )
 
 
 # ── Confidence estimator ──────────────────────────────────────────────────────
@@ -297,7 +367,12 @@ def run_chat(
         answer = _stub_chat(question)
         confidence = 0.45
     else:
+        answer = _enforce_founder_framework(answer)
         confidence = _estimate_confidence(question, answer, model_error=error)
+
+    # Apply framework to fallback responses too, so the UX is consistent.
+    if answer:
+        answer = _enforce_founder_framework(answer)
 
     return AIDecision(
         answer=answer,

@@ -9,6 +9,7 @@ Disallow: /job
 Disallow: /crew-reporting
 Disallow: /dns-migration
 Disallow: /portal
+Disallow: /admin
 Disallow: /admin/
 Disallow: /leads
 Disallow: /voice-calls
