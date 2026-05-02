@@ -56,7 +56,7 @@ export default function QuoteEngine() {
 
   const canProceed = () => {
     if (step === 0) return !!formData.surfaceType;
-    if (step === 1) return parseFloat(formData.width) > 0 && parseFloat(formData.length) > 0;
+    if (step === 1) return formData.sqft > 0 || (parseFloat(formData.width) > 0 && parseFloat(formData.length) > 0);
     if (step === 2) return !!formData.materialId;
     if (step === 3) return !!formData.urgency;
     if (step === 4) return formData.name.trim().length > 1 && isPhoneValid(formData.phone);
@@ -90,9 +90,18 @@ export default function QuoteEngine() {
       trackLeadSubmission({ ...leadData, id: createdLead?.id });
       trackOfflineConversionReady({ ...leadData, id: createdLead?.id });
 
-      // Fire-and-forget: generate + email branded PDF estimate (doesn't block UX)
+      // TRIGGER AUTOMATION TRACKS
       if (createdLead?.id) {
+        // 1. Score lead and enrich with local property data
+        base44.functions.invoke('scoreNewLead', { leadId: createdLead.id }).catch(() => {});
+        // 2. Immediate PDF Proposal Generation
         base44.functions.invoke('generateInstantQuotePdf', { leadId: createdLead.id }).catch(() => {});
+        // 3. Dispatch Sales Alert (Slack + Email)
+        base44.functions.invoke('notifyNewLeadSlack', { leadId: createdLead.id }).catch(() => {});
+        base44.functions.invoke('notifyNewLeadEmail', { leadId: createdLead.id }).catch(() => {});
+        // 4. Send Welcome SMS (Conversion Hardening)
+        base44.functions.invoke('sendLeadWelcomeEmail', { leadId: createdLead.id }).catch(() => {});
+        base44.functions.invoke('sendSmsFollowup', { leadId: createdLead.id, type: 'welcome' }).catch(() => {});
       }
 
       setSubmitted(true);
