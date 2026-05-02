@@ -7,6 +7,9 @@ import SmartImage from './SmartImage';
 import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 import { trackEvent, trackQualifiedLeadSignal } from '@/lib/analytics';
 
+const AVATAR_POSTER_URL =
+  (import.meta.env.VITE_CONCIERGE_AVATAR_POSTER_URL || '').trim() || '/hero-paving.jpg';
+
 function splitSentences(text) {
   return (text || '')
     .replace(/\s+/g, ' ')
@@ -567,13 +570,24 @@ export default function AIConciergeBubble() {
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
                 <div className="w-[128px] h-[128px] rounded-full border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
-                  <WebGLPersonaAvatar
-                    mode={avatarState}
-                    speechPulse={speechPulse}
-                    speechIntensity={speaking ? 0.9 : 0.55}
-                    onModelModeChange={setModelMode}
-                    className="w-full h-full"
-                  />
+                  {modelMode === 'model' ? (
+                    <WebGLPersonaAvatar
+                      mode={avatarState}
+                      speechPulse={speechPulse}
+                      speechIntensity={speaking ? 0.9 : 0.55}
+                      onModelModeChange={setModelMode}
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <SmartImage
+                      src={AVATAR_POSTER_URL}
+                      alt="J. Worden concierge portrait"
+                      width={512}
+                      height={512}
+                      className="w-full h-full object-cover quality-premium"
+                      sizes="128px"
+                    />
+                  )}
                 </div>
               </button>
               <span className="absolute top-4 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_12px_rgba(34,197,94,.8)]" />
@@ -616,13 +630,24 @@ export default function AIConciergeBubble() {
             <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full border border-primary/60 overflow-hidden bg-black/60 shadow-[0_12px_28px_rgba(0,0,0,0.42)]">
-                  <WebGLPersonaAvatar
-                    mode={avatarState}
-                    speechPulse={speechPulse}
-                    speechIntensity={speaking ? 0.95 : 0.5}
-                    onModelModeChange={setModelMode}
-                    className="w-full h-full"
-                  />
+                  {modelMode === 'model' ? (
+                    <WebGLPersonaAvatar
+                      mode={avatarState}
+                      speechPulse={speechPulse}
+                      speechIntensity={speaking ? 0.95 : 0.5}
+                      onModelModeChange={setModelMode}
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <SmartImage
+                      src={AVATAR_POSTER_URL}
+                      alt="J. Worden concierge portrait"
+                      width={256}
+                      height={256}
+                      className="w-full h-full object-cover quality-premium"
+                      sizes="56px"
+                    />
+                  )}
                 </div>
                 <div>
                   <div className="mb-1">
