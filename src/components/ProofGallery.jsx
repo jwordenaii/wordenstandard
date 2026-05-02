@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-const BEFORE_AFTER_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/43a3f5224_generated_ef01da5f.png';
-const CREW_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/067c32125_generated_2102df0c.png';
-const TEXTURE_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcaa2c9fa_generated_92be404b.png';
-const COMMERCIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/7724829ef_generated_50c2ec3a.png';
+const BEFORE_AFTER_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg';
+const CREW_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/a07dfd0b9_20171113_184141474_iOS.jpg';
+const TEXTURE_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg';
+const COMMERCIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg';
 
 const PROJECTS = [
   {

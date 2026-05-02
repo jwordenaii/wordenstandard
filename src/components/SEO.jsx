@@ -10,7 +10,7 @@ export default function SEO({
   title,
   description,
   canonicalPath,
-  ogImage = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+  ogImage = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
   ogType = 'website',
   jsonLd,
   noindex = false,

@@ -30,7 +30,7 @@ export default function LocationPage() {
         '@type': 'GeneralContractor',
         '@id': `${PRIMARY_DOMAIN}${canonicalPath}#business`,
         name: `J. Worden & Sons Asphalt Paving — ${loc.city}`,
-        image: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+        image: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
         url: `${PRIMARY_DOMAIN}${canonicalPath}`,
         telephone: '+1-804-446-1296',
         email: 'j.wordenandsonspaving@gmail.com',

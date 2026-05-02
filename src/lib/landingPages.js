@@ -26,7 +26,7 @@ export const LANDING_PAGES = [
       'Richmond VA parking lot repair and resurfacing by J. Worden & Sons. Structural asphalt repair, drainage fixes, ADA striping, and lifecycle planning for commercial properties.',
     canonicalPath: '/lp/richmond-parking-lot-repair',
     ogImage:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png',
+      'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
     serviceArea: 'Richmond, VA Metro',
     primaryKeyword: 'richmond parking lot repair',
     adIntent: 'high_commercial_repair',
@@ -85,7 +85,7 @@ export const LANDING_PAGES = [
       'Henrico VA parking lot resurfacing by J. Worden & Sons. Patch-first asphalt rehab, milling, overlays, striping, and phased scheduling for commercial properties.',
     canonicalPath: '/lp/henrico-parking-lot-resurfacing',
     ogImage:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png',
+      'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
     serviceArea: 'Henrico County, VA',
     primaryKeyword: 'henrico parking lot resurfacing',
     adIntent: 'high_commercial_resurfacing',
@@ -144,7 +144,7 @@ export const LANDING_PAGES = [
       'Industrial asphalt paving in Chester VA by J. Worden & Sons. Heavy-load pavement repair, truck route reinforcement, drainage fixes, and high-durability paving.',
     canonicalPath: '/lp/chester-industrial-asphalt-paving',
     ogImage:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png',
+      'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
     serviceArea: 'Chester, VA',
     primaryKeyword: 'chester industrial asphalt paving',
     adIntent: 'high_industrial_install',
@@ -203,7 +203,7 @@ export const LANDING_PAGES = [
       'Fairfax HOA asphalt street repair by J. Worden & Sons. Community road rehab, patching, resurfacing, traffic phasing, and long-term pavement planning.',
     canonicalPath: '/lp/fairfax-hoa-street-repair',
     ogImage:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png',
+      'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
     serviceArea: 'Fairfax County, VA',
     primaryKeyword: 'fairfax hoa street repair',
     adIntent: 'high_hoa_rehab',
@@ -262,7 +262,7 @@ export const LANDING_PAGES = [
       'Norfolk warehouse parking lot repair by J. Worden & Sons. Asphalt patching, resurfacing, traffic lane rehab, drainage fixes, and striping for high-use sites.',
     canonicalPath: '/lp/norfolk-warehouse-parking-lot-repair',
     ogImage:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png',
+      'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
     serviceArea: 'Norfolk, VA',
     primaryKeyword: 'norfolk warehouse parking lot repair',
     adIntent: 'high_facility_repair',
@@ -321,7 +321,7 @@ export const LANDING_PAGES = [
       'Fredericksburg church parking lot paving by J. Worden & Sons. Asphalt repair, resurfacing, ADA striping, and phased work plans for institutional properties.',
     canonicalPath: '/lp/fredericksburg-church-parking-lot-paving',
     ogImage:
-      'https://media.base44.com/images/public/69c853446b8987b1630018ff/525944372_generated_image.png',
+      'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
     serviceArea: 'Fredericksburg, VA',
     primaryKeyword: 'fredericksburg church parking lot paving',
     adIntent: 'high_institutional_repair',
@@ -452,3 +452,4 @@ export function buildLandingJsonLd(page) {
     '@graph': graph,
   }
 }
+

@@ -84,7 +84,7 @@ export default function BlogPost() {
           name: 'J. Worden & Sons Asphalt Paving',
           logo: {
             '@type': 'ImageObject',
-            url: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/215baec23_generated_ad0cdc85.png',
+            url: 'https://www.jwordenasphaltpaving.com/logo.png',
           },
         },
         mainEntityOfPage: {
