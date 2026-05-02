@@ -9,15 +9,15 @@ import { trackPhoneClick } from '@/lib/analytics'
 const REAL_PROJECT_IMAGES = [
   {
     segment: 'Residential Driveway',
-    src: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg',
+    src: '/work/bcdbc0e7f_drivewatpavingphoto.jpg',
   },
   {
     segment: 'Commercial Lot',
-    src: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
+    src: '/work/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
   },
   {
     segment: 'HOA / Private Road',
-    src: 'https://media.base44.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+    src: '/work/d77831126_20170408_185318649_iOS.jpg',
   },
 ]
 

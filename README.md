@@ -1,39 +1,57 @@
-**Welcome to your Base44 project** 
+# J. Worden & Sons Asphalt Paving — Standalone Deployment
 
-**About**
+A standalone Vite + React frontend for J. Worden & Sons Asphalt Paving. No third-party builder platform required — deploys to Netlify, Vercel, or any static host.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Quick Start
 
-This project contains everything you need to run your app locally.
-
-**Edit the code in your local development environment**
-
-Any change pushed to the repo will also be reflected in the Base44 Builder.
-
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+```bash
+npm install
+npm run dev
 ```
 
-Run the app: `npm run dev`
+## Environment Variables
 
-**Publish your changes**
+Create `.env.local` (copy from `.env.example`):
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+```
+VITE_API_BASE_URL=https://your-backend.railway.app
+VITE_SITE_URL=https://www.jwordenasphaltpaving.com
+VITE_CC_PASSWORD=your-command-center-password
+```
 
-**Docs & Support**
+Leave `VITE_API_BASE_URL` empty to run the frontend alone — public pages work without a backend; admin/dashboard features require the FastAPI backend.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+## Deploy to Netlify
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+1. Connect repo on [app.netlify.com](https://app.netlify.com)
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. Node version: `20`
+
+Set environment variables in **Site settings → Environment variables**.
+
+## Deploy to Vercel
+
+```bash
+npx vercel --prod
+```
+
+Set `VITE_API_BASE_URL`, `VITE_SITE_URL`, etc. in the Vercel dashboard.
+
+## Backend (FastAPI)
+
+The `app/` directory contains the FastAPI backend. Deploy to Railway:
+
+```bash
+railway up
+```
+
+See `DEPLOYMENT.md` for full backend setup, environment variables, and database migration instructions.
+
+## Build
+
+```bash
+npm run build      # Vite production build → dist/
+npm run lint       # ESLint
+npm run typecheck  # TypeScript check
+```

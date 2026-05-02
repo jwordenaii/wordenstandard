@@ -104,6 +104,34 @@ export const api = {
   },
 }
 
+// ── Null stub for removed Base44 SDK ─────────────────────────────────────────
+// Provides safe no-ops so any remaining call sites degrade gracefully instead
+// of throwing "base44 is not defined".
+const _noopList = async () => [];
+const _noopNull = async () => null;
+const _noopObj  = async () => ({});
+const _noopUnsub = () => () => {};
+const _entityStub = () => ({
+  list:      _noopList,
+  filter:    _noopList,
+  get:       _noopNull,
+  create:    _noopObj,
+  update:    _noopObj,
+  delete:    _noopObj,
+  subscribe: _noopUnsub,
+});
+export const base44 = {
+  entities:     new Proxy({}, { get: () => _entityStub() }),
+  functions:    { invoke: _noopNull },
+  agents: {
+    createConversation:      _noopNull,
+    subscribeToConversation: _noopUnsub,
+    addMessage:              _noopNull,
+  },
+  auth:         { me: _noopNull },
+  integrations: { Core: { UploadFile: async () => ({ file_url: '' }) } },
+};
+
 // ── GA4 event helpers ─────────────────────────────────────────────────────────
 export function trackEvent(eventName, params = {}) {
   if (typeof window.gtag === 'function') {

@@ -37,7 +37,7 @@ const ACHIEVEMENTS = [
   'Virginia Class A Contractor',
 ];
 
-const HOUZZ_SCREENSHOT = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/9ca50477a_houzzcomjwordenawards.jpg';
+const HOUZZ_SCREENSHOT = '/work/9ca50477a_houzzcomjwordenawards.jpg';
 
 // Aggregate weighted average across all platforms (honest math, no inflation).
 const totalReviews = REVIEW_PLATFORMS.reduce((sum, p) => sum + p.count, 0);

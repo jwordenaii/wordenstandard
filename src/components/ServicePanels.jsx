@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Home, Building2, Factory } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const RESIDENTIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg';
-const COMMERCIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg';
-const INDUSTRIAL_IMG = 'https://media.base44.com/images/public/69c853446b8987b1630018ff/5eb378b00_IMG_0844.jpg';
+const RESIDENTIAL_IMG = '/work/bcdbc0e7f_drivewatpavingphoto.jpg';
+const COMMERCIAL_IMG = '/work/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg';
+const INDUSTRIAL_IMG = '/work/5eb378b00_IMG_0844.jpg';
 
 const SERVICES = [
   {
