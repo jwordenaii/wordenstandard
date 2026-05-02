@@ -9,8 +9,7 @@
 [[plugins]]
   package = "netlify-plugin-bundle-env"
   [plugins.inputs]
-    srcDir = "src"
-    sourceDir = "src"
+    directories = ["src"]
 
 [[redirects]]
   from = "https://jwordenasphaltpaving.com/*"
