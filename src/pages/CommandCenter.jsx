@@ -52,6 +52,7 @@ const OPERATIONS_FEED = [
 const AUTOMATION_LOG_KEY = 'cc_automation_run_log_v1'
 const WEEKEND_SPRINT_STATE_KEY = 'cc_weekend_sprint_state_v1'
 const HUMAN_CHECKS_STATE_KEY = 'cc_human_checks_state_v1'
+const GOOGLE_ADS_BUDGET_STATE_KEY = 'cc_google_ads_budget_state_v1'
 
 function readAutomationRuns() {
   try {
@@ -1591,6 +1592,208 @@ function HumanChecksControlPanel() {
   )
 }
 
+function GoogleAdsBudgetControlPanel() {
+  const [budgetIndex, setBudgetIndex] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return 100
+      const raw = localStorage.getItem(GOOGLE_ADS_BUDGET_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return Number(parsed?.budgetIndex || 100)
+    } catch {
+      return 100
+    }
+  })
+  const [status, setStatus] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return 'active'
+      const raw = localStorage.getItem(GOOGLE_ADS_BUDGET_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed?.status || 'active'
+    } catch {
+      return 'active'
+    }
+  })
+  const [lastAction, setLastAction] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return null
+      const raw = localStorage.getItem(GOOGLE_ADS_BUDGET_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed?.lastAction || null
+    } catch {
+      return null
+    }
+  })
+  const [note, setNote] = useState('')
+
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return
+      localStorage.setItem(
+        GOOGLE_ADS_BUDGET_STATE_KEY,
+        JSON.stringify({
+          budgetIndex,
+          status,
+          lastAction,
+        }),
+      )
+    } catch {
+      // Keep controls usable when localStorage is unavailable.
+    }
+  }, [budgetIndex, status, lastAction])
+
+  const humanChecksState = useMemo(() => {
+    try {
+      if (typeof window === 'undefined') return { checks: {}, approver: '' }
+      const raw = localStorage.getItem(HUMAN_CHECKS_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return {
+        checks: parsed?.checks && typeof parsed.checks === 'object' ? parsed.checks : {},
+        approver: String(parsed?.approver || '').trim(),
+      }
+    } catch {
+      return { checks: {}, approver: '' }
+    }
+  }, [lastAction])
+
+  const adSpendApproved = Boolean(humanChecksState.checks?.ad_spend_qa) && humanChecksState.approver.length > 0
+
+  const runBudgetAction = useCallback(
+    (action) => {
+      const now = new Date().toISOString()
+      if (!adSpendApproved) {
+        const msg = 'Blocked: complete Human Checks > Ad budget shift approval and set approver initials first.'
+        setNote(msg)
+        appendAutomationRun({
+          id: `run_${Date.now()}`,
+          type: 'google-ads-budget-control',
+          status: 'blocked',
+          started_at: now,
+          ended_at: now,
+          detail: msg,
+        })
+        return
+      }
+
+      if (action.kind === 'off') {
+        setStatus('paused')
+        setLastAction({ at: now, label: 'Set Google Ads to OFF', delta: 0 })
+        setNote('Google Ads status set to OFF (paused).')
+        appendAutomationRun({
+          id: `run_${Date.now()}`,
+          type: 'google-ads-budget-control',
+          status: 'success',
+          started_at: now,
+          ended_at: now,
+          detail: 'Google Ads paused (OFF).',
+        })
+        return
+      }
+
+      if (action.kind === 'resume') {
+        setStatus('active')
+        setLastAction({ at: now, label: 'Resumed Google Ads', delta: 0 })
+        setNote('Google Ads resumed.')
+        appendAutomationRun({
+          id: `run_${Date.now()}`,
+          type: 'google-ads-budget-control',
+          status: 'success',
+          started_at: now,
+          ended_at: now,
+          detail: 'Google Ads resumed (active).',
+        })
+        return
+      }
+
+      const next = Math.max(20, Math.min(300, budgetIndex + action.delta))
+      setBudgetIndex(next)
+      setStatus('active')
+      setLastAction({ at: now, label: action.label, delta: action.delta })
+      setNote(`Applied: ${action.label}. New budget index: ${next}% of baseline.`)
+      appendAutomationRun({
+        id: `run_${Date.now()}`,
+        type: 'google-ads-budget-control',
+        status: 'success',
+        started_at: now,
+        ended_at: now,
+        detail: `${action.label}; budget index now ${next}% of baseline.`,
+      })
+    },
+    [adSpendApproved, budgetIndex],
+  )
+
+  const controls = [
+    { label: 'Budget +10%', delta: 10, kind: 'adjust' },
+    { label: 'Budget +20%', delta: 20, kind: 'adjust' },
+    { label: 'Budget -10%', delta: -10, kind: 'adjust' },
+    { label: 'Budget -20%', delta: -20, kind: 'adjust' },
+    { label: 'OFF', delta: 0, kind: 'off' },
+    { label: 'Resume', delta: 0, kind: 'resume' },
+  ]
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Google Ads Budget Control</h3>
+          <p className="text-xs text-white/50 mt-1">Operator controls: up, down, off, resume with human approval gate.</p>
+        </div>
+
+        <span
+          className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+            status === 'active'
+              ? 'border-emerald-300/60 bg-emerald-300/10 text-emerald-200'
+              : 'border-red-300/60 bg-red-300/10 text-red-200'
+          }`}
+        >
+          {status === 'active' ? 'Active' : 'OFF / Paused'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <p className="text-[11px] uppercase tracking-[0.12em] text-white/45">Current budget index</p>
+          <p className="text-white font-black text-3xl leading-none mt-2">{budgetIndex}%</p>
+          <p className="text-[11px] text-white/55 mt-2">Baseline = 100%. Clamp range: 20% to 300%.</p>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/20 p-3 lg:col-span-2">
+          <p className="text-[11px] uppercase tracking-[0.12em] text-white/45 mb-2">Quick Actions</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {controls.map((control) => (
+              <button
+                key={control.label}
+                type="button"
+                onClick={() => runBudgetAction(control)}
+                className={`rounded-lg px-3 py-2 text-xs font-black uppercase tracking-[0.12em] ${
+                  control.kind === 'off'
+                    ? 'bg-red-300/20 border border-red-300/40 text-red-100'
+                    : control.kind === 'resume'
+                      ? 'bg-emerald-300/20 border border-emerald-300/40 text-emerald-100'
+                      : 'bg-brand-amber text-brand-navy'
+                }`}
+              >
+                {control.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/70">
+        <p>Human approval gate: {adSpendApproved ? 'Cleared' : 'Blocked'}</p>
+        <p className="mt-1">Approver: {humanChecksState.approver || 'Not set'} · Ad budget check: {humanChecksState.checks?.ad_spend_qa ? 'approved' : 'not approved'}</p>
+        <p className="mt-1">Last action: {lastAction?.label ? `${lastAction.label} (${new Date(lastAction.at).toLocaleString()})` : 'None'}</p>
+      </div>
+
+      {note ? (
+        <div className="mt-3 rounded-lg border border-brand-amber/35 bg-brand-amber/10 px-3 py-2 text-xs text-brand-amber">
+          {note}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function HumanApprovalPolicyPanel() {
   const policyRules = [
     {
@@ -2304,6 +2507,7 @@ export default function CommandCenter() {
                 </div>
 
                 {strategyVisible ? <HumanChecksControlPanel /> : null}
+                {strategyVisible ? <GoogleAdsBudgetControlPanel /> : null}
                 {strategyVisible ? <ApiKeysPanel /> : null}
                 {strategyVisible ? <HumanApprovalPolicyPanel /> : null}
                 {strategyVisible ? <LaunchReadinessAuditPanel strategyVisible={strategyVisible} onAudit={setLatestAudit} /> : null}
