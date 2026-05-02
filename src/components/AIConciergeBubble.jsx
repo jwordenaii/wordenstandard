@@ -10,6 +10,9 @@ import { trackEvent, trackQualifiedLeadSignal } from '@/lib/analytics';
 const AVATAR_POSTER_URL =
   (import.meta.env.VITE_CONCIERGE_AVATAR_POSTER_URL || '').trim() || '/hero-paving.jpg';
 
+const AVATAR_REALISM_MODE =
+  String(import.meta.env.VITE_CONCIERGE_AVATAR_REALISM_MODE || 'photo').toLowerCase();
+
 function splitSentences(text) {
   return (text || '')
     .replace(/\s+/g, ' ')
@@ -158,6 +161,8 @@ export default function AIConciergeBubble() {
     : hovered
       ? 'wave'
       : 'idle';
+
+  const useModelRender = AVATAR_REALISM_MODE === 'hybrid' && modelMode === 'model';
 
   const QUICK_PROMPTS = [
     'Give me an instant price range for my project',
@@ -580,7 +585,7 @@ export default function AIConciergeBubble() {
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
                 <div className="w-[116px] h-[148px] rounded-2xl border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
-                  {modelMode === 'model' ? (
+                  {useModelRender ? (
                     <WebGLPersonaAvatar
                       mode={avatarState}
                       speechPulse={speechPulse}
@@ -643,7 +648,7 @@ export default function AIConciergeBubble() {
             <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-foreground p-4 flex items-center justify-between border-b border-primary/30">
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full border border-primary/60 overflow-hidden bg-black/60 shadow-[0_12px_28px_rgba(0,0,0,0.42)]">
-                  {modelMode === 'model' ? (
+                  {useModelRender ? (
                     <WebGLPersonaAvatar
                       mode={avatarState}
                       speechPulse={speechPulse}
@@ -680,7 +685,7 @@ export default function AIConciergeBubble() {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                     <p className="font-display text-muted-foreground text-[10px] tracking-wider uppercase">
-                      {modelMode === 'model' ? 'Founder model live · voice ready' : 'Founder concierge live · voice ready'}
+                      {useModelRender ? 'Founder model live · voice ready' : 'Founder portrait live · voice ready'}
                     </p>
                   </div>
                   <p className="font-display text-muted-foreground text-[9px] tracking-wider uppercase mt-0.5">
