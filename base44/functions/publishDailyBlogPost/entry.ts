@@ -17,6 +17,16 @@ type DraftPost = {
   cover_image?: string;
 };
 
+type AutomationTrack = 'commercial' | 'maintenance' | 'concrete' | 'residential';
+
+type TrackPlan = {
+  track: AutomationTrack;
+  category: DraftPost['category'];
+  mode: 'weekday-commercial' | 'weekday-maintenance' | 'weekday-concrete' | 'weekend-residential';
+  audience: string;
+  topicPool: string[];
+};
+
 const DEFAULT_COVER = 'https://www.jwordenasphaltpaving.com/hero-paving.jpg';
 
 const NEWS_FEEDS = [
@@ -33,12 +43,35 @@ const FALLBACK_WEEKDAY_TOPICS = [
   'Commercial parking lot lifecycle planning for lower long-term cost',
 ];
 
+const FALLBACK_COMMERCIAL_TOPICS = [
+  'Commercial parking lot lifecycle planning for lower long-term cost',
+  'How property managers can phase paving work without disrupting tenant traffic',
+  'Parking lot asset planning: repair versus overlay decisions for Virginia businesses',
+  'How to build annual commercial asphalt maintenance budgets with less risk',
+];
+
+const FALLBACK_MAINTENANCE_TOPICS = [
+  'How weather data and AI improve asphalt maintenance planning',
+  'Crack sealing schedules that reduce long-term repair costs in Virginia',
+  'Preventive sealcoating strategy for longer asphalt life in residential and commercial properties',
+  'How to audit asphalt condition before peak repair season',
+];
+
+const FALLBACK_CONCRETE_TOPICS = [
+  'Concrete versus asphalt for high-load zones: practical guidance for Virginia properties',
+  'When concrete aprons solve recurring edge damage near garage and loading areas',
+  'Concrete curb and gutter upgrades that improve drainage before paving projects',
+  'How mixed-surface projects combine concrete and asphalt for longer service life',
+];
+
 const FALLBACK_WEEKEND_TOPICS = [
   'Weekend homeowner guide: signs your residential driveway needs repair',
   'Residential driveway sealcoating timing in Virginia neighborhoods',
   'How families can prevent driveway cracks with simple maintenance habits',
   'Best residential paving upgrades for curb appeal and drainage',
 ];
+
+const WEEKDAY_ROTATION: AutomationTrack[] = ['commercial', 'maintenance', 'concrete', 'commercial', 'maintenance'];
 
 function getEasternNow() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
@@ -57,6 +90,142 @@ function safeSlug(value: string) {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .slice(0, 140);
+}
+
+function uniqueSlug(base: string, existingSlugs: Set<string>, dateISO: string, slot: number) {
+  const candidates = [
+    base,
+    `${base}-${dateISO}`,
+    `${base}-${dateISO}-${slot}`,
+  ];
+
+  for (const candidate of candidates) {
+    if (!existingSlugs.has(candidate)) {
+      existingSlugs.add(candidate);
+      return candidate;
+    }
+  }
+
+  let counter = 2;
+  while (counter < 100) {
+    const candidate = `${base}-${dateISO}-${slot}-${counter}`;
+    if (!existingSlugs.has(candidate)) {
+      existingSlugs.add(candidate);
+      return candidate;
+    }
+    counter += 1;
+  }
+
+  throw new Error('Unable to generate unique slug');
+}
+
+function parseBooleanEnv(value: string | undefined, defaultValue: boolean) {
+  if (value == null) return defaultValue;
+  const normalized = value.trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return defaultValue;
+}
+
+function getTrackPlan(nowEt: Date): TrackPlan {
+  if (isWeekendET(nowEt)) {
+    return {
+      track: 'residential',
+      category: 'maintenance',
+      mode: 'weekend-residential',
+      audience: 'homeowners, families, and residential driveway property owners',
+      topicPool: FALLBACK_WEEKEND_TOPICS,
+    };
+  }
+
+  const day = nowEt.getDay();
+  const track = WEEKDAY_ROTATION[Math.max(0, Math.min(4, day - 1))] || 'commercial';
+
+  if (track === 'commercial') {
+    return {
+      track,
+      category: 'commercial',
+      mode: 'weekday-commercial',
+      audience: 'property managers, business owners, and commercial lot decision-makers',
+      topicPool: FALLBACK_COMMERCIAL_TOPICS,
+    };
+  }
+
+  if (track === 'maintenance') {
+    return {
+      track,
+      category: 'maintenance',
+      mode: 'weekday-maintenance',
+      audience: 'property owners and maintenance planners who need practical maintenance decisions',
+      topicPool: FALLBACK_MAINTENANCE_TOPICS,
+    };
+  }
+
+  return {
+    track: 'concrete',
+    category: 'materials',
+    mode: 'weekday-concrete',
+    audience: 'property owners evaluating concrete and mixed-surface paving solutions',
+    topicPool: FALLBACK_CONCRETE_TOPICS,
+  };
+}
+
+function getSecondaryTrack(primaryTrack: AutomationTrack): AutomationTrack {
+  if (primaryTrack === 'commercial') return 'maintenance';
+  if (primaryTrack === 'maintenance') return 'concrete';
+  if (primaryTrack === 'concrete') return 'commercial';
+  return 'residential';
+}
+
+function getTrackPlanByTrack(track: AutomationTrack): TrackPlan {
+  if (track === 'residential') {
+    return {
+      track,
+      category: 'maintenance',
+      mode: 'weekend-residential',
+      audience: 'homeowners, families, and residential driveway property owners',
+      topicPool: FALLBACK_WEEKEND_TOPICS,
+    };
+  }
+  if (track === 'commercial') {
+    return {
+      track,
+      category: 'commercial',
+      mode: 'weekday-commercial',
+      audience: 'property managers, business owners, and commercial lot decision-makers',
+      topicPool: FALLBACK_COMMERCIAL_TOPICS,
+    };
+  }
+  if (track === 'maintenance') {
+    return {
+      track,
+      category: 'maintenance',
+      mode: 'weekday-maintenance',
+      audience: 'property owners and maintenance planners who need practical maintenance decisions',
+      topicPool: FALLBACK_MAINTENANCE_TOPICS,
+    };
+  }
+  return {
+    track: 'concrete',
+    category: 'materials',
+    mode: 'weekday-concrete',
+    audience: 'property owners evaluating concrete and mixed-surface paving solutions',
+    topicPool: FALLBACK_CONCRETE_TOPICS,
+  };
+}
+
+function getPostsPerDay(nowEt: Date) {
+  const manual = Number(Deno.env.get('BLOG_AUTOMATION_POSTS_PER_DAY') || '');
+  if (Number.isFinite(manual) && manual >= 1) {
+    return Math.min(3, Math.floor(manual));
+  }
+
+  if (isWeekendET(nowEt)) {
+    return 1;
+  }
+
+  const secondWeekday = parseBooleanEnv(Deno.env.get('BLOG_AUTOMATION_SECOND_POST_WEEKDAY'), true);
+  return secondWeekday ? 2 : 1;
 }
 
 function estimateReadTime(content: string) {
@@ -123,9 +292,9 @@ function extractJson(text: string) {
   return text;
 }
 
-async function generatePost(base44: any, opts: { weekend: boolean; news: NewsItem[]; dateISO: string; }): Promise<DraftPost> {
-  const mode = opts.weekend ? 'weekend-residential' : 'weekday-mixed';
-  const topicPool = opts.weekend ? FALLBACK_WEEKEND_TOPICS : FALLBACK_WEEKDAY_TOPICS;
+async function generatePost(base44: any, opts: { plan: TrackPlan; news: NewsItem[]; dateISO: string; slot: number; }): Promise<DraftPost> {
+  const mode = opts.plan.mode;
+  const topicPool = opts.plan.topicPool.length > 0 ? opts.plan.topicPool : FALLBACK_WEEKDAY_TOPICS;
   const fallbackTopic = topicPool[Math.floor(Math.random() * topicPool.length)];
 
   const newsContext = opts.news.map((n, i) => `${i + 1}. ${n.title} | ${n.link}`).join('\n');
@@ -137,12 +306,16 @@ Date: ${opts.dateISO}
 
 Rules:
 - Write a complete, high-quality blog post in markdown.
+- Track focus is ${opts.plan.track} and audience is: ${opts.plan.audience}
 - If mode is weekend-residential, the topic MUST be residential-only (homeowners, driveways, neighborhoods, family property care).
-- If mode is weekday-mixed, topic can be residential, commercial, materials, process, cost, or local-guides.
+- If mode is weekday-commercial, the topic MUST be commercial asphalt and parking lot strategy.
+- If mode is weekday-maintenance, the topic MUST be maintenance-first guidance.
+- If mode is weekday-concrete, the topic MUST be concrete or mixed asphalt/concrete decision guidance.
 - Build topic from current web context if useful. If web context is weak, still write a valuable evergreen post.
 - 1000-1800 words.
 - Include practical checklists and clear sections.
 - Mention J. Worden & Sons naturally and include one CTA at the end.
+- Ensure this post is materially different in angle from any other post published today.
 - Do not copy source text. Original writing only.
 
 Web context (news hints):
@@ -150,6 +323,8 @@ ${newsContext || '(No web context available today)'}
 
 Fallback topic if needed:
 ${fallbackTopic}
+
+Publishing slot today: ${opts.slot}
 
 Return STRICT JSON only:
 {
@@ -170,19 +345,26 @@ Return STRICT JSON only:
 
   const parsed = JSON.parse(extractJson(String(raw || '{}')));
 
-  const title = String(parsed.title || '').trim() || (opts.weekend ? 'Weekend Residential Driveway Guide' : 'Asphalt Paving Insight');
+  const title = String(parsed.title || '').trim() || (opts.plan.track === 'residential' ? 'Weekend Residential Driveway Guide' : 'Asphalt Paving Insight');
   const slugBase = safeSlug(String(parsed.slug || '') || title || fallbackTopic);
-  const excerpt = String(parsed.excerpt || '').trim() || `Expert asphalt guidance from J. Worden & Sons for ${opts.weekend ? 'residential property owners' : 'property owners and managers'} in Virginia.`;
+  const excerpt = String(parsed.excerpt || '').trim() || `Expert asphalt guidance from J. Worden & Sons for ${opts.plan.audience} in Virginia.`;
   const content = String(parsed.content || '').trim() || `# ${title}\n\n${excerpt}`;
 
   const allowedCategories = new Set(['maintenance', 'process', 'materials', 'local-guides', 'cost', 'commercial']);
-  const category = allowedCategories.has(parsed.category) ? parsed.category : (opts.weekend ? 'maintenance' : 'process');
+  const category = allowedCategories.has(parsed.category) ? parsed.category : opts.plan.category;
 
   const tagsRaw = Array.isArray(parsed.tags) ? parsed.tags : [];
   const tags = tagsRaw
     .map((t: unknown) => String(t || '').trim())
     .filter(Boolean)
     .slice(0, 10);
+
+  if (!tags.some((tag) => tag.toLowerCase() === opts.plan.track)) {
+    tags.unshift(opts.plan.track);
+  }
+  if (opts.plan.track === 'concrete' && !tags.some((tag) => tag.toLowerCase().includes('concrete'))) {
+    tags.unshift('concrete paving');
+  }
 
   const readTime = Number(parsed.read_time_minutes) || estimateReadTime(content);
   const cover = String(parsed.cover_image || '').trim() || DEFAULT_COVER;
@@ -213,6 +395,8 @@ Deno.serve(async (req) => {
     const nowEt = getEasternNow();
     const today = nowEt.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
     const weekend = isWeekendET(nowEt);
+    const primaryPlan = getTrackPlan(nowEt);
+    const postCount = getPostsPerDay(nowEt);
 
     // Gather web signals to keep topics fresh.
     const feedResults = await Promise.all(NEWS_FEEDS.map(fetchFeed));
@@ -221,39 +405,76 @@ Deno.serve(async (req) => {
     const existing = await base44.asServiceRole.entities.BlogPost.list('-created_date', 500);
     const existingSlugs = new Set((existing || []).map((p: any) => p.slug));
 
-    const draft = await generatePost(base44, {
-      weekend,
-      news: webSignals,
-      dateISO: today,
-    });
-
-    let finalSlug = draft.slug;
-    if (existingSlugs.has(finalSlug)) {
-      finalSlug = `${finalSlug}-${today}`;
+    const alreadyToday = (existing || []).filter((post: any) => post.published_date === today);
+    if (alreadyToday.length >= postCount) {
+      return Response.json({
+        status: 'already_published_for_today',
+        date: today,
+        target_posts: postCount,
+        existing_today: alreadyToday.length,
+        mode: primaryPlan.mode,
+      });
     }
 
-    const created = await base44.asServiceRole.entities.BlogPost.create({
-      title: draft.title,
-      slug: finalSlug,
-      excerpt: draft.excerpt,
-      content: draft.content,
-      cover_image: draft.cover_image || DEFAULT_COVER,
-      category: draft.category,
-      tags: draft.tags,
-      read_time_minutes: draft.read_time_minutes,
-      author: 'J. Worden & Sons',
-      featured: false,
-      published_date: today,
-    });
+    const planForSlot = (slot: number): TrackPlan => {
+      if (slot === 1 || weekend) return primaryPlan;
+      return getTrackPlanByTrack(getSecondaryTrack(primaryPlan.track));
+    };
+
+    const createdPosts: Array<{ id: string; slug: string; title: string; mode: string; track: string; category: string; slot: number }> = [];
+
+    for (let slot = alreadyToday.length + 1; slot <= postCount; slot += 1) {
+      const plan = planForSlot(slot);
+      const draft = await generatePost(base44, {
+        plan,
+        news: webSignals,
+        dateISO: today,
+        slot,
+      });
+
+      const finalSlug = uniqueSlug(draft.slug, existingSlugs, today, slot);
+      const baseTags = Array.isArray(draft.tags) ? draft.tags : [];
+      const uniqueTags = Array.from(new Set([...baseTags, 'ai-generated', `track-${plan.track}`, `slot-${slot}`]));
+
+      // Feature the first post of the week (Monday Morning)
+      const isMonday = nowEt.getDay() === 1;
+      const featured = isMonday && slot === 1;
+
+      const created = await base44.asServiceRole.entities.BlogPost.create({
+        title: draft.title,
+        slug: finalSlug,
+        excerpt: draft.excerpt,
+        content: draft.content,
+        cover_image: draft.cover_image || DEFAULT_COVER,
+        category: draft.category,
+        tags: uniqueTags.slice(0, 12),
+        read_time_minutes: draft.read_time_minutes,
+        author: 'J. Worden & Sons',
+        featured,
+        published_date: today,
+      });
+
+      createdPosts.push({
+        id: String(created.id),
+        slug: String(created.slug),
+        title: String(created.title),
+        mode: plan.mode,
+        track: plan.track,
+        category: draft.category,
+        slot,
+      });
+    }
 
     return Response.json({
       status: 'published',
-      mode: weekend ? 'weekend-residential' : 'weekday-mixed',
-      title: created.title,
-      slug: created.slug,
-      id: created.id,
-      web_signals_used: webSignals.length,
       date: today,
+      weekend,
+      target_posts: postCount,
+      mode: primaryPlan.mode,
+      primary_track: primaryPlan.track,
+      web_signals_used: webSignals.length,
+      published_count: createdPosts.length,
+      published: createdPosts,
     });
   } catch (error) {
     return Response.json({ error: error.message || String(error) }, { status: 500 });

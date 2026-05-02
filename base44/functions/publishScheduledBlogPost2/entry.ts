@@ -1,50 +1,45 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const POST = {
-  title: "Sealcoating in Virginia: When, Why, and How Often (A 40-Year Paver's Guide)",
-  slug: "sealcoating-virginia-when-why-how-often",
-  excerpt:
-    "Sealcoating is the single most important thing you can do to extend the life of an asphalt driveway in Virginia. Here's exactly when to seal, how often, and how to tell a good sealcoat job from a bad one — from a family paving company with 40 years of Central Virginia experience.",
-  cover_image:
-    "https://media.base44.com/images/public/69c853446b8987b1630018ff/dded10352_generated_57dcbeda.png",
-  category: "maintenance",
-  tags: [
-    "sealcoating Virginia",
-    "driveway sealcoating Richmond",
-    "when to sealcoat asphalt",
-    "how often sealcoat driveway",
-    "asphalt maintenance Virginia",
-    "Chester VA sealcoating",
-    "sealcoat cost Virginia",
-    "driveway sealer",
-  ],
-  read_time_minutes: 8,
-  author: "J. Worden & Sons",
-  featured: false,
-  content: `# Sealcoating in Virginia: When, Why, and How Often\n\n**Short answer:** In Virginia, sealcoat your asphalt driveway **every 3 years**, starting in **year 2** after a new install. Done right, sealcoating doubles the life of your pavement. Done wrong — or skipped — and you'll replace your driveway twice as fast.\n\nWe're J. Worden & Sons. Forty years of paving Central Virginia has taught us something simple: the homeowners whose driveways last 25+ years all do the same thing. **They sealcoat on schedule.** The ones who don't, end up calling us for replacement in year 12.\n\nThis guide is the exact sealcoating advice we give to every residential customer.\n\n---\n\n## What Sealcoating Actually Does\n\nAsphalt is held together by a petroleum binder. Three things attack that binder and break it down:\n\n1. **UV radiation** — sunlight oxidizes the binder, turning it gray and brittle\n2. **Water** — rain, snowmelt, and groundwater wash out the fine particles\n3. **Chemicals** — gasoline, motor oil, and road salt dissolve the binder\n\nSealcoat is a thin protective layer (coal tar or asphalt emulsion) that sits on top of the pavement and takes the beating instead of the asphalt underneath. Think of it as sunscreen, raincoat, and armor — all in one.\n\nA fresh sealcoat also fills **hairline cracks** before they grow. In Virginia's freeze-thaw climate, a crack the width of a credit card in April becomes a crack the width of a pencil by February. Sealcoat stops that cycle.\n\n---\n\n## The Virginia Sealcoat Schedule\n\nThis is the schedule we give every residential customer in Central Virginia, Hampton Roads, and the Richmond metro:\n\n| Year | What To Do |\n|---|---|\n| **Year 1** | **Do nothing.** Fresh asphalt needs 6–12 months to fully cure. Sealcoating too early locks in volatile oils and weakens the surface. |\n| **Year 2** | **First sealcoat.** This is the most important one. It seals the surface pores before oxidation damage starts. |\n| **Year 5** | **Second sealcoat** (+ crack fill anything wider than a credit card). |\n| **Year 8** | **Third sealcoat** + full crack evaluation. |\n| **Year 11** | **Fourth sealcoat.** |\n| **Year 14** | **Fifth sealcoat** + evaluate whether an overlay is coming soon. |\n| **Year 17+** | Continue every 3 years until resurface or replacement. |\n\nEvery 3 years. That's it. In Virginia's climate, 4 years is too long and annually is overkill (and actually bad for the pavement — more on that below).\n\n---\n\n## Why Every 3 Years in Virginia Specifically\n\nDifferent climates demand different sealcoat intervals. Here's why Virginia is on a 3-year cycle:\n\n- **Freeze-thaw:** Central Virginia sees 30–40 freeze-thaw cycles per winter. Each cycle stresses the sealcoat. By year 3, the protective layer is thin enough that water starts reaching the asphalt below.\n- **UV exposure:** Virginia averages 205 sunny days per year. UV breaks down coal tar sealers in roughly 36 months.\n- **Summer heat:** Asphalt surface temperatures regularly hit 140°F+ in July and August. Heat softens sealer and accelerates wear.\n- **Winter salt:** VDOT brine and rock salt sit on driveways for weeks. Chloride attacks unprotected binder fast.\n\nCoastal Virginia (Chesapeake, Virginia Beach, OBX) should actually run on a **2.5-year cycle** because salt air adds additional wear. Mountain regions (Blue Ridge) can stretch to 3.5 years.\n\n---\n\n## Can You Sealcoat Too Often?\n\n**Yes.** This surprises most homeowners.\n\nSealcoat that's applied annually builds up too thick. Thick sealcoat:\n\n- Cracks in a spider-web pattern (called \"mud cracking\")\n- Peels away from the asphalt below\n- Traps moisture instead of repelling it\n- Costs you money without extending pavement life\n\nMore is not better. **Every 3 years in Virginia is the sweet spot.** Some discount contractors push annual service as a subscription model — that's a sales tactic, not good pavement care.\n\n---\n\n## When NOT To Sealcoat\n\nSealcoat won't fix:\n\n- **Alligator cracking** — that's base failure. Sealing it hides the problem and makes it worse.\n- **Potholes** — need to be patched first.\n- **Standing water areas** — drainage issue. Fix the grade first.\n- **Severe oxidation** (gray, raveling surface) — may need a 1" overlay instead.\n- **Unstable base** — if the driveway is moving, sealer will just crack along with it.\n\nA good contractor will tell you when your driveway is past the sealcoat window. We've turned down plenty of sealcoat jobs because the honest answer was \"you need an overlay, not a sealer.\"\n\n---\n\n## How To Tell a Good Sealcoat Job From a Bad One\n\nMost sealcoat complaints come from **bad prep**, not bad product. Here's what separates a professional job from a ripoff:\n\n### A Professional Sealcoat Job Includes:\n\n1. **Power washing or hard bristle sweeping** — every leaf, pebble, and dust particle removed\n2. **Oil spot primer** on every grease stain (sealer won't stick to oil)\n3. **Crack filling** with hot-pour rubberized crack sealer before the sealcoat goes down\n4. **Edge cutting** with a brush or spray for a crisp border\n5. **Two coats minimum** — a thin first coat squeegeed in, then a second coat sprayed on\n6. **24-hour dry time minimum** before foot traffic, 48 hours before vehicles\n7. **Sand additive** for slip resistance on slopes (never on flat residential)\n\n### Red Flags:\n\n- **Diluted sealer.** Reputable contractors follow manufacturer specs. Cheap guys add 40%+ water to stretch product. The coat looks the same on day 1 and fails by year 2.\n- **Single coat.** One coat is a primer, not a finished job.\n- **Skipping crack fill.** Sealer sits in cracks but doesn't bond them. They'll reopen within 6 months.\n- **Spraying only.** Spray-only jobs miss the pores. Squeegee + spray is the professional standard.\n- **\"Sealcoating\" in the rain or below 50°F.** Won't cure properly. Won't last.\n\n---\n\n## Sealcoat Cost in Virginia (2026 Pricing)\n\nFor a standard residential driveway in Central Virginia, current pricing runs:\n\n- **Small driveway (under 500 sq ft):** $250–$400\n- **Average driveway (500–1,000 sq ft):** $400–$750\n- **Large driveway (1,000–2,000 sq ft):** $750–$1,400\n- **Long rural driveway (2,000+ sq ft):** $0.40–$0.60 per sq ft\n\nCrack filling is typically $1.50–$3.00 per linear foot, billed separately.\n\nIf someone quotes you $150 for a 1,200 sq ft driveway, they're cutting serious corners. If someone quotes you $2,000 for the same job, you're overpaying. Middle ground is where the good work lives.\n\n---\n\n## DIY vs. Professional: Honest Answer\n\nYes, you *can* buy a 5-gallon bucket of driveway sealer at Home Depot and apply it yourself. Here's the truth:\n\n**DIY pros:**\n- Saves $300–$500 in labor\n- Satisfying weekend project\n- Fine for small, simple driveways\n\n**DIY cons:**\n- Big-box store sealer is typically 50% diluted vs. commercial-grade\n- No crack filling means the cracks come back fast\n- Uneven application leaves thin spots that fail first\n- You'll re-seal every 18 months instead of every 3 years\n- Total cost over 10 years often *exceeds* professional service\n\nOur honest take: if your driveway is under 500 sq ft and in good shape, DIY is fine. Anything larger or older, hire it out. The commercial-grade product and proper crack prep make the difference.\n\n---\n\n## When Should You Sealcoat — What Month?\n\nIn Virginia, the sealcoating season runs **mid-April through early October**. The specifics:\n\n- **Best months:** May, June, September — warm but not scorching, low humidity, minimal rain risk\n- **Acceptable:** April (after last frost) and July/August (avoid afternoon applications)\n- **Avoid:** November–March (too cold to cure), any week with rain in the 48-hour forecast\n\n**Minimum conditions:** 50°F and rising ambient temperature, dry surface, no rain expected for 24 hours minimum.\n\nSchedule 2–3 weeks ahead. Good sealcoat crews book up fast in Virginia's spring rush.\n\n---\n\n## The Bottom Line\n\nSealcoating your driveway every 3 years in Virginia is the cheapest insurance policy you'll ever buy for your home's exterior. A $600 sealcoat every 3 years — call it **$200/year** — protects an asset worth $8,000–$15,000 to replace.\n\nSkip it, and you're guaranteed to pay for a full replacement in 10–12 years instead of 25–30. The math isn't close.\n\n---\n\n## Get a Sealcoat Estimate From a 40-Year Virginia Paver\n\nWe sealcoat driveways and commercial lots across Central Virginia, Hampton Roads, the Richmond metro, and within 60 miles of our Chester, VA headquarters. Every job includes crack filling, oil-spot priming, two coats, and a walk-through with the homeowner when we're done.\n\n**[Request a free sealcoat estimate](/#quote)** or call **(804) 446-1296**.\n\nFamily-owned. Work warrantied. Phone actually answered.\n\nThat's the J. Worden & Sons way.`,
-};
+function buildForwardUrl(reqUrl: string) {
+  const url = new URL(reqUrl);
+  const parts = url.pathname.split('/').filter(Boolean);
+  if (parts.length > 0) {
+    parts[parts.length - 1] = 'publishDailyBlogPost';
+    url.pathname = `/${parts.join('/')}`;
+  }
+  return url.toString();
+}
 
 Deno.serve(async (req) => {
   try {
+    // Keep auth behavior aligned with other automation functions.
     const base44 = createClientFromRequest(req);
-
-    // Today's date in ET (YYYY-MM-DD) — so published_date reflects actual publish day
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-
-    // Avoid duplicate if run twice
-    const existing = await base44.asServiceRole.entities.BlogPost.filter({ slug: POST.slug });
-    if (existing && existing.length > 0) {
-      return Response.json({ status: 'already_published', id: existing[0].id });
+    const caller = await base44.auth.me().catch(() => null);
+    const isScheduled = req.headers.get('x-base44-automation') || !caller;
+    if (!isScheduled && caller?.role !== 'admin') {
+      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const created = await base44.asServiceRole.entities.BlogPost.create({
-      ...POST,
-      published_date: today,
+    const forwardUrl = buildForwardUrl(req.url);
+    const body = await req.text().catch(() => '');
+
+    const forwardRes = await fetch(forwardUrl, {
+      method: req.method || 'POST',
+      headers: {
+        'content-type': req.headers.get('content-type') || 'application/json',
+        'x-base44-automation': req.headers.get('x-base44-automation') || '1',
+      },
+      body: body || '{}',
     });
 
-    return Response.json({ status: 'published', id: created.id, title: created.title });
+    const payload = await forwardRes.text();
+    return new Response(payload, {
+      status: forwardRes.status,
+      headers: {
+        'content-type': forwardRes.headers.get('content-type') || 'application/json',
+      },
+    });
   } catch (error) {
-    console.error('publishScheduledBlogPost2 error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: error.message || String(error) }, { status: 500 });
   }
 });

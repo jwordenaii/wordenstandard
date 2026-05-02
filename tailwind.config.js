@@ -8,10 +8,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ["var(--font-display)", "Inter", "system-ui", "sans-serif"],
-        body: ["var(--font-body)", "Inter", "system-ui", "sans-serif"]
+        display: ["var(--font-display)", "Bebas Neue", "sans-serif"],
+        editorial: ["var(--font-editorial)", "Playfair Display", "serif"],
+        body: ["var(--font-body)", "Plus Jakarta Sans", "sans-serif"]
       },
       borderRadius: {
+        luxury: "0.75rem",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)"
