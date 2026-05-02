@@ -626,7 +626,7 @@ export default function AIConciergeBubble() {
                   Meet Mr. Worden
                 </p>
                 <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-80 mt-0.5 text-foreground">
-                  Instant price range · 24/7
+                  Live Build 60a4ef7+ · Realism Mode
                 </p>
               </button>
             </div>
