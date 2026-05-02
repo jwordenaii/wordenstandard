@@ -58,7 +58,7 @@ export default function Navbar() {
               height={420}
               priority
               sizes="(max-width: 768px) 220px, 300px"
-              className="h-20 sm:h-24 md:h-28 w-auto object-contain quality-premium"
+              className="h-12 sm:h-14 md:h-20 w-auto object-contain quality-premium"
             />
           </button>
 
