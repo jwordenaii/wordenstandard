@@ -62,6 +62,26 @@ const fadeUp = {
   }),
 }
 
+const staggerReveal = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
+    },
+  },
+}
+
+const cardRise = {
+  hidden: { opacity: 0, y: 28, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+
 export default function JwordenAI() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -77,6 +97,9 @@ export default function JwordenAI() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="bg-brand-navy pt-32 pb-24 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(245,166,35,0.24),transparent_35%),radial-gradient(circle_at_10%_88%,rgba(120,190,255,0.16),transparent_34%)]" aria-hidden="true" />
+        <p className="absolute -right-16 top-10 font-display font-black text-[36vw] leading-none text-white/[0.03] select-none pointer-events-none tracking-tight" aria-hidden="true">
+          WORDEN
+        </p>
         {/* Subtle grid texture */}
         <div
           className="absolute inset-0 opacity-5"
@@ -88,7 +111,7 @@ export default function JwordenAI() {
           aria-hidden="true"
         />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-14 items-end">
           {/* Badge */}
           <motion.div
             initial="hidden"
@@ -101,80 +124,140 @@ export default function JwordenAI() {
             Serving Virginia For Over 40 Years
           </motion.div>
 
-          {/* Wordmark */}
-          <motion.h1
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={1}
-            className="font-display font-black text-5xl md:text-7xl mb-6 leading-none tracking-tight [text-shadow:0_12px_34px_rgba(0,0,0,0.45)]"
-          >
-            JWORDENAI
-            <span className="text-brand-amber align-super text-2xl md:text-3xl">™</span>
-          </motion.h1>
-
-          <motion.p
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={2}
-            className="text-white/80 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-4"
-          >
-            Since 1984, J. Worden &amp; Sons has helped homeowners and property managers across
-            Chester, Richmond, Midlothian, Henrico, and surrounding communities protect and
-            restore their asphalt the right way.
-          </motion.p>
-
-          <motion.p
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={3}
-            className="text-white/60 text-sm max-w-xl mx-auto mb-12"
-          >
-            Local crews. Honest recommendations. Lasting pavement work.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={4}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Link
-              to="/contact"
-              className="btn-primary text-base !px-8 !py-3"
-              onClick={() => {
-                if (typeof window.gtag === 'function')
-                  window.gtag('event', 'cta_click', { location: 'jwordenai_hero_primary' })
-              }}
+          <div>
+            {/* Wordmark */}
+            <motion.h1
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              custom={1}
+              className="font-display font-black text-6xl sm:text-7xl md:text-[6.5rem] lg:text-[7.2rem] mb-4 leading-[0.9] tracking-[-0.02em] [text-shadow:0_12px_34px_rgba(0,0,0,0.45)]"
             >
-              Book A Free Site Visit
-            </Link>
-            <Link
-              to="/services"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-white/30 text-white/90 hover:text-white hover:border-brand-amber/60 hover:bg-white/5 transition-colors text-base font-medium"
+              JWORDENAI
+              <span className="text-brand-amber align-super text-2xl md:text-3xl">™</span>
+            </motion.h1>
+
+            <motion.p
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              custom={2}
+              className="font-display uppercase tracking-[0.16em] text-brand-amber text-xs md:text-sm mb-4"
             >
-              Explore Services
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
+              Asphalt Intelligence Unit · Founder-Led Since 1984
+            </motion.p>
+
+            <motion.p
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              custom={3}
+              className="text-white/80 text-lg md:text-xl max-w-2xl leading-relaxed mb-4"
+            >
+              Since 1984, J. Worden &amp; Sons has helped homeowners and property managers across
+              Chester, Richmond, Midlothian, Henrico, and surrounding communities protect and
+              restore their asphalt the right way.
+            </motion.p>
+
+            <motion.p
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              custom={4}
+              className="text-white/60 text-sm max-w-xl mb-10"
+            >
+              Local crews. Honest recommendations. Lasting pavement work.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              custom={5}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <Link
+                to="/contact"
+                className="btn-primary text-base !px-8 !py-3"
+                onClick={() => {
+                  if (typeof window.gtag === 'function')
+                    window.gtag('event', 'cta_click', { location: 'jwordenai_hero_primary' })
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </Link>
+                Book A Free Site Visit
+              </Link>
+              <Link
+                to="/services"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg border border-white/30 text-white/90 hover:text-white hover:border-brand-amber/60 hover:bg-white/5 transition-colors text-base font-medium"
+              >
+                Explore Services
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </Link>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-4"
+          >
+            {["Founder strategy", "Virginia climate playbook", "40+ years field intelligence"].map((chip) => (
+              <div key={chip} className="premium-panel rounded-2xl px-5 py-4 text-sm font-display tracking-[0.14em] uppercase text-foreground/90">
+                {chip}
+              </div>
+            ))}
+            <div className="rounded-2xl border border-primary/35 bg-black/35 p-5 shadow-[0_24px_56px_rgba(0,0,0,0.46)]">
+              <p className="font-display text-[10px] tracking-[0.24em] uppercase text-primary mb-2">Live Service Mix</p>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="border border-white/10 bg-white/5 rounded-lg px-3 py-2">Residential</div>
+                <div className="border border-white/10 bg-white/5 rounded-lg px-3 py-2">Commercial</div>
+                <div className="border border-white/10 bg-white/5 rounded-lg px-3 py-2">Sealcoating</div>
+                <div className="border border-white/10 bg-white/5 rounded-lg px-3 py-2">Concrete</div>
+              </div>
+            </div>
           </motion.div>
         </div>
+      </section>
+
+      <section className="bg-black border-y border-primary/30 overflow-hidden">
+        <motion.div
+          initial={{ x: 0 }}
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ repeat: Infinity, duration: 26, ease: 'linear' }}
+          className="flex w-[200%]"
+        >
+          <div className="w-1/2 py-3 flex items-center justify-around font-display text-[11px] tracking-[0.28em] uppercase text-primary">
+            <span>Chester</span>
+            <span>Richmond</span>
+            <span>Midlothian</span>
+            <span>Henrico</span>
+            <span>Commercial Lots</span>
+            <span>Driveway Specialists</span>
+          </div>
+          <div className="w-1/2 py-3 flex items-center justify-around font-display text-[11px] tracking-[0.28em] uppercase text-primary">
+            <span>Chester</span>
+            <span>Richmond</span>
+            <span>Midlothian</span>
+            <span>Henrico</span>
+            <span>Commercial Lots</span>
+            <span>Driveway Specialists</span>
+          </div>
+        </motion.div>
       </section>
 
       {/* ── Divider stat bar ─────────────────────────────────────────────── */}
@@ -226,15 +309,17 @@ export default function JwordenAI() {
             ))}
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <motion.div
+            className="grid md:grid-cols-3 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={staggerReveal}
+          >
             {FEATURES.map((feature, i) => (
               <motion.div
                 key={feature.title}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
+                variants={cardRise}
                 className="group premium-panel rounded-2xl p-8 hover:border-primary/45 transition-all duration-300"
               >
                 {/* Icon */}
@@ -268,7 +353,7 @@ export default function JwordenAI() {
                 </ul>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -288,14 +373,16 @@ export default function JwordenAI() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <motion.div
+            className="grid md:grid-cols-2 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerReveal}
+          >
             {/* Current abilities */}
             <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUp}
-              custom={0}
+              variants={cardRise}
               className="premium-panel rounded-2xl p-8"
             >
               <div className="flex items-center gap-3 mb-5">
@@ -332,11 +419,7 @@ export default function JwordenAI() {
 
             {/* Future tech / in development */}
             <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUp}
-              custom={1}
+              variants={cardRise}
               className="rounded-2xl border border-brand-amber/35 bg-gradient-to-br from-brand-amber/12 to-black/10 p-8 shadow-[0_22px_52px_rgba(0,0,0,0.35)]"
             >
               <div className="flex items-center gap-3 mb-5">
@@ -370,7 +453,7 @@ export default function JwordenAI() {
                 ))}
               </ul>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Commitment statement */}
           <motion.div
