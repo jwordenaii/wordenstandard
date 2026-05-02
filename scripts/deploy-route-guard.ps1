@@ -42,8 +42,26 @@ function Test-CommandCenterRoute {
     throw "HTTP status $($response.StatusCode) for $url"
   }
 
-  if ($hasNotFoundMarker -or -not $hasCommandCenterMarker) {
-    throw "Route integrity failed for $url (React Not Found marker detected or Command Center marker missing)."
+  if ($hasNotFoundMarker) {
+    throw "Route integrity failed for $url (React Not Found marker detected)."
+  }
+
+  if (-not $hasCommandCenterMarker) {
+    # SPA routes may render Command Center marker only after client-side hydration.
+    $assetPath = [regex]::Match($html, 'src="(?<s>/assets/index-[^"]+\.js)"').Groups['s'].Value
+    if ([string]::IsNullOrWhiteSpace($assetPath)) {
+      throw "Route integrity failed for $url (Command Center marker missing and bundle asset not found)."
+    }
+
+    $bundleUrl = "$BaseDomain$assetPath"
+    $bundleContent = (Invoke-WebRequest -Uri $bundleUrl -UseBasicParsing).Content
+    $bundleHasRoute = $bundleContent -match '/command-center'
+    if (-not $bundleHasRoute) {
+      throw "Route integrity failed for $url (Command Center marker missing and deployed bundle lacks /command-center route)."
+    }
+
+    Write-Output "Route integrity PASS (SPA hydration): $url"
+    return
   }
 
   Write-Output "Route integrity PASS: $url"

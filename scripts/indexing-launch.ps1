@@ -62,8 +62,23 @@ try {
   $htmlCommandCenter = (Invoke-WebRequest -Uri $commandCenterUrl -UseBasicParsing).Content
   $hasNotFoundMarker = $htmlCommandCenter -match '(?i)page not found|could not be found in this application'
   $hasCommandCenterMarker = $htmlCommandCenter -match '(?i)JWordenAI Command Center'
-  if ($hasNotFoundMarker -or -not $hasCommandCenterMarker) {
-    Write-Output 'WARNING: /command-center route returned app-level Not Found or missing Command Center marker. Verify latest deploy includes Command Center route.'
+  if ($hasNotFoundMarker) {
+    Write-Output 'WARNING: /command-center route returned app-level Not Found. Verify latest deploy includes Command Center route.'
+  } elseif (-not $hasCommandCenterMarker) {
+    # SPA routes may hydrate this marker client-side; confirm route exists in deployed bundle.
+    $assetPath = [regex]::Match($htmlCommandCenter, 'src="(?<s>/assets/index-[^"]+\.js)"').Groups['s'].Value
+    if ([string]::IsNullOrWhiteSpace($assetPath)) {
+      Write-Output 'WARNING: /command-center marker missing and bundle asset could not be detected.'
+    } else {
+      $bundleUrl = "$Domain$assetPath"
+      $bundleContent = (Invoke-WebRequest -Uri $bundleUrl -UseBasicParsing).Content
+      $bundleHasRoute = $bundleContent -match '/command-center'
+      if ($bundleHasRoute) {
+        Write-Output 'Command Center route integrity: PASS (SPA hydration via bundle route check)'
+      } else {
+        Write-Output 'WARNING: /command-center marker missing and deployed bundle lacks route. Verify latest deploy includes Command Center route.'
+      }
+    }
   } else {
     Write-Output 'Command Center route integrity: PASS'
   }
