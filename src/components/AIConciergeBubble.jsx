@@ -160,10 +160,25 @@ export default function AIConciergeBubble() {
       : 'idle';
 
   const QUICK_PROMPTS = [
-    'Mr. Worden, what would you do for my driveway?',
-    'How much does a driveway usually cost?',
-    'How soon can you start in Chester?',
-    'Is asphalt better than concrete for my project?',
+    'Give me an instant price range for my project',
+    'Tell me if I should repair or replace first',
+    'How soon can your crew start in my area?',
+    'What details do you need for a fast estimate?',
+  ];
+
+  const ACTION_PATHS = [
+    {
+      label: 'Instant Price Range',
+      prompt: 'Give me an instant price range. My surface is driveway, about 1200 sq ft, in Chester, VA. What would you recommend?',
+    },
+    {
+      label: 'Repair vs Replace',
+      prompt: 'Help me decide repair vs replace. I have cracks and low spots. What should I do first?',
+    },
+    {
+      label: 'Book Site Visit',
+      prompt: 'I want to book a free site visit this week. What is the fastest next step?',
+    },
   ];
 
   const TRUST_SIGNALS = [
@@ -322,7 +337,7 @@ export default function AIConciergeBubble() {
       setMessages([
         {
           role: 'assistant',
-          content: "Recommendation: Ask me anything about your paving project and I will give you a direct recommendation. Why: I run this like a real jobsite decision, not a generic chatbot answer. Next step: Share your driveway size, condition, and timeline, and I will lay out the smartest plan. — Mr. Worden, Founder",
+          content: "Recommendation: I can give you an instant price range, a repair-vs-replace decision, and the fastest start timeline. Why: I use your real property details, not generic guesses. Next step: Share your surface type, approximate square footage, and city and I will lay out the smartest plan. — Mr. Worden, Founder",
         },
       ]);
       return conv;
@@ -560,16 +575,11 @@ export default function AIConciergeBubble() {
               transition={{ repeat: Infinity, duration: 4.6, ease: 'easeInOut' }}
               className="relative"
             >
-              <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl scale-125 pointer-events-none" />
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ repeat: Infinity, duration: 15, ease: 'linear' }}
-                className="absolute -inset-2 rounded-full border border-primary/35 pointer-events-none"
-              />
-              <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-primary/20 via-transparent to-sky-300/15 blur-xl pointer-events-none" />
+              <div className="absolute inset-0 rounded-2xl bg-primary/24 blur-2xl scale-110 pointer-events-none" />
+              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-primary/14 via-transparent to-sky-300/12 blur-xl pointer-events-none" />
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
-                <div className="w-[128px] h-[128px] rounded-full border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
+                <div className="w-[116px] h-[148px] rounded-2xl border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
                   {modelMode === 'model' ? (
                     <WebGLPersonaAvatar
                       mode={avatarState}
@@ -585,13 +595,16 @@ export default function AIConciergeBubble() {
                       width={512}
                       height={512}
                       className="w-full h-full object-cover quality-premium"
-                      sizes="128px"
+                      sizes="116px"
                     />
                   )}
+                  <div className="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-gradient-to-t from-black/85 to-transparent text-center pointer-events-none">
+                    <p className="font-display text-[9px] tracking-[0.16em] uppercase text-primary">Mr. Worden</p>
+                  </div>
                 </div>
               </button>
               <span className="absolute top-4 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-black shadow-[0_0_12px_rgba(34,197,94,.8)]" />
-              <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-[9px] font-display font-bold tracking-[0.14em] uppercase border border-primary/40">
+              <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-[9px] font-display font-bold tracking-[0.14em] uppercase border border-primary/40">
                 AI
               </div>
             </motion.div>
@@ -608,7 +621,7 @@ export default function AIConciergeBubble() {
                   Meet Mr. Worden
                 </p>
                 <p className="font-display text-[9px] tracking-[0.2em] uppercase opacity-80 mt-0.5 text-foreground">
-                  Premium founder concierge · 24/7
+                  Instant price range · 24/7
                 </p>
               </button>
             </div>
@@ -727,6 +740,30 @@ export default function AIConciergeBubble() {
                   Call Now
                 </a>
               </div>
+              <div className="mt-2.5 flex items-center gap-2 overflow-x-auto">
+                <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[9px] font-display tracking-[0.12em] uppercase border border-primary/30 bg-black/25 text-foreground rounded-full">
+                  Typical reply in under 60s
+                </span>
+                <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[9px] font-display tracking-[0.12em] uppercase border border-primary/30 bg-black/25 text-foreground rounded-full">
+                  Free guidance · no obligation
+                </span>
+              </div>
+            </div>
+
+            <div className="px-3 pt-2 pb-2 border-b border-border bg-black/25">
+              <div className="flex gap-2 overflow-x-auto">
+                {ACTION_PATHS.map((action) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    onClick={() => handleQuickPrompt(action.prompt)}
+                    disabled={sending || booting}
+                    className="shrink-0 px-3 py-2 text-[11px] font-display tracking-[0.12em] uppercase border border-primary/40 bg-primary/10 text-foreground hover:bg-primary/20 hover:border-primary/60 transition-colors disabled:opacity-50"
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Messages */}
@@ -807,6 +844,7 @@ export default function AIConciergeBubble() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={listening ? 'Listening… speak now' : 'Ask about pricing, timing, materials...'}
+                placeholder={listening ? 'Listening… speak now' : 'Type: driveway, square footage, city, and timeline for instant guidance'}
                 disabled={sending || booting}
                 className="flex-1 bg-muted border border-border px-3 py-2.5 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:opacity-50"
               />
