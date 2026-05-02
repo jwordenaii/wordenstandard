@@ -61,29 +61,27 @@ export default function SmartImage({
       <div
         role="img"
         aria-label={alt || label || 'Project photo placeholder'}
-        className={`relative flex items-center justify-center bg-gradient-to-br ${gradient} ${className}`}
+        className={`image-presentation-premium flex items-center justify-center ${className}`}
         style={{ aspectRatio: `${width} / ${height}` }}
       >
-        {/* Subtle diagonal texture so the panel reads as a designed surface,
-            not an empty box. */}
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-[0.03]"
           aria-hidden="true"
           style={{
             backgroundImage:
-              'repeating-linear-gradient(45deg, #f5a623 0, #f5a623 1px, transparent 0, transparent 14px)',
-            backgroundSize: '14px 14px',
+              'repeating-linear-gradient(45deg, #FFD700 0, #FFD700 1px, transparent 0, transparent 14px)',
+            backgroundSize: '24px 24px',
           }}
         />
         {(label || sublabel) && (
-          <div className="relative text-center px-4">
+          <div className="relative text-center px-8">
             {label && (
-              <div className="font-display font-bold text-white text-base sm:text-lg leading-tight">
+              <div className="font-editorial italic text-white/50 text-2xl lg:text-3xl leading-tight mb-2">
                 {label}
               </div>
             )}
             {sublabel && (
-              <div className="text-white/60 text-xs mt-1">{sublabel}</div>
+              <div className="font-display tracking-[0.4em] uppercase text-primary text-[10px] mt-2 brightness-75">{sublabel}</div>
             )}
           </div>
         )}
@@ -91,13 +89,30 @@ export default function SmartImage({
     )
   }
 
-  const imgEl = (
-    <img
-      src={activeSrc}
-      alt={alt}
-      width={width}
-      height={height}
-      loading={priority ? 'eager' : 'lazy'}
+  return (
+    <div className={`image-presentation-premium image-reveal-obsidian ${className}`} style={{ aspectRatio: `${width} / ${height}` }}>
+      <img
+        src={activeSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        onLoad={() => setFailed(false)}
+        onError={handleError}
+        className="w-full h-full object-cover"
+        sizes={sizes}
+      />
+      {/* Editorial Title Overlay for Real Images */}
+      {label && (
+        <div className="absolute bottom-10 left-10 z-20 pointer-events-none opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 delay-100">
+          <p className="font-display text-primary text-[10px] tracking-[0.5em] uppercase mb-1">{sublabel || 'Project Gallery'}</p>
+          <h4 className="font-editorial italic text-white text-3xl">{label}</h4>
+        </div>
+      )}
+    </div>
+  )
+}
       decoding="async"
       fetchPriority={priority ? 'high' : 'auto'}
       sizes={sizes}

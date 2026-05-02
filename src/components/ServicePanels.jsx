@@ -58,93 +58,101 @@ export default function ServicePanels() {
   };
 
   return (
-    <section id="services" className="border-t border-border relative overflow-hidden">
-      <div className="absolute -top-20 right-0 w-72 h-72 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+    <section id="services" className="border-t border-white/5 relative bg-[#030303] overflow-hidden">
+      {/* Structural Accents */}
+      <div className="absolute top-0 right-0 w-[500px] h-px bg-gradient-to-l from-primary/30 to-transparent" />
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
 
       {/* Section header */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 md:py-24">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <p className="font-display text-primary text-sm tracking-[0.3em] uppercase mb-3">What We Do</p>
-            <h2 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight">
-              Service Matrix
+      <div className="max-w-[1400px] mx-auto px-8 lg:px-12 py-32 md:py-48">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12">
+          <div className="max-w-3xl">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="flex items-center gap-4 mb-6">
+              <div className="h-px w-12 bg-primary/40" />
+              <p className="font-display text-primary text-xs tracking-[0.4em] uppercase">Service Architecture</p>
+            </motion.div>
+            <h2 className="editorial-header">
+              The <span className="text-gold-gradient">Service</span> Matrix
             </h2>
           </div>
-          <p className="font-body text-muted-foreground text-lg max-w-md leading-relaxed">
-            Three sectors. One standard of excellence. Every surface engineered for its specific demands.
+          <p className="font-body text-foreground/50 text-xl max-w-lg leading-relaxed italic border-l border-white/10 pl-8">
+            Engineered for performance. Optimized for endurance. From single-family driveways to high-traffic industrial logistics hubs.
           </p>
         </div>
       </div>
 
-      {/* Panels */}
-      <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border/70 relative z-10">
+      {/* Panels - Industrial Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 border-y border-white/10 relative z-10 bg-[#050505]">
         {SERVICES.map((service) => (
           <div
             key={service.id}
-            className="border-b md:border-b-0 md:border-r border-border/70 last:border-r-0 last:border-b-0 group relative overflow-hidden"
+            className="group relative h-[700px] md:h-[850px] border-b md:border-b-0 md:border-r border-white/10 last:border-r-0 overflow-hidden cursor-pointer"
             onMouseEnter={() => setActivePanel(service.id)}
             onMouseLeave={() => setActivePanel(null)}
           >
-            {/* Background image on hover */}
-            <div
-              className={`absolute inset-0 transition-opacity duration-700 ${
-                activePanel === service.id ? 'opacity-30' : 'opacity-0'
-              }`}
-            >
+            {/* Direct Background Image - Always there but silent until hover */}
+            <div className="absolute inset-0 z-0">
               <img
                 src={service.image}
                 alt={service.alt}
-                width="1200"
-                height="900"
                 loading="lazy"
                 decoding="async"
-                className="w-full h-full object-cover quality-premium"
+                className="w-full h-full object-cover transition-all duration-[2000ms] ease-out scale-110 opacity-20 grayscale brightness-50 group-hover:scale-100 group-hover:opacity-40 group-hover:grayscale-0 group-hover:brightness-100"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/80 to-transparent" />
             </div>
 
-            <div className="relative z-10 p-8 md:p-10 lg:p-14 min-h-[400px] md:min-h-[600px] flex flex-col justify-between premium-panel rounded-none">
+            <div className="relative z-10 h-full p-10 lg:p-16 flex flex-col justify-between transition-all duration-700 bg-transparent group-hover:bg-primary/5">
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <span className="font-display text-primary text-sm tracking-[0.3em]">{service.label}</span>
-                  <div className="w-12 h-12 border border-primary/30 bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-500">
-                    <service.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-500" />
+                <div className="flex items-center justify-between mb-12">
+                  <span className="font-display text-primary/40 text-[10px] tracking-[0.5em] group-hover:text-primary transition-colors">{service.label}</span>
+                  <div className="w-14 h-14 border border-white/10 bg-white/5 flex items-center justify-center rounded-xl group-hover:border-primary group-hover:bg-primary/20 transition-all duration-700 group-hover:rotate-[360deg]">
+                    <service.icon className="w-6 h-6 text-white group-hover:text-primary transition-colors duration-700" />
                   </div>
                 </div>
-                <h3 className="font-display font-black text-foreground text-3xl md:text-4xl lg:text-5xl uppercase tracking-tight">
+                
+                <h3 className="font-display font-black text-white text-5xl lg:text-6xl uppercase tracking-tighter mb-4 italic transition-transform duration-700 group-hover:-translate-y-2">
                   {service.title}
                 </h3>
-                <p className="font-display text-muted-foreground text-sm tracking-wider uppercase mt-2">
+                <p className="font-display text-primary text-xs tracking-[0.2em] uppercase mb-8 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
                   {service.subtitle}
                 </p>
-                <p className="font-body text-muted-foreground text-base leading-relaxed mt-6">
+                
+                <div className="h-px w-full bg-white/5 mb-8 group-hover:bg-primary/30 transition-colors" />
+                
+                <p className="font-body text-foreground/40 text-base leading-relaxed line-clamp-4 group-hover:line-clamp-none group-hover:text-foreground/70 transition-all duration-700">
                   {service.description}
                 </p>
               </div>
 
               <div className="mt-8">
-                <div className="flex flex-wrap gap-2 mb-8">
+                <div className="flex flex-wrap gap-2 mb-12 opacity-40 group-hover:opacity-100 transition-opacity duration-700">
                   {service.features.map((f) => (
                     <span
                       key={f}
-                      className="px-3 py-1.5 border border-border text-muted-foreground font-display text-xs tracking-wider uppercase group-hover:border-primary/30 group-hover:text-foreground transition-colors duration-500"
+                      className="px-4 py-2 bg-white/5 border border-white/5 text-white/50 font-display text-[9px] tracking-widest uppercase transition-all duration-500 group-hover:border-primary/20 group-hover:text-white"
                     >
                       {f}
                     </span>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-4 items-center">
+                
+                <div className="flex flex-col sm:flex-row gap-4">
                   <Link
                     to={service.ctaHref}
-                    className="flex items-center gap-2 text-primary font-display font-bold text-sm tracking-wider uppercase hover:text-primary/80 transition-colors min-h-[48px]"
+                    className="flex-1 flex items-center justify-center gap-3 bg-white/5 border border-white/10 text-white px-6 py-4 rounded-xl font-display font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-white/10 transition-all"
                   >
-                    {service.ctaLabel} <ArrowRight className="w-4 h-4" />
+                    View Specs
                   </Link>
                   <button
                     onClick={scrollToQuote}
-                    className="flex items-center gap-2 text-muted-foreground font-display font-bold text-sm tracking-wider uppercase group-hover:gap-4 transition-all duration-300 min-h-[48px]"
+                    className="flex-1 glass-surface-premium flex items-center justify-center gap-3 text-primary px-6 py-4 rounded-xl font-display font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-500"
                   >
-                    Get Quote <ArrowRight className="w-4 h-4" />
+                    Get Estimate
                   </button>
                 </div>
               </div>
