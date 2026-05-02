@@ -345,7 +345,7 @@ export default function AIConciergeBubble() {
           content: "Recommendation: I can give you an instant price range, a repair-vs-replace decision, and the fastest start timeline. Why: I use your real property details, not generic guesses. Next step: Share your surface type, approximate square footage, and city and I will lay out the smartest plan. — Mr. Worden, Founder",
         },
       ]);
-      return conv;
+      return sessionId;
     } catch (e) {
       setMessages([
         { role: 'assistant', content: "I'm having trouble connecting. Please call (804) 446-1296 — we answer during business hours." },
@@ -541,6 +541,10 @@ export default function AIConciergeBubble() {
       await api.agents.addMessage(conv, { role: 'user', content: text });
     } catch (err) {
       console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: "I'm having trouble connecting. Please call (804) 446-1296 — we answer during business hours." },
+      ]);
     } finally {
       setSending(false);
     }
