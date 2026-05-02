@@ -56,62 +56,58 @@ const TECH_FEATURES = [
 
 export default function TechStack() {
   return (
-    <section id="tech" className="relative border-t border-white/5 py-32 md:py-48 bg-[#030303] overflow-hidden">
-      {/* Structural Accents */}
-      <div className="absolute top-0 right-0 w-[500px] h-px bg-gradient-to-l from-primary/30 to-transparent" />
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
-
-      <div className="max-w-[1400px] mx-auto px-8 lg:px-12 relative z-10">
+    <section id="tech" className="border-t border-border py-16 md:py-24 bg-muted/10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12 mb-20">
-          <div className="max-w-3xl">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="flex items-center gap-4 mb-6">
-              <div className="h-px w-12 bg-primary/40" />
-              <p className="font-display text-primary text-xs tracking-[0.4em] uppercase">Proprietary Infrastructure</p>
-            </motion.div>
-            <h2 className="editorial-header">
-              The <span className="text-gold-gradient">Digital</span> Backbone
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-primary font-display font-black text-lg">//</span>
+              <p className="font-display text-primary text-xs tracking-[0.3em] uppercase">
+                Built-In Technology
+              </p>
+            </div>
+            <h2 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight">
+              Powered By Our
+              <br />
+              <span className="text-primary">Own Platform</span>
             </h2>
           </div>
-          <p className="font-body text-foreground/50 text-xl max-w-lg leading-relaxed italic border-l border-white/10 pl-8">
-            "High-end paving requires high-end data. We built the platform that manages the logistics, so our crews can focus on the asphalt."
+          <p className="font-body text-muted-foreground text-lg max-w-md leading-relaxed">
+            We didn't just pave the paths of progress — we built the software that runs our operation. Every tool below is custom-engineered for how J. Worden & Sons works.
           </p>
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {TECH_FEATURES.map((feature, i) => (
             <motion.div
               key={feature.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.08 }}
-              className="group glass-surface-premium p-10 rounded-[2rem] hover:border-primary/40 transition-all duration-700"
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="group border border-border bg-card p-7 hover:border-primary/40 transition-colors duration-500"
             >
-              <div className="flex items-start justify-between mb-8">
-                <span className="font-display text-primary/40 text-[10px] tracking-[0.5em] group-hover:text-primary transition-colors">{feature.label}</span>
-                <div className="w-14 h-14 border border-white/10 bg-white/5 flex items-center justify-center rounded-xl group-hover:border-primary group-hover:bg-primary/20 transition-all duration-[800ms] group-hover:rotate-[360deg]">
-                  <feature.icon className="w-6 h-6 text-white group-hover:text-primary transition-colors duration-700" />
+              <div className="flex items-start justify-between mb-6">
+                <span className="font-display text-primary text-sm tracking-[0.3em]">{feature.label}</span>
+                <div className="w-12 h-12 border border-primary/30 bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-500">
+                  <feature.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-500" />
                 </div>
               </div>
 
-              <h3 className="font-display font-black text-white text-3xl uppercase tracking-tighter leading-tight mb-4 italic">
+              <h3 className="font-display font-black text-foreground text-2xl uppercase tracking-tight leading-tight mb-3">
                 {feature.title}
               </h3>
-              <p className="font-body text-foreground/40 text-sm leading-relaxed mb-8 group-hover:text-foreground/70 transition-colors">
+              <p className="font-body text-muted-foreground text-sm leading-relaxed mb-6">
                 {feature.description}
               </p>
 
-              <div className="flex flex-wrap gap-2 pt-8 border-t border-white/5">
+              <div className="flex flex-wrap gap-2 pt-5 border-t border-border">
                 {feature.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1.5 bg-white/5 border border-white/5 text-white/40 font-display text-[9px] tracking-widest uppercase transition-all duration-500 group-hover:border-primary/20 group-hover:text-white"
+                    className="px-2.5 py-1 border border-border text-muted-foreground font-display text-[10px] tracking-[0.15em] uppercase"
                   >
                     {tag}
                   </span>

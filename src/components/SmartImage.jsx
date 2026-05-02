@@ -113,22 +113,3 @@ export default function SmartImage({
     </div>
   )
 }
-      decoding="async"
-      fetchPriority={priority ? 'high' : 'auto'}
-      sizes={sizes}
-      onError={handleError}
-      className={className}
-    />
-  )
-
-  if (webpSrc) {
-    return (
-      <picture>
-        <source srcSet={webpSrc} type="image/webp" />
-        {imgEl}
-      </picture>
-    )
-  }
-
-  return imgEl
-}

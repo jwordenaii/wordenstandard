@@ -40,107 +40,111 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-700 w-[95%] max-w-7xl px-8 py-4 rounded-full border border-white/10 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-black/60 backdrop-blur-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)]'
-          : 'bg-black/20 backdrop-blur-md'
+          ? 'bg-black/82 backdrop-blur-xl border-b border-primary/20 shadow-[0_12px_28px_rgba(0,0,0,0.45)]'
+          : 'bg-black/48 backdrop-blur-md border-b border-transparent'
       }`}
     >
-      <div className="flex items-center justify-between h-12 md:h-14">
-        {/* Logo — centered on mobile, left on desktop */}
-        <button 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-          className="flex items-center min-w-0 transition-transform duration-500 hover:scale-105" 
-          aria-label="J. Worden & Sons Paving"
-        >
-          <SmartImage
-            src={PRIMARY_LOGO_URL}
-            fallbackSrc={FALLBACK_LOGO_URL}
-            alt="J. Worden & Sons Paving"
-            width={380}
-            height={120}
-            priority
-            sizes="200px"
-            className="h-10 md:h-12 w-auto object-contain brightness-110 contrast-125"
-          />
-        </button>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-24 md:h-28">
+          {/* Logo — top left corner */}
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0" aria-label="J. Worden & Sons Paving — Home">
+            <SmartImage
+              src={PRIMARY_LOGO_URL}
+              fallbackSrc={FALLBACK_LOGO_URL}
+              alt="J. Worden & Sons Paving — Quality Work. Built To Last."
+              width={1400}
+              height={420}
+              priority
+              sizes="(max-width: 768px) 220px, 300px"
+              className="h-12 sm:h-14 md:h-20 w-auto object-contain quality-premium"
+            />
+          </button>
 
-        {/* Desktop nav — absolute centered */}
-        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-10">
-          {NAV_LINKS.map((link) =>
-            <button
-              key={link.label}
-              onClick={() => scrollTo(link.href)}
-              className="font-display text-[11px] tracking-[0.25em] uppercase text-foreground/50 hover:text-primary transition-all duration-300 relative group">
-              {link.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all duration-500 group-hover:w-full" />
-            </button>
-          )}
-        </div>
+          {/* Mobile phone CTA */}
+          <a
+            href="tel:+18044461296"
+            onClick={() => trackPhoneClick('navbar_mobile')}
+            className="md:hidden flex items-center gap-1.5 text-primary font-display font-bold text-xs tracking-wider ml-2 flex-shrink-0"
+            aria-label="Call (804) 446-1296"
+          >
+            <Phone className="w-4 h-4" />
+            <span className="hidden xs:inline">804-446-1296</span>
+          </a>
 
-        {/* Right side CTAs */}
-        <div className="flex items-center gap-4">
+          {/* Desktop phone CTA (click-to-call) */}
           <a
             href="tel:+18044461296"
             onClick={() => trackPhoneClick('navbar_desktop')}
-            className="hidden lg:flex items-center gap-2 text-foreground/70 font-display font-medium text-[11px] tracking-[0.14em] uppercase hover:text-primary transition-colors"
+            className="hidden md:flex items-center gap-2 text-primary font-display font-bold text-sm tracking-[0.14em] uppercase hover:text-primary/80 transition-colors ml-auto mr-6"
+            aria-label="Call (804) 446-1296"
           >
-            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-              <Phone className="w-3 h-3 text-primary" />
-            </div>
-            804-446-1296
+            <Phone className="w-4 h-4" />
+            (804) 446-1296
           </a>
-          
-          <button
-            onClick={() => scrollTo('#quote')}
-            className="hidden md:block glass-surface-premium text-primary px-6 py-2.5 rounded-full font-display font-bold text-[11px] tracking-[0.2em] uppercase transition-all hover:scale-105 active:scale-95 border border-primary/30">
-            Get Proposal
-          </button>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {NAV_LINKS.map((link) =>
+            <button
+              key={link.label}
+              onClick={() => scrollTo(link.href)}
+              className="font-display text-sm tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors duration-300">
+              
+                {link.label}
+              </button>
+            )}
+            <button
+              onClick={() => scrollTo('#quote')}
+              className="premium-cta flex items-center gap-2 text-primary-foreground px-5 py-3 font-display font-bold text-sm tracking-[0.16em] uppercase transition-all min-h-[48px]">
+              
+              <Phone className="w-4 h-4" />
+              Free Estimate
+            </button>
+          </div>
 
           {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-foreground p-2 rounded-full hover:bg-white/5 transition-colors"
+            className="md:hidden text-foreground p-2 min-h-[48px] min-w-[48px] flex items-center justify-center"
             aria-label="Toggle menu">
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu - full screen glass overlay style */}
+      {/* Mobile menu */}
       <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="absolute top-[calc(100%+1rem)] left-0 right-0 p-8 bg-black/80 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
-          >
-            <div className="flex flex-col gap-8">
-              {NAV_LINKS.map((link, idx) => (
-                <motion.button
-                  key={link.label}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  onClick={() => scrollTo(link.href)}
-                  className="text-left font-editorial text-3xl italic text-foreground/80 hover:text-primary transition-colors italic"
-                >
+        {isOpen &&
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="md:hidden bg-black/95 backdrop-blur-xl border-b border-primary/20 overflow-hidden">
+          
+            <div className="px-6 py-6 space-y-1">
+              {NAV_LINKS.map((link) =>
+            <button
+              key={link.label}
+              onClick={() => scrollTo(link.href)}
+              className="block w-full text-left font-display text-lg tracking-widest uppercase text-muted-foreground hover:text-primary py-3 border-b border-border/70 transition-colors min-h-[48px]">
+              
                   {link.label}
-                </motion.button>
-              ))}
-              <div className="h-px bg-white/10 w-full my-2" />
+                </button>
+            )}
               <button
-                onClick={() => scrollTo('#quote')}
-                className="w-full bg-primary text-primary-foreground p-6 rounded-3xl font-display font-bold text-sm tracking-[0.3em] uppercase"
-              >
-                Request Proposal
+              onClick={() => scrollTo('#quote')}
+              className="w-full mt-4 flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-4 font-display font-bold text-sm tracking-wider uppercase min-h-[48px]">
+              
+                <Phone className="w-4 h-4" />
+                Free Estimate
               </button>
             </div>
           </motion.div>
-        )}
+        }
       </AnimatePresence>
-    </nav>
 
       <AnimatePresence>
         {showMiniLogo && !isOpen &&

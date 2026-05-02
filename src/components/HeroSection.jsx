@@ -27,41 +27,33 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden bg-[#030303]">
-      {/* Background image with cinematic treatment */}
+    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden">
+      {/* Background image */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <SmartImage
-            src={HERO_IMAGE}
-            alt="Heavy asphalt paving machine laying fresh hot-mix asphalt"
-            width={2560}
-            height={1440}
-            priority
-            sizes="100vw"
-            className="w-full h-full object-cover object-center quality-premium scale-110 animate-[subtle-zoom_20s_infinite_alternate]"
-          />
-        </div>
+        <SmartImage
+          src={HERO_IMAGE}
+          alt="Heavy asphalt paving machine laying fresh hot-mix asphalt at golden hour with steam rising from the surface"
+          width={2560}
+          height={1440}
+          priority
+          sizes="100vw"
+          className="w-full h-full object-cover object-top quality-premium"
+        />
         
-        {/* Advanced Light Leak & Vignetting */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-black/40 z-[1]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(253,185,49,0.08)_0%,transparent_50%)] z-[1]" />
-        
-        {/* Animated Bokeh/Dust elements */}
-        <div className="absolute inset-0 pointer-events-none z-[2]">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-primary/5 blur-[160px] rounded-full animate-pulse [animation-delay:2s]" />
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/58 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/45 to-transparent" />
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/22 blur-3xl" />
+        <div className="absolute top-1/3 -left-20 w-60 h-60 rounded-full bg-sky-400/14 blur-3xl" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-8 lg:px-12 pb-24 pt-48 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pb-12 pt-32 w-full">
         <motion.div
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}>
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}>
 
-          <div className="inline-flex items-center gap-6 rounded-full border border-white/5 bg-black/60 backdrop-blur-3xl px-8 py-3 mb-12 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="inline-flex items-center gap-4 rounded-xl border border-primary/30 bg-black/35 backdrop-blur-md px-4 py-3 mb-5 md:mb-7">
             <SmartImage
               src={PRIMARY_LOGO_URL}
               fallbackSrc={FALLBACK_LOGO_URL}
@@ -69,100 +61,93 @@ export default function HeroSection() {
               width={380}
               height={120}
               priority
-              sizes="200px"
-              className="h-10 md:h-12 w-auto object-contain relative z-10 filter brightness-125 contrast-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+              sizes="(max-width: 768px) 160px, 220px"
+              className="h-9 md:h-11 w-auto object-contain"
             />
-            <span className="h-6 w-px bg-white/10" aria-hidden="true" />
-            <span className="font-display text-[11px] md:text-xs tracking-[0.4em] uppercase text-foreground/50 relative z-10">
-              Virginia Paving Intelligence
+            <span className="hidden sm:block h-8 w-px bg-primary/35" aria-hidden="true" />
+            <span className="font-display text-[10px] md:text-xs tracking-[0.22em] uppercase text-muted-foreground">
+              Trusted Virginia Paving Since 1984
             </span>
           </div>
           
-          <div className="space-y-4 mb-20">
-            <motion.h1 
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="font-display font-black text-foreground uppercase leading-[0.8] tracking-[-0.04em]">
-              <span className="block text-[15vw] md:text-[12vw] lg:text-[10vw] luxury-text-shadow">Crafting</span>
-              <span className="block text-[15vw] md:text-[12vw] lg:text-[10vw] text-gold-gradient drop-shadow-2xl py-2">Enduring</span>
-              <span className="block text-[15vw] md:text-[12vw] lg:text-[10vw] luxury-text-shadow">Ground</span>
-            </motion.h1>
+          <p className="font-display text-primary text-sm md:text-base tracking-[0.34em] uppercase mb-4 md:mb-6">
+            Educate First · Pave Second · 40 Years in Virginia
+          </p>
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              className="max-w-2xl border-l-[3px] border-primary/60 pl-10 py-2">
-              <p className="font-editorial italic text-2xl md:text-4xl text-foreground/90 leading-tight tracking-tight">
-                "Your property is an asset, not a project. We provide the intelligence to protect it and the mastery to build it."
-              </p>
-              <div className="mt-8 flex items-center gap-3">
-                <div className="h-px w-12 bg-primary/40" />
-                <span className="font-display text-sm tracking-[0.3em] uppercase text-primary/80">J. Worden, Founder</span>
-              </div>
-            </motion.div>
-          </div>
+          <h1 className="font-display font-black text-foreground uppercase leading-[0.84] tracking-[0.02em]">
+            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw]">Asphalt</span>
+            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw]">Built To</span>
+            <span className="block text-[13vw] md:text-[8.6vw] lg:text-[6.4vw] text-primary">
+              Last Decades
+            </span>
+          </h1>
+
+          <p className="font-body text-foreground/90 mt-6 text-lg md:text-xl max-w-2xl leading-relaxed md:mt-8">
+            We explain what your pavement actually needs before we recommend a job. Get transparent guidance on repair vs replace, clear scope options, and a quote only when you are ready.
+          </p>
+
+          <p className="font-body text-foreground/75 mt-3 text-sm md:text-base max-w-2xl leading-relaxed">
+            Trusted across Richmond, Chester, Midlothian, and Central Virginia for residential driveways and commercial parking lot paving.
+          </p>
+
+          <p className="font-display text-muted-foreground text-xs md:text-sm tracking-[0.18em] uppercase mt-4">
+            No pressure sales • no vague line items • no surprise change orders
+          </p>
         </motion.div>
 
-        {/* Console-style Action Dashboard */}
+        {/* Stats bar */}
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="glass-surface-premium p-3 rounded-[3rem] max-w-5xl">
+          transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="premium-panel mt-10 md:mt-14 flex flex-col sm:flex-row items-start sm:items-end gap-6 sm:gap-0 sm:justify-between border-t border-primary/30 pt-8 px-6 md:px-8 pb-6 rounded-2xl">
           
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            <button
-              onClick={scrollToQuote}
-              className="md:col-span-5 group relative overflow-hidden bg-primary px-10 py-10 rounded-[2.5rem] transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(255,166,35,0.5)]">
-              <div className="relative z-10 flex flex-col items-start text-left">
-                <span className="font-display text-primary-foreground text-4xl tracking-tight leading-none mb-2">Request Proposal</span>
-                <span className="font-body text-primary-foreground/60 text-xs uppercase tracking-[0.2em]">Immediate Dispatch Capability</span>
-              </div>
-              <div className="absolute bottom-8 right-10 group-hover:translate-x-3 transition-transform duration-700">
-                <ArrowDown className="w-10 h-10 text-primary-foreground/40 transform -rotate-90" />
-              </div>
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/20 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            </button>
-
-            <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={scrollToFaq}
-                className="group p-8 rounded-[2.5rem] border border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-500 relative overflow-hidden">
-                <div className="relative z-10 flex flex-col h-full justify-between">
-                  <span className="font-display text-foreground text-2xl tracking-tight">Diagnostics</span>
-                  <span className="font-body text-foreground/40 text-[10px] uppercase tracking-[0.2em] mt-4">AI Pavement Condition Analysis</span>
-                </div>
-                <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <ShieldCheck className="w-24 h-24" />
-                </div>
-              </button>
-
-              <div className="p-8 rounded-[2.5rem] bg-black/40 border border-white/5 backdrop-blur-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[10px] font-display tracking-[0.25em] uppercase text-green-500/80">Active Operations</span>
-                  </div>
-                  <p className="font-display text-primary text-4xl tracking-tighter">40 Years</p>
-                </div>
-                <p className="font-body text-foreground/30 text-[9px] uppercase tracking-[0.3em] leading-relaxed">
-                  Continuous Virginia Service · Since 1984
-                </p>
-              </div>
+          <div className="flex flex-wrap gap-8 md:gap-14">
+            <div>
+              <p className="font-display font-black text-primary text-4xl md:text-5xl">40+</p>
+              <p className="font-body text-muted-foreground text-sm mt-1 tracking-wider uppercase">Years in Business</p>
+            </div>
+            <div>
+              <p className="font-display font-black text-foreground text-4xl md:text-5xl">2.4M</p>
+              <p className="font-body text-muted-foreground text-sm mt-1 tracking-wider uppercase">Sq Ft Paved</p>
+            </div>
+            <div>
+              <p className="font-display font-black text-foreground text-4xl md:text-5xl">1,200+</p>
+              <p className="font-body text-muted-foreground text-sm mt-1 tracking-wider uppercase">Projects Complete</p>
             </div>
           </div>
-        </motion.div>
-      </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes subtle-zoom {
-          from { transform: scale(1); }
-          to { transform: scale(1.1); }
-        }
-      `}} />
-    </section>
+          <div className="flex flex-wrap gap-4 items-center">
+            <button
+              onClick={scrollToFaq}
+              className="border border-primary/70 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors min-h-[48px]"
+            >
+              Help Me Diagnose First
+            </button>
+            <button
+              onClick={scrollToQuote}
+              className="premium-cta text-primary-foreground px-8 py-4 font-display font-bold text-sm tracking-[0.16em] uppercase transition-all min-h-[48px]">
+              
+              I Know What I Need
+            </button>
+            <a
+              href="tel:+18044461296"
+              onClick={() => {
+                trackEvent('hero_cta_click', { cta: 'call_now' });
+                trackPhoneClick('hero');
+              }}
+              className="border border-primary/70 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors min-h-[48px] inline-flex items-center gap-2"
+              aria-label="Call (804) 446-1296"
+            >
+              <Phone className="w-4 h-4" />
+              Call (804) 446-1296
+            </a>
+            <button
+              onClick={scrollToServices}
+              className="border border-border text-foreground px-4 py-4 hover:border-primary hover:text-primary transition-colors min-h-[48px]"
+              aria-label="Scroll to services">
+              
+              <ArrowDown className="w-5 h-5" />
             </button>
           </div>
         </motion.div>

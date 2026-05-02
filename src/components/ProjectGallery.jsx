@@ -278,25 +278,3 @@ export default function ProjectGallery() {
     </section>
   );
 }
-                          </span>
-                        </div>
-                      )}
-                      {project.sqft && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Ruler className="w-3.5 h-3.5 text-primary" />
-                          <span className="font-display text-xs tracking-wider uppercase">
-                            {Math.round(project.sqft).toLocaleString()} sq ft
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </figcaption>
-                </motion.figure>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
