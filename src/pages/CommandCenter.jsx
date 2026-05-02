@@ -51,6 +51,7 @@ const OPERATIONS_FEED = [
 
 const AUTOMATION_LOG_KEY = 'cc_automation_run_log_v1'
 const WEEKEND_SPRINT_STATE_KEY = 'cc_weekend_sprint_state_v1'
+const HUMAN_CHECKS_STATE_KEY = 'cc_human_checks_state_v1'
 
 function readAutomationRuns() {
   try {
@@ -1070,23 +1071,49 @@ function ChannelPerformancePanel() {
     }
   }, [])
 
-  const channelRows = useMemo(() => {
+  const inWindow = useMemo(() => {
     const since = new Date()
     since.setDate(since.getDate() - 30)
 
-    const inWindow = leads.filter((lead) => {
+    return leads.filter((lead) => {
       const created = new Date(lead.created_date || lead.created_at || 0)
       return created.toString() !== 'Invalid Date' && created >= since
     })
+  }, [leads])
 
+  const parsedRows = useMemo(() => {
+    return inWindow.map((lead) => {
+      let attribution = {}
+      try {
+        const parsed = lead.attribution_snapshot ? JSON.parse(lead.attribution_snapshot) : {}
+        attribution = parsed && typeof parsed === 'object' ? parsed : {}
+      } catch {
+        attribution = {}
+      }
+
+      return {
+        lead,
+        source: String(attribution.utm_source || '').trim().toLowerCase() || String(lead.conversion_source || 'direct').toLowerCase(),
+        medium: String(attribution.utm_medium || '').trim().toLowerCase() || 'none',
+        campaign: String(attribution.utm_campaign || lead.geofence_campaign || '').trim() || 'none',
+        term: String(attribution.utm_term || '').trim() || 'none',
+        domain: String(lead.backlink_domain || '').trim().toLowerCase(),
+      }
+    })
+  }, [inWindow])
+
+  const channelRows = useMemo(() => {
     const buckets = {
+      google_ads: { leads: 0, won: 0, pipeline: 0 },
+      google_organic: { leads: 0, won: 0, pipeline: 0 },
       geofencing: { leads: 0, won: 0, pipeline: 0 },
       backlink_partner: { leads: 0, won: 0, pipeline: 0 },
       referral: { leads: 0, won: 0, pipeline: 0 },
+      direct: { leads: 0, won: 0, pipeline: 0 },
     }
 
     inWindow.forEach((lead) => {
-      const source = String(lead.conversion_source || 'other')
+      const source = String(lead.conversion_source || 'direct')
       if (!buckets[source]) return
       buckets[source].leads += 1
       if (lead.status === 'won') buckets[source].won += 1
@@ -1100,7 +1127,24 @@ function ChannelPerformancePanel() {
       ...stats,
       closeRate: stats.leads > 0 ? Math.round((stats.won / stats.leads) * 100) : 0,
     }))
-  }, [leads])
+  }, [inWindow])
+
+  const countTop = useCallback((rows, extractor, limit = 6) => {
+    const map = {}
+    rows.forEach((row) => {
+      const key = extractor(row)
+      if (!key || key === 'none') return
+      map[key] = (map[key] || 0) + 1
+    })
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+  }, [])
+
+  const topTrafficSources = useMemo(() => countTop(parsedRows, (row) => row.source), [countTop, parsedRows])
+  const topTrafficMediums = useMemo(() => countTop(parsedRows, (row) => row.medium), [countTop, parsedRows])
+  const topCampaigns = useMemo(() => countTop(parsedRows, (row) => row.campaign), [countTop, parsedRows])
+  const topSearchTerms = useMemo(() => countTop(parsedRows, (row) => row.term), [countTop, parsedRows])
 
   const topBacklinkDomains = useMemo(() => {
     const domains = {}
@@ -1128,10 +1172,47 @@ function ChannelPerformancePanel() {
       .slice(0, 4)
   }, [leads])
 
+  const domainPerformanceRows = useMemo(() => {
+    const map = {}
+    inWindow.forEach((lead) => {
+      const fallbackSource = String(lead.conversion_source || 'unknown')
+      const row = parsedRows.find((r) => r.lead.id === lead.id)
+      const sourceHint = row?.source || fallbackSource
+      const derivedDomain = lead.backlink_domain
+        ? String(lead.backlink_domain).toLowerCase()
+        : sourceHint.includes('.')
+          ? sourceHint
+          : null
+
+      if (!derivedDomain) return
+
+      if (!map[derivedDomain]) {
+        map[derivedDomain] = { domain: derivedDomain, leads: 0, won: 0, pipeline: 0 }
+      }
+
+      map[derivedDomain].leads += 1
+      if (lead.status === 'won') map[derivedDomain].won += 1
+      if (lead.status !== 'won' && lead.status !== 'lost') {
+        map[derivedDomain].pipeline += Number(lead.estimated_value) || 0
+      }
+    })
+
+    return Object.values(map)
+      .map((item) => ({
+        ...item,
+        closeRate: item.leads > 0 ? Math.round((item.won / item.leads) * 100) : 0,
+      }))
+      .sort((a, b) => b.leads - a.leads)
+      .slice(0, 8)
+  }, [inWindow, parsedRows])
+
   const label = (source) => {
+    if (source === 'google_ads') return 'Google Ads'
+    if (source === 'google_organic') return 'Google Organic'
     if (source === 'geofencing') return 'Geofencing'
     if (source === 'backlink_partner') return 'Backlink Partner'
     if (source === 'referral') return 'Referral'
+    if (source === 'direct') return 'Direct'
     return source
   }
 
@@ -1139,7 +1220,7 @@ function ChannelPerformancePanel() {
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
       <div className="flex items-center justify-between gap-3 mb-4">
         <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
-          Backlink + Geofence Performance (30d)
+          Traffic + Search + Domain Intelligence (30d)
         </h3>
         <span className="text-xs text-white/45">Live from Lead records</span>
       </div>
@@ -1151,7 +1232,7 @@ function ChannelPerformancePanel() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
             {channelRows.map((row) => (
               <div key={row.source} className="rounded-xl border border-white/10 bg-black/20 p-3">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-white/45">{label(row.source)}</p>
@@ -1175,14 +1256,14 @@ function ChannelPerformancePanel() {
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
             <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Backlink Domains</p>
-              {topBacklinkDomains.length === 0 ? (
-                <p className="text-sm text-white/55">No backlink domain data yet.</p>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Traffic Sources</p>
+              {topTrafficSources.length === 0 ? (
+                <p className="text-sm text-white/55">No source attribution data yet.</p>
               ) : (
                 <ul className="space-y-1.5">
-                  {topBacklinkDomains.map(([domain, count]) => (
-                    <li key={domain} className="text-sm text-white/80 flex items-center justify-between gap-3">
-                      <span className="truncate">{domain}</span>
+                  {topTrafficSources.map(([source, count]) => (
+                    <li key={source} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                      <span className="truncate">{source}</span>
                       <span className="text-brand-amber font-semibold">{count}</span>
                     </li>
                   ))}
@@ -1191,12 +1272,30 @@ function ChannelPerformancePanel() {
             </div>
 
             <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Geofence Campaigns</p>
-              {topGeofenceCampaigns.length === 0 ? (
-                <p className="text-sm text-white/55">No geofence campaign tags yet.</p>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Traffic Mediums</p>
+              {topTrafficMediums.length === 0 ? (
+                <p className="text-sm text-white/55">No medium attribution data yet.</p>
               ) : (
                 <ul className="space-y-1.5">
-                  {topGeofenceCampaigns.map(([campaign, count]) => (
+                  {topTrafficMediums.map(([medium, count]) => (
+                    <li key={medium} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                      <span className="truncate">{medium}</span>
+                      <span className="text-brand-amber font-semibold">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-3">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Campaigns</p>
+              {topCampaigns.length === 0 ? (
+                <p className="text-sm text-white/55">No campaign attribution data yet.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {topCampaigns.map(([campaign, count]) => (
                     <li key={campaign} className="text-sm text-white/80 flex items-center justify-between gap-3">
                       <span className="truncate">{campaign}</span>
                       <span className="text-brand-amber font-semibold">{count}</span>
@@ -1205,9 +1304,289 @@ function ChannelPerformancePanel() {
                 </ul>
               )}
             </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Search Terms</p>
+              {topSearchTerms.length === 0 ? (
+                <p className="text-sm text-white/55">No search-term attribution data yet.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {topSearchTerms.map(([term, count]) => (
+                    <li key={term} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                      <span className="truncate">{term}</span>
+                      <span className="text-brand-amber font-semibold">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
+
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3 mt-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Domain Performance Matrix</p>
+            {domainPerformanceRows.length === 0 ? (
+              <p className="text-sm text-white/55">No domain-level attribution records yet.</p>
+            ) : (
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {domainPerformanceRows.map((item) => (
+                  <div key={item.domain} className="rounded-lg border border-white/10 bg-black/30 px-3 py-2.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-white text-sm font-semibold truncate">{item.domain}</p>
+                      <span className="text-[10px] text-emerald-200 uppercase tracking-[0.12em] font-bold">
+                        Close {item.closeRate}%
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-white/60 mt-1">Leads: {item.leads} · Won: {item.won} · Pipeline: ${Math.round(item.pipeline / 1000)}k</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {(topBacklinkDomains.length > 0 || topGeofenceCampaigns.length > 0) ? (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-3">
+              <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Backlink Domains</p>
+                {topBacklinkDomains.length === 0 ? (
+                  <p className="text-sm text-white/55">No backlink domain data yet.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {topBacklinkDomains.map(([domain, count]) => (
+                      <li key={domain} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                        <span className="truncate">{domain}</span>
+                        <span className="text-brand-amber font-semibold">{count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-2">Top Geofence Campaigns</p>
+                {topGeofenceCampaigns.length === 0 ? (
+                  <p className="text-sm text-white/55">No geofence campaign tags yet.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {topGeofenceCampaigns.map(([campaign, count]) => (
+                      <li key={campaign} className="text-sm text-white/80 flex items-center justify-between gap-3">
+                        <span className="truncate">{campaign}</span>
+                        <span className="text-brand-amber font-semibold">{count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          ) : null}
         </>
       )}
+    </div>
+  )
+}
+
+function HumanChecksControlPanel() {
+  const requiredChecks = useMemo(
+    () => [
+      {
+        id: 'claims_qa',
+        title: 'Claims + legal copy reviewed',
+        owner: 'Brand / Legal',
+      },
+      {
+        id: 'pricing_qa',
+        title: 'Pricing + discount changes verified',
+        owner: 'Owner / GM',
+      },
+      {
+        id: 'ad_spend_qa',
+        title: 'Ad budget shift approved (>20% delta)',
+        owner: 'Marketing Lead',
+      },
+      {
+        id: 'publish_qa',
+        title: 'Public-facing publish authorization',
+        owner: 'Growth + Brand',
+      },
+      {
+        id: 'crm_qa',
+        title: 'Hot/Warm lead SLA on-call owner confirmed',
+        owner: 'Sales Ops',
+      },
+    ],
+    [],
+  )
+
+  const [checks, setChecks] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return {}
+      const raw = localStorage.getItem(HUMAN_CHECKS_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed?.checks && typeof parsed.checks === 'object' ? parsed.checks : {}
+    } catch {
+      return {}
+    }
+  })
+  const [approver, setApprover] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return ''
+      const raw = localStorage.getItem(HUMAN_CHECKS_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed?.approver || ''
+    } catch {
+      return ''
+    }
+  })
+  const [lastApprovedAt, setLastApprovedAt] = useState(() => {
+    try {
+      if (typeof window === 'undefined') return null
+      const raw = localStorage.getItem(HUMAN_CHECKS_STATE_KEY)
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed?.lastApprovedAt || null
+    } catch {
+      return null
+    }
+  })
+
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return
+      localStorage.setItem(
+        HUMAN_CHECKS_STATE_KEY,
+        JSON.stringify({
+          checks,
+          approver,
+          lastApprovedAt,
+        }),
+      )
+    } catch {
+      // Keep panel functional even if persistence fails.
+    }
+  }, [checks, approver, lastApprovedAt])
+
+  const completedCount = requiredChecks.filter((item) => Boolean(checks[item.id])).length
+  const blockerCount = requiredChecks.length - completedCount
+  const readyForPublicActions = blockerCount === 0 && approver.trim().length > 0
+
+  const exportHumanChecks = useCallback(() => {
+    if (typeof window === 'undefined') return
+    const payload = {
+      generated_at: new Date().toISOString(),
+      approver: approver.trim() || null,
+      last_approved_at: lastApprovedAt,
+      ready_for_public_actions: readyForPublicActions,
+      checks: requiredChecks.map((item) => ({
+        id: item.id,
+        title: item.title,
+        owner: item.owner,
+        status: checks[item.id] ? 'approved' : 'blocked',
+      })),
+    }
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'command-center-human-checks.json'
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    URL.revokeObjectURL(url)
+  }, [approver, checks, lastApprovedAt, readyForPublicActions, requiredChecks])
+
+  const markApprovedNow = useCallback(() => {
+    setLastApprovedAt(new Date().toISOString())
+  }, [])
+
+  const resetChecks = useCallback(() => {
+    setChecks({})
+    setApprover('')
+    setLastApprovedAt(null)
+  }, [])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">
+            Human Checks Control Tower
+          </h3>
+          <p className="text-xs text-white/50 mt-1">Explicit human approvals before irreversible public actions.</p>
+        </div>
+
+        <span
+          className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+            readyForPublicActions
+              ? 'border-emerald-300/60 bg-emerald-300/10 text-emerald-200'
+              : 'border-red-300/60 bg-red-300/10 text-red-200'
+          }`}
+        >
+          {readyForPublicActions ? 'Human Check: Cleared' : `Human Check: ${blockerCount} Blocker${blockerCount === 1 ? '' : 's'}`}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
+        <div className="lg:col-span-3 rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
+          {requiredChecks.map((item) => (
+            <label key={item.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 cursor-pointer">
+              <div>
+                <p className="text-sm text-white font-semibold">{item.title}</p>
+                <p className="text-[11px] text-brand-amber mt-0.5">Owner: {item.owner}</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={Boolean(checks[item.id])}
+                onChange={(e) => {
+                  setChecks((prev) => ({ ...prev, [item.id]: e.target.checked }))
+                }}
+                className="h-4 w-4 accent-brand-amber"
+              />
+            </label>
+          ))}
+        </div>
+
+        <div className="lg:col-span-2 rounded-xl border border-white/10 bg-black/20 p-3 space-y-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.12em] text-white/45">Approver initials</p>
+            <input
+              type="text"
+              value={approver}
+              maxLength={18}
+              onChange={(e) => setApprover(e.target.value.toUpperCase())}
+              placeholder="EX: JW"
+              className="mt-1.5 w-full rounded-lg border border-white/20 bg-black/35 px-3 py-2 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-brand-amber/50"
+            />
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/70">
+            <p>Checks complete: {completedCount}/{requiredChecks.length}</p>
+            <p className="mt-1">Last approval timestamp: {lastApprovedAt ? new Date(lastApprovedAt).toLocaleString() : 'Not recorded'}</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            <button
+              type="button"
+              onClick={markApprovedNow}
+              className="rounded-lg bg-brand-amber text-brand-navy px-3 py-2 text-xs font-black uppercase tracking-[0.12em]"
+            >
+              Stamp Human Approval
+            </button>
+            <button
+              type="button"
+              onClick={exportHumanChecks}
+              className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40"
+            >
+              Export Approval Log
+            </button>
+            <button
+              type="button"
+              onClick={resetChecks}
+              className="rounded-lg border border-red-300/35 px-3 py-2 text-xs font-semibold text-red-200 hover:bg-red-300/10"
+            >
+              Reset Human Checks
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1924,6 +2303,7 @@ export default function CommandCenter() {
                   </div>
                 </div>
 
+                {strategyVisible ? <HumanChecksControlPanel /> : null}
                 {strategyVisible ? <ApiKeysPanel /> : null}
                 {strategyVisible ? <HumanApprovalPolicyPanel /> : null}
                 {strategyVisible ? <LaunchReadinessAuditPanel strategyVisible={strategyVisible} onAudit={setLatestAudit} /> : null}
