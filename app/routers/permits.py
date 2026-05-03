@@ -145,3 +145,99 @@ async def national_permits(
         None, lambda: fetch_all_permits(state_list, keyword=keyword, max_results=limit)
     )
     return {"status": "ok", "count": len(results), "results": results}
+
+
+# ── State permit rules (static codified logic) ────────────────────────────────
+
+# Sources:
+#   VA — Virginia Uniform Statewide Building Code (USBC)
+#   NC — NC General Statute 160D-1110
+#   SC — SC Code of Laws Title 6 Chapter 9
+#   GA — Georgia State Minimum Standard Codes
+#   MD — Maryland Building Performance Standards (MBPS)
+_PERMIT_RULES: dict[str, dict] = {
+    "VA": {
+        "governing_law": "Virginia Uniform Statewide Building Code (USBC)",
+        "permit_required_if": [
+            "Any new structure or addition",
+            "Shed/Accessory structure exceeds 256 sq ft",
+            "Deck is attached to house or > 30 inches off ground",
+            "Finishing a basement or moving load-bearing walls",
+            "New electrical, gas, or plumbing circuits",
+        ],
+        "universal_exception": "Ordinary repairs and light fixture replacement",
+    },
+    "NC": {
+        "governing_law": "NC General Statute 160D-1110",
+        "logic_summary": "Permit required for projects > $40,000 OR specific triggers.",
+        "permit_required_if": [
+            "Project cost exceeds $40,000",
+            "Structural changes (load-bearing walls)",
+            "Addition/Change in plumbing, mechanical, or electrical design",
+            "Changing building footprint (regardless of cost)",
+            "Deck additions or structural deck repairs",
+        ],
+        "exemptions": ["Replacing pickets, railings, or deck floorboards < $40k"],
+    },
+    "SC": {
+        "governing_law": "SC Code of Laws Title 6 Chapter 9",
+        "permit_required_if": [
+            "Project value exceeds $2,000 (standard threshold)",
+            "Work > $200 usually requires a licensed professional",
+            "New construction or structural alterations",
+            "Coastal counties: Any change affecting wind/seismic resistance",
+        ],
+        "special_note": "Coastal counties (Horry, Charleston) have stricter hurricane codes.",
+    },
+    "GA": {
+        "governing_law": "Georgia State Minimum Standard Codes",
+        "permit_required_if": [
+            "Project requires a professional inspection",
+            "Accessory structures (sheds) > 200 sq ft",
+            "New electrical, plumbing, or HVAC systems",
+            "Structural changes or footprint expansion",
+        ],
+        "exemptions": ["Retaining walls under 4ft", "Fencing", "Painting/Carpeting"],
+    },
+    "MD": {
+        "governing_law": "Maryland Building Performance Standards (MBPS)",
+        "permit_required_if": [
+            "All new construction and additions",
+            "Structural alterations",
+            "Deck > 30 inches above grade",
+            "Sheds (varies by county, but generally 150-200 sq ft threshold)",
+            "Within 1,000ft of tidal waters (Critical Area permit)",
+        ],
+    },
+}
+
+_SUPPORTED_STATES = sorted(_PERMIT_RULES.keys())
+
+
+@router.get(
+    "/rules/{state_code}",
+    summary="State permit rules — codified trigger logic for VA, NC, SC, GA, MD",
+)
+def get_permit_rules(state_code: str, _: dict = Depends(verify_premium_security)):
+    """
+    Return the codified permit-trigger rules for a given 2-letter US state code.
+
+    Supported states: VA, NC, SC, GA, MD.
+
+    Response includes:
+    - ``governing_law``       — authoritative statute reference
+    - ``permit_required_if``  — list of conditions that trigger a permit requirement
+    - ``exemptions``          — work categories explicitly exempt (where applicable)
+    - ``special_note``        — coastal / local override notes (where applicable)
+    """
+    key = state_code.upper().strip()
+    rules = _PERMIT_RULES.get(key)
+    if rules is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"State '{key}' not found. "
+                f"Supported states: {', '.join(_SUPPORTED_STATES)}"
+            ),
+        )
+    return {"state": key, **rules}
