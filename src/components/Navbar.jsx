@@ -10,10 +10,9 @@ const NAV_LINKS = [
   { label: 'Hardscapes', href: '/hardscapes' },
   { label: 'Sealcoating', href: '/sealcoating' },
   { label: 'Millings', href: '/millings-fines' },
+  { label: 'General Contracting', href: '/general-contracting' },
   { label: 'JWordenAI', href: '/jwordenai' },
-  { label: 'Blog', href: '/blog' },
 ];
-
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);

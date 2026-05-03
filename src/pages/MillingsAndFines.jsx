@@ -4,6 +4,7 @@ import { CheckCircle2, Phone, Construction, Layers, Droplets, HardHat } from 'lu
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
+import { trackPhoneClick } from '@/lib/analytics'
 
 const MILLING_USE_CASES = [
   {
@@ -43,7 +44,11 @@ export default function MillingsAndFines() {
             at a fraction of the cost. Including our exclusive <span className="text-primary font-black uppercase italic">Coated Millings</span> process.
           </p>
           <div className="flex gap-4">
-            <a href="tel:+18044461296" className="premium-cta px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-primary-foreground">
+            <a 
+              href="tel:+18044461296" 
+              onClick={() => trackPhoneClick('millings_hero')}
+              className="premium-cta px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-primary-foreground"
+            >
               Request A Load
             </a>
           </div>

@@ -83,7 +83,11 @@ export default function AsphaltPaving() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <a href="tel:+18044461296" className="premium-cta px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-primary-foreground">
+              <a 
+                href="tel:+18044461296" 
+                onClick={() => trackPhoneClick('paving_hero')}
+                className="premium-cta px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-primary-foreground"
+              >
                 Start My Project
               </a>
               <Link to="/contact" className="border-2 border-primary/40 text-white px-10 py-5 font-display font-bold text-sm tracking-widest uppercase hover:bg-primary/20 transition-all">
@@ -123,7 +127,11 @@ export default function AsphaltPaving() {
       <section className="bg-primary py-12">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
           <h2 className="font-display font-black text-2xl md:text-4xl text-primary-foreground uppercase tracking-tight">Ready for a Lifetime Result?</h2>
-          <a href="tel:+18044461296" className="bg-black text-white px-12 py-5 font-display font-bold text-sm tracking-widest uppercase hover:opacity-90 transition-all shadow-2xl">
+          <a 
+            href="tel:+18044461296" 
+            onClick={() => trackPhoneClick('paving_bottom')}
+            className="bg-black text-white px-12 py-5 font-display font-bold text-sm tracking-widest uppercase hover:opacity-90 transition-all shadow-2xl"
+          >
             804.446.1296
           </a>
         </div>

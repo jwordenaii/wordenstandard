@@ -18,7 +18,6 @@ Disallow: /revenue
 # Block internal strategy/tooling routes
 Disallow: /residential
 Disallow: /home-services
-Disallow: /general-contracting
 Disallow: /tar-and-chip
 Disallow: /contractor-ai
 Disallow: /advisory

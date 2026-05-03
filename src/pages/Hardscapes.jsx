@@ -4,6 +4,7 @@ import { CheckCircle2, Phone, Construction, Layers, Droplets, HardHat, Building2
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
+import { trackPhoneClick } from '@/lib/analytics'
 
 const HARDSCAPE_TYPES = [
   {
@@ -44,7 +45,11 @@ export default function Hardscapes() {
             surfaces that command attention and resist the elements.
           </p>
           <div className="flex gap-4">
-            <a href="tel:+18044461296" className="premium-cta px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-primary-foreground">
+            <a 
+              href="tel:+18044461296" 
+              onClick={() => trackPhoneClick('hardscapes_hero')}
+              className="premium-cta px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-primary-foreground"
+            >
               Request Design Consultation
             </a>
           </div>
