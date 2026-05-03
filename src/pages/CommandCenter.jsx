@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw } from 'lucide-react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight } from 'lucide-react'
 import { api } from '@/api/client'
+import { Link } from 'react-router-dom'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
@@ -100,6 +101,70 @@ function writeWeekendSprintState(payload) {
 function parseBoolLike(input) {
   const value = String(input || '').trim().toLowerCase()
   return ['1', 'true', 'yes', 'up', 'ready', 'ok', 'healthy', 'configured'].includes(value)
+}
+
+// ── Shared UI Components ───────────────────────────────────────────────────
+
+function HubLinkPanel() {
+  const hubs = [
+    {
+      title: 'Level 4 Autonomy',
+      desc: 'Cognitive Digital Twin & Drift Remediation',
+      path: '/autonomy',
+      icon: Layers,
+      color: 'text-amber-400',
+      bg: 'bg-amber-400/10',
+    },
+    {
+      title: 'Virginia Statewide Hub',
+      desc: 'SCC Verifier & VDOT Bid Board',
+      path: '/virginia-statewide',
+      icon: Globe,
+      color: 'text-blue-400',
+      bg: 'bg-blue-400/10',
+    },
+    {
+      title: '3D Floor Plan Studio',
+      desc: 'Houzz-style Visualizer & Cost Catalog',
+      path: '/floor-plan-studio',
+      icon: Box,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-400/10',
+    },
+    {
+      title: 'Enterprise AI Platform',
+      desc: 'Licensed L4 Controls & Agent Registry',
+      path: '/jwordenai',
+      icon: Layout,
+      color: 'text-purple-400',
+      bg: 'bg-purple-400/10',
+    },
+  ]
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {hubs.map((hub) => (
+        <Link
+          key={hub.path}
+          to={hub.path}
+          className="group block rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:bg-white/[0.06] hover:border-white/20 transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-xl ${hub.bg} ${hub.color}`}>
+              <hub.icon className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display font-bold text-white text-base group-hover:text-brand-amber transition-colors">
+                {hub.title}
+              </h3>
+              <p className="text-white/40 text-xs mt-0.5 truncate">{hub.desc}</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-brand-amber group-hover:translate-x-1 transition-all" />
+          </div>
+        </Link>
+      ))}
+    </div>
+  )
 }
 
 function statusTone(score) {
@@ -2474,6 +2539,7 @@ export default function CommandCenter() {
         ) : (
           <>
             {!strategyVisible ? <InternalStrategyNotice /> : null}
+            {strategyVisible ? <HubLinkPanel /> : null}
 
             {activeTab === 'richmond-grid' && (
               <Suspense
