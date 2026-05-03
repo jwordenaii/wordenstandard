@@ -51,6 +51,18 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setAccessToken(null);
+      setUser(null);
+      setIsAuthenticated(false);
+      setAuthError({ type: 'pin_required', message: 'Your admin session expired. Enter the PIN to continue.' });
+    };
+
+    window.addEventListener('jworden:auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('jworden:auth-expired', handleAuthExpired);
+  }, []);
+
   const logout = () => {
     localStorage.removeItem("jworden_admin_session");
     clearAuthToken();

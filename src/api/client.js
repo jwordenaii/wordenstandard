@@ -42,6 +42,17 @@ function clearStoredAuthToken() {
   window.sessionStorage.removeItem(AUTH_EXPIRES_STORAGE_KEY)
 }
 
+function handleAuthRejection(status, detail) {
+  if (![401, 403].includes(Number(status))) return
+  const message = String(detail || '').toLowerCase()
+  if (status === 401 || message.includes('invalid token') || message.includes('not authenticated') || message.includes('expired')) {
+    clearStoredAuthToken()
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('jworden:auth-expired'))
+    }
+  }
+}
+
 function restoreStoredAuthToken() {
   if (typeof window === 'undefined') return false
   const token = window.sessionStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
@@ -125,6 +136,7 @@ async function request(method, path, body) {
     const res = await fetch(`${BASE}${path}`, opts)
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
+      handleAuthRejection(res.status, err.detail)
       throw new Error(err.detail || `HTTP ${res.status}`)
     }
     return res.json()
@@ -176,6 +188,7 @@ async function protectedFormRequest(path, form) {
     const res = await fetch(`${BASE}${path}`, { method: 'POST', body: form, headers, signal: controller.signal })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
+      handleAuthRejection(res.status, err.detail)
       throw new Error(err.detail || `HTTP ${res.status}`)
     }
     return res.json()
