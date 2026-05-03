@@ -112,6 +112,7 @@ const AuthenticatedApp = () => {
         <Route path="/millings-fines" element={<MillingsAndFines />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/jwordenai" element={<JwordenAI />} />
+        <Route path="/general-contracting" element={<GeneralContracting />} />
         <Route path="/lp/:slug" element={<LandingPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
@@ -127,7 +128,6 @@ const AuthenticatedApp = () => {
         <Route path="/command-center" element={<RequireAuth><CommandCenter /></RequireAuth>} />
         <Route path="/residential" element={<RequireAuth><ResidentialAsphalt /></RequireAuth>} />
         <Route path="/home-services" element={<RequireAuth><HomeServices /></RequireAuth>} />
-        <Route path="/general-contracting" element={<RequireAuth><GeneralContracting /></RequireAuth>} />
         <Route path="/floor-plan-studio" element={<RequireAuth><FloorPlanStudio /></RequireAuth>} />
         <Route path="/virginia-statewide" element={<RequireAuth><VirginiaStatewide /></RequireAuth>} />
         <Route path="/autonomy" element={<RequireAuth><AutonomyDashboard /></RequireAuth>} />
