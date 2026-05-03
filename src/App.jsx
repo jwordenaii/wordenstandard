@@ -45,6 +45,10 @@ const LeadInbox = lazy(() => import('./pages/LeadInbox'));
 const VoiceCalls = lazy(() => import('./pages/VoiceCalls'));
 const RevenueDashboard = lazy(() => import('./pages/RevenueDashboard'));
 const CrewEta = lazy(() => import('./pages/CrewEta'));
+const AsphaltPaving = lazy(() => import('./pages/AsphaltPaving'));
+const Hardscapes = lazy(() => import('./pages/Hardscapes'));
+const VirginiaSealcoating = lazy(() => import('./pages/VirginiaSealcoating'));
+const MillingsAndFines = lazy(() => import('./pages/MillingsAndFines'));
 // Add page imports here
 
 const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
@@ -102,6 +106,10 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/locations" element={<LocationsIndex />} />
         <Route path="/locations/:slug" element={<LocationPage />} />
+        <Route path="/paving" element={<AsphaltPaving />} />
+        <Route path="/hardscapes" element={<Hardscapes />} />
+        <Route path="/sealcoating" element={<VirginiaSealcoating />} />
+        <Route path="/millings-fines" element={<MillingsAndFines />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/jwordenai" element={<JwordenAI />} />
         <Route path="/lp/:slug" element={<LandingPage />} />

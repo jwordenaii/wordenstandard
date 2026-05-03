@@ -6,11 +6,13 @@ import SmartImage from './SmartImage';
 import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 
 const NAV_LINKS = [
-{ label: 'Services', href: '#services' },
-{ label: 'Our Work', href: '#proof' },
-{ label: 'About', href: '#about' },
-{ label: 'Blog', href: '/blog', external: true },
-{ label: 'Contact', href: '#quote' }];
+  { label: 'Paving', href: '/paving' },
+  { label: 'Hardscapes', href: '/hardscapes' },
+  { label: 'Sealcoating', href: '/sealcoating' },
+  { label: 'Millings', href: '/millings-fines' },
+  { label: 'JWordenAI', href: '/jwordenai' },
+  { label: 'Blog', href: '/blog' },
+];
 
 
 export default function Navbar() {

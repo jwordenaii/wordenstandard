@@ -1,54 +1,118 @@
+/**
+ * JwordenAI.jsx — Public SEO landing page for the JWordenAI platform brand.
+ *
+ * Purpose: rank on Google for construction AI / contractor intelligence queries.
+ * This page is pure marketing content — no tools, no free logic.
+ * All capability detail stays behind auth.
+ */
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import SchemaMarkup from '../components/SchemaMarkup'
 
-const LOCAL_PROJECT_IMAGES = [
-  'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
-  'https://media.api.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
-  'https://media.api.com/images/public/69c853446b8987b1630018ff/e5adfa586_20180209_014945610_iOS.jpg',
+// ── SEO data ─────────────────────────────────────────────────────────────────
+
+const PLATFORM_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'JWordenAI',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  description:
+    'JWordenAI is an autonomous construction intelligence platform built on 40+ years of Virginia asphalt field data. It delivers permit analysis, bid intelligence, cost estimation, and digital twin monitoring for paving contractors and construction professionals.',
+  url: 'https://jworden.com/jwordenai',
+  author: {
+    '@type': 'Organization',
+    name: 'J. Worden & Sons',
+    foundingDate: '1984',
+    areaServed: { '@type': 'State', name: 'Virginia' },
+  },
+  offers: { '@type': 'Offer', availability: 'https://schema.org/InStock' },
+}
+
+const CAPABILITIES = [
+  {
+    icon: '📋',
+    title: 'Permit Intelligence',
+    tagline: 'Multi-state permit trigger analysis',
+    description:
+      'Codified permit logic for Virginia, North Carolina, South Carolina, Georgia, and Maryland — including county-level fee schedules and trigger thresholds. Instantly surfaces permit requirements by project type, cost, and structure size.',
+    teaser: true,
+  },
+  {
+    icon: '🏗️',
+    title: 'Bid Board Monitor',
+    tagline: 'VDOT & regional bid opportunities',
+    description:
+      'Automated scanning of VDOT bid board and state procurement portals. Surfaces active bid opportunities ranked by match score, district, and estimated value — before competitors find them.',
+    teaser: true,
+  },
+  {
+    icon: '🧠',
+    title: 'Cognitive Digital Twin',
+    tagline: 'Live project drift detection',
+    description:
+      'A six-dimension real-time model of every active project — timeline, cost, quality, safety, materials, and crew. Detects drift from plan and triggers auto-remediation workflows when thresholds are crossed.',
+    teaser: true,
+  },
+  {
+    icon: '⚖️',
+    title: 'Automated Quote Engine',
+    tagline: '2026 Virginia market benchmarks',
+    description:
+      'Generates priced asphalt proposals from site evaluations. Applies damage-type logic (alligator cracking = base-rehab multiplier), VDOT base standards, and regional $/sq ft benchmarks — with 7-day liquid-asphalt market validity.',
+    teaser: true,
+  },
+  {
+    icon: '🛡️',
+    title: 'Compliance Monitoring',
+    tagline: 'Subcontractor cert & license tracking',
+    description:
+      'Tracks insurance, bond, and license expiration dates across your entire subcontractor roster. Auto-alerts 30 days and 7 days ahead of expiry. Integrates with 50-state DPOR and license verification APIs.',
+    teaser: true,
+  },
+  {
+    icon: '🤖',
+    title: 'Autonomous Orchestrator',
+    tagline: 'Level 4 AI goal execution',
+    description:
+      'An Orchestrator-Worker-Reflexion-RL engine that executes complex business goals — schedule integrity, cost control, safety compliance, material supply — with built-in self-critique and reinforcement learning weight updates.',
+    teaser: true,
+  },
 ]
 
-const FEATURES = [
+const STATS = [
+  { value: '40+', label: 'Years of field intelligence' },
+  { value: '133', label: 'Virginia localities covered' },
+  { value: '5', label: 'States of permit logic' },
+  { value: 'L4', label: 'Autonomous intelligence level' },
+]
+
+const WHO_ITS_FOR = [
   {
-    icon: '🏡',
-    title: 'Driveway Experts Since 1984',
-    tagline: 'Serving Chester, Richmond, and Midlothian',
-    description:
-      'Homeowners trust us to inspect asphalt honestly, explain the right repair plan, and deliver clean paving work that holds up in Virginia weather.',
-    capabilities: [
-      'Driveway resurfacing and replacement',
-      'Crack filling and sealcoating',
-      'Drainage-aware prep before paving',
-      'Clear written scope and timeline',
-      'Friendly local crew communication',
+    audience: 'Paving Contractors',
+    points: [
+      'Win more bids with real-time VDOT opportunity alerts',
+      'Auto-generate accurate quotes from site photos',
+      'Track subcontractor compliance without spreadsheets',
+      'Monitor active jobs for cost and schedule drift',
     ],
   },
   {
-    icon: '🏢',
-    title: 'Commercial Lot Reliability',
-    tagline: 'Built for businesses, churches, and HOAs',
-    description:
-      'From neighborhood shopping centers to church lots, we build phased paving plans that reduce downtime and keep your property safe and professional.',
-    capabilities: [
-      'Parking lot patching and overlay',
-      'Traffic-friendly project phasing',
-      'Line striping and finishing coordination',
-      'Maintenance planning by budget year',
-      'Large-area paving execution support',
+    audience: 'General Contractors',
+    points: [
+      'Permit requirement lookup across 5 states + 16 counties',
+      'Automated site evaluation scoring before mobilization',
+      'Utility risk advisory before any excavation begins',
+      'Integrated cash flow and lien deadline monitoring',
     ],
   },
   {
-    icon: '🛣️',
-    title: 'Virginia Climate Smart Planning',
-    tagline: 'Prep first, pave right, protect longer',
-    description:
-      'Our recommendations are based on what local asphalt faces every year: heat, rain, freeze-thaw cycles, and heavy daily traffic across Central Virginia.',
-    capabilities: [
-      'Season-aware scheduling windows',
-      'Subgrade and base prep guidance',
-      'Drainage correction prioritization',
-      'Practical long-term maintenance plans',
-      'Property-specific pavement recommendations',
+    audience: 'Property Managers & HOAs',
+    points: [
+      'Instant paving condition reports from photos',
+      'Multi-site maintenance cost forecasting',
+      'VDOT base standard compliance documentation',
+      'Annual resurfacing schedule planning tools',
     ],
   },
 ]
@@ -64,23 +128,22 @@ const fadeUp = {
 
 const staggerReveal = {
   hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.08,
-    },
-  },
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.06 } },
 }
 
 const cardRise = {
   hidden: { opacity: 0, y: 28, scale: 0.98 },
   visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
   },
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FEATURES = [
+/* Lines 146-186 omitted */
+]
 
 export default function JwordenAI() {
   return (
