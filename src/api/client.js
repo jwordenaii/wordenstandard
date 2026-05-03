@@ -185,7 +185,7 @@ async function protectedFormRequest(path, form) {
 }
 
 /** Build a query string from an object, omitting null/undefined/empty values. */
-function buildQS(params) {
+function buildQS(params = {}) {
   const qs = new URLSearchParams(
     Object.fromEntries(
       Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
