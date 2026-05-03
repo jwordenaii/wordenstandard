@@ -6,6 +6,29 @@ Day-to-day operations guide for the JWordenAI backend.
 
 ## Checking System Health
 
+## Setting Operational Secrets
+
+Use the prompted helper when adding or rotating API keys. It sends values to Railway, Netlify, or the local process without writing secrets to `.env` or git.
+
+```powershell
+# Preview prompts and destinations without changing providers
+npm run ops:secrets -- -DryRun
+
+# Core production auth/config in Railway + Netlify
+npm run ops:secrets -- -Target core -Provider all
+
+# AI provider keys for backend features
+npm run ops:secrets -- -Target ai -Provider railway
+
+# Observability keys and alert webhooks
+npm run ops:secrets -- -Target observability -Provider railway
+
+# Local-only media import tokens for Dropbox, Google Photos, and Drive
+npm run ops:secrets -- -Target media -Provider local
+```
+
+Blank prompts are skipped, so you can run the helper repeatedly as keys become available. Local media tokens are stored in the Windows user environment by default; pass `-LocalScope Process` for a one-session-only setup. After changing Railway or Netlify production variables, wait for the provider redeploy and then run the health checks below.
+
 ### Quick Status Check
 
 ```bash

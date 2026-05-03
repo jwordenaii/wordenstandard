@@ -16,6 +16,7 @@
     "ai:build-pages": "node scripts/ai-page-factory.mjs",
     "ai:site-studio": "node scripts/site-blueprint-studio.mjs",
     "ops:preflight": "powershell -ExecutionPolicy Bypass -File scripts/repo-preflight.ps1",
+    "ops:secrets": "powershell -ExecutionPolicy Bypass -File scripts/set-operational-secrets.ps1",
     "ops:seo-guard": "powershell -ExecutionPolicy Bypass -File scripts/seo-guardrails.ps1",
     "ops:seo-self-heal": "powershell -ExecutionPolicy Bypass -File scripts/seo-self-heal.ps1 -UpdateCoreRoutes",
     "ops:live-check": "powershell -ExecutionPolicy Bypass -File scripts/live-deploy-check.ps1",
