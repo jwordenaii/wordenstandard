@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from pydantic import BaseModel, Field
@@ -12,6 +12,7 @@ from ..core.security import verify_premium_security
 from ..database import get_db
 from ..models import Estimate, Job, Lead, ProjectDocument, WorkOrder
 from ..services.audit import write_audit_event
+from ..services.monitoring_service import monitoring
 from ..services.pricing import estimate_price
 
 router = APIRouter(prefix="/api/v1/operations", tags=["operations"])
@@ -48,6 +49,10 @@ class ProjectDocumentUpdateRequest(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=4000)
     visible_to_client: bool | None = None
+
+
+class DemoSeedRequest(BaseModel):
+    reset_existing: bool = True
 
 
 def _estimate_number(lead_id: int) -> str:
@@ -132,6 +137,42 @@ def _serialize_document_collection(items: list[ProjectDocument]) -> dict:
     }
 
 
+def _text_document_url(title: str, body: str) -> tuple[str, int]:
+    content = f"{title}\n{'=' * len(title)}\n\n{body}\n".encode("utf-8")
+    encoded = base64.b64encode(content).decode("utf-8")
+    return f"data:text/plain;base64,{encoded}", len(content)
+
+
+def _create_seed_document(
+    db: Session,
+    *,
+    job: Job,
+    lead: Lead,
+    document_type: str,
+    title: str,
+    description: str,
+    filename: str,
+    body: str,
+) -> ProjectDocument:
+    file_url, file_size = _text_document_url(title, body)
+    document = ProjectDocument(
+        id=str(uuid.uuid4()),
+        job_id=job.id,
+        client_email=lead.email.strip().lower(),
+        document_type=document_type,
+        title=title,
+        description=description,
+        filename=filename,
+        mime_type="text/plain",
+        file_size_bytes=file_size,
+        file_url=file_url,
+        visible_to_client=True,
+        uploaded_by="demo_seed",
+    )
+    db.add(document)
+    return document
+
+
 @router.get("/leads/recent")
 def list_recent_leads(
     limit: int = 12,
@@ -158,6 +199,173 @@ def list_recent_leads(
             }
             for lead in leads
         ],
+    }
+
+
+@router.post("/demo/seed")
+def seed_demo_workspace(
+    body: DemoSeedRequest | None = Body(default=None),
+    db: Session = Depends(get_db),
+    security: dict = Depends(verify_premium_security),
+):
+    body = body or DemoSeedRequest()
+    demo_email = "demo.portal@jwordenasphaltpaving.com"
+
+    existing_leads = db.query(Lead).filter(Lead.email == demo_email).all()
+    existing_lead_ids = [lead.id for lead in existing_leads]
+    if body.reset_existing and existing_lead_ids:
+        existing_jobs = db.query(Job).filter(Job.lead_id.in_(existing_lead_ids)).all()
+        existing_job_ids = [job.id for job in existing_jobs]
+        if existing_job_ids:
+            db.query(ProjectDocument).filter(ProjectDocument.job_id.in_(existing_job_ids)).delete(synchronize_session=False)
+            db.query(WorkOrder).filter(WorkOrder.job_id.in_(existing_job_ids)).delete(synchronize_session=False)
+            db.query(Job).filter(Job.id.in_(existing_job_ids)).delete(synchronize_session=False)
+        db.query(Estimate).filter(Estimate.lead_id.in_(existing_lead_ids)).delete(synchronize_session=False)
+        db.query(Lead).filter(Lead.id.in_(existing_lead_ids)).delete(synchronize_session=False)
+        db.commit()
+
+    now = datetime.now(timezone.utc)
+    lead = Lead(
+        name="River City Retail Partners",
+        email=demo_email,
+        phone="804-446-1296",
+        service_type="parking_lot_resurface",
+        property_type="commercial",
+        urgency="scheduled",
+        project_size_sqft=18400,
+        address="2420 Commerce Road, Richmond, VA",
+        state_code="VA",
+        message="Polished production demo: mill failed surface, repair base at loading lane, resurface customer parking, stripe ADA-compliant stalls.",
+        score_value=94,
+        score_label="HOT",
+        score_priority=1,
+        pipeline_stage="converted",
+        contacted_at=now - timedelta(days=3),
+        proposal_sent_at=now - timedelta(days=2),
+        tenant_id="JWORDEN_HQ",
+    )
+    db.add(lead)
+    db.flush()
+
+    estimate = Estimate(
+        lead_id=lead.id,
+        estimate_number=f"EST-DEMO-{int(now.timestamp())}",
+        service_type=lead.service_type,
+        scope_summary="Commercial resurfacing demo: milling, base repair, tack coat, surface lift, striping, and warranty packet.",
+        amount_low=38500,
+        amount_high=47200,
+        status="converted",
+        state_code="VA",
+        tenant_id="JWORDEN_HQ",
+    )
+    db.add(estimate)
+    db.flush()
+
+    scheduled_start = (now + timedelta(days=2)).replace(hour=7, minute=30, second=0, microsecond=0)
+    scheduled_end = scheduled_start + timedelta(hours=9)
+    job = Job(
+        estimate_id=estimate.id,
+        lead_id=lead.id,
+        job_number=f"JOB-DEMO-{int(now.timestamp())}",
+        name="River City Retail Center Resurface",
+        status="in_progress",
+        service_type="parking_lot_resurface",
+        site_address=lead.address,
+        state_code="VA",
+        scheduled_start=scheduled_start,
+        scheduled_end=scheduled_end,
+        progress_percent=62,
+        progress_notes="Milling and base repairs are complete. Surface lift is scheduled for the morning weather window, then striping follows after cure time.",
+        tenant_id="JWORDEN_HQ",
+    )
+    db.add(job)
+    db.flush()
+
+    work_order = WorkOrder(
+        job_id=job.id,
+        work_order_number=f"WO-DEMO-{int(now.timestamp())}",
+        title="Surface lift and striping prep",
+        status="dispatched",
+        assigned_crew="Crew A",
+        scheduled_for=scheduled_start,
+        notes="Confirm tack coat coverage, protect storefront access, and stage striping layout before close of business.",
+    )
+    db.add(work_order)
+
+    documents = [
+        _create_seed_document(
+            db,
+            job=job,
+            lead=lead,
+            document_type="contract",
+            title="Approved Commercial Scope",
+            description="Customer-facing scope summary for the resurfacing package.",
+            filename="river-city-approved-scope.txt",
+            body="Scope includes milling, base repairs, tack coat, surface lift, traffic control, and final striping for the River City Retail Center lot.",
+        ),
+        _create_seed_document(
+            db,
+            job=job,
+            lead=lead,
+            document_type="invoice",
+            title="Deposit Invoice",
+            description="Demo invoice record visible in the customer portal.",
+            filename="river-city-deposit-invoice.txt",
+            body="Deposit invoice: 35% due at scheduling, balance due after final walkthrough and punch-list approval.",
+        ),
+        _create_seed_document(
+            db,
+            job=job,
+            lead=lead,
+            document_type="warranty",
+            title="Workmanship Warranty Preview",
+            description="Warranty expectations prepared before closeout.",
+            filename="river-city-warranty-preview.txt",
+            body="Warranty preview covers workmanship, drainage review notes, and recommended sealcoat maintenance cadence.",
+        ),
+        _create_seed_document(
+            db,
+            job=job,
+            lead=lead,
+            document_type="progress_photo",
+            title="Base Repair Progress Note",
+            description="Text progress placeholder until field photos are uploaded.",
+            filename="river-city-progress-note.txt",
+            body="Base repair at the loading lane is complete. Photos can be replaced with real field media from Admin Documents.",
+        ),
+    ]
+
+    db.commit()
+    db.refresh(job)
+
+    write_audit_event(
+        db,
+        event_type="demo.seeded",
+        actor_type="admin",
+        actor_id=security.get("user"),
+        entity_type="job",
+        entity_id=job.id,
+        summary="Production demo workspace seeded for portal, documents, and ETA verification.",
+        detail={"lead_id": lead.id, "estimate_id": estimate.id, "document_count": len(documents)},
+    )
+    monitoring.log_metric("operations.demo_seeded", 1, tags=["source:admin_documents"])
+    monitoring.send_slack_alert(
+        "Demo Workspace Seeded",
+        f"Job `{job.job_number}` was seeded for `{lead.name}` by `{security.get('user')}`.",
+        severity="info",
+    )
+
+    return {
+        "status": "seeded",
+        "lead_id": lead.id,
+        "estimate_id": estimate.id,
+        "job": _serialize_job(job, lead),
+        "documents": [_serialize_project_document(document) for document in documents],
+        "work_order": {
+            "id": work_order.id,
+            "work_order_number": work_order.work_order_number,
+            "status": work_order.status,
+        },
     }
 
 

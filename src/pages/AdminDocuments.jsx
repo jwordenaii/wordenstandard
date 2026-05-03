@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, ShieldOff } from 'lucide-react';
+import { Activity, CheckCircle2, Loader2, RefreshCw, ShieldOff, Sparkles, TriangleAlert } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useAuth } from '@/lib/AuthContext';
@@ -10,6 +10,109 @@ import JobPicker from '../components/admin/JobPicker';
 import DocumentUploader from '../components/admin/DocumentUploader';
 import JobProgressEditor from '../components/admin/JobProgressEditor';
 import ExistingDocuments from '../components/admin/ExistingDocuments';
+
+function AdminOpsPanel({ isAdmin, onSeeded }) {
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState(null);
+  const [seedError, setSeedError] = useState('');
+
+  const { data: monitoringStatus } = useQuery({
+    queryKey: ['admin-monitoring-status'],
+    queryFn: () => api.getMonitoringStatus(),
+    enabled: isAdmin,
+    staleTime: 60_000,
+  });
+
+  const monitoring = monitoringStatus?.monitoring || null;
+  const slackReady = Boolean(monitoring?.slack_enabled);
+  const datadogReady = Boolean(monitoring?.datadog_enabled);
+
+  const handleSeedDemo = async () => {
+    setSeeding(true);
+    setSeedError('');
+    setSeedResult(null);
+    try {
+      const result = await api.seedDemoWorkspace(true);
+      setSeedResult(result);
+      onSeeded?.(result);
+    } catch (error) {
+      setSeedError(error?.message || 'Could not seed demo workspace.');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  return (
+    <div className="mb-8 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-6">
+      <div className="border border-primary/30 bg-primary/5 p-5 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div>
+            <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-2">
+              // Maintenance
+            </p>
+            <h2 className="font-display font-black text-foreground text-2xl uppercase tracking-tight">
+              Production Demo Workspace
+            </h2>
+            <p className="font-body text-muted-foreground text-sm mt-2 max-w-2xl">
+              Seeds one polished commercial resurfacing job with portal documents, progress, work order, audit evidence, and ETA data.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleSeedDemo}
+            disabled={seeding}
+            className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-display font-bold text-xs tracking-wider uppercase px-5 py-3 hover:bg-primary/90 transition-colors disabled:opacity-60"
+          >
+            {seeding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {seeding ? 'Seeding' : 'Seed Demo'}
+          </button>
+        </div>
+
+        {seedResult ? (
+          <div className="mt-4 border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-foreground">
+            <p className="font-display font-bold uppercase tracking-wide text-emerald-300">Demo ready</p>
+            <p className="mt-1 text-muted-foreground">
+              {seedResult.job?.title} · Job #{seedResult.job?.id} · {seedResult.documents?.length || 0} client document(s)
+            </p>
+          </div>
+        ) : null}
+        {seedError ? (
+          <div className="mt-4 border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            {seedError}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="border border-border bg-card p-5 md:p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="w-4 h-4 text-primary" />
+          <h2 className="font-display font-black text-foreground text-lg uppercase tracking-tight">
+            Monitoring Alerts
+          </h2>
+        </div>
+        <div className="space-y-3">
+          {[
+            { label: 'Slack alert channel', ready: slackReady },
+            { label: 'Datadog metrics/events', ready: datadogReady },
+            { label: 'Health endpoint', ready: true },
+            { label: '5xx error alerts', ready: slackReady || datadogReady },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center justify-between gap-3 border border-border bg-background/40 px-3 py-2">
+              <span className="font-body text-sm text-foreground">{item.label}</span>
+              <span className={`inline-flex items-center gap-1 font-display text-[10px] font-bold uppercase tracking-wider ${item.ready ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {item.ready ? <CheckCircle2 className="w-3.5 h-3.5" /> : <TriangleAlert className="w-3.5 h-3.5" />}
+                {item.ready ? 'Ready' : 'Needs Env'}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="font-body text-muted-foreground text-xs mt-4">
+          Service: {monitoring?.dd_service || 'jworden-api'} · Env: {monitoring?.dd_env || 'production'}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDocuments() {
   const { user } = useAuth();
@@ -42,6 +145,15 @@ export default function AdminDocuments() {
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-jobs'] });
     queryClient.invalidateQueries({ queryKey: ['admin-job-docs', selectedJobId] });
+  };
+
+  const handleSeeded = (result) => {
+    queryClient.invalidateQueries({ queryKey: ['admin-jobs'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-monitoring-status'] });
+    if (result?.job?.id) {
+      setSelectedJobId(result.job.id);
+      queryClient.invalidateQueries({ queryKey: ['admin-job-docs', result.job.id] });
+    }
   };
 
   // Admin gate
@@ -90,6 +202,8 @@ export default function AdminDocuments() {
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <AdminOpsPanel isAdmin={isAdmin} onSeeded={handleSeeded} />
+
           {jobsLoading ? (
             <div className="flex items-center justify-center h-64">
               <Loader2 className="w-8 h-8 text-primary animate-spin" />
