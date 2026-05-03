@@ -297,6 +297,30 @@ def list_jobs(
     }
 
 
+@router.get("/public/jobs/{job_id}")
+def get_public_job(job_id: int, db: Session = Depends(get_db)):
+    job = db.get(Job, job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    lead = db.get(Lead, job.lead_id) if job.lead_id else None
+    payload = _serialize_job(job, lead)
+    return {
+        key: payload.get(key)
+        for key in (
+            "id",
+            "status",
+            "title",
+            "surface_type",
+            "address",
+            "scheduled_date",
+            "start_time",
+            "progress_percent",
+            "progress_notes",
+            "client_name",
+        )
+    }
+
+
 @router.get("/jobs/{job_id}")
 def get_job(job_id: int, db: Session = Depends(get_db), _: dict = Depends(verify_premium_security)):
     job = db.get(Job, job_id)

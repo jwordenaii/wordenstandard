@@ -25,7 +25,7 @@ export default function CrewEta() {
 
     const load = async () => {
       try {
-        const j = await api.entities.Job.get(jobId);
+        const j = await api.getPublicJob(jobId);
         setJob(j);
       } catch {
         setError('Could not load job details');

@@ -741,6 +741,7 @@ export const api = {
   listEstimates: () => protectedRequest('GET', '/api/v1/operations/estimates'),
   createJobFromEstimate: (estimateId, payload = {}) => protectedRequest('POST', '/api/v1/operations/jobs/from-estimate', { estimate_id: estimateId, ...payload }),
   listJobs: () => protectedRequest('GET', '/api/v1/operations/jobs'),
+  getPublicJob: (jobId) => request('GET', `/api/v1/operations/public/jobs/${encodeURIComponent(jobId)}`),
   createWorkOrder: (payload) => protectedRequest('POST', '/api/v1/operations/work-orders', payload),
   listWorkOrders: (jobId) => protectedRequest('GET', `/api/v1/operations/jobs/${jobId}/work-orders`),
   uploadProjectDocument: async (file, payload) => {
