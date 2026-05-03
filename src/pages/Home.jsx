@@ -199,7 +199,7 @@ export default function Home() {
       <HomeSchema />
       <Navbar />
 
-      <section className="relative min-h-[92vh] overflow-hidden bg-black pt-32">
+      <section className="relative min-h-[92vh] overflow-hidden bg-[#f2f6f3] pt-32">
         <div className="absolute inset-0">
           <SmartImage
             src={HERO_IMAGE}
@@ -208,37 +208,37 @@ export default function Home() {
             height={1440}
             priority
             sizes="100vw"
-            className="h-full w-full object-cover opacity-55 grayscale contrast-125"
+            className="h-full w-full object-cover opacity-34 saturate-90 contrast-105"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,#050505_0%,rgba(5,5,5,0.88)_42%,rgba(5,5,5,0.42)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(248,247,241,0.98)_0%,rgba(248,247,241,0.9)_46%,rgba(248,247,241,0.44)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-background to-transparent" />
         </div>
 
         <div className="relative z-10 mx-auto flex min-h-[78vh] max-w-7xl flex-col justify-end px-6 pb-16 lg:px-8">
           <div className="max-w-5xl">
-            <div className="mb-7 inline-flex items-center gap-3 border border-primary/40 bg-black/70 px-4 py-2 text-primary">
+            <div className="mb-7 inline-flex items-center gap-3 rounded-md border border-primary/25 bg-white/88 px-4 py-2 text-primary shadow-[0_14px_30px_-24px_rgba(15,48,68,0.45)]">
               <Award className="h-4 w-4" />
               <span className="font-display text-sm uppercase tracking-[0.24em]">Award-winning Virginia paving company</span>
             </div>
-            <h1 className="font-display text-6xl font-black uppercase leading-[0.86] tracking-normal text-white md:text-8xl lg:text-9xl">
+            <h1 className="font-display text-5xl font-black uppercase leading-[0.88] tracking-normal text-foreground sm:text-6xl md:text-8xl lg:text-9xl">
               Educate First.<br />
               <span className="text-primary">Pave Second.</span>
             </h1>
-            <p className="mt-8 max-w-3xl text-lg leading-relaxed text-zinc-200 md:text-2xl">
+            <p className="mt-8 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-2xl">
               The other paving quote may tell you what they want to sell. We show you what your asphalt actually needs, what can wait, and where bad scopes waste money.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <a
                 href="tel:+18044461296"
                 onClick={() => trackPhoneClick('homepage_hero')}
-                className="inline-flex min-h-[52px] items-center gap-3 bg-primary px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-black transition-colors hover:bg-white"
+                className="inline-flex min-h-[52px] items-center gap-3 rounded-md bg-primary px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary-foreground shadow-[0_16px_32px_-22px_rgba(20,97,138,0.75)] transition-colors hover:bg-accent"
               >
                 <Phone className="h-5 w-5" />
                 Schedule A Free Evaluation
               </a>
               <a
                 href="#diagnose"
-                className="inline-flex min-h-[52px] items-center gap-3 border border-white/25 px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-white transition-colors hover:border-primary hover:text-primary"
+                className="inline-flex min-h-[52px] items-center gap-3 rounded-md border border-primary/35 bg-white/80 px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary transition-colors hover:border-accent hover:text-accent"
               >
                 Diagnose My Pavement
                 <ArrowRight className="h-5 w-5" />
@@ -246,11 +246,11 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-14 grid max-w-6xl grid-cols-2 border-y border-white/15 md:grid-cols-5">
+          <div className="mt-14 grid max-w-6xl grid-cols-2 overflow-hidden rounded-lg border border-border bg-white/84 shadow-[0_20px_48px_-34px_rgba(15,48,68,0.36)] md:grid-cols-5">
             {proofStats.map((stat) => (
-              <div key={stat.label} className="border-white/15 py-5 pr-5 md:border-r md:last:border-r-0">
-                <p className="font-display text-3xl uppercase text-white md:text-4xl">{stat.value}</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-zinc-400">{stat.label}</p>
+              <div key={stat.label} className="border-border p-5 md:border-r md:last:border-r-0">
+                <p className="font-display text-3xl uppercase text-foreground md:text-4xl">{stat.value}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -261,11 +261,11 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">What we believe</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-[0.92] tracking-normal text-white md:text-7xl">
+            <h2 className="mt-4 font-display text-5xl uppercase leading-[0.92] tracking-normal text-foreground md:text-7xl">
               The right paving decision starts before the proposal.
             </h2>
           </div>
-          <div className="space-y-6 text-base leading-relaxed text-zinc-300 md:text-lg">
+          <div className="space-y-6 text-base leading-relaxed text-muted-foreground md:text-lg">
             <p>
               Most asphalt problems are not solved by the prettiest number on a bid sheet. They are solved by understanding water, base depth, use, traffic load, edges, patch history, and what the property owner is trying to protect.
             </p>
@@ -274,9 +274,9 @@ export default function Home() {
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               {['Transparent guidance', 'No pressure diagnosis', 'Repair vs. replace clarity', 'Long-term pavement planning'].map((item) => (
-                <div key={item} className="flex items-center gap-3 border border-border bg-card/70 p-4">
+                <div key={item} className="flex items-center gap-3 rounded-md border border-border bg-card p-4 shadow-[0_14px_36px_-32px_rgba(15,48,68,0.42)]">
                   <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
-                  <span className="font-display text-xl uppercase text-white">{item}</span>
+                  <span className="font-display text-xl uppercase text-foreground">{item}</span>
                 </div>
               ))}
             </div>
@@ -284,30 +284,30 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="services" className="bg-[#111111] py-20 md:py-28">
+      <section id="services" className="bg-[#eef4f1] py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
               <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Core service solutions</p>
-              <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Everything your pavement needs.</h2>
+              <h2 className="mt-4 font-display text-4xl uppercase leading-none text-foreground sm:text-5xl md:text-7xl">Everything your pavement needs.</h2>
             </div>
-            <p className="max-w-xl text-base leading-relaxed text-zinc-400">
+            <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
               The work is roughly balanced between residential and commercial. Driveways, private lanes, parking lots, sealcoating, crack repair, patching, and resurfacing all matter because most pavement needs the right maintenance long before it needs full replacement.
             </p>
           </div>
 
-          <div className="grid gap-px overflow-hidden border border-border bg-border md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {serviceSolutions.map((service) => (
-              <article key={service} className="bg-background p-7 transition-colors hover:bg-card">
+              <article key={service} className="rounded-lg border border-border bg-card p-7 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)] transition-colors hover:border-primary/40">
                 <Hammer className="mb-6 h-6 w-6 text-primary" />
-                <h3 className="font-display text-3xl uppercase leading-none text-white">{service}</h3>
+                <h3 className="font-display text-3xl uppercase leading-none text-foreground">{service}</h3>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="grid bg-black lg:grid-cols-2">
+      <section className="grid bg-white lg:grid-cols-2">
         <div className="min-h-[420px]">
           <SmartImage
             src={LOT_IMAGE}
@@ -321,13 +321,13 @@ export default function Home() {
         <div className="flex items-center px-6 py-20 lg:px-16">
           <div className="max-w-2xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Markets we serve</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Built for owners who need the truth.</h2>
-              <p className="mt-6 text-base leading-relaxed text-zinc-300">
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">Built for owners who need the truth.</h2>
+              <p className="mt-6 text-base leading-relaxed text-muted-foreground">
                 Our practical service footprint runs from Dinwiddie and Southside Virginia north to Fairfax and Northern Virginia, east to Virginia Beach and Hampton Roads, through Williamsburg and New Kent County new-construction growth, across the rural residential corridors between the larger cities, and west through the I-81 corridor.
               </p>
             <div className="mt-9 grid gap-4 sm:grid-cols-2">
               {markets.map((market) => (
-                <div key={market} className="border-l border-primary bg-white/[0.03] p-4 text-sm leading-relaxed text-zinc-300">
+                <div key={market} className="rounded-r-md border-l-4 border-accent bg-[#eef4f1] p-4 text-sm leading-relaxed text-muted-foreground">
                   {market}
                 </div>
               ))}
@@ -340,16 +340,16 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 max-w-4xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Richmond local pack focus</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Home turf around Richmond.</h2>
-            <p className="mt-7 text-lg leading-relaxed text-zinc-300">
+            <h2 className="mt-4 font-display text-4xl uppercase leading-none text-foreground sm:text-5xl md:text-7xl">Home turf around Richmond.</h2>
+            <p className="mt-7 text-lg leading-relaxed text-muted-foreground">
               Richmond is the center of gravity for the company: Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell. That is where residential driveways, rural lanes, sealcoating, crack repair, pothole repair, and commercial lot maintenance need fast local response and clear scope details.
             </p>
           </div>
-          <div className="grid gap-px overflow-hidden border border-border bg-border md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {richmondMetroSignals.map((market) => (
-              <a key={market.title} href={market.href} className="bg-card p-7 transition-colors hover:bg-[#171717]">
-                <p className="font-display text-2xl uppercase leading-none text-white">{market.title}</p>
-                <p className="mt-5 text-sm leading-relaxed text-zinc-400">{market.body}</p>
+              <a key={market.title} href={market.href} className="rounded-lg border border-border bg-card p-7 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)] transition-colors hover:border-primary/40">
+                <p className="font-display text-2xl uppercase leading-none text-foreground">{market.title}</p>
+                <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{market.body}</p>
               </a>
             ))}
           </div>
@@ -360,38 +360,38 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 max-w-4xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">The Worden process</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">No mystery. No scare tactics. No throwaway scopes.</h2>
+            <h2 className="mt-4 font-display text-4xl uppercase leading-none text-foreground sm:text-5xl md:text-7xl">No mystery. No scare tactics. No throwaway scopes.</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {processSteps.map((step, index) => (
-              <article key={step.title} className="border border-border bg-card/60 p-8">
+              <article key={step.title} className="rounded-lg border border-border bg-card p-8 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
                 <p className="font-display text-6xl text-primary">{index + 1}</p>
-                <h3 className="mt-8 font-display text-3xl uppercase leading-none text-white">{step.title}</h3>
-                <p className="mt-5 text-sm leading-relaxed text-zinc-400">{step.body}</p>
+                <h3 className="mt-8 font-display text-3xl uppercase leading-none text-foreground">{step.title}</h3>
+                <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="learning" className="bg-[#111111] py-20 md:py-28">
+      <section id="learning" className="bg-[#eef4f1] py-20 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[1fr_0.9fr] lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Learning center mindset</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">We teach you what to look for before you hire anyone.</h2>
-            <p className="mt-7 max-w-3xl text-lg leading-relaxed text-zinc-300">
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">We teach you what to look for before you hire anyone.</h2>
+            <p className="mt-7 max-w-3xl text-lg leading-relaxed text-muted-foreground">
               A better buyer gets a better project. Our public pages are being rebuilt around the questions property owners actually ask: cost, timing, warning signs, repair vs. replace, drainage, ADA, and what separates a lasting job from a cheap one.
             </p>
-            <a href="/blog" className="mt-8 inline-flex items-center gap-3 border border-primary px-6 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary hover:text-black">
+            <a href="/blog" className="mt-8 inline-flex items-center gap-3 rounded-md border border-primary/35 bg-white px-6 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary transition-colors hover:border-accent hover:text-accent">
               Visit The Learning Center
               <BookOpen className="h-5 w-5" />
             </a>
           </div>
           <div className="space-y-4">
             {learningTopics.map((topic) => (
-              <div key={topic} className="flex gap-4 border border-border bg-background p-5">
+              <div key={topic} className="flex gap-4 rounded-lg border border-border bg-card p-5 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
                 <ClipboardCheck className="mt-1 h-5 w-5 shrink-0 text-primary" />
-                <p className="text-base leading-relaxed text-zinc-300">{topic}</p>
+                <p className="text-base leading-relaxed text-muted-foreground">{topic}</p>
               </div>
             ))}
           </div>
@@ -402,34 +402,34 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.86fr_1.14fr] lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Cost and pricing guidance</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Real paving prices come from real site conditions.</h2>
-            <p className="mt-7 text-lg leading-relaxed text-zinc-300">
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">Real paving prices come from real site conditions.</h2>
+            <p className="mt-7 text-lg leading-relaxed text-muted-foreground">
               A responsible estimate should explain what drives cost before it asks you to sign. We help owners understand the variables, compare scopes, and spot bids that leave out the work that actually protects the pavement.
             </p>
           </div>
-          <div className="grid gap-px border border-border bg-border sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {pricingFactors.map((factor) => (
-              <article key={factor} className="bg-card p-7">
+              <article key={factor} className="rounded-lg border border-border bg-card p-7 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
                 <CircleDollarSign className="mb-6 h-6 w-6 text-primary" />
-                <p className="text-base leading-relaxed text-zinc-300">{factor}</p>
+                <p className="text-base leading-relaxed text-muted-foreground">{factor}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#111111] py-20 md:py-28">
+      <section className="bg-[#eef4f1] py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 max-w-4xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Repair or replace?</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">The answer should come from the pavement, not the salesperson.</h2>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">The answer should come from the pavement, not the salesperson.</h2>
           </div>
           <div className="grid gap-5 md:grid-cols-4">
             {decisionSignals.map((signal) => (
-              <article key={signal.label} className="border border-border bg-background p-7">
+              <article key={signal.label} className="rounded-lg border border-border bg-card p-7 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
                 <ListChecks className="mb-7 h-6 w-6 text-primary" />
-                <h3 className="font-display text-4xl uppercase leading-none text-white">{signal.label}</h3>
-                <p className="mt-5 text-sm leading-relaxed text-zinc-400">{signal.body}</p>
+                <h3 className="font-display text-4xl uppercase leading-none text-foreground">{signal.label}</h3>
+                <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{signal.body}</p>
               </article>
             ))}
           </div>
@@ -440,33 +440,33 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">How to compare contractors</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Google can rank pages. Owners still need a checklist.</h2>
-            <p className="mt-7 text-lg leading-relaxed text-zinc-300">
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">Google can rank pages. Owners still need a checklist.</h2>
+            <p className="mt-7 text-lg leading-relaxed text-muted-foreground">
               The best asphalt page should make you harder to fool. These are the items we want every Virginia buyer to check before choosing any paving contractor, including us.
             </p>
           </div>
           <div className="space-y-4">
             {trustChecklist.map((item) => (
-              <div key={item} className="flex gap-4 border border-border bg-card p-5">
+              <div key={item} className="flex gap-4 rounded-lg border border-border bg-card p-5 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
                 <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-primary" />
-                <p className="text-base leading-relaxed text-zinc-300">{item}</p>
+                <p className="text-base leading-relaxed text-muted-foreground">{item}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#111111] py-20 md:py-28">
+      <section className="bg-[#eef4f1] py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 max-w-4xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Helpful answers</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Asphalt questions buyers ask before they call.</h2>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">Asphalt questions buyers ask before they call.</h2>
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
             {faqs.map((faq) => (
-              <article key={faq.question} className="border border-border bg-background p-7">
-                <h3 className="font-display text-3xl uppercase leading-none text-white">{faq.question}</h3>
-                <p className="mt-5 text-sm leading-relaxed text-zinc-400">{faq.answer}</p>
+              <article key={faq.question} className="rounded-lg border border-border bg-card p-7 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
+                <h3 className="font-display text-3xl uppercase leading-none text-foreground">{faq.question}</h3>
+                <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{faq.answer}</p>
               </article>
             ))}
           </div>
@@ -477,10 +477,10 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Explore services</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Clear paths for every major paving need.</h2>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">Clear paths for every major paving need.</h2>
             <div className="mt-8 flex flex-wrap gap-3">
               {internalLinks.map((link) => (
-                <a key={link.href} href={link.href} className="border border-border bg-card px-5 py-3 font-display text-xl uppercase text-white transition-colors hover:border-primary hover:text-primary">
+                <a key={link.href} href={link.href} className="rounded-md border border-border bg-card px-5 py-3 font-display text-xl uppercase text-foreground transition-colors hover:border-primary hover:text-primary">
                   {link.label}
                 </a>
               ))}
@@ -488,18 +488,18 @@ export default function Home() {
           </div>
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Service areas</p>
-            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Dinwiddie to Fairfax. Virginia Beach to I-81.</h2>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-foreground md:text-7xl">Dinwiddie to Fairfax. Virginia Beach to I-81.</h2>
             <div className="mt-8 grid gap-4">
               {footprintAnchors.map((anchor) => (
-                <article key={anchor.title} className="border-l border-primary bg-card p-5">
-                  <h3 className="font-display text-3xl uppercase leading-none text-white">{anchor.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-zinc-400">{anchor.body}</p>
+                <article key={anchor.title} className="rounded-r-md border-l-4 border-accent bg-card p-5 shadow-[0_18px_42px_-34px_rgba(15,48,68,0.34)]">
+                  <h3 className="font-display text-3xl uppercase leading-none text-foreground">{anchor.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{anchor.body}</p>
                 </article>
               ))}
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
               {serviceAreaLinks.map((link) => (
-                <a key={link.href} href={link.href} className="border border-border bg-card px-5 py-3 font-display text-xl uppercase text-white transition-colors hover:border-primary hover:text-primary">
+                <a key={link.href} href={link.href} className="rounded-md border border-border bg-card px-5 py-3 font-display text-xl uppercase text-foreground transition-colors hover:border-primary hover:text-primary">
                   {link.label}
                 </a>
               ))}
@@ -508,15 +508,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid bg-black lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="grid bg-white lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex items-center px-6 py-20 lg:px-16">
           <div className="max-w-2xl">
-            <div className="mb-7 inline-flex items-center gap-3 border border-primary/40 bg-primary/10 px-4 py-2 text-primary">
+            <div className="mb-7 inline-flex items-center gap-3 rounded-md border border-primary/25 bg-[#eef4f1] px-4 py-2 text-primary">
               <TriangleAlert className="h-4 w-4" />
               <span className="font-display text-sm uppercase tracking-[0.2em]">Avoid the expensive mistake</span>
             </div>
-            <h2 className="font-display text-5xl uppercase leading-none text-white md:text-7xl">The wrong paving contractor is not cheap.</h2>
-            <p className="mt-7 text-lg leading-relaxed text-zinc-300">
+            <h2 className="font-display text-5xl uppercase leading-none text-foreground md:text-7xl">The wrong paving contractor is not cheap.</h2>
+            <p className="mt-7 text-lg leading-relaxed text-muted-foreground">
               Low bids often hide missing prep, thin asphalt, weak base repair, ignored drainage, vague exclusions, and future change orders. The right question is not just price. It is whether the scope protects the pavement after we leave.
             </p>
           </div>
@@ -528,23 +528,23 @@ export default function Home() {
             width={1600}
             height={1100}
             sizes="(max-width: 1024px) 100vw, 55vw"
-            className="h-full w-full object-cover grayscale"
+            className="h-full w-full object-cover saturate-90"
           />
         </div>
       </section>
 
-      <section className="bg-primary py-16 text-black">
+      <section className="bg-primary py-16 text-primary-foreground">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 md:flex-row md:items-center md:justify-between lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.22em]">How can we help?</p>
             <h2 className="mt-2 font-display text-4xl uppercase leading-none md:text-6xl">Ready to take the guesswork out of asphalt?</h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <a href="tel:+18044461296" onClick={() => trackPhoneClick('homepage_bottom')} className="inline-flex min-h-[52px] items-center gap-3 bg-black px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-white">
+            <a href="tel:+18044461296" onClick={() => trackPhoneClick('homepage_bottom')} className="inline-flex min-h-[52px] items-center gap-3 rounded-md bg-white px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary">
               <Phone className="h-5 w-5" />
               Call 804.446.1296
             </a>
-            <a href="/jwordenai" className="inline-flex min-h-[52px] items-center gap-3 border border-black px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-black">
+            <a href="/jwordenai" className="inline-flex min-h-[52px] items-center gap-3 rounded-md border border-white/55 px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-white">
               JWORDENAI Teaser
               <Building2 className="h-5 w-5" />
             </a>

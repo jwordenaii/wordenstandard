@@ -10,27 +10,27 @@
     --font-heading: 'Bebas Neue', sans-serif;
     --font-body: 'Inter', sans-serif;
 
-    /* Industrial Luxury Palette: Obsidian, Zinc, Brushed Gold */
-    --background: 0 0% 4%; /* #0A0A0A */
-    --foreground: 0 0% 98%;
-    --card: 240 5% 9%; /* Zinc-900 */
-    --card-foreground: 0 0% 98%;
-    --popover: 240 5% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 41 51% 56%; /* #C5A059 Brushed Gold */
-    --primary-foreground: 0 0% 4%;
-    --secondary: 240 5% 15%; /* Zinc-800 */
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 5% 15%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 41 51% 56%;
-    --accent-foreground: 0 0% 4%;
+    /* High-trust contractor palette: clean concrete, asphalt navy, service green */
+    --background: 48 33% 97%;
+    --foreground: 215 40% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 40% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 40% 16%;
+    --primary: 203 74% 29%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 154 32% 93%;
+    --secondary-foreground: 154 42% 22%;
+    --muted: 210 28% 93%;
+    --muted-foreground: 214 17% 42%;
+    --accent: 154 45% 34%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5% 15%; /* Zinc-800 */
-    --input: 240 5% 15%;
-    --ring: 41 51% 56%;
-    --radius: 0rem; /* Sharp industrial edges */
+    --border: 214 24% 84%;
+    --input: 214 24% 84%;
+    --ring: 203 74% 29%;
+    --radius: 0.5rem;
   }
 }
 
@@ -40,18 +40,17 @@
   }
 
   ::selection {
-    background-color: #C5A059;
-    color: #0A0A0A;
+    background-color: #14618a;
+    color: #ffffff;
   }
 
   body {
     @apply bg-background text-foreground;
-    /* Mesh Gradient: Obsidian to Zinc depth */
-    background-color: #0A0A0A;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(240, 5%, 15%, 0.3) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(41, 51%, 56%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(240, 5%, 10%, 0.5) 0px, transparent 50%);
+    background-color: #f8f7f1;
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,0.92), rgba(242,246,241,0.78)),
+      radial-gradient(at 0% 0%, rgba(20, 97, 138, 0.08) 0px, transparent 42%),
+      radial-gradient(at 100% 10%, rgba(50, 125, 89, 0.08) 0px, transparent 38%);
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -63,40 +62,37 @@
   }
 }
 
-/* Industrial Utility Classes */
+/* Contractor Utility Classes */
 .border-industrial {
-  @apply border border-zinc-800;
+  @apply border border-border;
 }
 
 .mesh-gradient-hero {
-  background: radial-gradient(at 0% 0%, #18181b 0%, transparent 50%),
-              radial-gradient(at 100% 0%, #0a0a0a 0%, transparent 50%),
-              radial-gradient(at 50% 50%, #18181b 0%, #0a0a0a 100%);
+  background: linear-gradient(120deg, rgba(255,255,255,0.94), rgba(232,241,238,0.86));
 }
 
-/* Luxury Surfaces */
+/* Service-company surfaces */
 .glass-surface {
-  @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)];
+  @apply border border-border bg-white/90 shadow-[0_18px_42px_-28px_rgba(15,48,68,0.35)] backdrop-blur-xl;
 }
 
 .glass-surface-premium {
-  @apply relative overflow-hidden bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-3xl border border-white/[0.08] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)];
-  /* Inner bevel effect */
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  @apply relative overflow-hidden border border-border bg-white/95 shadow-[0_24px_54px_-32px_rgba(15,48,68,0.32)] backdrop-blur-2xl;
+  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.8);
 }
 
 .glass-surface-premium::before {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 transition-opacity duration-700;
+  @apply absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 transition-opacity duration-700;
 }
 
 .glass-surface-premium:hover::before {
   @apply opacity-100;
 }
 
-/* Elite Typography */
+/* Legacy typography helpers */
 .text-gold-gradient {
-  background: linear-gradient(135deg, #FFD700 0%, #B8860B 25%, #FFD700 50%, #B8860B 75%, #FFD700 100%);
+  background: linear-gradient(135deg, #14618a 0%, #327d59 48%, #1f6f9f 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 200% auto;
@@ -105,7 +101,7 @@
 }
 
 .luxury-text-shadow {
-  text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 10px rgba(15,48,68,0.18);
 }
 
 @keyframes shine {
@@ -113,12 +109,12 @@
 }
 
 .premium-panel {
-  @apply relative overflow-hidden rounded-[2rem] border border-white/[0.05] bg-[#080808]/80 backdrop-blur-2xl transition-all duration-700 hover:border-primary/20;
+  @apply relative overflow-hidden rounded-lg border border-border bg-card shadow-[0_20px_50px_-36px_rgba(15,48,68,0.35)] transition-all duration-300 hover:border-primary/35;
 }
 
 /* Button & Interaction Design */
 .premium-cta {
-  @apply relative overflow-hidden rounded-full bg-primary px-10 py-5 font-display text-sm tracking-[0.3em] uppercase text-primary-foreground shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_20px_40px_-10px_rgba(255,166,35,0.4)];
+  @apply relative overflow-hidden rounded-md bg-primary px-10 py-5 font-display text-sm tracking-[0.16em] uppercase text-primary-foreground shadow-[0_16px_32px_-22px_rgba(20,97,138,0.8)] transition-all duration-300 hover:bg-accent active:scale-[0.98];
 }
 
 .premium-cta::after {
@@ -144,5 +140,5 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { @apply bg-zinc-950; }
-::-webkit-scrollbar-thumb { @apply bg-zinc-800 rounded-full border-2 border-zinc-950 hover:bg-zinc-700; }
+::-webkit-scrollbar-track { @apply bg-muted; }
+::-webkit-scrollbar-thumb { @apply bg-primary/45 rounded-full border-2 border-muted hover:bg-primary/70; }

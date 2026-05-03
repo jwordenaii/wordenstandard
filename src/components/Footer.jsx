@@ -1,8 +1,7 @@
 import React from 'react';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { trackPhoneClick } from '@/lib/analytics';
-import SmartImage from '@/components/SmartImage';
-import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
+import { PRIMARY_LOGO_URL } from '@/lib/branding';
 
 export default function Footer() {
   const scrollTo = (href) => {
@@ -11,22 +10,18 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-border relative overflow-hidden">
-      <div className="absolute -top-16 left-10 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+    <footer className="relative overflow-hidden border-t border-border bg-[#eef4f1]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
           {/* Brand */}
-          <div className="lg:col-span-1 premium-panel rounded-2xl p-6">
+          <div className="lg:col-span-1 premium-panel p-6">
             <div className="flex items-center gap-3 mb-6">
-              <SmartImage
+              <img
                 src={PRIMARY_LOGO_URL}
-                fallbackSrc={FALLBACK_LOGO_URL}
                 alt="J. Worden & Sons Asphalt Paving logo"
-                label="J. Worden & Sons"
-                sublabel="Asphalt Paving"
                 width={560}
                 height={120}
-                className="w-40 h-12 object-contain bg-white/5 border border-white/10 rounded-md p-1"
+                className="w-40 h-12 object-contain rounded-md border border-border bg-white p-1"
                 sizes="160px"
               />
               <div>
@@ -44,7 +39,7 @@ export default function Footer() {
           </div>
 
           {/* Quick links */}
-          <div className="premium-panel rounded-2xl p-6">
+          <div className="premium-panel p-6">
             <h4 className="font-display font-bold text-foreground text-xs tracking-[0.2em] uppercase mb-6">Navigation</h4>
             <div className="space-y-3">
               {[
@@ -77,7 +72,7 @@ export default function Footer() {
           </div>
 
           {/* Services */}
-          <div className="premium-panel rounded-2xl p-6">
+          <div className="premium-panel p-6">
             <h4 className="font-display font-bold text-foreground text-xs tracking-[0.2em] uppercase mb-6">Services</h4>
             <div className="space-y-3">
               {['Residential Paving', 'Commercial Paving', 'Industrial Paving', 'Sealcoating', 'Crack Repair', 'Line Striping'].map((s) => (
@@ -87,7 +82,7 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="premium-panel rounded-2xl p-6">
+          <div className="premium-panel p-6">
             <h4 className="font-display font-bold text-foreground text-xs tracking-[0.2em] uppercase mb-6">Contact</h4>
             <div className="space-y-4">
               <a

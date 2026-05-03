@@ -47,6 +47,9 @@ export default function SmartImage({
   }, [src])
 
   const showFallback = !activeSrc || failed
+  const presentationStyle = className.includes('h-full')
+    ? { width: '100%', maxWidth: '100%' }
+    : { aspectRatio: `${width} / ${height}`, width: '100%', maxWidth: '100%' }
 
   const handleError = () => {
     if (fallbackSrc && activeSrc !== fallbackSrc) {
@@ -62,7 +65,7 @@ export default function SmartImage({
         role="img"
         aria-label={alt || label || 'Project photo placeholder'}
         className={`image-presentation-premium flex items-center justify-center ${className}`}
-        style={{ aspectRatio: `${width} / ${height}` }}
+        style={presentationStyle}
       >
         <div
           className="absolute inset-0 opacity-[0.03]"
@@ -90,7 +93,7 @@ export default function SmartImage({
   }
 
   return (
-    <div className={`image-presentation-premium image-reveal-obsidian ${className}`} style={{ aspectRatio: `${width} / ${height}` }}>
+    <div className={`image-presentation-premium image-reveal-obsidian ${className}`} style={presentationStyle}>
       <img
         src={activeSrc}
         alt={alt}

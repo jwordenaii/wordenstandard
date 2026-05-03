@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackPhoneClick } from '@/lib/analytics';
-import SmartImage from './SmartImage';
-import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
+import { PRIMARY_LOGO_URL } from '@/lib/branding';
 
 const NAV_LINKS = [
   { label: 'Paving', href: '/paving' },
@@ -43,23 +42,21 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-black/82 backdrop-blur-xl border-b border-primary/20 shadow-[0_12px_28px_rgba(0,0,0,0.45)]'
-          : 'bg-black/48 backdrop-blur-md border-b border-transparent'
+          ? 'bg-white/95 backdrop-blur-xl border-b border-border shadow-[0_12px_28px_rgba(15,48,68,0.12)]'
+          : 'bg-white/86 backdrop-blur-md border-b border-white/70 shadow-[0_8px_24px_rgba(15,48,68,0.08)]'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo — top left corner */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0 shrink-0" aria-label="J. Worden & Sons Asphalt Paving — Home">
-            <SmartImage
+            <img
               src={PRIMARY_LOGO_URL}
-              fallbackSrc={FALLBACK_LOGO_URL}
               alt="J. Worden & Sons Asphalt Paving — Quality Work. Built To Last."
               width={560}
               height={120}
-              priority
-              sizes="(max-width: 768px) 240px, 360px"
-              className="h-12 sm:h-14 md:h-20 w-[230px] sm:w-[270px] md:w-[360px] object-contain quality-premium"
+              sizes="(max-width: 640px) 190px, (max-width: 768px) 250px, 340px"
+              className="h-12 sm:h-14 md:h-20 w-[190px] sm:w-[250px] md:w-[340px] object-contain quality-premium"
             />
           </button>
 
@@ -123,7 +120,7 @@ export default function Navbar() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="lg:hidden bg-black/95 backdrop-blur-xl border-b border-primary/20 overflow-hidden">
+          className="lg:hidden bg-white/98 backdrop-blur-xl border-b border-border overflow-hidden">
           
             <div className="px-6 py-6 space-y-1">
               {NAV_LINKS.map((link) =>
@@ -155,12 +152,11 @@ export default function Navbar() {
           exit={{ opacity: 0, y: 12, scale: 0.92 }}
           transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[70] rounded-xl border border-primary/30 bg-black/88 shadow-[0_14px_36px_rgba(0,0,0,0.55)] px-3 py-2 backdrop-blur-lg"
+          className="fixed bottom-4 right-4 z-[70] hidden rounded-xl border border-border bg-white/94 px-3 py-2 shadow-[0_14px_36px_rgba(15,48,68,0.2)] backdrop-blur-lg md:bottom-6 md:right-6 md:block"
           aria-label="Back to top">
 
-            <SmartImage
+            <img
               src={PRIMARY_LOGO_URL}
-              fallbackSrc={FALLBACK_LOGO_URL}
               alt="J. Worden & Sons Asphalt Paving mini logo"
               width={560}
               height={120}

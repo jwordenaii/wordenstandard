@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 120" fill="none" role="img" aria-label="J. Worden &amp; Sons Asphalt Paving">
-  <!-- Sophisticated dark gradient background -->
+  <!-- Clean contractor brand colors -->
   <defs>
-    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#FDB931;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#14618A;stop-opacity:1" />
+      <stop offset="52%" style="stop-color:#327D59;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1F6F9F;stop-opacity:1" />
     </linearGradient>
   </defs>
   
@@ -12,23 +12,23 @@
   
   <!-- The main mark -->
   <g transform="translate(10, 10)">
-    <!-- Obsidian slab icon -->
-    <rect width="60" height="100" rx="8" fill="#111111" />
-    <path d="M10 20 L50 20 L50 80 L10 80 Z" fill="url(#goldGradient)" opacity="0.9" />
+        <!-- Asphalt slab icon -->
+        <rect width="60" height="100" rx="8" fill="#183244" />
+        <path d="M10 20 L50 20 L50 80 L10 80 Z" fill="url(#brandGradient)" opacity="0.95" />
     <text x="30" y="62" font-family="'Playfair Display', serif" font-size="34" font-weight="900" 
-          text-anchor="middle" fill="#111111" letter-spacing="-2">W</text>
+          text-anchor="middle" fill="#FFFFFF" letter-spacing="-2">W</text>
   </g>
   
   <!-- Typography -->
     <g transform="translate(85, 42)">
       <text y="0" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="800" 
-        fill="url(#goldGradient)" letter-spacing="1">J. WORDEN &amp; SONS</text>
+        fill="#183244" letter-spacing="1">J. WORDEN &amp; SONS</text>
       <text y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="18" font-weight="700" 
-        fill="#FFFFFF" opacity="0.86" letter-spacing="3" text-transform="uppercase">ASPHALT PAVING</text>
+        fill="#327D59" opacity="0.96" letter-spacing="3" text-transform="uppercase">ASPHALT PAVING</text>
     
     <!-- Foundation line -->
-    <rect y="48" width="420" height="1" fill="url(#goldGradient)" opacity="0.3"/>
+        <rect y="48" width="420" height="1" fill="url(#brandGradient)" opacity="0.35"/>
     <text x="210" y="64" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="300" 
-          fill="#FFFFFF" opacity="0.4" text-anchor="middle" letter-spacing="2">ESTABLISHED 1984 · VIRGINIA</text>
+          fill="#486273" opacity="0.82" text-anchor="middle" letter-spacing="2">ESTABLISHED 1984 · VIRGINIA</text>
   </g>
 </svg>
