@@ -164,6 +164,7 @@ async function protectedRequest(method, path, body) {
     const res = await fetch(`${BASE}${path}`, opts)
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
+      handleAuthRejection(res.status, err.detail)
       throw new Error(err.detail || `HTTP ${res.status}`)
     }
     if (res.status === 204) return null
