@@ -10,6 +10,7 @@
 # ============================================================
 /robots.txt    /robots.txt    200!
 /sitemap.xml   /sitemap.xml   200!
+/api/*         https://codexbuildfreeofbase44-production.up.railway.app/api/:splat    200!
 
 # Force canonical host
 https://jwordenasphaltpaving.com/*      https://www.jwordenasphaltpaving.com/:splat      301!
