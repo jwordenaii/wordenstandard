@@ -22,6 +22,8 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthenticated,
         isLoadingAuth: false,
+        authChecked: true,
+        checkUserAuth: async () => {},
         isLoadingPublicSettings: false,
         authError: null,
         appPublicSettings: { public_settings: {} },
