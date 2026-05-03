@@ -50,16 +50,16 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo — top left corner */}
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0" aria-label="J. Worden & Sons Paving — Home">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0 shrink-0" aria-label="J. Worden & Sons Asphalt Paving — Home">
             <SmartImage
               src={PRIMARY_LOGO_URL}
               fallbackSrc={FALLBACK_LOGO_URL}
-              alt="J. Worden & Sons Paving — Quality Work. Built To Last."
-              width={1400}
-              height={420}
+              alt="J. Worden & Sons Asphalt Paving — Quality Work. Built To Last."
+              width={560}
+              height={120}
               priority
-              sizes="(max-width: 768px) 220px, 300px"
-              className="h-12 sm:h-14 md:h-20 w-auto object-contain quality-premium"
+              sizes="(max-width: 768px) 240px, 360px"
+              className="h-12 sm:h-14 md:h-20 w-[230px] sm:w-[270px] md:w-[360px] object-contain quality-premium"
             />
           </button>
 
@@ -67,7 +67,7 @@ export default function Navbar() {
           <a
             href="tel:+18044461296"
             onClick={() => trackPhoneClick('navbar_mobile')}
-            className="md:hidden flex items-center gap-1.5 text-primary font-display font-bold text-xs tracking-wider ml-2 flex-shrink-0"
+            className="lg:hidden flex items-center gap-1.5 text-primary font-display font-bold text-xs tracking-wider ml-2 flex-shrink-0"
             aria-label="Call (804) 446-1296"
           >
             <Phone className="w-4 h-4" />
@@ -78,7 +78,7 @@ export default function Navbar() {
           <a
             href="tel:+18044461296"
             onClick={() => trackPhoneClick('navbar_desktop')}
-            className="hidden md:flex items-center gap-2 text-primary font-display font-bold text-sm tracking-[0.14em] uppercase hover:text-primary/80 transition-colors ml-auto mr-6"
+            className="hidden lg:flex items-center gap-2 text-primary font-display font-bold text-sm tracking-[0.14em] uppercase hover:text-primary/80 transition-colors ml-auto mr-6"
             aria-label="Call (804) 446-1296"
           >
             <Phone className="w-4 h-4" />
@@ -86,7 +86,7 @@ export default function Navbar() {
           </a>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-7 xl:gap-8">
             {NAV_LINKS.map((link) =>
             <button
               key={link.label}
@@ -108,7 +108,7 @@ export default function Navbar() {
           {/* Mobile toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-foreground p-2 min-h-[48px] min-w-[48px] flex items-center justify-center"
+            className="lg:hidden text-foreground p-2 min-h-[48px] min-w-[48px] flex items-center justify-center"
             aria-label="Toggle menu">
             
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -123,7 +123,7 @@ export default function Navbar() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-black/95 backdrop-blur-xl border-b border-primary/20 overflow-hidden">
+          className="lg:hidden bg-black/95 backdrop-blur-xl border-b border-primary/20 overflow-hidden">
           
             <div className="px-6 py-6 space-y-1">
               {NAV_LINKS.map((link) =>
@@ -161,11 +161,11 @@ export default function Navbar() {
             <SmartImage
               src={PRIMARY_LOGO_URL}
               fallbackSrc={FALLBACK_LOGO_URL}
-              alt="J. Worden & Sons mini logo"
-              width={220}
-              height={70}
-              sizes="96px"
-              className="w-20 h-7 md:w-24 md:h-8 object-contain"
+              alt="J. Worden & Sons Asphalt Paving mini logo"
+              width={560}
+              height={120}
+              sizes="160px"
+              className="w-36 h-8 md:w-40 md:h-9 object-contain"
             />
           </motion.button>
         }

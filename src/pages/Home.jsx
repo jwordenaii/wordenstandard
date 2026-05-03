@@ -32,6 +32,29 @@ const markets = [
   'Sealcoating and repair customers protecting existing pavement',
 ];
 
+const richmondMetroSignals = [
+  {
+    title: 'Richmond City',
+    body: 'Driveway repair, alley access, commercial patching, and sealcoating from The Fan and Museum District to Manchester, Church Hill, Scott\'s Addition, and Shockoe Bottom.',
+    href: '/locations/richmond-va',
+  },
+  {
+    title: 'Chester / Chesterfield',
+    body: 'The home-base corridor for residential driveways, private lanes, church lots, HOAs, rural entrances, and commercial maintenance south of Richmond.',
+    href: '/locations/chester-va',
+  },
+  {
+    title: 'Henrico / West End',
+    body: 'Sealcoating, crack repair, parking-lot resurfacing, residential paving, and industrial pavement planning from Glen Allen to Sandston.',
+    href: '/locations/henrico-va',
+  },
+  {
+    title: 'Midlothian / Short Pump',
+    body: 'High-value residential driveways, estate access roads, retail centers, and maintenance plans for the west and northwest Richmond growth markets.',
+    href: '/locations/midlothian-va',
+  },
+];
+
 const footprintAnchors = [
   {
     title: 'Southside / Dinwiddie',
@@ -151,6 +174,10 @@ const faqs = [
   {
     question: 'Do you handle sealcoating and asphalt repair, or only full paving?',
     answer: 'Sealcoating, crack sealing, pothole repair, patching, milling, overlays, and pavement preservation are major services. Many properties do not need full replacement yet; the right repair or maintenance plan can protect the driveway or lot and delay a larger capital project.',
+  },
+  {
+    question: 'What Richmond-area markets does J. Worden prioritize?',
+    answer: 'Richmond metro is home turf. The core local service area includes Richmond, Chester, Chesterfield, Henrico, Glen Allen, Short Pump, Midlothian, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, Hopewell, and nearby rural residential corridors where driveway, sealcoating, repair, and parking-lot work are strongest.',
   },
 ];
 
@@ -305,6 +332,26 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-border bg-background py-20 md:py-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-12 max-w-4xl">
+            <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Richmond local pack focus</p>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">Home turf around Richmond.</h2>
+            <p className="mt-7 text-lg leading-relaxed text-zinc-300">
+              Richmond is the center of gravity for the company: Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell. That is where residential driveways, rural lanes, sealcoating, crack repair, pothole repair, and commercial lot maintenance need fast local response and clear scope details.
+            </p>
+          </div>
+          <div className="grid gap-px overflow-hidden border border-border bg-border md:grid-cols-2 lg:grid-cols-4">
+            {richmondMetroSignals.map((market) => (
+              <a key={market.title} href={market.href} className="bg-card p-7 transition-colors hover:bg-[#171717]">
+                <p className="font-display text-2xl uppercase leading-none text-white">{market.title}</p>
+                <p className="mt-5 text-sm leading-relaxed text-zinc-400">{market.body}</p>
+              </a>
+            ))}
           </div>
         </div>
       </section>

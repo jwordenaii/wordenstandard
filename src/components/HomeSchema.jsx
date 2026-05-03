@@ -13,7 +13,7 @@ export default function HomeSchema() {
   useEffect(() => {
     const localBusiness = {
       '@context': 'https://schema.org',
-      '@type': 'LocalBusiness',
+      '@type': ['LocalBusiness', 'PavingContractor'],
       '@id': 'https://www.jwordenasphaltpaving.com/#organization',
       name: 'J. Worden & Sons Asphalt Paving',
       legalName: 'J. Worden & Sons Paving, L.L.C.',
@@ -23,7 +23,7 @@ export default function HomeSchema() {
       logo: 'https://www.jwordenasphaltpaving.com/logo.png',
       image: 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
       description:
-        'Virginia\'s family-owned asphalt paving contractor for 40+ years. Mountain-grade spec for the I-81 corridor, coastal-spec engineering for Virginia Beach and Hampton Roads, and virgin-soil stabilization for Fredericksburg new construction. Serving all of Virginia with 4th-generation craftsmanship, written 5-year warranty, licensed/bonded/insured.',
+        'Family-owned asphalt paving contractor based in the Richmond metro for 40+ years. Core local service around Richmond, Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell, with residential driveways, commercial lots, sealcoating, asphalt repair, and pavement preservation as core services.',
       disambiguatingDescription:
         'J. Worden & Sons Asphalt Paving is an independent company operating at jwordenasphaltpaving.com and is not affiliated with Worden Paving.',
       foundingDate: '1984',
@@ -68,6 +68,7 @@ export default function HomeSchema() {
         { '@type': 'State', name: 'Virginia' },
         { '@type': 'City', name: 'Richmond' },
         { '@type': 'City', name: 'Chester' },
+        { '@type': 'AdministrativeArea', name: 'Chesterfield County' },
         { '@type': 'City', name: 'Dinwiddie' },
         { '@type': 'City', name: 'Petersburg' },
         { '@type': 'City', name: 'Hopewell' },
@@ -90,6 +91,37 @@ export default function HomeSchema() {
         { '@type': 'City', name: 'Fairfax' },
         { '@type': 'City', name: 'Stafford' },
         { '@type': 'City', name: 'Spotsylvania' },
+      ],
+      serviceArea: [
+        {
+          '@type': 'AdministrativeArea',
+          name: 'Richmond Metro Area',
+          containsPlace: [
+            { '@type': 'City', name: 'Richmond' },
+            { '@type': 'City', name: 'Chester' },
+            { '@type': 'AdministrativeArea', name: 'Chesterfield County' },
+            { '@type': 'AdministrativeArea', name: 'Henrico County' },
+            { '@type': 'City', name: 'Midlothian' },
+            { '@type': 'City', name: 'Short Pump' },
+            { '@type': 'City', name: 'Glen Allen' },
+            { '@type': 'City', name: 'Bon Air' },
+            { '@type': 'City', name: 'Tuckahoe' },
+            { '@type': 'City', name: 'Mechanicsville' },
+            { '@type': 'City', name: 'Ashland' },
+            { '@type': 'City', name: 'Petersburg' },
+            { '@type': 'City', name: 'Hopewell' },
+          ],
+        },
+      ],
+      knowsAbout: [
+        'Richmond asphalt paving',
+        'Richmond driveway paving',
+        'Richmond sealcoating',
+        'Richmond asphalt repair',
+        'Chesterfield driveway paving',
+        'Henrico parking lot repair',
+        'Midlothian residential asphalt',
+        'Short Pump commercial asphalt maintenance',
       ],
       aggregateRating: {
         '@type': 'AggregateRating',
@@ -147,6 +179,19 @@ export default function HomeSchema() {
                 'Professional sealcoating, hot-pour crack repair, pothole patching, asphalt repair, and pavement preservation for residential driveways and commercial parking lots. Recommended before oxidation and water intrusion turn maintenance into replacement.',
             },
           },
+          {
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: 'Richmond Metro Asphalt Paving, Sealcoating & Repair',
+              areaServed: {
+                '@type': 'AdministrativeArea',
+                name: 'Richmond Metro Area',
+              },
+              description:
+                'Residential driveway paving, commercial parking lot repair, sealcoating, crack sealing, pothole patching, milling, overlays, and pavement maintenance across Richmond, Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell.',
+            },
+          },
         ],
       },
       sameAs: [
@@ -174,6 +219,14 @@ export default function HomeSchema() {
           acceptedAnswer: {
             '@type': 'Answer',
             text: 'Compare both proposals on written scope detail, base depth, asphalt mix specification, drainage plan, warranty terms, and whether repair versus replacement is documented before contract signature. J. Worden & Sons provides line-item scope clarity and practical pre-contract guidance so Richmond buyers can compare bids fairly and avoid hidden change orders.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Does J. Worden & Sons serve the Richmond metro for residential and commercial asphalt work?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. Richmond metro is the core local service area, including Richmond, Chester, Chesterfield County, Henrico County, Glen Allen, Short Pump, Midlothian, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, Hopewell, and nearby rural residential corridors. Services include driveway paving, commercial parking lot paving, sealcoating, crack repair, pothole repair, milling, overlays, and pavement preservation.',
           },
         },
         {

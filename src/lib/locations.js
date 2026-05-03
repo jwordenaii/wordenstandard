@@ -52,9 +52,9 @@ export const LOCATIONS = [
     stateAbbr: 'VA',
     region: 'Central Virginia',
     geo: { lat: 37.5407, lng: -77.4360 },
-    headline: 'Asphalt Paving in Richmond, VA — 40 Years on RVA Streets',
+    headline: 'Asphalt Paving in Richmond, VA — Local Driveways, Lots, Sealcoating, and Repair',
     intro:
-      'From the cobblestones of Shockoe Bottom to the modern logistics yards off I-95, Richmond\'s pavement tells the story of four centuries of traffic. We\'ve patched the alleys of the Fan, repaved Capital One\'s campus loops, and re-laid VCU parking decks. Local crew. Local accountability.',
+      'Richmond is home-market asphalt for J. Worden & Sons: residential driveways, rural lanes just outside the city, HOA roads, church lots, commercial parking lots, sealcoating, crack repair, pothole patching, milling, and overlays. From The Fan, Church Hill, Scott\'s Addition, and Manchester to Chester, Henrico, Midlothian, Short Pump, and the county-road residential corridors around Richmond, the work starts with local diagnosis and a written scope.',
     neighborhoods: [
       'The Fan', 'Church Hill', 'Shockoe Bottom', 'Scott\'s Addition',
       'Museum District', 'Carytown', 'Manchester', 'Forest Hill',
@@ -77,6 +77,14 @@ export const LOCATIONS = [
       {
         q: 'How do you handle Richmond\'s stormwater runoff requirements?',
         a: 'Lots over 2,500 sq ft trigger Richmond DPU stormwater review. We design with permeable asphalt options or integrate bioswale tie-ins. We submit the SWPPP plan for you.',
+      },
+      {
+        q: 'Do you handle sealcoating and asphalt repair around Richmond?',
+        a: 'Yes. Richmond metro sealcoating, crack repair, pothole patching, milling, overlays, and pavement preservation are core services for residential driveways, HOAs, church lots, retail lots, and industrial yards.',
+      },
+      {
+        q: 'What areas around Richmond are priority service markets?',
+        a: 'Richmond, Chester, Chesterfield, Henrico, Glen Allen, Short Pump, Midlothian, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, Hopewell, and nearby rural residential corridors are core local markets.',
       },
     ],
     reviews: 287,

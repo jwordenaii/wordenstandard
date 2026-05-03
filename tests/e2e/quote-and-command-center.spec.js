@@ -88,6 +88,7 @@ test.beforeEach(async ({ page }) => {
 test('homepage education-first smoke flow', async ({ page }) => {
   await page.goto('/')
 
+  await expect(page.getByLabel(/J\. Worden & Sons Asphalt Paving/i).first()).toBeVisible()
   await expect(page.getByRole('heading', { name: /Educate First/i })).toBeVisible()
   await expect(page.getByText(/Award-winning Virginia paving company/i)).toBeVisible()
   await expect(page.getByRole('heading', { name: /The right paving decision starts before the proposal/i })).toBeVisible()
@@ -95,6 +96,9 @@ test('homepage education-first smoke flow', async ({ page }) => {
   await expect(page.getByText(/50\/50/i)).toBeVisible()
   await expect(page.getByText(/Sealcoating, crack sealing, and pavement preservation programs/i)).toBeVisible()
   await expect(page.getByText(/Asphalt repair, pothole patching, milling, and overlays/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Home turf around Richmond/i })).toBeVisible()
+  await expect(page.getByText(/Richmond local pack focus/i)).toBeVisible()
+  await expect(page.getByText(/Chesterfield, Henrico, Midlothian, Short Pump/i)).toBeVisible()
   await expect(page.getByRole('heading', { name: /Real paving prices come from real site conditions/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /The answer should come from the pavement/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Owners still need a checklist/i })).toBeVisible()

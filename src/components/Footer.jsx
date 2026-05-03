@@ -21,13 +21,13 @@ export default function Footer() {
               <SmartImage
                 src={PRIMARY_LOGO_URL}
                 fallbackSrc={FALLBACK_LOGO_URL}
-                alt="J. Worden & Sons logo"
-                label="J. Worden"
-                sublabel="Logo"
-                width={220}
-                height={90}
-                className="w-32 h-12 object-contain bg-white/5 border border-white/10 rounded-md p-1"
-                sizes="128px"
+                alt="J. Worden & Sons Asphalt Paving logo"
+                label="J. Worden & Sons"
+                sublabel="Asphalt Paving"
+                width={560}
+                height={120}
+                className="w-40 h-12 object-contain bg-white/5 border border-white/10 rounded-md p-1"
+                sizes="160px"
               />
               <div>
                 <p className="font-display font-bold text-foreground text-sm tracking-widest uppercase leading-none">
