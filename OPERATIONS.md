@@ -25,9 +25,12 @@ npm run ops:secrets -- -Target observability -Provider railway
 
 # Local-only media import tokens for Dropbox, Google Photos, and Drive
 npm run ops:secrets -- -Target media -Provider local
+
+# Easier noncoder mode: fill .env.ops.local, then apply only filled-in values
+npm run ops:secrets -- -InputFile .env.ops.local -Target all -Provider all
 ```
 
-Blank prompts are skipped, so you can run the helper repeatedly as keys become available. Local media tokens are stored in the Windows user environment by default; pass `-LocalScope Process` for a one-session-only setup. After changing Railway or Netlify production variables, wait for the provider redeploy and then run the health checks below.
+Blank prompts are skipped, so you can run the helper repeatedly as keys become available. In file mode, blank lines in `.env.ops.local` are skipped and values are never printed. Local media tokens are stored in the Windows user environment by default; pass `-LocalScope Process` for a one-session-only setup. After changing Railway or Netlify production variables, wait for the provider redeploy and then run the health checks below.
 
 ### Quick Status Check
 

@@ -10,14 +10,42 @@ param(
   [string]$NetlifySiteId = 'da1c274c-cd8c-4080-bbbb-5ad79f448f18',
   [ValidateSet('Process', 'User')]
   [string]$LocalScope = 'User',
+  [string]$InputFile = '',
   [switch]$DryRun
 )
 
 $ErrorActionPreference = 'Stop'
+$InputValues = @{}
 
 function Write-Step {
   param([string]$Message)
   Write-Host "[ops-secrets] $Message"
+}
+
+function Import-InputFile {
+  param([string]$Path)
+
+  if ([string]::IsNullOrWhiteSpace($Path)) { return }
+  if (-not (Test-Path $Path)) {
+    throw "Input file not found: $Path"
+  }
+
+  Get-Content $Path | ForEach-Object {
+    $line = $_.Trim()
+    if (-not $line -or $line.StartsWith('#')) { return }
+    $parts = $line.Split('=', 2)
+    if ($parts.Count -ne 2) { return }
+    $name = $parts[0].Trim()
+    $value = $parts[1].Trim()
+    if ($value.StartsWith('"') -and $value.EndsWith('"') -and $value.Length -ge 2) {
+      $value = $value.Substring(1, $value.Length - 2)
+    }
+    if ([string]::IsNullOrWhiteSpace($name) -or [string]::IsNullOrWhiteSpace($value)) { return }
+    if ($value -match '^(PASTE_|YOUR_|TODO|CHANGEME)') { return }
+    $script:InputValues[$name] = $value
+  }
+
+  Write-Step "Loaded $($InputValues.Count) filled value(s) from $Path. Values will not be printed."
 }
 
 function Should-IncludeGroup {
@@ -49,6 +77,16 @@ function Read-SecretValue {
     [string]$Description
   )
 
+  if ($InputValues.ContainsKey($Name)) {
+    Write-Step "Using $Name from input file."
+    return [string]$InputValues[$Name]
+  }
+
+  if ($InputFile) {
+    Write-Step "Skipped $Name because it is blank or missing in $InputFile."
+    return $null
+  }
+
   Write-Host ""
   Write-Host "$Name - $Description"
   $secure = Read-Host "Enter value, or leave blank to skip" -AsSecureString
@@ -64,6 +102,16 @@ function Read-PlainValue {
     [string]$Description,
     [string]$DefaultValue = ''
   )
+
+  if ($InputValues.ContainsKey($Name)) {
+    Write-Step "Using $Name from input file."
+    return [string]$InputValues[$Name]
+  }
+
+  if ($InputFile) {
+    Write-Step "Skipped $Name because it is blank or missing in $InputFile."
+    return $null
+  }
 
   Write-Host ""
   Write-Host "$Name - $Description"
@@ -185,6 +233,7 @@ function Set-EntryValue {
 
 Write-Step "Target=$Target Provider=$Provider DryRun=$DryRun"
 Write-Step "Blank secret prompts are skipped. Nothing is written to .env or git."
+Import-InputFile -Path $InputFile
 
 Add-PlainEntry -Group 'core' -Name 'AUTO_CREATE_TABLES' -Description 'Production should use Alembic migrations instead of startup table creation.' -Destinations @('railway') -DefaultValue 'false'
 Add-PlainEntry -Group 'core' -Name 'LOG_FORMAT' -Description 'Use JSON logs in production.' -Destinations @('railway') -DefaultValue 'json'
@@ -206,6 +255,8 @@ Add-SecretEntry -Group 'observability' -Name 'SENTRY_DSN' -Description 'Backend 
 Add-SecretEntry -Group 'observability' -Name 'VITE_SENTRY_DSN' -Description 'Frontend Sentry DSN.' -Destinations @('netlify')
 Add-SecretEntry -Group 'observability' -Name 'DATADOG_API_KEY' -Description 'Datadog metrics API key.' -Destinations @('railway')
 Add-SecretEntry -Group 'observability' -Name 'SLACK_WEBHOOK_URL' -Description 'Slack incoming webhook for operational alerts.' -Destinations @('railway')
+Add-SecretEntry -Group 'observability' -Name 'RESEND_API_KEY' -Description 'Resend transactional email API key.' -Destinations @('railway')
+Add-PlainEntry -Group 'observability' -Name 'RESEND_FROM_EMAIL' -Description 'Verified sender email address for customer and operations email.' -Destinations @('railway')
 Add-PlainEntry -Group 'observability' -Name 'DD_ENV' -Description 'Datadog environment tag.' -Destinations @('railway') -DefaultValue 'production'
 Add-PlainEntry -Group 'observability' -Name 'DD_SERVICE' -Description 'Datadog service tag.' -Destinations @('railway') -DefaultValue 'jworden-api'
 Add-SecretEntry -Group 'media' -Name 'DROPBOX_ACCESS_TOKEN' -Description 'Local Dropbox import token. Stored only in this process by default.' -Destinations @('local')
