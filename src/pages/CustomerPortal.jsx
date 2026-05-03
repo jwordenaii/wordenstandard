@@ -15,22 +15,25 @@ import ReferralCard from '../components/portal/ReferralCard';
 export default function CustomerPortal() {
   const { user, logout } = useAuth();
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const isAdminPreview = user?.role === 'admin';
 
-  // SECURITY: filter strictly by the authenticated user's email.
+  // Customer sessions are email-filtered; admin sessions can preview all projects.
   const { data: jobs = [], isLoading: jobsLoading } = useQuery({
-    queryKey: ['portal-jobs', user?.email],
-    queryFn: () => api.entities.Job.filter({ client_email: user.email }),
-    enabled: !!user?.email,
+    queryKey: ['portal-jobs', user?.email, isAdminPreview],
+    queryFn: () => isAdminPreview ? api.entities.Job.list() : api.entities.Job.filter({ client_email: user.email }),
+    enabled: isAdminPreview || !!user?.email,
   });
 
   const { data: documents = [], isLoading: docsLoading } = useQuery({
-    queryKey: ['portal-docs', user?.email],
+    queryKey: ['portal-docs', user?.email, isAdminPreview],
     queryFn: () =>
-      api.entities.ProjectDocument.filter({
-        client_email: user.email,
-        visible_to_client: true,
-      }),
-    enabled: !!user?.email,
+      isAdminPreview
+        ? api.entities.ProjectDocument.list()
+        : api.entities.ProjectDocument.filter({
+            client_email: user.email,
+            visible_to_client: true,
+          }),
+    enabled: isAdminPreview || !!user?.email,
   });
 
   const loading = jobsLoading || docsLoading;
@@ -102,7 +105,7 @@ export default function CustomerPortal() {
                 No Projects Yet
               </h2>
               <p className="font-body text-muted-foreground text-base leading-relaxed mb-6 max-w-md mx-auto">
-                We don't have any projects linked to your email address ({user?.email}) yet. If this seems wrong, please reach out to us.
+                We don't have any projects linked to {isAdminPreview ? 'this admin preview' : `your email address (${user?.email})`} yet. If this seems wrong, please reach out to us.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
