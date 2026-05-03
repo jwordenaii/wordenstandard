@@ -25,6 +25,7 @@
     "media:doctor": "powershell -ExecutionPolicy Bypass -File scripts/media-ingest-cli.ps1 -Action check-setup",
     "media:dropbox": "powershell -ExecutionPolicy Bypass -File scripts/media-ingest-cli.ps1 -Action pull-dropbox",
     "media:gphotos": "powershell -ExecutionPolicy Bypass -File scripts/media-ingest-cli.ps1 -Action pull-google-photos",
+    "media:gdrive": "powershell -ExecutionPolicy Bypass -File scripts/media-ingest-cli.ps1 -Action pull-google-drive",
     "preview": "vite preview",
     "test": "npm run test:unit",
     "test:unit": "echo \"No frontend unit tests configured\"",

@@ -1,6 +1,6 @@
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('organize-local', 'pull-dropbox', 'pull-google-photos', 'check-setup')]
+  [ValidateSet('organize-local', 'pull-dropbox', 'pull-google-photos', 'pull-google-drive', 'check-setup')]
   [string]$Action,
 
   [string]$InputDir,
@@ -13,6 +13,9 @@ param(
 
   [string]$GooglePhotosToken,
   [string]$GoogleAlbumId,
+
+  [string]$GoogleDriveToken,
+  [string]$GoogleDriveFolderId,
 
   [string]$LocationKeywords = 'Richmond,Chester,Midlothian,Henrico,Fairfax,Fredericksburg,Virginia,VA',
   [int]$MaxItems = 300,
@@ -403,6 +406,81 @@ function Get-GooglePhotosFiles {
   return ,$downloaded
 }
 
+function Get-GoogleDriveFiles {
+  param(
+    [string]$Token,
+    [string]$FolderId,
+    [int]$Limit,
+    [string]$StagingDir
+  )
+
+  if (-not $Token) {
+    throw 'Google Drive token is required for pull-google-drive action.'
+  }
+
+  Ensure-Directory -Path $StagingDir
+  $headers = @{ Authorization = "Bearer $Token" }
+
+  $mimeQuery = if ($IncludeVideos) {
+    "(mimeType contains 'image/' or mimeType contains 'video/')"
+  } else {
+    "mimeType contains 'image/'"
+  }
+
+  $queryParts = @('trashed = false', $mimeQuery)
+  if ($FolderId) {
+    $queryParts += "'$FolderId' in parents"
+  }
+
+  $query = [string]::Join(' and ', $queryParts)
+  $encodedQuery = [System.Uri]::EscapeDataString($query)
+  $fields = [System.Uri]::EscapeDataString('nextPageToken,files(id,name,mimeType,createdTime,modifiedTime,size)')
+
+  $items = @()
+  $nextToken = $null
+
+  do {
+    $uri = "https://www.googleapis.com/drive/v3/files?q=$encodedQuery&pageSize=100&fields=$fields&supportsAllDrives=true&includeItemsFromAllDrives=true"
+    if ($nextToken) {
+      $uri += '&pageToken=' + [System.Uri]::EscapeDataString($nextToken)
+    }
+
+    $resp = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers
+    $items += @($resp.files)
+    $nextToken = $resp.nextPageToken
+  } while ($nextToken -and $items.Count -lt $Limit)
+
+  $selected = $items | Select-Object -First $Limit
+  $downloaded = @()
+
+  foreach ($item in $selected) {
+    $safeName = if ($item.name) { $item.name } else { "$($item.id).jpg" }
+    $target = Join-Path -Path $StagingDir -ChildPath $safeName
+    if (Test-Path -LiteralPath $target) {
+      $base = [IO.Path]::GetFileNameWithoutExtension($safeName)
+      $ext = [IO.Path]::GetExtension($safeName)
+      $target = Join-Path -Path $StagingDir -ChildPath "$base-$($item.id)$ext"
+    }
+
+    $downloadUri = "https://www.googleapis.com/drive/v3/files/$($item.id)?alt=media&supportsAllDrives=true"
+    Invoke-WebRequest -Uri $downloadUri -Method Get -Headers $headers -OutFile $target | Out-Null
+
+    $timestamp = if ($item.createdTime) { $item.createdTime } else { $item.modifiedTime }
+    if ($timestamp) {
+      try {
+        $created = [DateTime]::Parse($timestamp)
+        (Get-Item -LiteralPath $target).LastWriteTime = $created
+      } catch {
+        # Ignore timestamp parse issues.
+      }
+    }
+
+    $downloaded += Get-Item -LiteralPath $target
+  }
+
+  return ,$downloaded
+}
+
 function Build-Result {
   param(
     [string]$ActionName,
@@ -442,6 +520,8 @@ $ResolvedDropboxToken = Get-ConfigValue -Explicit $DropboxToken -EnvName 'DROPBO
 $ResolvedDropboxPath = Get-ConfigValue -Explicit $DropboxPath -EnvName 'DROPBOX_PATH' -Default ''
 $ResolvedGooglePhotosToken = Get-ConfigValue -Explicit $GooglePhotosToken -EnvName 'GOOGLE_PHOTOS_ACCESS_TOKEN'
 $ResolvedGoogleAlbumId = Get-ConfigValue -Explicit $GoogleAlbumId -EnvName 'GOOGLE_PHOTOS_ALBUM_ID'
+$ResolvedGoogleDriveToken = Get-ConfigValue -Explicit $GoogleDriveToken -EnvName 'GOOGLE_DRIVE_ACCESS_TOKEN'
+$ResolvedGoogleDriveFolderId = Get-ConfigValue -Explicit $GoogleDriveFolderId -EnvName 'GOOGLE_DRIVE_FOLDER_ID'
 
 $keywords = @($LocationKeywords -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 Ensure-Directory -Path $OutputRoot
@@ -463,17 +543,23 @@ try {
         dropbox_token_present = [bool]($ResolvedDropboxToken)
         google_photos_token_present = [bool]($ResolvedGooglePhotosToken)
         google_photos_album_id_present = [bool]($ResolvedGoogleAlbumId)
+        google_drive_token_present = [bool]($ResolvedGoogleDriveToken)
+        google_drive_folder_id_present = [bool]($ResolvedGoogleDriveFolderId)
       }
       env_names = [ordered]@{
         dropbox_token = 'DROPBOX_ACCESS_TOKEN'
         dropbox_path = 'DROPBOX_PATH'
         google_photos_token = 'GOOGLE_PHOTOS_ACCESS_TOKEN'
         google_photos_album_id = 'GOOGLE_PHOTOS_ALBUM_ID'
+        google_drive_token = 'GOOGLE_DRIVE_ACCESS_TOKEN'
+        google_drive_folder_id = 'GOOGLE_DRIVE_FOLDER_ID'
       }
       next_steps = @(
         'Set Dropbox token in DROPBOX_ACCESS_TOKEN or pass -DropboxToken.',
         'Set Google Photos token in GOOGLE_PHOTOS_ACCESS_TOKEN or pass -GooglePhotosToken.',
         'Optional: Set GOOGLE_PHOTOS_ALBUM_ID to limit import to one album.',
+        'Set Google Drive token in GOOGLE_DRIVE_ACCESS_TOKEN or pass -GoogleDriveToken.',
+        'Optional: Set GOOGLE_DRIVE_FOLDER_ID to limit import to one Drive folder.',
         'Run pull command with -DryRun first to verify before writing files.'
       )
     }
@@ -486,6 +572,8 @@ try {
       Write-Output "Dropbox token present: $($setup.checks.dropbox_token_present)"
       Write-Output "Google Photos token present: $($setup.checks.google_photos_token_present)"
       Write-Output "Google Photos album ID present: $($setup.checks.google_photos_album_id_present)"
+      Write-Output "Google Drive token present: $($setup.checks.google_drive_token_present)"
+      Write-Output "Google Drive folder ID present: $($setup.checks.google_drive_folder_id_present)"
       Write-Output 'Next steps:'
       foreach ($step in $setup.next_steps) {
         Write-Output "- $step"
@@ -514,6 +602,10 @@ try {
     'pull-google-photos' {
       $provider = 'google-photos'
       $files = Get-GooglePhotosFiles -Token $ResolvedGooglePhotosToken -AlbumId $ResolvedGoogleAlbumId -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'googlephotos')
+    }
+    'pull-google-drive' {
+      $provider = 'google-drive'
+      $files = Get-GoogleDriveFiles -Token $ResolvedGoogleDriveToken -FolderId $ResolvedGoogleDriveFolderId -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'googledrive')
     }
   }
 

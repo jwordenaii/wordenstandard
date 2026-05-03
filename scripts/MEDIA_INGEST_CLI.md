@@ -1,10 +1,10 @@
 # Media Ingest CLI
 
-CLI to pull work photos from Dropbox or Google Photos and organize them into timestamp + location folders for gallery workflows.
+CLI to pull work photos from Dropbox, Google Photos, or Google Drive and organize them into timestamp + location folders for gallery workflows.
 
 ## What it does
 
-- Pulls media from Dropbox or Google Photos, or ingests from a local folder.
+- Pulls media from Dropbox, Google Photos, Google Drive, or ingests from a local folder.
 - Organizes files under:
   - `public/work/imported/YYYY/MM/DD/location-token/`
 - Generates:
@@ -18,6 +18,7 @@ Use `project-import.json` to seed/update project gallery records.
 - `organize-local`
 - `pull-dropbox`
 - `pull-google-photos`
+- `pull-google-drive`
 - `check-setup`
 
 ## Examples
@@ -42,6 +43,14 @@ Use `project-import.json` to seed/update project gallery records.
 
 `npm run media:gphotos -- -GooglePhotosToken YOUR_GOOGLE_TOKEN -GoogleAlbumId YOUR_ALBUM_ID -MaxItems 300 -Json`
 
+### 5) Pull from Google Drive
+
+`npm run media:gdrive -- -GoogleDriveToken YOUR_GOOGLE_TOKEN -MaxItems 500 -Json`
+
+### 6) Pull from one Google Drive folder
+
+`npm run media:gdrive -- -GoogleDriveToken YOUR_GOOGLE_TOKEN -GoogleDriveFolderId YOUR_FOLDER_ID -MaxItems 500 -Json`
+
 ## Key options
 
 - `-OutputRoot`: Defaults to `public/work/imported`
@@ -58,8 +67,11 @@ Use `project-import.json` to seed/update project gallery records.
 - `DROPBOX_PATH`
 - `GOOGLE_PHOTOS_ACCESS_TOKEN`
 - `GOOGLE_PHOTOS_ALBUM_ID`
+- `GOOGLE_DRIVE_ACCESS_TOKEN`
+- `GOOGLE_DRIVE_FOLDER_ID`
 
 - Dropbox requires a valid OAuth access token with file read scope.
 - Google Photos requires an OAuth access token for Photos Library API.
+- Google Drive requires an OAuth access token with Drive file read access. Use `GOOGLE_DRIVE_FOLDER_ID` to keep the import scoped to one work-photo folder.
 - EXIF timestamp is used when available; otherwise file modified time is used.
 - GPS EXIF is converted into a geo token when no keyword location match is found.
