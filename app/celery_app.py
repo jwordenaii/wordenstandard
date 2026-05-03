@@ -35,6 +35,7 @@ celery_app = Celery(
         "app.tasks.vector_tasks",
         "app.tasks.anomaly_beat",
         "app.tasks.vdot_scraper",
+        "app.tasks.autonomy_tasks",
     ],
 )
 
@@ -85,6 +86,11 @@ celery_app.conf.update(
             "task": "app.tasks.vdot_scraper.scrape_vdot_bids_task",
             "schedule": crontab(minute=0, hour=7),
             "kwargs": {"max_results": 100},
+        },
+        # Autonomy audit — daily at 06:00 UTC, before VDOT scrape
+        "run-autonomy-audit-daily": {
+            "task": "app.tasks.autonomy_tasks.run_autonomy_audit",
+            "schedule": crontab(minute=0, hour=6),
         },
     },
 )

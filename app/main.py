@@ -233,6 +233,7 @@ from .routers import ads_intelligence as ads_intelligence_router
 from .routers import spatial_ai as spatial_ai_router
 from .routers import scc as scc_router
 from .routers import vdot_bids as vdot_bids_router
+from .routers import autonomy as autonomy_router
 from .routers import admin_2fa as admin_2fa_router
 from .routers import human_review as human_review_router
 from .routers import search as search_router
@@ -474,6 +475,9 @@ app.include_router(spatial_ai_router.catalog_router)
 # Statewide intelligence: SCC entity verification + VDOT bid board
 app.include_router(scc_router.router)
 app.include_router(vdot_bids_router.router)
+
+# Level 4 Autonomous Intelligence
+app.include_router(autonomy_router.router)
 
 # Admin 2FA (TOTP enrollment, verify, disable, status)
 app.include_router(admin_2fa_router.router)
