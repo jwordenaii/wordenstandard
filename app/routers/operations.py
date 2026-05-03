@@ -137,10 +137,55 @@ def _serialize_document_collection(items: list[ProjectDocument]) -> dict:
     }
 
 
-def _text_document_url(title: str, body: str) -> tuple[str, int]:
-    content = f"{title}\n{'=' * len(title)}\n\n{body}\n".encode("utf-8")
-    encoded = base64.b64encode(content).decode("utf-8")
-    return f"data:text/plain;base64,{encoded}", len(content)
+def _escape_pdf_text(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+
+def _pdf_document_url(title: str, lines: list[str]) -> tuple[str, int, str]:
+    text_commands = ["BT", "/F1 20 Tf", "72 742 Td", f"({_escape_pdf_text('J. Worden & Sons Asphalt Paving')}) Tj"]
+    text_commands.extend(["/F1 15 Tf", "0 -32 Td", f"({_escape_pdf_text(title)}) Tj", "/F1 10 Tf"])
+    for line in lines:
+        text_commands.extend(["0 -18 Td", f"({_escape_pdf_text(line[:92])}) Tj"])
+    text_commands.append("ET")
+    stream = "\n".join(text_commands).encode("latin-1", errors="replace")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length " + str(len(stream)).encode("ascii") + b" >>\nstream\n" + stream + b"\nendstream",
+    ]
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for index, obj in enumerate(objects, start=1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{index} 0 obj\n".encode("ascii"))
+        pdf.extend(obj)
+        pdf.extend(b"\nendobj\n")
+    xref_at = len(pdf)
+    pdf.extend(f"xref\n0 {len(objects) + 1}\n0000000000 65535 f \n".encode("ascii"))
+    for offset in offsets:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+    pdf.extend(f"trailer << /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_at}\n%%EOF\n".encode("ascii"))
+    encoded = base64.b64encode(bytes(pdf)).decode("utf-8")
+    return f"data:application/pdf;base64,{encoded}", len(pdf), "application/pdf"
+
+
+def _svg_document_url(title: str, subtitle: str, progress: int) -> tuple[str, int, str]:
+    width = max(0, min(progress, 100)) * 8.6
+    svg = f"""<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'>
+<rect width='1200' height='800' fill='#111827'/>
+<rect x='80' y='80' width='1040' height='640' rx='16' fill='#f8fafc'/>
+<rect x='130' y='150' width='940' height='230' fill='#374151'/>
+<path d='M140 360 L520 210 L710 330 L1060 190 L1060 360 Z' fill='#1f2937'/>
+<rect x='170' y='430' width='860' height='34' rx='17' fill='#e5e7eb'/>
+<rect x='170' y='430' width='{width}' height='34' rx='17' fill='#d97706'/>
+<text x='170' y='525' font-family='Arial, sans-serif' font-size='44' font-weight='700' fill='#111827'>{title}</text>
+<text x='170' y='580' font-family='Arial, sans-serif' font-size='28' fill='#4b5563'>{subtitle}</text>
+<text x='170' y='640' font-family='Arial, sans-serif' font-size='24' fill='#92400e'>Progress: {progress}%</text>
+</svg>""".encode("utf-8")
+    encoded = base64.b64encode(svg).decode("utf-8")
+    return f"data:image/svg+xml;base64,{encoded}", len(svg), "image/svg+xml"
 
 
 def _create_seed_document(
@@ -152,9 +197,10 @@ def _create_seed_document(
     title: str,
     description: str,
     filename: str,
-    body: str,
+    file_url: str,
+    mime_type: str,
+    file_size_bytes: int,
 ) -> ProjectDocument:
-    file_url, file_size = _text_document_url(title, body)
     document = ProjectDocument(
         id=str(uuid.uuid4()),
         job_id=job.id,
@@ -163,8 +209,8 @@ def _create_seed_document(
         title=title,
         description=description,
         filename=filename,
-        mime_type="text/plain",
-        file_size_bytes=file_size,
+        mime_type=mime_type,
+        file_size_bytes=file_size_bytes,
         file_url=file_url,
         visible_to_client=True,
         uploaded_by="demo_seed",
@@ -292,6 +338,38 @@ def seed_demo_workspace(
     )
     db.add(work_order)
 
+    scope_pdf = _pdf_document_url(
+        "Approved Commercial Scope",
+        [
+            "Customer: River City Retail Partners",
+            "Site: 2420 Commerce Road, Richmond, VA",
+            "Scope: mill failed surface, repair loading lane base, tack coat, resurface, and stripe.",
+            "Traffic plan: keep storefront access open and stage equipment along the rear service lane.",
+            "Quality check: drainage review, edge compaction, ADA stall layout, and owner walkthrough.",
+        ],
+    )
+    invoice_pdf = _pdf_document_url(
+        "Deposit Invoice",
+        [
+            "Estimate range: $38,500 - $47,200",
+            "Deposit due at scheduling: 35%",
+            "Balance due after final walkthrough and punch-list approval.",
+            "Payment notes: ACH or company check accepted by J. Worden & Sons Asphalt Paving.",
+        ],
+    )
+    warranty_pdf = _pdf_document_url(
+        "Workmanship Warranty Preview",
+        [
+            "Coverage: workmanship and installation practices for resurfacing scope.",
+            "Maintenance: inspect drainage after first heavy rain and sealcoat on recommended cadence.",
+            "Closeout: final photos, striping verification, and customer signoff are included in packet.",
+        ],
+    )
+    progress_svg = _svg_document_url(
+        "Base Repair Complete",
+        "Loading lane stabilized; surface lift is next in the weather window.",
+        62,
+    )
     documents = [
         _create_seed_document(
             db,
@@ -300,8 +378,10 @@ def seed_demo_workspace(
             document_type="contract",
             title="Approved Commercial Scope",
             description="Customer-facing scope summary for the resurfacing package.",
-            filename="river-city-approved-scope.txt",
-            body="Scope includes milling, base repairs, tack coat, surface lift, traffic control, and final striping for the River City Retail Center lot.",
+            filename="river-city-approved-scope.pdf",
+            file_url=scope_pdf[0],
+            file_size_bytes=scope_pdf[1],
+            mime_type=scope_pdf[2],
         ),
         _create_seed_document(
             db,
@@ -310,8 +390,10 @@ def seed_demo_workspace(
             document_type="invoice",
             title="Deposit Invoice",
             description="Demo invoice record visible in the customer portal.",
-            filename="river-city-deposit-invoice.txt",
-            body="Deposit invoice: 35% due at scheduling, balance due after final walkthrough and punch-list approval.",
+            filename="river-city-deposit-invoice.pdf",
+            file_url=invoice_pdf[0],
+            file_size_bytes=invoice_pdf[1],
+            mime_type=invoice_pdf[2],
         ),
         _create_seed_document(
             db,
@@ -320,8 +402,10 @@ def seed_demo_workspace(
             document_type="warranty",
             title="Workmanship Warranty Preview",
             description="Warranty expectations prepared before closeout.",
-            filename="river-city-warranty-preview.txt",
-            body="Warranty preview covers workmanship, drainage review notes, and recommended sealcoat maintenance cadence.",
+            filename="river-city-warranty-preview.pdf",
+            file_url=warranty_pdf[0],
+            file_size_bytes=warranty_pdf[1],
+            mime_type=warranty_pdf[2],
         ),
         _create_seed_document(
             db,
@@ -329,9 +413,11 @@ def seed_demo_workspace(
             lead=lead,
             document_type="progress_photo",
             title="Base Repair Progress Note",
-            description="Text progress placeholder until field photos are uploaded.",
-            filename="river-city-progress-note.txt",
-            body="Base repair at the loading lane is complete. Photos can be replaced with real field media from Admin Documents.",
+            description="Branded visual progress card for the customer portal.",
+            filename="river-city-progress-card.svg",
+            file_url=progress_svg[0],
+            file_size_bytes=progress_svg[1],
+            mime_type=progress_svg[2],
         ),
     ]
 

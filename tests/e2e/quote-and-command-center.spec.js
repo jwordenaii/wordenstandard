@@ -1,32 +1,97 @@
 import { test, expect } from '@playwright/test'
 
-test('quote form smoke flow', async ({ page }) => {
-  await page.route('**/api/v1/leads/quote', async (route) => {
+const demoJob = {
+  id: 2,
+  title: 'River City Retail Center Resurface',
+  client_name: 'River City Retail Partners',
+  client_email: 'ops@rivercity.example',
+  address: '2420 Commerce Road, Richmond, VA',
+  scheduled_date: '2026-05-04',
+  start_time: '8:00 AM',
+  crew: 'Worden crew',
+  surface_type: 'commercial_asphalt',
+  status: 'in_progress',
+  progress_percent: 62,
+  progress_notes: 'Milling and base repairs are complete. Surface lift is scheduled next.',
+}
+
+const demoDocuments = [
+  {
+    id: 11,
+    job_id: 2,
+    client_email: 'ops@rivercity.example',
+    title: 'Approved Commercial Scope',
+    filename: 'river-city-approved-scope.pdf',
+    document_type: 'contract',
+    visible_to_client: true,
+    file_url: 'data:application/pdf;base64,JVBERi0xLjQK',
+  },
+  {
+    id: 12,
+    job_id: 2,
+    client_email: 'ops@rivercity.example',
+    title: 'Deposit Invoice',
+    filename: 'river-city-deposit-invoice.pdf',
+    document_type: 'invoice',
+    visible_to_client: true,
+    file_url: 'data:application/pdf;base64,JVBERi0xLjQK',
+  },
+]
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem('jworden.auth.token', 'e2e-token')
+    window.sessionStorage.setItem('jworden.auth.expires_at', String(Math.floor(Date.now() / 1000) + 3600))
+  })
+
+  await page.route('**/api/v1/auth/status', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        status: 'received',
-        lead_id: 501,
-        lead_score: 'HOT',
-        follow_up_sla: 'Follow-up in 1 hour',
-      }),
+      body: JSON.stringify({ auth_required: true, auth_mode: 'pin', token_endpoint: '/api/v1/auth/pin-token' }),
     })
   })
 
-  await page.goto('/quote')
-  await page.getByRole('button', { name: /Asphalt Paving/i }).click()
-  await page.getByRole('button', { name: /Property Details/i }).click()
-  await page.getByRole('button', { name: /Contact Info/i }).click()
+  await page.route('**/api/v1/auth/pin-token', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ access_token: 'e2e-token', expires_in: 3600 }),
+    })
+  })
 
-  await page.getByPlaceholder('John Smith').fill('Playwright User')
-  await page.getByPlaceholder('john@example.com').fill('pw@example.com')
-  await page.getByPlaceholder('(555) 555-5555').fill('5551231234')
+  await page.route('**/api/v1/operations/jobs**', async (route) => {
+    if (route.request().method() === 'PATCH') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(demoJob) })
+      return
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ jobs: [demoJob] }) })
+  })
 
-  await page.getByRole('button', { name: /Review & Submit/i }).click()
-  await page.getByRole('button', { name: /Submit Request/i }).click()
+  await page.route('**/api/v1/operations/job-documents**', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ documents: demoDocuments }) })
+  })
 
-  await expect(page.getByText(/Quote Request Received/i)).toBeVisible()
+  await page.route('**/api/v1/admin/monitoring/status', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ monitoring: { slack_enabled: true, datadog_enabled: true, dd_service: 'jworden-api', dd_env: 'production' } }),
+    })
+  })
+
+  await page.route('**/api/v1/operations/public/jobs/2', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(demoJob) })
+  })
+})
+
+test('homepage estimate smoke flow', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.getByRole('heading', { name: /The Premier/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Your Estimate in 60 Seconds/i })).toBeVisible()
+  await page.getByRole('button', { name: /Driveway/i }).click()
+  await expect(page.getByRole('button', { name: /Next Step/i })).toBeEnabled()
 })
 
 test('command center smoke flow', async ({ page }) => {
@@ -39,4 +104,35 @@ test('command center smoke flow', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: /Richmond Grid/i }).first()
   ).toBeVisible()
+})
+
+test('admin documents visual smoke flow', async ({ page }) => {
+  await page.goto('/admin/documents')
+
+  await expect(page.getByRole('heading', { name: /Customer Documents/i })).toBeVisible()
+  await expect(page.getByText(/Production Demo Workspace/i)).toBeVisible()
+  await expect(page.getByText(/Monitoring Alerts/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Complete', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Packet/i })).toBeVisible()
+  await expect(page.getByText(/River City Retail Center Resurface/i).first()).toBeVisible()
+  await expect(page.getByText(/Approved Commercial Scope/i).first()).toBeVisible()
+})
+
+test('customer portal visual smoke flow', async ({ page }) => {
+  await page.goto('/portal')
+
+  await expect(page.getByRole('heading', { name: /Welcome/i })).toBeVisible()
+  await expect(page.getByText(/River City Retail Center Resurface/i).first()).toBeVisible()
+  await expect(page.getByText(/Project Details/i)).toBeVisible()
+  await expect(page.getByText(/Invoices & Receipts/i)).toBeVisible()
+  await expect(page.getByText(/Deposit Invoice/i)).toBeVisible()
+})
+
+test('crew eta visual smoke flow', async ({ page }) => {
+  await page.goto('/crew-eta?jobId=2')
+
+  await expect(page.getByText(/Live Crew Tracker/i)).toBeVisible()
+  await expect(page.getByText(/Work in Progress/i)).toBeVisible()
+  await expect(page.getByText(/62%/i)).toBeVisible()
+  await expect(page.getByText(/2420 Commerce Road/i)).toBeVisible()
 })

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, CheckCircle2, Loader2, RefreshCw, ShieldOff, Sparkles, TriangleAlert } from 'lucide-react';
+import { Activity, Archive, CheckCircle2, Copy, Download, Loader2, RefreshCw, ShieldOff, Sparkles, TriangleAlert } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useAuth } from '@/lib/AuthContext';
@@ -11,10 +11,12 @@ import DocumentUploader from '../components/admin/DocumentUploader';
 import JobProgressEditor from '../components/admin/JobProgressEditor';
 import ExistingDocuments from '../components/admin/ExistingDocuments';
 
-function AdminOpsPanel({ isAdmin, onSeeded }) {
+function AdminOpsPanel({ isAdmin, selectedJob, documents, onSeeded, onChanged }) {
   const [seeding, setSeeding] = useState(false);
+  const [actionBusy, setActionBusy] = useState('');
   const [seedResult, setSeedResult] = useState(null);
   const [seedError, setSeedError] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
 
   const { data: monitoringStatus } = useQuery({
     queryKey: ['admin-monitoring-status'],
@@ -30,6 +32,7 @@ function AdminOpsPanel({ isAdmin, onSeeded }) {
   const handleSeedDemo = async () => {
     setSeeding(true);
     setSeedError('');
+    setActionMessage('');
     setSeedResult(null);
     try {
       const result = await api.seedDemoWorkspace(true);
@@ -39,6 +42,67 @@ function AdminOpsPanel({ isAdmin, onSeeded }) {
       setSeedError(error?.message || 'Could not seed demo workspace.');
     } finally {
       setSeeding(false);
+    }
+  };
+
+  const updateSelectedJob = async (action, payload, message) => {
+    if (!selectedJob?.id) return;
+    setActionBusy(action);
+    setSeedError('');
+    setActionMessage('');
+    try {
+      await api.entities.Job.update(selectedJob.id, payload);
+      setActionMessage(message);
+      onChanged?.();
+    } catch (error) {
+      setSeedError(error?.message || 'Could not update job.');
+    } finally {
+      setActionBusy('');
+    }
+  };
+
+  const copyEtaLink = async () => {
+    if (!selectedJob?.id) return;
+    const link = `${window.location.origin}/crew-eta?jobId=${selectedJob.id}`;
+    await navigator.clipboard?.writeText(link);
+    setActionMessage('ETA link copied.');
+  };
+
+  const exportProjectPacket = async () => {
+    if (!selectedJob?.id) return;
+    setActionBusy('export');
+    setActionMessage('');
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text('J. Worden & Sons Asphalt Paving', 18, 22);
+      doc.setFontSize(14);
+      doc.text(selectedJob.title || selectedJob.name || `Job ${selectedJob.id}`, 18, 34);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const rows = [
+        `Customer: ${selectedJob.client_name || 'Customer'}`,
+        `Email: ${selectedJob.client_email || 'Not set'}`,
+        `Address: ${selectedJob.address || selectedJob.site_address || 'Not set'}`,
+        `Status: ${selectedJob.status || 'scheduled'}`,
+        `Progress: ${selectedJob.progress_percent || 0}%`,
+        `ETA: ${window.location.origin}/crew-eta?jobId=${selectedJob.id}`,
+      ];
+      rows.forEach((line, index) => doc.text(line, 18, 50 + index * 8));
+      doc.setFont('helvetica', 'bold');
+      doc.text('Customer Documents', 18, 106);
+      doc.setFont('helvetica', 'normal');
+      (documents || []).slice(0, 18).forEach((item, index) => {
+        doc.text(`${index + 1}. ${item.title || item.filename} (${item.document_type || 'document'})`, 18, 120 + index * 7);
+      });
+      doc.save(`jworden-project-${selectedJob.id}-packet.pdf`);
+      setActionMessage('Project packet exported.');
+    } catch (error) {
+      setSeedError(error?.message || 'Could not export packet.');
+    } finally {
+      setActionBusy('');
     }
   };
 
@@ -74,6 +138,35 @@ function AdminOpsPanel({ isAdmin, onSeeded }) {
             <p className="mt-1 text-muted-foreground">
               {seedResult.job?.title} · Job #{seedResult.job?.id} · {seedResult.documents?.length || 0} client document(s)
             </p>
+          </div>
+        ) : null}
+        {selectedJob ? (
+          <div className="mt-5 border-t border-primary/20 pt-4">
+            <p className="font-display text-muted-foreground text-xs tracking-[0.25em] uppercase mb-3">
+              Selected Job Actions
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2">
+              <button type="button" onClick={() => updateSelectedJob('complete', { status: 'completed', progress_percent: 100, progress_notes: 'Project complete. Final walkthrough and closeout packet are ready.' }, 'Job marked complete.')} disabled={Boolean(actionBusy)} className="inline-flex items-center justify-center gap-2 border border-border bg-background px-3 py-2 text-xs font-display font-bold uppercase tracking-wider hover:border-primary disabled:opacity-60">
+                <CheckCircle2 className="w-4 h-4" /> Complete
+              </button>
+              <button type="button" onClick={() => updateSelectedJob('reset', { status: 'in_progress', progress_percent: 62, progress_notes: 'Milling and base repairs are complete. Surface lift is scheduled for the morning weather window, then striping follows after cure time.' }, 'Demo progress reset.')} disabled={Boolean(actionBusy)} className="inline-flex items-center justify-center gap-2 border border-border bg-background px-3 py-2 text-xs font-display font-bold uppercase tracking-wider hover:border-primary disabled:opacity-60">
+                <RefreshCw className="w-4 h-4" /> Reset
+              </button>
+              <button type="button" onClick={() => updateSelectedJob('archive', { status: 'cancelled', progress_notes: 'Demo job archived from Admin Documents maintenance controls.' }, 'Demo job archived.')} disabled={Boolean(actionBusy)} className="inline-flex items-center justify-center gap-2 border border-border bg-background px-3 py-2 text-xs font-display font-bold uppercase tracking-wider hover:border-primary disabled:opacity-60">
+                <Archive className="w-4 h-4" /> Archive
+              </button>
+              <button type="button" onClick={copyEtaLink} disabled={Boolean(actionBusy)} className="inline-flex items-center justify-center gap-2 border border-border bg-background px-3 py-2 text-xs font-display font-bold uppercase tracking-wider hover:border-primary disabled:opacity-60">
+                <Copy className="w-4 h-4" /> ETA Link
+              </button>
+              <button type="button" onClick={exportProjectPacket} disabled={Boolean(actionBusy)} className="inline-flex items-center justify-center gap-2 border border-border bg-background px-3 py-2 text-xs font-display font-bold uppercase tracking-wider hover:border-primary disabled:opacity-60">
+                <Download className="w-4 h-4" /> Packet
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {actionMessage ? (
+          <div className="mt-4 border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-foreground">
+            {actionMessage}
           </div>
         ) : null}
         {seedError ? (
@@ -202,7 +295,13 @@ export default function AdminDocuments() {
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <AdminOpsPanel isAdmin={isAdmin} onSeeded={handleSeeded} />
+          <AdminOpsPanel
+            isAdmin={isAdmin}
+            selectedJob={selectedJob}
+            documents={documents}
+            onSeeded={handleSeeded}
+            onChanged={handleRefresh}
+          />
 
           {jobsLoading ? (
             <div className="flex items-center justify-center h-64">
