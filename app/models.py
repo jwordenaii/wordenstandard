@@ -1343,3 +1343,39 @@ class VdotBid(Base):
             f"<VdotBid id={self.id} contract={self.contract_id!r} "
             f"district={self.district!r} value=${self.estimated_value}>"
         )
+
+
+# ── Paving Site Evaluation ───────────────────────────────────────────────────
+
+class PavingEvaluation(Base):
+    """
+    Physical site assessment captured during the quoting workflow.
+
+    Records are created by field staff or via vision-AI photo inspection.
+    The ``damage_type`` drives quote pricing (alligator cracking triggers
+    the 1.4× base-rehab multiplier per VDOT 6-inch base standards).
+
+    Fields:
+      region          — Human-readable service area (e.g. "Richmond, VA")
+      calculated_sqft — Measured paving area in square feet
+      damage_type     — Condition code: alligator_cracking | surface_cracking
+                        | pothole | rutting | raveling | good
+      notes           — Free-text inspector / AI notes
+      tenant_id       — Multi-tenant isolation key
+    """
+
+    __tablename__ = "paving_evaluations"
+
+    id              = Column(Integer,              primary_key=True, index=True)
+    region          = Column(String(200),          nullable=False)
+    calculated_sqft = Column(Float,                nullable=False)
+    damage_type     = Column(String(60),           nullable=False, default="good")
+    notes           = Column(Text,                 nullable=True)
+    tenant_id       = Column(String(60),           nullable=True, index=True, default="default")
+    created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<PavingEvaluation id={self.id} region={self.region!r} "
+            f"sqft={self.calculated_sqft} damage={self.damage_type!r}>"
+        )
