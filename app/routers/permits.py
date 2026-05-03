@@ -1,11 +1,13 @@
 """
-Virginia permitting endpoints for the JWordenAI Command Center.
+Permitting endpoints for the JWordenAI Command Center.
 
 Routes:
-  GET  /api/v1/permits/virginia/vpt   — Virginia Permit Transparency permit feed
-  GET  /api/v1/permits/virginia/deq   — DEQ PEEP stormwater permit feed
-  POST /api/v1/permits/virginia/dpor  — DPOR license lookup via Apify
-  GET  /api/v1/permits/national       — Multi-state national permit feed
+  GET  /api/v1/permits/virginia/vpt        — Virginia Permit Transparency permit feed
+  GET  /api/v1/permits/virginia/deq        — DEQ PEEP stormwater permit feed
+  POST /api/v1/permits/virginia/dpor       — DPOR license lookup via Apify
+  GET  /api/v1/permits/national            — Multi-state national permit feed
+  GET  /api/v1/permits/rules/{state_code}  — Codified state permit trigger rules
+  POST /api/v1/permits/check               — Intelligent permit check (state + county + cost/size gates)
 """
 
 from __future__ import annotations
@@ -17,6 +19,7 @@ from ..core.limiter import limiter
 from ..core.security import verify_premium_security
 from ..services.permit_scraper import fetch_vpt_permits, fetch_deq_permits, lookup_dpor_license
 from ..services.lead_scorer import score_lead
+from ..services.permit_engine import engine as permit_engine
 
 router = APIRouter(prefix="/api/v1/permits", tags=["permits"])
 
@@ -241,3 +244,44 @@ def get_permit_rules(state_code: str, _: dict = Depends(verify_premium_security)
             ),
         )
     return {"state": key, **rules}
+
+
+# ── Intelligent permit check (engine-powered) ─────────────────────────────────
+
+class PermitCheckRequest(BaseModel):
+    state_code:     str   = Field(..., min_length=2, max_length=2, description="2-letter state code (VA, NC, SC, GA, MD)")
+    county_name:    str | None = Field(default=None, max_length=100, description="County name (optional)")
+    project_cost:   float = Field(default=0.0, ge=0, description="Estimated project value in USD")
+    structure_size: float = Field(default=0.0, ge=0, description="Accessory structure area in sq ft")
+
+
+@router.post(
+    "/check",
+    summary="Intelligent permit check — state + county override + cost/size logic gates",
+)
+def check_permit(
+    req: PermitCheckRequest,
+    _: dict = Depends(verify_premium_security),
+):
+    """
+    Run the permit engine against a specific project scenario.
+
+    - Applies state golden rules for VA, NC, SC, GA, or MD.
+    - Overlays county-specific fee schedules and trigger overrides where available.
+    - Evaluates cost threshold (NC $40k / SC $2k) and structure-size gates.
+    - Returns ``permit_likely`` boolean plus annotated ``notes``.
+
+    Supported counties include: Fairfax, Prince William, Loudoun, Virginia Beach,
+    Franklin (VA); Mecklenburg, Brunswick (NC); Horry, Charleston, Greenville (SC);
+    Gwinnett, Cobb, DeKalb, Fulton (GA); Prince George's, Montgomery,
+    Baltimore County, Anne Arundel (MD).
+    """
+    result = permit_engine.get_permit_info(
+        state_code=req.state_code,
+        county_name=req.county_name,
+        project_cost=req.project_cost,
+        structure_size=req.structure_size,
+    )
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
