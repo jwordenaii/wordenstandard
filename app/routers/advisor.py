@@ -6,6 +6,7 @@ Exposes:
   POST /api/v1/advisor/rank-contractors   — contractor bid ranking
   GET  /api/v1/advisor/top-states         — strongest states for a dispute type
   GET  /api/v1/advisor/license-optimizer  — best states for base license
+  POST /api/v1/advisor/utility-risk       — Virginia 811 private-utility risk advisory
 """
 
 from __future__ import annotations
@@ -202,4 +203,57 @@ def license_optimizer(top_n: int = 10):
             }
             for i, s in enumerate(results)
         ],
+    }
+
+
+# ── Virginia 811 private-utility risk advisory ────────────────────────────────
+
+class UtilityCheckRequest(BaseModel):
+    has_septic:              bool
+    has_well:                bool
+    has_detached_structures: bool
+    has_pool:                bool
+
+
+@router.post(
+    "/utility-risk",
+    summary="Virginia 811 private-utility risk advisory",
+)
+def evaluate_utility_risk(req: UtilityCheckRequest):
+    """
+    Advisory scoring for sites with private utilities that VA 811 (Miss Utility)
+    will NOT mark.  Returns a risk level, actionable recommendations, and the
+    legal notice reminder about per-person excavation ticket requirements.
+
+    No PII is collected.  Response is purely advisory.
+    """
+    has_private = (
+        req.has_septic
+        or req.has_well
+        or req.has_detached_structures
+        or req.has_pool
+    )
+
+    recommendations = [
+        "\u2705 Contact VA 811 (Miss Utility) at least 3 business days before digging."
+    ]
+
+    if has_private:
+        recommendations += [
+            "\u26a0\ufe0f HIGH RISK: Private lines detected. VA 811 will NOT mark these.",
+            "\U0001f4a1 Recommendation: Hire a private utility locating service.",
+        ]
+
+    recommendations.append(
+        "\u2139\ufe0f Tip: Use \u2018White Lining\u2019 (white paint/flags) to outline the "
+        "work area before locators arrive."
+    )
+
+    return {
+        "risk_level":    "High" if has_private else "Low",
+        "advisory_notes": recommendations,
+        "legal_notice": (
+            "Every \u2018person\u2019 must provide their own notice of excavation. "
+            "Subcontractors cannot work under another\u2019s ticket."
+        ),
     }
