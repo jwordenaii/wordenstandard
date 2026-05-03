@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 
-const BASE = import.meta.env.VITE_API_BASE_URL || ''
+import { api } from '@/api/client'
+
 const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB
 
 export default function GalleryUploadForm({ onUploaded }) {
@@ -42,15 +43,7 @@ export default function GalleryUploadForm({ onUploaded }) {
     if (description.trim()) form.append('description', description.trim())
 
     try {
-      const res = await fetch(`${BASE}/api/v1/gallery/upload`, {
-        method: 'POST',
-        body: form,
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.detail || `Upload failed (${res.status})`)
-      }
-      const data = await res.json()
+      const data = await api.uploadGalleryImage(form)
       setSuccess(true)
       setJobName('')
       setDescription('')

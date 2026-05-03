@@ -9,6 +9,104 @@
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
 const DEFAULT_TIMEOUT_MS = 10_000
+const LOCAL_ENTITY_PREFIX = 'jworden.local.entity.'
+const AUTH_TOKEN_STORAGE_KEY = 'jworden.auth.token'
+const AUTH_EXPIRES_STORAGE_KEY = 'jworden.auth.expires_at'
+
+const entitySubscribers = new Map()
+
+let authState = {
+  token: null,
+  expiresAt: 0,
+  authRequired: false,
+  tokenEndpoint: null,
+}
+
+function tokenStillValid() {
+  return Boolean(authState.token && authState.expiresAt - Date.now() > 60_000)
+}
+
+function storeAuthToken(token, expiresAtSeconds) {
+  authState.token = token
+  authState.expiresAt = (expiresAtSeconds || 0) * 1000
+  if (typeof window === 'undefined') return
+  window.sessionStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token)
+  window.sessionStorage.setItem(AUTH_EXPIRES_STORAGE_KEY, String(expiresAtSeconds || 0))
+}
+
+function clearStoredAuthToken() {
+  authState.token = null
+  authState.expiresAt = 0
+  if (typeof window === 'undefined') return
+  window.sessionStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
+  window.sessionStorage.removeItem(AUTH_EXPIRES_STORAGE_KEY)
+}
+
+function restoreStoredAuthToken() {
+  if (typeof window === 'undefined') return false
+  const token = window.sessionStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+  const expiresAtSeconds = Number(window.sessionStorage.getItem(AUTH_EXPIRES_STORAGE_KEY) || 0)
+  if (!token || expiresAtSeconds * 1000 - Date.now() <= 60_000) {
+    clearStoredAuthToken()
+    return false
+  }
+  authState.token = token
+  authState.expiresAt = expiresAtSeconds * 1000
+  return true
+}
+
+async function fetchBootstrapToken() {
+  if (!authState.tokenEndpoint) {
+    throw new Error('No server token endpoint is configured.')
+  }
+  const res = await fetch(authState.tokenEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }))
+    throw new Error(err.error || `Token bootstrap failed (${res.status})`)
+  }
+  const body = await res.json()
+  storeAuthToken(body.token, body.expires_at)
+  return authState.token
+}
+
+export async function bootstrapAuth() {
+  const status = await request('GET', '/api/v1/auth/status')
+  authState.authRequired = Boolean(status?.auth_required)
+  authState.tokenEndpoint = status?.token_endpoint || null
+  if (authState.authRequired) {
+    if (!restoreStoredAuthToken()) {
+      try {
+        await fetchBootstrapToken()
+      } catch (error) {
+        clearStoredAuthToken()
+        status.token_bootstrap_error = error.message || 'Token bootstrap failed.'
+      }
+    }
+  } else {
+    clearStoredAuthToken()
+  }
+  return status
+}
+
+export async function getAccessToken() {
+  if (!authState.authRequired) return null
+  if (!tokenStillValid()) restoreStoredAuthToken()
+  if (tokenStillValid()) return authState.token
+  return fetchBootstrapToken()
+}
+
+export async function authenticateWithPin(pin) {
+  const response = await request('POST', '/api/v1/auth/pin-token', { pin })
+  storeAuthToken(response.access_token, Math.floor(Date.now() / 1000) + (response.expires_in || 86_400))
+  return authState.token
+}
+
+export function clearAuthToken() {
+  clearStoredAuthToken()
+}
 
 async function request(method, path, body) {
   const controller = new AbortController()
@@ -40,6 +138,52 @@ async function request(method, path, body) {
   }
 }
 
+async function protectedRequest(method, path, body) {
+  const token = await getAccessToken()
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
+  const headers = { 'Content-Type': 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  const opts = { method, headers, signal: controller.signal }
+  if (body) opts.body = JSON.stringify(body)
+
+  try {
+    const res = await fetch(`${BASE}${path}`, opts)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail || `HTTP ${res.status}`)
+    }
+    if (res.status === 204) return null
+    return res.json()
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+async function protectedFormRequest(path, form) {
+  const token = await getAccessToken()
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 30_000)
+  const headers = {}
+  if (token) headers.Authorization = `Bearer ${token}`
+  try {
+    const res = await fetch(`${BASE}${path}`, { method: 'POST', body: form, headers, signal: controller.signal })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail || `HTTP ${res.status}`)
+    }
+    return res.json()
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
 /** Build a query string from an object, omitting null/undefined/empty values. */
 function buildQS(params) {
   const qs = new URLSearchParams(
@@ -50,7 +194,426 @@ function buildQS(params) {
   return qs ? `?${qs}` : ''
 }
 
+function readLocalEntityStore(entityName) {
+  try {
+    if (typeof window === 'undefined') return []
+    const raw = window.localStorage.getItem(`${LOCAL_ENTITY_PREFIX}${entityName}`)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function writeLocalEntityStore(entityName, records) {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(`${LOCAL_ENTITY_PREFIX}${entityName}`, JSON.stringify(records))
+}
+
+function nextLocalEntityId(entityName) {
+  return `${entityName.toLowerCase()}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+}
+
+function sortEntityRecords(records, sort) {
+  if (!sort) return records
+  const descending = String(sort).startsWith('-')
+  const field = descending ? String(sort).slice(1) : String(sort)
+  return [...records].sort((left, right) => {
+    const a = left?.[field]
+    const b = right?.[field]
+    if (a == null && b == null) return 0
+    if (a == null) return 1
+    if (b == null) return -1
+    if (a < b) return descending ? 1 : -1
+    if (a > b) return descending ? -1 : 1
+    return 0
+  })
+}
+
+function matchesEntityFilter(record, filter = {}) {
+  return Object.entries(filter).every(([key, value]) => {
+    if (value === undefined || value === null || value === '') return true
+    return record?.[key] === value
+  })
+}
+
+function notifyEntitySubscribers(entityName, event) {
+  const listeners = entitySubscribers.get(entityName)
+  if (!listeners) return
+  listeners.forEach((listener) => {
+    try {
+      listener(event)
+    } catch {
+      // Keep other listeners alive.
+    }
+  })
+}
+
+function subscribeToEntity(entityName, callback) {
+  const listeners = entitySubscribers.get(entityName) || new Set()
+  listeners.add(callback)
+  entitySubscribers.set(entityName, listeners)
+  return () => {
+    listeners.delete(callback)
+    if (listeners.size === 0) {
+      entitySubscribers.delete(entityName)
+    }
+  }
+}
+
+function normalizeLeadRecord(record) {
+  if (!record) return record
+  return {
+    ...record,
+    status: record.status || record.pipeline_stage || 'new',
+    created_date: record.created_date || record.created_at || new Date().toISOString(),
+  }
+}
+
+function normalizeBlogPostRecord(record) {
+  if (!record) return record
+  return {
+    ...record,
+    content: record.content || record.body || '',
+    published_date: record.published_date || record.published_at || record.created_at || null,
+    updated_date: record.updated_date || record.updated_at || record.published_at || null,
+    author: record.author || record.author_name || 'J. Worden & Sons',
+    cover_image: record.cover_image || record.image_url || null,
+    tags: Array.isArray(record.tags) ? record.tags : String(record.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+  }
+}
+
+function normalizeJobRecord(record) {
+  if (!record) return record
+  return {
+    ...record,
+    title: record.title || record.name || `Job ${record.job_number || record.id}`,
+    address: record.address || record.site_address || null,
+    surface_type: record.surface_type || record.service_type || null,
+    scheduled_date: record.scheduled_date || (record.scheduled_start ? String(record.scheduled_start).split('T')[0] : null),
+    start_time: record.start_time || null,
+    progress_percent: Number(record.progress_percent || 0),
+    progress_notes: record.progress_notes || '',
+    notes: record.notes || record.progress_notes || '',
+    sqft: record.sqft || record.project_size_sqft || null,
+    client_name: record.client_name || null,
+    client_email: record.client_email || null,
+    client_phone: record.client_phone || null,
+    status: record.status === 'active' ? 'in_progress' : record.status,
+  }
+}
+
+function normalizeProjectDocumentRecord(record) {
+  if (!record) return record
+  return {
+    ...record,
+    visible_to_client: Boolean(record.visible_to_client),
+  }
+}
+
+async function listBackendLeads(limit = 200) {
+  const response = await protectedRequest('GET', `/api/v1/crm/leads${buildQS({ limit })}`)
+  const leads = Array.isArray(response?.leads) ? response.leads : []
+  return leads.map(normalizeLeadRecord)
+}
+
+function mergeLeadOverlay(baseLeads) {
+  const overlays = readLocalEntityStore('Lead')
+  const byId = new Map(baseLeads.map((lead) => [String(lead.id), lead]))
+
+  overlays.forEach((overlay) => {
+    const key = String(overlay.id)
+    if (byId.has(key)) {
+      byId.set(key, normalizeLeadRecord({ ...byId.get(key), ...overlay }))
+      return
+    }
+    byId.set(key, normalizeLeadRecord(overlay))
+  })
+
+  return [...byId.values()]
+}
+
+function isQuotePayload(payload) {
+  return Boolean(payload && payload.name && payload.phone && payload.service_type)
+}
+
+async function createLeadRecord(payload) {
+  if (isQuotePayload(payload)) {
+    const response = await api.submitQuote({
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      service_type: payload.service_type,
+      property_type: payload.property_type || 'residential',
+      urgency: payload.urgency || 'within_2_weeks',
+      project_size_sqft: payload.project_size_sqft || payload.sqft || 1000,
+      address: payload.address || '',
+      message: payload.notes || payload.message || '',
+      state_code: payload.state_code,
+    })
+    const created = normalizeLeadRecord({
+      ...payload,
+      id: response?.lead_id ?? nextLocalEntityId('Lead'),
+      score_label: response?.score_label,
+      created_at: new Date().toISOString(),
+    })
+    const existing = readLocalEntityStore('Lead').filter((item) => String(item.id) !== String(created.id))
+    writeLocalEntityStore('Lead', [created, ...existing])
+    notifyEntitySubscribers('Lead', { type: 'create', id: created.id, data: created })
+    return created
+  }
+
+  const created = normalizeLeadRecord({
+    ...payload,
+    id: payload?.id || nextLocalEntityId('Lead'),
+    created_at: payload?.created_at || new Date().toISOString(),
+  })
+  const existing = readLocalEntityStore('Lead').filter((item) => String(item.id) !== String(created.id))
+  writeLocalEntityStore('Lead', [created, ...existing])
+  notifyEntitySubscribers('Lead', { type: 'create', id: created.id, data: created })
+  return created
+}
+
+async function updateLeadRecord(id, payload) {
+  const key = String(id)
+  const records = readLocalEntityStore('Lead')
+  const current = records.find((item) => String(item.id) === key) || { id }
+  const next = normalizeLeadRecord({ ...current, ...payload, id })
+  const merged = [next, ...records.filter((item) => String(item.id) !== key)]
+  writeLocalEntityStore('Lead', merged)
+
+  if (payload?.status || payload?.pipeline_stage) {
+    const pipelineStage = payload.pipeline_stage || payload.status
+    const closedReason = payload.closed_reason || null
+    try {
+      await protectedRequest('PATCH', `/api/v1/crm/leads/${id}/stage`, {
+        pipeline_stage: pipelineStage,
+        closed_reason: closedReason,
+      })
+    } catch {
+      // Keep local overlay even if protected stage update is unavailable.
+    }
+  }
+
+  notifyEntitySubscribers('Lead', { type: 'update', id: next.id, data: next })
+  return next
+}
+
+async function listLeadRecords(sort = '-created_date', limit = 200) {
+  let backend = []
+  try {
+    backend = await listBackendLeads(limit)
+  } catch {
+    backend = []
+  }
+  const merged = mergeLeadOverlay(backend)
+  return sortEntityRecords(merged, sort).slice(0, limit)
+}
+
+function createLocalEntityAdapter(entityName) {
+  return {
+    async list(sort, limit = 100) {
+      const records = readLocalEntityStore(entityName)
+      return sortEntityRecords(records, sort).slice(0, limit)
+    },
+    async filter(filter = {}, sort, limit = 100) {
+      const records = readLocalEntityStore(entityName).filter((record) => matchesEntityFilter(record, filter))
+      return sortEntityRecords(records, sort).slice(0, limit)
+    },
+    async get(id) {
+      return readLocalEntityStore(entityName).find((record) => String(record.id) === String(id)) || null
+    },
+    async create(payload) {
+      const created = {
+        ...payload,
+        id: payload?.id || nextLocalEntityId(entityName),
+        created_at: payload?.created_at || new Date().toISOString(),
+      }
+      const records = readLocalEntityStore(entityName)
+      writeLocalEntityStore(entityName, [created, ...records.filter((record) => String(record.id) !== String(created.id))])
+      notifyEntitySubscribers(entityName, { type: 'create', id: created.id, data: created })
+      return created
+    },
+    async update(id, payload) {
+      const key = String(id)
+      const records = readLocalEntityStore(entityName)
+      const current = records.find((record) => String(record.id) === key) || { id }
+      const updated = { ...current, ...payload, id }
+      writeLocalEntityStore(entityName, [updated, ...records.filter((record) => String(record.id) !== key)])
+      notifyEntitySubscribers(entityName, { type: 'update', id: updated.id, data: updated })
+      return updated
+    },
+    async delete(id) {
+      const key = String(id)
+      const remaining = readLocalEntityStore(entityName).filter((record) => String(record.id) !== key)
+      writeLocalEntityStore(entityName, remaining)
+      notifyEntitySubscribers(entityName, { type: 'delete', id })
+      return { status: 'deleted', id }
+    },
+    subscribe(callback) {
+      return subscribeToEntity(entityName, callback)
+    },
+  }
+}
+
+const entityAdapters = {
+  BlogPost: {
+    async list(sort = '-published_date', limit = 100) {
+      const response = await request('GET', `/api/v1/blog${buildQS({ per_page: limit })}`)
+      const posts = Array.isArray(response?.posts) ? response.posts.map(normalizeBlogPostRecord) : []
+      return sortEntityRecords(posts, sort).slice(0, limit)
+    },
+    async filter(filter = {}, sort = '-published_date', limit = 100) {
+      if (filter?.slug) {
+        try {
+          const post = await request('GET', `/api/v1/blog/${encodeURIComponent(filter.slug)}`)
+          return [normalizeBlogPostRecord(post)]
+        } catch {
+          return []
+        }
+      }
+      const posts = await this.list(sort, limit)
+      return posts.filter((post) => matchesEntityFilter(post, filter)).slice(0, limit)
+    },
+    async get(idOrSlug) {
+      try {
+        const post = await request('GET', `/api/v1/blog/${encodeURIComponent(idOrSlug)}`)
+        return normalizeBlogPostRecord(post)
+      } catch {
+        return null
+      }
+    },
+    subscribe(callback) {
+      return subscribeToEntity('BlogPost', callback)
+    },
+  },
+  Job: {
+    async list(sort = '-scheduled_date', limit = 200) {
+      const response = await protectedRequest('GET', `/api/v1/operations/jobs${buildQS()}`)
+      const jobs = Array.isArray(response?.jobs) ? response.jobs.map(normalizeJobRecord) : []
+      return sortEntityRecords(jobs, sort).slice(0, limit)
+    },
+    async filter(filter = {}, sort = '-scheduled_date', limit = 200) {
+      const response = await protectedRequest('GET', `/api/v1/operations/jobs${buildQS({ client_email: filter.client_email })}`)
+      const jobs = Array.isArray(response?.jobs) ? response.jobs.map(normalizeJobRecord) : []
+      return sortEntityRecords(jobs.filter((job) => matchesEntityFilter(job, filter)), sort).slice(0, limit)
+    },
+    async get(id) {
+      try {
+        const job = await protectedRequest('GET', `/api/v1/operations/jobs/${id}`)
+        return normalizeJobRecord(job)
+      } catch {
+        return null
+      }
+    },
+    async update(id, payload) {
+      const job = await protectedRequest('PATCH', `/api/v1/operations/jobs/${id}`, payload)
+      return normalizeJobRecord(job)
+    },
+    subscribe(callback) {
+      return subscribeToEntity('Job', callback)
+    },
+  },
+  Lead: {
+    async list(sort, limit = 200) {
+      return listLeadRecords(sort, limit)
+    },
+    async filter(filter = {}, sort, limit = 200) {
+      const records = await listLeadRecords(sort, limit)
+      return records.filter((record) => matchesEntityFilter(record, filter)).slice(0, limit)
+    },
+    async get(id) {
+      const records = await listLeadRecords('-created_date', 500)
+      return records.find((record) => String(record.id) === String(id)) || null
+    },
+    async create(payload) {
+      return createLeadRecord(payload)
+    },
+    async update(id, payload) {
+      return updateLeadRecord(id, payload)
+    },
+    async delete(id) {
+      const key = String(id)
+      const remaining = readLocalEntityStore('Lead').filter((record) => String(record.id) !== key)
+      writeLocalEntityStore('Lead', remaining)
+      notifyEntitySubscribers('Lead', { type: 'delete', id })
+      return { status: 'deleted', id }
+    },
+    subscribe(callback) {
+      return subscribeToEntity('Lead', callback)
+    },
+  },
+  ProjectDocument: {
+    async list(sort = '-created_at', limit = 200) {
+      const response = await protectedRequest('GET', '/api/v1/operations/job-documents')
+      const documents = Array.isArray(response?.documents) ? response.documents.map(normalizeProjectDocumentRecord) : []
+      return sortEntityRecords(documents, sort).slice(0, limit)
+    },
+    async filter(filter = {}, sort = '-created_at', limit = 200) {
+      const response = await protectedRequest('GET', `/api/v1/operations/job-documents${buildQS(filter)}`)
+      const documents = Array.isArray(response?.documents) ? response.documents.map(normalizeProjectDocumentRecord) : []
+      return sortEntityRecords(documents, sort).slice(0, limit)
+    },
+    async get(id) {
+      const documents = await this.filter({}, '-created_at', 500)
+      return documents.find((document) => String(document.id) === String(id)) || null
+    },
+    async update(id, payload) {
+      const document = await protectedRequest('PATCH', `/api/v1/operations/job-documents/${id}`, payload)
+      return normalizeProjectDocumentRecord(document)
+    },
+    async delete(id) {
+      return protectedRequest('DELETE', `/api/v1/operations/job-documents/${id}`)
+    },
+    subscribe(callback) {
+      return subscribeToEntity('ProjectDocument', callback)
+    },
+  },
+}
+
+const entities = new Proxy(entityAdapters, {
+  get(target, prop) {
+    if (typeof prop !== 'string') return undefined
+    if (!target[prop]) {
+      target[prop] = createLocalEntityAdapter(prop)
+    }
+    return target[prop]
+  },
+})
+
+const functionsClient = {
+  async invoke(name, payload = {}) {
+    return {
+      ok: true,
+      status: 'queued',
+      function_name: name,
+      data: {
+        acknowledged: true,
+        mode: 'standalone_fallback',
+        payload,
+      },
+    }
+  },
+}
+
+const integrationsClient = {
+  Core: {
+    async UploadFile({ file }) {
+      if (!file) {
+        throw new Error('No file provided.')
+      }
+      return {
+        file_url: typeof URL !== 'undefined' ? URL.createObjectURL(file) : '',
+      }
+    },
+  },
+}
+
 export const api = {
+  getAuthStatus: () => request('GET', '/api/v1/auth/status'),
+  authenticateWithPin,
+  listAuditEvents: (params = {}) => protectedRequest('GET', `/api/v1/admin/audit/events${buildQS(params)}`),
+  listRecentOperationalLeads: (limit = 12) => protectedRequest('GET', `/api/v1/operations/leads/recent${buildQS({ limit })}`),
   submitQuote: (data) => request('POST', '/api/v1/leads/quote', data),
   submitContact: (data) => request('POST', '/api/v1/leads/contact', data),
   getReviews: () => request('GET', '/api/v1/reviews'),
@@ -90,8 +653,8 @@ export const api = {
   getAIDesignSuggestions: (data) => request('POST', '/api/v1/visualizer/ai-suggestions', data),
   // ── Proposals + Stripe checkout (post-quote pipeline) ─────────────────────
   generateProposal: (leadId) =>
-    request('POST', '/api/v1/proposals/generate', { lead_id: leadId, include_pdf: true }),
-  sendProposal: (leadId) => request('POST', `/api/v1/proposals/${leadId}/send`),
+    protectedRequest('POST', '/api/v1/proposals/generate', { lead_id: leadId, include_pdf: true }),
+  sendProposal: (leadId) => protectedRequest('POST', `/api/v1/proposals/${leadId}/send`),
   createCheckoutSession: (leadId, successUrl, cancelUrl) =>
     request('POST', '/api/v1/payments/checkout-session', {
       lead_id: leadId,
@@ -174,6 +737,26 @@ export const api = {
   getVdotBid: (id) => request('GET', `/api/v1/vdot-bids/${id}`),
   triggerVdotScan: (maxResults = 50) => request('POST', `/api/v1/vdot-bids/scan?max_results=${maxResults}`),
   getVdotStatus: () => request('GET', '/api/v1/vdot-bids/status'),
+  createEstimateFromLead: (leadId, scopeSummary) => protectedRequest('POST', '/api/v1/operations/estimates/from-lead', { lead_id: leadId, scope_summary: scopeSummary }),
+  listEstimates: () => protectedRequest('GET', '/api/v1/operations/estimates'),
+  createJobFromEstimate: (estimateId, payload = {}) => protectedRequest('POST', '/api/v1/operations/jobs/from-estimate', { estimate_id: estimateId, ...payload }),
+  listJobs: () => protectedRequest('GET', '/api/v1/operations/jobs'),
+  createWorkOrder: (payload) => protectedRequest('POST', '/api/v1/operations/work-orders', payload),
+  listWorkOrders: (jobId) => protectedRequest('GET', `/api/v1/operations/jobs/${jobId}/work-orders`),
+  uploadProjectDocument: async (file, payload) => {
+    const form = new FormData()
+    form.append('file', file)
+    Object.entries(payload || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return
+      form.append(key, typeof value === 'boolean' ? String(value) : value)
+    })
+    return protectedFormRequest('/api/v1/operations/job-documents/upload', form)
+  },
+  uploadGalleryImage: (form) => protectedFormRequest('/api/v1/gallery/upload', form),
+  deleteGalleryImage: (imageId) => protectedRequest('DELETE', `/api/v1/gallery/images/${imageId}`),
+  entities,
+  functions: functionsClient,
+  integrations: integrationsClient,
 }
 
 // ── GA4 event helpers ─────────────────────────────────────────────────────────

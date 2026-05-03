@@ -3,8 +3,8 @@ import GalleryUploadForm from '../components/GalleryUploadForm'
 import SchemaMarkup from '../components/SchemaMarkup'
 import { SITE_URL } from '../lib/businessInfo'
 import { useGalleryImages } from '../hooks/useGalleryImages'
-
-const BASE = import.meta.env.VITE_API_BASE_URL || ''
+import { api } from '@/api/client'
+import { useAuth } from '@/lib/AuthContext'
 
 function formatDate(iso) {
   if (!iso) return ''
@@ -23,11 +23,7 @@ function ImageCard({ image, token, onDeleted }) {
     if (!window.confirm(`Delete "${image.job_name}"?`)) return
     setDeleting(true)
     try {
-      const res = await fetch(`${BASE}/api/v1/gallery/images/${image.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!res.ok) throw new Error('Delete failed')
+      await api.deleteGalleryImage(image.id)
       if (onDeleted) onDeleted(image.id)
     } catch {
       alert('Could not delete image. Please try again.')
@@ -110,10 +106,8 @@ function ImageCard({ image, token, onDeleted }) {
 
 export default function Gallery() {
   const { images, loading, error, reload, setImages } = useGalleryImages()
+  const { accessToken, isAuthenticated } = useAuth()
   const [showUpload, setShowUpload] = useState(false)
-  const [token, setToken] = useState('')
-  const [tokenInput, setTokenInput] = useState('')
-  const [showTokenForm, setShowTokenForm] = useState(false)
 
   // Admin/upload UI is hidden from the public-facing gallery.
   // Operators reveal it by visiting /gallery?admin=1 (or with ?admin=1 in the
@@ -230,49 +224,19 @@ export default function Gallery() {
             {showUpload ? '✕ Cancel Upload' : '+ Upload Photo'}
           </button>
 
-          {!token ? (
+          {isAuthenticated ? (
             <button
-              onClick={() => setShowTokenForm((v) => !v)}
-              className="text-sm text-white/50 hover:text-white/80 transition-colors underline underline-offset-2"
-            >
-              Admin login
-            </button>
-          ) : (
-            <button
-              onClick={() => { setToken(''); setTokenInput('') }}
+              onClick={reload}
               className="text-sm text-brand-amber hover:text-amber-400 transition-colors"
             >
-              ✓ Admin mode — log out
+              Refresh gallery
             </button>
-          )}
-        </div>
-      )}
-
-      {/* Admin token form */}
-      {adminUiVisible && showTokenForm && !token && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-          <form
-            onSubmit={handleTokenSubmit}
-            className="flex gap-2 max-w-sm bg-white/5 border border-white/10 rounded-xl p-4"
-          >
-            <input
-              type="password"
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              placeholder="Admin token"
-              className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2
-                         text-white placeholder-white/40 text-sm focus:outline-none
-                         focus:ring-2 focus:ring-brand-amber"
-            />
-            <button type="submit" className="btn-primary text-sm !py-2">
-              Login
-            </button>
-          </form>
+          ) : null}
         </div>
       )}
 
       {/* Upload form */}
-      {adminUiVisible && showUpload && (
+      {adminUiVisible && showUpload && isAuthenticated && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
           <div className="max-w-lg">
             <GalleryUploadForm onUploaded={handleUploaded} />
@@ -313,7 +277,7 @@ export default function Gallery() {
               <ImageCard
                 key={img.id}
                 image={img}
-                token={token}
+                token={accessToken}
                 onDeleted={handleDeleted}
               />
             ))}

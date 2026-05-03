@@ -19,12 +19,17 @@ from __future__ import annotations
 
 import logging
 import os
+import hashlib
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from ..database import get_db
+from ..services.audit import write_audit_event
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +41,68 @@ _TOKEN_EXPIRE_SECONDS = 86_400  # 24 hours
 _oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token", auto_error=False)
 
 
+def _secret_fingerprint(value: str) -> str:
+    if not value:
+        return "unset"
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()[:12]
+    return f"len={len(value)} sha256={digest}"
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int = _TOKEN_EXPIRE_SECONDS
+
+
+class PinTokenRequest(BaseModel):
+    pin: str
+
+
+class AuthStatusResponse(BaseModel):
+    auth_required: bool
+    auth_mode: str
+    token_endpoint: str | None = None
+    admin_configured: bool
+
+
+def _auth_mode() -> str:
+    return os.getenv("AUTH_MODE", "required").strip().lower()
+
+
+def _issue_admin_jwt() -> str:
+    secret = os.getenv("JWT_SECRET_KEY", "")
+    if not secret:
+        raise HTTPException(
+            status_code=500,
+            detail="JWT signing is not configured. Set JWT_SECRET_KEY.",
+        )
+
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": "Admin",
+        "tenant_id": "JWORDEN_HQ",
+        "iat": now,
+        "exp": now + timedelta(seconds=_TOKEN_EXPIRE_SECONDS),
+    }
+    return jwt.encode(payload, secret, algorithm=_ALGORITHM)
+
+
+@router.get(
+    "/status",
+    summary="Return server-auth configuration for frontend bootstrapping",
+    response_model=AuthStatusResponse,
+)
+def auth_status():
+    mode = _auth_mode()
+    auth_required = mode not in {"none", "off", "disabled", "0", "false"}
+    admin_configured = bool(os.getenv("ADMIN_PIN") or (os.getenv("ADMIN_USERNAME") and os.getenv("ADMIN_PASSWORD")))
+    token_endpoint = "/.netlify/functions/get-token" if auth_required else None
+    return AuthStatusResponse(
+        auth_required=auth_required,
+        auth_mode=mode,
+        token_endpoint=token_endpoint,
+        admin_configured=admin_configured,
+    )
 
 
 @router.post(
@@ -47,7 +110,10 @@ class TokenResponse(BaseModel):
     summary="Exchange master key for a 24-hour JWT",
     response_model=TokenResponse,
 )
-def issue_token(raw_token: str = Security(_oauth2_scheme)):
+def issue_token(
+    raw_token: str = Security(_oauth2_scheme),
+    db: Session = Depends(get_db),
+):
     """
     Present the ``JWORDEN_MASTER_KEY`` as a Bearer token to receive a signed
     JWT valid for 24 hours.
@@ -75,29 +141,73 @@ def issue_token(raw_token: str = Security(_oauth2_scheme)):
         )
 
     if raw_token != master_key:
-        logger.warning("Token issuance rejected — invalid master key presented")
+        logger.warning(
+            "Token issuance rejected — invalid master key presented (presented=%s expected=%s)",
+            _secret_fingerprint(raw_token),
+            _secret_fingerprint(master_key),
+        )
         raise HTTPException(
             status_code=403,
             detail="Invalid master key",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    secret = os.getenv("JWT_SECRET_KEY", "")
-    if not secret:
+    token = _issue_admin_jwt()
+    logger.info("JWT issued for Admin (tenant=JWORDEN_HQ, expires_in=%ds)", _TOKEN_EXPIRE_SECONDS)
+
+    write_audit_event(
+        db,
+        event_type="auth.token_issued",
+        actor_type="service",
+        actor_id="auth_router",
+        entity_type="auth_token",
+        entity_id="Admin",
+        summary="Issued backend JWT for admin client bootstrap.",
+        detail={"tenant_id": "JWORDEN_HQ", "expires_in": _TOKEN_EXPIRE_SECONDS},
+    )
+
+    return TokenResponse(access_token=token)
+
+
+@router.post(
+    "/pin-token",
+    summary="Exchange the configured admin PIN for a 24-hour JWT",
+    response_model=TokenResponse,
+)
+def issue_pin_token(
+    request: PinTokenRequest,
+    db: Session = Depends(get_db),
+):
+    admin_pin = os.getenv("ADMIN_PIN", "")
+    if not admin_pin:
         raise HTTPException(
             status_code=500,
-            detail="JWT signing is not configured. Set JWT_SECRET_KEY.",
+            detail="PIN authentication is not configured. Set ADMIN_PIN.",
         )
 
-    now = datetime.now(timezone.utc)
-    payload = {
-        "sub": "Admin",
-        "tenant_id": "JWORDEN_HQ",
-        "iat": now,
-        "exp": now + timedelta(seconds=_TOKEN_EXPIRE_SECONDS),
-    }
+    if not request.pin or not request.pin.isdigit() or len(request.pin) != 4:
+        raise HTTPException(status_code=400, detail="A 4-digit PIN is required.")
 
-    token = jwt.encode(payload, secret, algorithm=_ALGORITHM)
-    logger.info("JWT issued for Admin (tenant=JWORDEN_HQ, expires_in=%ds)", _TOKEN_EXPIRE_SECONDS)
+    if request.pin != admin_pin:
+        logger.warning(
+            "PIN token issuance rejected — incorrect PIN presented (presented=%s expected=%s)",
+            _secret_fingerprint(request.pin),
+            _secret_fingerprint(admin_pin),
+        )
+        raise HTTPException(status_code=403, detail="Incorrect PIN")
+
+    token = _issue_admin_jwt()
+    logger.info("JWT issued for Admin via PIN auth (tenant=JWORDEN_HQ, expires_in=%ds)", _TOKEN_EXPIRE_SECONDS)
+
+    write_audit_event(
+        db,
+        event_type="auth.pin_token_issued",
+        actor_type="admin",
+        actor_id="pin_auth",
+        entity_type="auth_token",
+        entity_id="Admin",
+        summary="Issued backend JWT after admin PIN verification.",
+        detail={"tenant_id": "JWORDEN_HQ", "expires_in": _TOKEN_EXPIRE_SECONDS},
+    )
 
     return TokenResponse(access_token=token)

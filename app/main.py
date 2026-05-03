@@ -239,6 +239,8 @@ from .routers import admin_2fa as admin_2fa_router
 from .routers import human_review as human_review_router
 from .routers import search as search_router
 from .routers import public_chat as public_chat_router
+from .routers import operations as operations_router
+from .routers import audit_admin as audit_admin_router
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
 
@@ -493,6 +495,8 @@ app.include_router(human_review_router.router)
 app.include_router(search_router.router)
 # Public concierge chat — Mr. Worden widget (no auth, rate-limited)
 app.include_router(public_chat_router.router)
+app.include_router(operations_router.router)
+app.include_router(audit_admin_router.router)
 
 
 # ── Socket.IO ASGI mount ──────────────────────────────────────────────────────

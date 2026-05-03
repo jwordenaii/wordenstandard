@@ -1,4 +1,6 @@
 import os
+import hashlib
+import logging
 from fastapi import HTTPException, Security
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -6,10 +8,18 @@ from jose import JWTError, jwt
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 _ALGORITHM = "HS256"
+logger = logging.getLogger(__name__)
+
+
+def _secret_fingerprint(value: str) -> str:
+    if not value:
+        return "unset"
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()[:12]
+    return f"len={len(value)} sha256={digest}"
 
 
 def _auth_disabled() -> bool:
-    mode = os.getenv("AUTH_MODE", "none").strip().lower()
+    mode = os.getenv("AUTH_MODE", "required").strip().lower()
     return mode in {"none", "off", "disabled", "0", "false"}
 
 
@@ -46,4 +56,10 @@ def verify_premium_security(token: str = Security(oauth2_scheme)):
             "tenant_id": payload.get("tenant_id", "JWORDEN_HQ"),
         }
     except JWTError:
+        logger.warning(
+            "Protected request rejected — invalid token (presented=%s jwt_secret=%s master_key=%s)",
+            _secret_fingerprint(token),
+            _secret_fingerprint(secret),
+            _secret_fingerprint(master_key),
+        )
         raise HTTPException(status_code=403, detail="Unauthorized: invalid token")

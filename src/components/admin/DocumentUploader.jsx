@@ -49,15 +49,12 @@ export default function DocumentUploader({ job, onUploaded }) {
 
     setUploading(true);
     try {
-      const { file_url } = await api.integrations.Core.UploadFile({ file });
-      await api.entities.ProjectDocument.create({
+      await api.uploadProjectDocument(file, {
         job_id: job.id,
         client_email: job.client_email,
         document_type: docType,
         title: title.trim(),
         description: description.trim() || undefined,
-        file_url,
-        file_size_bytes: file.size,
         visible_to_client: visibleToClient,
       });
       toast.success('Document uploaded and shared with the customer.');

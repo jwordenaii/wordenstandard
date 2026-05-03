@@ -4,18 +4,7 @@ import { api } from '@/api/client'
 import { Link } from 'react-router-dom'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
-const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
-const AUTH_DISABLED = ['none', 'off', 'disabled', '0', 'false'].includes(AUTH_MODE)
 const INTERNAL_STRATEGY_ENABLED = true
-
-// ⚠️  SECURITY NOTE — client-side PIN is NOT real access control.
-// VITE_ variables are bundled into the browser JavaScript bundle and are
-// visible to anyone who inspects the page source or network requests.
-// This PIN gate is a convenience deterrent only.
-// For genuine protection, enable Netlify Password Protection (Pro plan) or
-// deploy a Netlify Edge Function that validates a secret before serving the page.
-// See the "Command Center — Edge Protection" section in netlify.toml for guidance.
-const CC_PASSWORD = import.meta.env.VITE_CC_PASSWORD
 
 function isCommandCenterPath() {
   if (typeof window === 'undefined') return false
@@ -27,6 +16,7 @@ const TABS = [
   { id: 'richmond-grid', label: 'Richmond Grid' },
   { id: 'kpi', label: 'KPI Wall' },
   { id: 'crm', label: 'CRM Leads' },
+  { id: 'ops', label: 'Ops Pipeline' },
 ]
 
 const KPI_CARDS = [
@@ -552,6 +542,261 @@ function CrmTable() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  )
+}
+
+function formatTimestamp(value) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+function OperationsPipelinePanel() {
+  const [loading, setLoading] = useState(true)
+  const [creatingEstimateId, setCreatingEstimateId] = useState(null)
+  const [creatingJobId, setCreatingJobId] = useState(null)
+  const [creatingWorkOrderId, setCreatingWorkOrderId] = useState(null)
+  const [error, setError] = useState('')
+  const [statusNote, setStatusNote] = useState('')
+  const [recentLeads, setRecentLeads] = useState([])
+  const [estimates, setEstimates] = useState([])
+  const [jobs, setJobs] = useState([])
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const [leadData, estimateData, jobData] = await Promise.all([
+        api.listRecentOperationalLeads(8),
+        api.listEstimates(),
+        api.listJobs(),
+      ])
+      setRecentLeads(Array.isArray(leadData?.leads) ? leadData.leads : [])
+      setEstimates(Array.isArray(estimateData?.estimates) ? estimateData.estimates : [])
+      setJobs(Array.isArray(jobData?.jobs) ? jobData.jobs : [])
+    } catch (loadError) {
+      setError(loadError?.message || 'Could not load operations pipeline.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const handleCreateEstimate = useCallback(async (lead) => {
+    setCreatingEstimateId(lead.id)
+    setStatusNote('')
+    setError('')
+    try {
+      await api.createEstimateFromLead(lead.id, lead.address ? `Operational estimate for ${lead.address}` : undefined)
+      setStatusNote(`Estimate created from lead #${lead.id}.`)
+      await loadData()
+    } catch (createError) {
+      setError(createError?.message || 'Could not create estimate.')
+    } finally {
+      setCreatingEstimateId(null)
+    }
+  }, [loadData])
+
+  const handleCreateJob = useCallback(async (estimate) => {
+    setCreatingJobId(estimate.id)
+    setStatusNote('')
+    setError('')
+    try {
+      await api.createJobFromEstimate(estimate.id, {
+        name: `${estimate.service_type || 'Project'} execution ${estimate.estimate_number}`,
+      })
+      setStatusNote(`Job created from ${estimate.estimate_number}.`)
+      await loadData()
+    } catch (createError) {
+      setError(createError?.message || 'Could not create job.')
+    } finally {
+      setCreatingJobId(null)
+    }
+  }, [loadData])
+
+  const handleCreateWorkOrder = useCallback(async (job) => {
+    setCreatingWorkOrderId(job.id)
+    setStatusNote('')
+    setError('')
+    try {
+      await api.createWorkOrder({
+        job_id: job.id,
+        title: `Dispatch ${job.job_number}`,
+        assigned_crew: 'Crew A',
+      })
+      setStatusNote(`Work order created for ${job.job_number}.`)
+      await loadData()
+    } catch (createError) {
+      setError(createError?.message || 'Could not create work order.')
+    } finally {
+      setCreatingWorkOrderId(null)
+    }
+  }, [loadData])
+
+  return (
+    <div className="space-y-4 md:space-y-5">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Operations Pipeline</h3>
+            <p className="text-white/55 text-sm mt-1">Turn fresh leads into estimates, jobs, and work orders from one protected flow.</p>
+          </div>
+          <button
+            type="button"
+            onClick={loadData}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/75 hover:border-brand-amber/40 hover:text-brand-amber"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
+        </div>
+
+        {error ? <div className="mb-3 rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div> : null}
+        {statusNote ? <div className="mb-3 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">{statusNote}</div> : null}
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-3">Recent Leads</p>
+            <div className="space-y-2.5">
+              {loading ? <p className="text-sm text-white/50">Loading leads…</p> : recentLeads.map((lead) => (
+                <div key={lead.id} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2.5">
+                  <p className="text-white text-sm font-semibold">#{lead.id} {lead.name || 'Lead'}</p>
+                  <p className="text-white/55 text-xs mt-0.5">{lead.service_type || 'Service TBD'} · {lead.address || lead.state_code || 'No address yet'}</p>
+                  <p className="text-white/35 text-[11px] mt-1">{formatTimestamp(lead.created_at)}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateEstimate(lead)}
+                    disabled={creatingEstimateId === lead.id}
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg bg-brand-amber px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-brand-navy disabled:opacity-50"
+                  >
+                    {creatingEstimateId === lead.id ? 'Creating…' : 'Create Estimate'}
+                  </button>
+                </div>
+              ))}
+              {!loading && recentLeads.length === 0 ? <p className="text-sm text-white/50">No recent leads available.</p> : null}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-3">Estimates</p>
+            <div className="space-y-2.5">
+              {loading ? <p className="text-sm text-white/50">Loading estimates…</p> : estimates.slice(0, 8).map((estimate) => (
+                <div key={estimate.id} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-white text-sm font-semibold">{estimate.estimate_number}</p>
+                      <p className="text-white/55 text-xs mt-0.5">Lead #{estimate.lead_id} · {estimate.status}</p>
+                    </div>
+                    <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-bold ${estimate.status === 'converted' ? 'text-emerald-300 border-emerald-300/50 bg-emerald-300/10' : 'text-amber-300 border-amber-300/50 bg-amber-300/10'}`}>
+                      {estimate.status}
+                    </span>
+                  </div>
+                  <p className="text-brand-amber text-xs mt-2">${Math.round(Number(estimate.amount_low || 0)).toLocaleString()} - ${Math.round(Number(estimate.amount_high || 0)).toLocaleString()}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateJob(estimate)}
+                    disabled={creatingJobId === estimate.id || estimate.status === 'converted'}
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-brand-amber/40 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-brand-amber disabled:opacity-50"
+                  >
+                    {creatingJobId === estimate.id ? 'Creating…' : estimate.status === 'converted' ? 'Converted' : 'Create Job'}
+                  </button>
+                </div>
+              ))}
+              {!loading && estimates.length === 0 ? <p className="text-sm text-white/50">No estimates created yet.</p> : null}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-white/45 mb-3">Jobs Ready For Dispatch</p>
+            <div className="space-y-2.5">
+              {loading ? <p className="text-sm text-white/50">Loading jobs…</p> : jobs.slice(0, 8).map((job) => (
+                <div key={job.id} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2.5">
+                  <p className="text-white text-sm font-semibold">{job.job_number}</p>
+                  <p className="text-white/55 text-xs mt-0.5">{job.name}</p>
+                  <p className="text-white/35 text-[11px] mt-1">Estimate #{job.estimate_id} · {job.status}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateWorkOrder(job)}
+                    disabled={creatingWorkOrderId === job.id}
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-sky-300/40 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-sky-300 disabled:opacity-50"
+                  >
+                    {creatingWorkOrderId === job.id ? 'Creating…' : 'Create Work Order'}
+                  </button>
+                </div>
+              ))}
+              {!loading && jobs.length === 0 ? <p className="text-sm text-white/50">No jobs created yet.</p> : null}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AuditFeedPanel() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [events, setEvents] = useState([])
+
+  const loadEvents = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const data = await api.listAuditEvents({ limit: 12 })
+      setEvents(Array.isArray(data?.events) ? data.events : [])
+    } catch (loadError) {
+      setError(loadError?.message || 'Could not load audit feed.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Audit Feed</h3>
+          <p className="text-white/55 text-sm mt-1">Live operational evidence from the protected backend audit stream.</p>
+        </div>
+        <button
+          type="button"
+          onClick={loadEvents}
+          className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/75 hover:border-brand-amber/40 hover:text-brand-amber"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Refresh
+        </button>
+      </div>
+
+      {error ? <div className="mb-3 rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div> : null}
+
+      <div className="space-y-2.5">
+        {loading ? <p className="text-sm text-white/50">Loading audit feed…</p> : events.map((event) => (
+          <div key={event.id} className="rounded-lg border border-white/10 bg-black/20 px-3 py-2.5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-white text-sm font-semibold">{event.event_type}</p>
+                <p className="text-white/55 text-xs mt-0.5">{event.summary}</p>
+              </div>
+              <span className="text-[11px] text-white/35">{formatTimestamp(event.created_at)}</span>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-white/45">
+              <span className="rounded-full border border-white/10 px-2 py-1">Actor: {event.actor_type}</span>
+              <span className="rounded-full border border-white/10 px-2 py-1">Entity: {event.entity_type || '—'} {event.entity_id || ''}</span>
+            </div>
+          </div>
+        ))}
+        {!loading && events.length === 0 ? <p className="text-sm text-white/50">No audit events available.</p> : null}
       </div>
     </div>
   )
@@ -2480,13 +2725,8 @@ function InternalStrategyNotice() {
 
 export default function CommandCenter() {
   const [activeTab, setActiveTab] = useState('richmond-grid')
-  // Never auto-unlock — require an explicit PIN entry every session.
-  // When CC_PASSWORD is not configured the body renders DisabledNotice instead.
-  const [unlocked, setUnlocked] = useState(AUTH_DISABLED)
   const strategyVisible = INTERNAL_STRATEGY_ENABLED && isCommandCenterPath()
   const [latestAudit, setLatestAudit] = useState(null)
-
-  const handleUnlock = useCallback(() => setUnlocked(true), [])
   const now = new Date()
 
   return (
@@ -2532,36 +2772,31 @@ export default function CommandCenter() {
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
-        {!AUTH_DISABLED && !CC_PASSWORD ? (
-          <DisabledNotice />
-        ) : !AUTH_DISABLED && !unlocked ? (
-          <PinGate onUnlock={handleUnlock} />
-        ) : (
-          <>
-            {!strategyVisible ? <InternalStrategyNotice /> : null}
-            {strategyVisible ? <HubLinkPanel /> : null}
+        <>
+          {!strategyVisible ? <InternalStrategyNotice /> : null}
+          {strategyVisible ? <HubLinkPanel /> : null}
 
-            {activeTab === 'richmond-grid' && (
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center h-96 text-white/50">
-                    Loading map…
-                  </div>
-                }
-              >
-                <RichmondGrid />
-              </Suspense>
-            )}
-
-            {activeTab === 'kpi' && (
-              <div className="space-y-4 md:space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
-                  {KPI_CARDS.map((card) => (
-                    <KpiCard key={card.label} {...card} />
-                  ))}
+          {activeTab === 'richmond-grid' && (
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-96 text-white/50">
+                  Loading map…
                 </div>
+              }
+            >
+              <RichmondGrid />
+            </Suspense>
+          )}
 
-                {strategyVisible ? <OperationsNerveCenterPanel /> : null}
+          {activeTab === 'kpi' && (
+            <div className="space-y-4 md:space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+                {KPI_CARDS.map((card) => (
+                  <KpiCard key={card.label} {...card} />
+                ))}
+              </div>
+
+              {strategyVisible ? <OperationsNerveCenterPanel /> : null}
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
                   <div className="xl:col-span-2">
@@ -2592,6 +2827,13 @@ export default function CommandCenter() {
                     Priority Playbook: Focus calls on leads above 80 first, schedule site visits before 6 PM, and send proposal PDFs within 30 minutes of each visit.
                   </div>
                 ) : null}
+              </div>
+            )}
+
+            {activeTab === 'ops' && (
+              <div className="space-y-4 md:space-y-5">
+                <OperationsPipelinePanel />
+                <AuditFeedPanel />
               </div>
             )}
           </>

@@ -49,7 +49,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import ContactMessage, Lead, PageContent, TwoFactorSecret
+from ..models import AuditEvent, ContactMessage, Lead, PageContent, TwoFactorSecret
 from ..services.ranking import rank_leads
 from ..services.gsc_client import get_gsc_data, get_top_keywords, get_keywords_by_position
 from ..services.ga4_client import get_ga4_data, get_top_pages, get_conversion_funnel, get_conversion_rate_by_page
@@ -69,7 +69,7 @@ templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 def _auth_disabled() -> bool:
-    mode = os.getenv("AUTH_MODE", "none").strip().lower()
+    mode = os.getenv("AUTH_MODE", "required").strip().lower()
     return mode in {"none", "off", "disabled", "0", "false"}
 
 def _require_admin(
@@ -579,3 +579,32 @@ async def admin_analytics_chat(
             status_code=500,
             content={"error": f"Chat failed: {exc}"},
         )
+
+
+@router.get("/audit", response_class=HTMLResponse)
+def admin_audit(
+    request: Request,
+    event_type: str = "",
+    entity_type: str = "",
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    _: str = Depends(_require_admin),
+):
+    query = db.query(AuditEvent)
+    if event_type:
+        query = query.filter(AuditEvent.event_type == event_type)
+    if entity_type:
+        query = query.filter(AuditEvent.entity_type == entity_type)
+
+    events = query.order_by(AuditEvent.created_at.desc()).limit(min(limit, 250)).all()
+    return _render(
+        request,
+        "admin/audit.html",
+        db,
+        active="audit",
+        events=events,
+        total=len(events),
+        filter_event_type=event_type,
+        filter_entity_type=entity_type,
+        limit=limit,
+    )

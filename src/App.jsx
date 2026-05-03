@@ -1,6 +1,8 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import ReactGA from 'react-ga4';
 import { Toaster } from "@/components/ui/toaster"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -51,9 +53,6 @@ const VirginiaSealcoating = lazy(() => import('./pages/VirginiaSealcoating'));
 const MillingsAndFines = lazy(() => import('./pages/MillingsAndFines'));
 // Add page imports here
 
-const AUTH_MODE = String(import.meta.env.VITE_AUTH_MODE || 'none').toLowerCase()
-const AUTH_DISABLED = ['none', 'off', 'disabled', '0', 'false'].includes(AUTH_MODE)
-
 // Initialise GA4 once — silently skipped when the measurement ID is not set.
 const GA4_ID = import.meta.env.VITE_GA4_ID
 if (GA4_ID) {
@@ -66,11 +65,60 @@ const LoadingSpinner = () => (
   </div>
 );
 
+const AdminPinGate = () => {
+  const { loginWithPin } = useAuth();
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const submitPin = async (event) => {
+    event.preventDefault();
+    setError('');
+    if (!/^\d{4}$/.test(pin)) {
+      setError('Enter the 4-digit admin PIN.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await loginWithPin(pin);
+    } catch (err) {
+      setError(err.message || 'Incorrect PIN.');
+      setPin('');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-6">
+      <form onSubmit={submitPin} className="w-full max-w-sm border border-border bg-card p-6 shadow-lg">
+        <p className="font-display text-primary text-xs tracking-widest uppercase mb-2">Admin Access</p>
+        <h1 className="font-display text-2xl font-black text-foreground mb-4">Enter PIN</h1>
+        <Input
+          autoFocus
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={4}
+          type="password"
+          value={pin}
+          onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 4))}
+          aria-label="Admin PIN"
+          className="h-12 text-center text-xl tracking-widest"
+        />
+        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+        <Button type="submit" className="mt-5 w-full" disabled={submitting}>
+          {submitting ? 'Checking...' : 'Unlock'}
+        </Button>
+      </form>
+    </div>
+  );
+};
+
 // Gate only back-office pages behind auth. Public pages render without any auth check.
 const RequireAuth = ({ children }) => {
-  if (AUTH_DISABLED) return children;
+  const { authRequired, isAuthenticated, isLoadingAuth, authError } = useAuth();
 
-  const { isAuthenticated, isLoadingAuth, authError, navigateToLogin } = useAuth();
+  if (!authRequired) return children;
 
   if (isLoadingAuth) return <LoadingSpinner />;
 
@@ -79,8 +127,7 @@ const RequireAuth = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    navigateToLogin();
-    return null;
+    return <AdminPinGate />;
   }
 
   return children;

@@ -18,6 +18,7 @@ from ..core.limiter import limiter
 from ..core.security import verify_premium_security
 from ..database import get_db
 from ..models import Lead
+from ..services.audit import write_audit_event
 from ..services.estimate_approval import (
     estimate_requires_approval,
     stage_proposal_for_approval,
@@ -96,6 +97,17 @@ async def generate_proposal(
             db.commit()
     except Exception as exc:  # noqa: BLE001
         logger.warning('Could not update pipeline stage: %s', exc)
+
+    write_audit_event(
+        db,
+        event_type='proposal.generated',
+        actor_type='admin',
+        actor_id='protected_api',
+        entity_type='lead',
+        entity_id=lead.id,
+        summary=f'Proposal generated for lead {lead.name}.',
+        detail={'include_pdf': req.include_pdf, 'service_type': lead.service_type},
+    )
 
     return result
 
@@ -198,6 +210,16 @@ async def send_proposal(
     # an estimate until it's been reviewed in the command center.
     if estimate_requires_approval():
         item = stage_proposal_for_approval(db, lead, payload)
+        write_audit_event(
+            db,
+            event_type='proposal.staged_for_approval',
+            actor_type='admin',
+            actor_id='protected_api',
+            entity_type='lead',
+            entity_id=lead.id,
+            summary=f'Proposal staged for approval for {recipient}.',
+            detail={'review_item_id': item.id, 'recipient': recipient},
+        )
         return {
             'status':          'pending_approval',
             'message':         f'Proposal queued for review — approve in command center to release to {recipient}',
@@ -211,6 +233,16 @@ async def send_proposal(
 
     # Auto-send path (only when ESTIMATE_REQUIRES_APPROVAL=false)
     background_tasks.add_task(_send_proposal_email, lead_dict, proposal_text, pdf_bytes)
+    write_audit_event(
+        db,
+        event_type='proposal.queued_for_send',
+        actor_type='admin',
+        actor_id='protected_api',
+        entity_type='lead',
+        entity_id=lead.id,
+        summary=f'Proposal queued for automatic send to {recipient}.',
+        detail={'recipient': recipient},
+    )
     return {
         'status': 'queued',
         'message': f'Proposal will be emailed to {lead.email} (auto-send, approval gate disabled)',

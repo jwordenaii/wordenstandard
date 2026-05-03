@@ -2,7 +2,7 @@
 gallery.py — Job photo gallery for J. Worden & Sons.
 
 Endpoints:
-  POST   /api/v1/gallery/upload           → upload a job photo (public)
+    POST   /api/v1/gallery/upload           → upload a job photo (admin only)
   GET    /api/v1/gallery/images           → list all gallery images (public)
   DELETE /api/v1/gallery/images/{image_id} → delete an image (admin only)
 
@@ -59,10 +59,11 @@ async def upload_image(
     job_name: str = Form(...),
     description: Optional[str] = Form(None),
     db: Session = Depends(get_db),
+    security: dict = Depends(verify_premium_security),
 ):
     """
     Accept a multipart image upload and store it as a base64 data URI.
-    No authentication required — J can upload from the site directly.
+    Requires a valid bearer token.
     """
     # Validate MIME type
     mime = (file.content_type or "").lower()
@@ -96,7 +97,13 @@ async def upload_image(
     db.commit()
     db.refresh(image)
 
-    logger.info("Gallery upload: id=%s job=%r filename=%r", image.id, image.job_name, image.filename)
+    logger.info(
+        "Gallery upload: id=%s job=%r filename=%r by user=%s",
+        image.id,
+        image.job_name,
+        image.filename,
+        security.get("user"),
+    )
     return {"status": "uploaded", "image": _serialize_image(image)}
 
 

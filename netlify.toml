@@ -6,6 +6,9 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[functions]
+  directory = "netlify/functions"
+
 [[plugins]]
   package = "netlify-plugin-bundle-env"
   [plugins.inputs]
@@ -38,6 +41,12 @@
 [[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://codexbuildfreeofbase44-production.up.railway.app/api/:splat"
   status = 200
   force = true
 

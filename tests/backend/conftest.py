@@ -17,6 +17,7 @@ def app_modules(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv('DATABASE_URL', f'sqlite:///{db_path}')
     monkeypatch.setenv('JWORDEN_MASTER_KEY', 'test-master-key')
     monkeypatch.setenv('JWT_SECRET_KEY', 'test-jwt-secret')
+    monkeypatch.setenv('ADMIN_PIN', '1234')
     monkeypatch.setenv('AUTO_CREATE_TABLES', 'true')
     monkeypatch.delenv('REDIS_URL', raising=False)
     monkeypatch.delenv('CELERY_BROKER_URL', raising=False)

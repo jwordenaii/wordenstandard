@@ -481,6 +481,105 @@ class ServiceHistory(Base):
         return f"<ServiceHistory id={self.id} customer_id={self.customer_id}>"
 
 
+class Estimate(Base):
+    """Commercial estimate record derived from a lead and used to start a job."""
+
+    __tablename__ = "estimates"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    lead_id           = Column(Integer, nullable=True, index=True)
+    customer_id       = Column(Integer, nullable=True, index=True)
+    estimate_number   = Column(String(80), nullable=False, unique=True, index=True)
+    status            = Column(String(30), nullable=False, default="draft")  # draft | sent | approved | rejected | converted
+    service_type      = Column(String(60), nullable=True)
+    scope_summary     = Column(Text, nullable=True)
+    amount_low        = Column(Float, nullable=True)
+    amount_high       = Column(Float, nullable=True)
+    currency          = Column(String(10), nullable=False, default="usd")
+    state_code        = Column(String(2), nullable=True, index=True)
+    tenant_id         = Column(String(60), nullable=True, index=True, default="default")
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at        = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Estimate id={self.id} number={self.estimate_number!r} status={self.status!r}>"
+
+
+class Job(Base):
+    """Primary operational job record created from an approved estimate."""
+
+    __tablename__ = "jobs"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    estimate_id       = Column(Integer, nullable=True, index=True)
+    lead_id           = Column(Integer, nullable=True, index=True)
+    customer_id       = Column(Integer, nullable=True, index=True)
+    job_number        = Column(String(80), nullable=False, unique=True, index=True)
+    name              = Column(String(200), nullable=False)
+    status            = Column(String(30), nullable=False, default="scheduled")  # scheduled | active | blocked | completed | cancelled
+    service_type      = Column(String(60), nullable=True)
+    site_address      = Column(String(300), nullable=True)
+    state_code        = Column(String(2), nullable=True, index=True)
+    scheduled_start   = Column(DateTime(timezone=True), nullable=True)
+    scheduled_end     = Column(DateTime(timezone=True), nullable=True)
+    progress_percent  = Column(Integer, nullable=False, default=0)
+    progress_notes    = Column(Text, nullable=True)
+    completed_at      = Column(DateTime(timezone=True), nullable=True)
+    tenant_id         = Column(String(60), nullable=True, index=True, default="default")
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at        = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Job id={self.id} number={self.job_number!r} status={self.status!r}>"
+
+
+class ProjectDocument(Base):
+    """Customer-facing job document persisted for admin and portal workflows."""
+
+    __tablename__ = "project_documents"
+
+    id                = Column(String(36), primary_key=True, index=True)
+    job_id            = Column(Integer, nullable=False, index=True)
+    client_email      = Column(String(254), nullable=True, index=True)
+    document_type     = Column(String(40), nullable=False, default="other")
+    title             = Column(String(200), nullable=False)
+    description       = Column(Text, nullable=True)
+    filename          = Column(String(300), nullable=False)
+    mime_type         = Column(String(120), nullable=True)
+    file_size_bytes   = Column(Integer, nullable=True)
+    file_url          = Column(Text, nullable=False)
+    visible_to_client = Column(Boolean, nullable=False, default=True)
+    uploaded_by       = Column(String(120), nullable=True)
+    tenant_id         = Column(String(60), nullable=True, index=True, default="default")
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at        = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ProjectDocument id={self.id!r} job_id={self.job_id} type={self.document_type!r}>"
+
+
+class WorkOrder(Base):
+    """Field-execution unit of work under a job for crews and dispatch."""
+
+    __tablename__ = "work_orders"
+
+    id                = Column(Integer, primary_key=True, index=True)
+    job_id            = Column(Integer, nullable=False, index=True)
+    work_order_number = Column(String(80), nullable=False, unique=True, index=True)
+    title             = Column(String(200), nullable=False)
+    status            = Column(String(30), nullable=False, default="scheduled")  # scheduled | dispatched | in_progress | completed | blocked
+    assigned_crew     = Column(String(120), nullable=True)
+    scheduled_for     = Column(DateTime(timezone=True), nullable=True)
+    completed_at      = Column(DateTime(timezone=True), nullable=True)
+    notes             = Column(Text, nullable=True)
+    tenant_id         = Column(String(60), nullable=True, index=True, default="default")
+    created_at        = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at        = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<WorkOrder id={self.id} number={self.work_order_number!r} status={self.status!r}>"
+
+
 # ── iGrade & media files ──────────────────────────────────────────────────────
 
 class GradeLog(Base):
@@ -1155,6 +1254,31 @@ class EmailLog(Base):
 
     def __repr__(self) -> str:
         return f"<EmailLog id={self.id} to={self.recipient_email!r} status={self.status!r}>"
+
+
+class AuditEvent(Base):
+    """
+    Generic immutable audit record for privileged actions and workflow changes.
+
+    Stores a compact summary plus optional JSON detail so operational events can
+    be reconstructed without coupling audit history to a single business model.
+    """
+
+    __tablename__ = "audit_events"
+
+    id               = Column(Integer, primary_key=True, index=True)
+    event_type       = Column(String(80), nullable=False, index=True)
+    actor_type       = Column(String(40), nullable=False, default="system")
+    actor_id         = Column(String(120), nullable=True, index=True)
+    entity_type      = Column(String(80), nullable=True, index=True)
+    entity_id        = Column(String(120), nullable=True, index=True)
+    tenant_id        = Column(String(60), nullable=True, index=True, default="default")
+    summary          = Column(String(500), nullable=False)
+    detail_json      = Column(Text, nullable=True)
+    created_at       = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<AuditEvent id={self.id} type={self.event_type!r} entity={self.entity_type!r}:{self.entity_id!r}>"
 
 
 # ── Two-Factor Authentication ─────────────────────────────────────────────────

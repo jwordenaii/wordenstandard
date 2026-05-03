@@ -99,7 +99,7 @@
 ### Security & Auth
 - **security.py** — JWT token verification, HTTP Basic auth, master key validation
 - **verify_premium_security()** — Bearer token validation for protected endpoints
-- **HTTP Basic auth** — Admin dashboard (jhworden1 / Geneboy26!)
+- **HTTP Basic auth** — Admin dashboard (credentials supplied via `ADMIN_USERNAME` / `ADMIN_PASSWORD` environment variables)
 - **Master key exchange** — POST /api/v1/auth/token → 24-hour JWT
 
 ### Observability

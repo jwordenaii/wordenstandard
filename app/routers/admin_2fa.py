@@ -42,7 +42,7 @@ security = HTTPBasic()
 # ── Auth dependency (mirrors admin.py) ────────────────────────────────────────
 
 def _auth_disabled() -> bool:
-    mode = os.getenv("AUTH_MODE", "none").strip().lower()
+    mode = os.getenv("AUTH_MODE", "required").strip().lower()
     return mode in {"none", "off", "disabled", "0", "false"}
 
 def _require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:

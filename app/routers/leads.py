@@ -7,6 +7,7 @@ from typing import Optional
 from ..core.limiter import limiter
 from ..database import get_db
 from ..models import Lead, ContactMessage
+from ..services.audit import write_audit_event
 from ..services.lead_scorer import score_lead
 from ..services.notifications import send_lead_notification
 from ..services.pricing import estimate_price
@@ -105,6 +106,22 @@ async def submit_quote(
     db.refresh(db_lead)
     lead_data["db_id"] = db_lead.id
 
+    write_audit_event(
+        db,
+        event_type="lead.quote_submitted",
+        actor_type="customer",
+        actor_id=db_lead.email,
+        entity_type="lead",
+        entity_id=db_lead.id,
+        summary=f"Quote request submitted for {db_lead.service_type} ({scoring['label']}).",
+        detail={
+            "state_code": validated_state,
+            "property_type": db_lead.property_type,
+            "score_label": scoring["label"],
+            "score_priority": scoring["priority"],
+        },
+    )
+
     background_tasks.add_task(send_lead_notification, lead_data)
 
     # SendGrid: send confirmation to customer + admin notification
@@ -181,6 +198,17 @@ async def submit_contact(
     db.add(db_msg)
     db.commit()
     db.refresh(db_msg)
+
+    write_audit_event(
+        db,
+        event_type="lead.contact_submitted",
+        actor_type="customer",
+        actor_id=db_msg.email,
+        entity_type="contact_message",
+        entity_id=db_msg.id,
+        summary="General contact form submitted.",
+        detail={"has_phone": bool(db_msg.phone)},
+    )
 
     lead_data = {**req.model_dump(), "type": "contact"}
     background_tasks.add_task(send_lead_notification, lead_data)
