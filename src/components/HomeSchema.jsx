@@ -68,6 +68,9 @@ export default function HomeSchema() {
         { '@type': 'State', name: 'Virginia' },
         { '@type': 'City', name: 'Richmond' },
         { '@type': 'City', name: 'Chester' },
+        { '@type': 'City', name: 'Dinwiddie' },
+        { '@type': 'City', name: 'Petersburg' },
+        { '@type': 'City', name: 'Hopewell' },
         { '@type': 'City', name: 'Midlothian' },
         { '@type': 'City', name: 'Short Pump' },
         { '@type': 'City', name: 'Henrico' },
@@ -79,10 +82,12 @@ export default function HomeSchema() {
         { '@type': 'City', name: 'Virginia Beach' },
         { '@type': 'City', name: 'Chesapeake' },
         { '@type': 'City', name: 'Williamsburg' },
+        { '@type': 'AdministrativeArea', name: 'New Kent County' },
         { '@type': 'City', name: 'Roanoke' },
         { '@type': 'City', name: 'Harrisonburg' },
         { '@type': 'City', name: 'Winchester' },
         { '@type': 'City', name: 'Fredericksburg' },
+        { '@type': 'City', name: 'Fairfax' },
         { '@type': 'City', name: 'Stafford' },
         { '@type': 'City', name: 'Spotsylvania' },
       ],
@@ -103,7 +108,7 @@ export default function HomeSchema() {
               '@type': 'Service',
               name: 'Residential Asphalt Driveway Paving',
               description:
-                'New installation, overlay, and repair of residential asphalt driveways with 6-inch structural stone base, geotextile reinforcement, and polymer-modified binder.',
+                'New installation, overlay, sealcoating, crack repair, and repair of residential asphalt driveways, private lanes, and rural entrances with correct stone base, drainage review, and maintenance planning.',
             },
           },
           {
@@ -112,7 +117,7 @@ export default function HomeSchema() {
               '@type': 'Service',
               name: 'Commercial Parking Lot Paving',
               description:
-                'Full-depth reconstruction, mill-and-overlay, and new-build commercial parking lots for QSR, retail, and industrial properties. SM-12.5D heavy-duty mix, MMA striping, ADA-compliant.',
+                'Commercial parking lot paving, resurfacing, repair, sealcoating, crack sealing, patching, and maintenance programs for retail, industrial, HOA, church, school, and facility properties.',
             },
           },
           {
@@ -139,7 +144,7 @@ export default function HomeSchema() {
               '@type': 'Service',
               name: 'Sealcoating & Crack Repair',
               description:
-                'Professional sealcoating with oil-spot priming, hot-pour rubberized crack fill, and two-coat application. Recommended every 3 years inland, every 2.5 years coastal.',
+                'Professional sealcoating, hot-pour crack repair, pothole patching, asphalt repair, and pavement preservation for residential driveways and commercial parking lots. Recommended before oxidation and water intrusion turn maintenance into replacement.',
             },
           },
         ],
@@ -256,7 +261,7 @@ export default function HomeSchema() {
           name: 'Does J. Worden & Sons offer free driveway estimates?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes. J. Worden & Sons provides free on-site estimates throughout Virginia, including Richmond, Chester, Midlothian, Short Pump, Virginia Beach, Chesapeake, Roanoke, Harrisonburg, Winchester, Fredericksburg, Stafford, and Williamsburg. Same-week site visits for Central Virginia and the I-95 corridor. Written line-item estimates delivered within 48 hours with mix spec, base depth, and binder grade spelled out. Call (804) 446-1296.',
+            text: 'Yes. J. Worden & Sons provides free on-site estimates across its Virginia service footprint for a balanced mix of residential and commercial paving, sealcoating, asphalt repair, and maintenance work. The service area runs from Dinwiddie and Southside Virginia north to Fairfax and Northern Virginia, east to Virginia Beach and Hampton Roads, through Williamsburg and New Kent County new-construction growth areas, across rural residential corridors between the larger cities, and west through the I-81 corridor including Roanoke, Harrisonburg, and Winchester. Written line-item estimates include mix spec, base depth, repair scope, maintenance options, and binder grade. Call (804) 446-1296.',
           },
         },
       ],

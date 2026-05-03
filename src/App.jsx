@@ -12,7 +12,6 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import RouteLoader from '@/components/RouteLoader';
 import SplashScreen from '@/components/SplashScreen';
-import AIConciergeBubble from '@/components/AIConciergeBubble';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
@@ -208,7 +207,6 @@ function App() {
           <Router>
             <SplashScreen />
             <AuthenticatedApp />
-            <AIConciergeBubble />
           </Router>
           <Toaster />
         </QueryClientProvider>

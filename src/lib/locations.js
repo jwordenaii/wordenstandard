@@ -263,6 +263,44 @@ export const LOCATIONS = [
     rating: 5.0,
   },
 
+  {
+    slug: 'new-kent-va',
+    city: 'New Kent County',
+    state: 'Virginia',
+    stateAbbr: 'VA',
+    region: 'Williamsburg / New Kent Growth Corridor',
+    geo: { lat: 37.5176, lng: -76.9789 },
+    headline: 'New Kent County, VA Asphalt Paving — New Construction Driveways and Commercial Access',
+    intro:
+      'New Kent County is one of the fastest-growing construction corridors between Richmond and Williamsburg, and the rural areas between bigger cities are where many residential asphalt jobs happen. New subdivisions, rural estates, county-road homes, commercial pads, and access roads need asphalt scopes that account for fresh grading, builder fill, drainage movement, and long driveway runs before the final surface goes down.',
+    neighborhoods: [
+      'New Kent', 'Quinton', 'Providence Forge', 'Barhamsville',
+      'Lanexa', 'Bottoms Bridge', 'Talleysville', 'Eltham',
+      'Brickshire', 'Viniterra', 'I-64 corridor', 'Route 60 corridor',
+    ],
+    landmarks: ['I-64 corridor', 'New Kent Winery', 'Viniterra', 'Brickshire', 'Colonial Downs', 'Route 60'],
+    climate: {
+      title: 'Fresh Builder Fill, Long Driveways, and Growth-Corridor Drainage',
+      body: 'New Kent paving often happens on recently disturbed soils, new subdivision pads, rural estate entrances, and commercial access roads. We check compaction, water movement, stone depth, and edge support before paving so new asphalt does not rut, settle, or crack early as the site continues to stabilize.',
+    },
+    faqs: [
+      {
+        q: 'Do you pave new-construction driveways in New Kent County?',
+        a: 'Yes. We handle new-construction driveways, rural estate lanes, subdivision driveways, and commercial access roads across New Kent County with grading, stone base prep, drainage review, and asphalt installation.',
+      },
+      {
+        q: 'Why do new-construction driveways fail early in New Kent?',
+        a: 'Early failure usually comes from unsettled builder fill, weak compaction, thin stone base, poor drainage, or paving before the site is ready. We look at the base and water movement before recommending the final pavement scope.',
+      },
+      {
+        q: 'Do you serve the Williamsburg to Richmond growth corridor?',
+        a: 'Yes. New Kent, Providence Forge, Quinton, Lanexa, Williamsburg, and the I-64 corridor are practical service areas when the project scope and scheduling align.',
+      },
+    ],
+    reviews: 28,
+    rating: 4.9,
+  },
+
   // ──────── I-81 CORRIDOR (Mountain Virginia) ────────
   {
     slug: 'roanoke-va',
@@ -488,6 +526,45 @@ export const LOCATIONS = [
     rating: 4.9,
   },
 
+  // ──────── SOUTHSIDE / DINWIDDIE CORRIDOR ────────
+  {
+    slug: 'dinwiddie-va',
+    city: 'Dinwiddie',
+    state: 'Virginia',
+    stateAbbr: 'VA',
+    region: 'Southside Virginia / I-85 Corridor',
+    geo: { lat: 37.0779, lng: -77.5861 },
+    headline: 'Dinwiddie, VA Asphalt Paving — Southside Driveways, Lots, and Access Roads',
+    intro:
+      'Dinwiddie County is core Southside territory for J. Worden & Sons. We support residential driveways, rural access roads, church lots, small commercial properties, and light industrial paving with clear diagnosis, drainage-first prep, and practical scopes built for clay soil, farm access, and I-85 corridor traffic.',
+    neighborhoods: [
+      'Dinwiddie', 'Sutherland', 'McKenney', 'DeWitt',
+      'Carson', 'Church Road', 'Ford', 'Dewitt',
+      'Petersburg area', 'Prince George corridor', 'I-85 corridor',
+    ],
+    landmarks: ['Dinwiddie County Airport', 'I-85 corridor', 'Route 1', 'Route 460', 'Petersburg National Battlefield area'],
+    climate: {
+      title: 'Southside Clay, Rural Access, and Drainage Control',
+      body: 'Dinwiddie-area pavement often deals with clay subgrade, rural driveway lengths, farm and service traffic, and drainage that moves across open ground instead of curb-and-gutter systems. We focus on stable base construction, crown, slope, stone depth, and edge support so driveways and lots do not rut or unravel early.',
+    },
+    faqs: [
+      {
+        q: 'Do you pave long residential and rural driveways in Dinwiddie County?',
+        a: 'Yes. We handle long driveways, private lanes, farm entrances, and residential access roads with grading, drainage, stone base prep, and asphalt installation matched to the property.',
+      },
+      {
+        q: 'Do you serve commercial and church parking lots in Dinwiddie and Southside Virginia?',
+        a: 'Yes. We support small commercial lots, churches, community properties, and light industrial yards with repair, resurfacing, sealcoating, striping, and full paving scopes.',
+      },
+      {
+        q: 'What causes driveway rutting around Dinwiddie and Petersburg?',
+        a: 'Rutting usually comes from weak base, trapped water, poor compaction, or clay subgrade movement. We diagnose those conditions before recommending overlay, repair, or replacement.',
+      },
+    ],
+    reviews: 34,
+    rating: 4.9,
+  },
+
   // ──────── NORTHERN VIRGINIA / FAIRFAX CORRIDOR ────────
   {
     slug: 'fairfax-va',
@@ -621,11 +698,13 @@ export const STRATEGIC_CORRIDOR_SLUGS = [
   'virginia-beach-va',
   'chesapeake-va',
   'williamsburg-va',
+  'new-kent-va',
   'richmond-va',
   'henrico-va',
   'midlothian-va',
   'short-pump-va',
   'chester-va',
+  'dinwiddie-va',
   'fredericksburg-va',
   'fairfax-va',
   'harrisonburg-va',

@@ -1,182 +1,140 @@
-/**
- * JwordenAI.jsx — Public SEO landing page for the JWordenAI platform brand.
- *
- * Purpose: rank on Google for construction AI / contractor intelligence queries.
- * This page is pure marketing content — no tools, no free logic.
- * All capability detail stays behind auth.
- */
-import { Link } from "react-router-dom"
-import { motion } from "framer-motion"
-import SchemaMarkup from "../components/SchemaMarkup"
+import React from 'react';
+import { BrainCircuit, ClipboardCheck, Eye, LockKeyhole, Map, Phone } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
+import SchemaMarkup from '../components/SchemaMarkup';
+import { trackPhoneClick } from '@/lib/analytics';
 
-const PLATFORM_SCHEMA = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "JWordenAI",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
-  description:
-    "JWordenAI is an autonomous construction intelligence platform built on 40+ years of Virginia asphalt field data. It delivers permit analysis, bid intelligence, cost estimation, and digital twin monitoring for paving contractors and construction professionals.",
-  url: "https://jworden.com/jwordenai",
-  author: {
-    "@type": "Organization",
-    name: "J. Worden & Sons",
-    foundingDate: "1984",
-    areaServed: { "@type": "State", name: "Virginia" },
+const teaserCards = [
+  {
+    title: 'Pavement Intelligence',
+    body: 'Field observations, photos, scopes, and maintenance history organized into clearer decisions for asphalt owners and managers.',
+    icon: Eye,
   },
-  offers: { "@type": "Offer", availability: "https://schema.org/InStock" },
-}
+  {
+    title: 'Proposal Support',
+    body: 'Internal tooling for turning real site conditions into better explanations, cleaner scopes, and faster follow-up.',
+    icon: ClipboardCheck,
+  },
+  {
+    title: 'Market Awareness',
+    body: 'Regional service-area intelligence, project patterns, and buyer education shaped around Virginia paving work.',
+    icon: Map,
+  },
+];
 
-const CAPABILITIES = [
-  {
-    icon: "📋",
-    title: "Permit Intelligence",
-    tagline: "Multi-state permit trigger analysis",
-    description: "Codified permit logic for Virginia, North Carolina, South Carolina, Georgia, and Maryland.",
-  },
-  {
-    icon: "🏗️",
-    title: "Bid Board Monitor",
-    tagline: "VDOT & regional bid opportunities",
-    description: "Automated scanning of VDOT bid board and state procurement portals.",
-  },
-  {
-    icon: "🧠",
-    title: "Cognitive Digital Twin",
-    tagline: "Live project drift detection",
-    description: "A six-dimension real-time model of every active project.",
-  },
-  {
-    icon: "⚖️",
-    title: "Automated Quote Engine",
-    tagline: "2026 Virginia market benchmarks",
-    description: "Generates priced asphalt proposals from site evaluations.",
-  },
-  {
-    icon: "🛡️",
-    title: "Compliance Monitoring",
-    tagline: "Subcontractor cert & license tracking",
-    description: "Tracks insurance, bond, and license expiration dates.",
-  },
-  {
-    icon: "🤖",
-    title: "Autonomous Orchestrator",
-    tagline: "Level 4 AI goal execution",
-    description: "An Orchestrator-Worker-Reflexion-RL engine that executes complex business goals.",
-  },
-]
-
-const STATS = [
-  { value: "40+", label: "Years of field intelligence" },
-  { value: "133", label: "Virginia localities covered" },
-  { value: "5", label: "States of permit logic" },
-  { value: "L4", label: "Autonomous intelligence level" },
-]
-
-const WHO_ITS_FOR = [
-  {
-    audience: "Paving Contractors",
-    points: ["Win more bids", "Auto-generate quotes", "Track compliance", "Monitor jobs"],
-  },
-  {
-    audience: "General Contractors",
-    points: ["Permit lookup", "Site evaluation", "Utility risk", "Cash flow monitoring"],
-  },
-  {
-    audience: "Property Managers & HOAs",
-    points: ["Condition reports", "Cost forecasting", "Base standard compliance", "Resurfacing planning"],
-  },
-]
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, delay: i * 0.12, ease: "easeOut" },
-  }),
-}
-
-const cardRise = {
-  hidden: { opacity: 0, y: 28, scale: 0.98 },
-  visible: {
-    opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
-  },
-}
+const boundaries = [
+  'No public estimating engine on this page',
+  'No customer documents or job data exposed',
+  'No back-office command center access',
+  'Only a preview of where the company is going',
+];
 
 export default function JwordenAI() {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'JWORDENAI',
+    description: 'A teaser for the internal construction intelligence system behind J. Worden & Sons Asphalt Paving.',
+    url: 'https://www.jwordenasphaltpaving.com/jwordenai',
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SchemaMarkup
-        title="JWordenAI | Autonomous Construction Intelligence Platform"
-        description="Autonomous permit analysis, bid monitoring, and digital twin orchestration." 
-        canonical="/jwordenai"
-        breadcrumb={[{ name: "Home", path: "/" }, { name: "JWordenAI", path: "/jwordenai" }]}
+      <SEO
+        title="JWORDENAI | Construction Intelligence Teaser"
+        description="A public preview of the private construction intelligence system supporting J. Worden & Sons Asphalt Paving."
+        canonicalPath="/jwordenai"
+        jsonLd={schema}
       />
-      <section className="bg-black pt-32 pb-24 text-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="inline-flex items-center gap-2 bg-primary/20 border border-primary/40 text-primary text-xs font-bold px-5 py-2 rounded-full mb-8 uppercase tracking-widest">
-            Autonomous Intelligence Platform
-          </motion.div>
-          <motion.h1 initial="hidden" animate="visible" variants={fadeUp} custom={1} className="font-display font-black text-6xl md:text-[9rem] mb-6 leading-[0.85] tracking-tighter">
-            JWORDENAI<span className="text-primary align-super text-3xl italic">L4</span>
-          </motion.h1>
-          <motion.p initial="hidden" animate="visible" variants={fadeUp} custom={2} className="text-white/80 text-xl md:text-3xl max-w-3xl mb-12 font-light">
-            The first autonomous orchestrator for the construction enterprise. Level 4 intelligence for permitting and bidding.
-          </motion.p>
-          <div className="flex flex-wrap gap-5">
-            <Link to="/contact" className="bg-primary text-black px-12 py-5 font-display font-black text-sm uppercase tracking-widest">Request Access</Link>
-          </div>
+      <SchemaMarkup
+        title="JWORDENAI | Construction Intelligence Teaser"
+        description="A public preview of the private construction intelligence system supporting J. Worden & Sons Asphalt Paving."
+        canonical="/jwordenai"
+        breadcrumb={[{ name: 'Home', path: '/' }, { name: 'JWORDENAI', path: '/jwordenai' }]}
+      />
+      <Navbar />
+
+      <section className="relative overflow-hidden bg-black pt-36">
+        <div className="absolute inset-0 opacity-40">
+          <div className="h-full w-full bg-[linear-gradient(135deg,#050505_0%,#171717_52%,#32280f_100%)]" />
         </div>
-      </section>
-      <section className="bg-card border-y border-border py-12">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map((stat, i) => (
-            <div key={i} className="text-center">
-              <p className="font-display font-black text-4xl text-primary mb-1">{stat.value}</p>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{stat.label}</p>
+        <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-12 lg:px-8">
+          <div className="max-w-5xl">
+            <div className="mb-7 inline-flex items-center gap-3 border border-primary/40 bg-primary/10 px-4 py-2 text-primary">
+              <BrainCircuit className="h-4 w-4" />
+              <span className="font-display text-sm uppercase tracking-[0.24em]">Private construction intelligence teaser</span>
             </div>
-          ))}
-        </div>
-      </section>
-      <section className="py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="font-display font-black text-4xl md:text-7xl uppercase mb-20 tracking-tighter">Platform Capabilities</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {CAPABILITIES.map((cap, i) => (
-              <motion.div key={i} variants={cardRise} initial="hidden" whileInView="visible" viewport={{ once: true }} className="premium-panel p-10 rounded-3xl border-border/50 hover:border-primary transition-all">
-                <div className="text-4xl mb-8">{cap.icon}</div>
-                <p className="text-primary font-bold text-xs uppercase tracking-widest mb-2">{cap.tagline}</p>
-                <h3 className="font-display font-black text-2xl uppercase mb-4">{cap.title}</h3>
-                <p className="text-muted-foreground leading-relaxed italic">{cap.description}</p>
-              </motion.div>
-            ))}
+            <h1 className="font-display text-7xl font-black uppercase leading-[0.82] tracking-normal text-white md:text-9xl">
+              JWORDENAI
+            </h1>
+            <p className="mt-8 max-w-3xl text-xl leading-relaxed text-zinc-300 md:text-2xl">
+              The public page is only a window. The real system stays behind the company, helping organize field knowledge, customer education, project documents, and operational decisions.
+            </p>
           </div>
         </div>
       </section>
-      <section className="py-24 bg-card">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-3 gap-12">
-            {WHO_ITS_FOR.map((target, i) => (
-              <div key={i} className="space-y-8">
-                <h3 className="font-display font-black text-3xl uppercase tracking-tighter border-b-2 border-primary pb-4 inline-block">{target.audience}</h3>
-                <ul className="space-y-4">
-                  {target.points.map((point, j) => (
-                    <li key={j} className="flex items-start gap-4 text-muted-foreground"><span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />{point}</li>
-                  ))}
-                </ul>
+
+      <section className="border-y border-border bg-background py-20 md:py-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-12 max-w-4xl">
+            <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">What it previews</p>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">
+              AI for better contractor judgment, not public gimmicks.
+            </h2>
+          </div>
+          <div className="grid gap-px border border-border bg-border md:grid-cols-3">
+            {teaserCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <article key={card.title} className="bg-card p-8">
+                  <Icon className="mb-8 h-7 w-7 text-primary" />
+                  <h3 className="font-display text-3xl uppercase leading-none text-white">{card.title}</h3>
+                  <p className="mt-5 text-sm leading-relaxed text-zinc-400">{card.body}</p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#111111] py-20 md:py-28">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+          <div>
+            <div className="mb-7 inline-flex items-center gap-3 border border-primary/40 bg-black px-4 py-2 text-primary">
+              <LockKeyhole className="h-4 w-4" />
+              <span className="font-display text-sm uppercase tracking-[0.2em]">Public boundary</span>
+            </div>
+            <h2 className="font-display text-5xl uppercase leading-none text-white md:text-7xl">The tools stay private.</h2>
+            <p className="mt-7 text-lg leading-relaxed text-zinc-300">
+              JWORDENAI supports the business behind the scenes. The public site should educate buyers, build trust, and show the direction of the company without exposing operational logic.
+            </p>
+          </div>
+          <div className="space-y-4">
+            {boundaries.map((item) => (
+              <div key={item} className="border-l border-primary bg-background p-5 font-display text-2xl uppercase text-white">
+                {item}
               </div>
             ))}
           </div>
         </div>
       </section>
-      <section className="py-24 bg-primary text-black text-center">
-        <div className="max-w-5xl mx-auto px-6">
-          <h2 className="font-display font-black text-5xl md:text-8xl uppercase tracking-tighter leading-[0.85] mb-8">Ready to <br />Automate?</h2>
-          <Link to="/contact" className="bg-black text-white px-16 py-6 font-display font-black text-sm uppercase tracking-widest">Request Licensing</Link>
+
+      <section className="bg-primary py-16 text-black">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div>
+            <p className="font-display text-sm uppercase tracking-[0.22em]">Need pavement help now?</p>
+            <h2 className="mt-2 font-display text-4xl uppercase leading-none md:text-6xl">Talk to the paving company, not the teaser.</h2>
+          </div>
+          <a href="tel:+18044461296" onClick={() => trackPhoneClick('jwordenai_teaser')} className="inline-flex min-h-[52px] items-center gap-3 bg-black px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-white">
+            <Phone className="h-5 w-5" />
+            Call 804.446.1296
+          </a>
         </div>
       </section>
+
+      <Footer />
     </div>
-  )
+  );
 }

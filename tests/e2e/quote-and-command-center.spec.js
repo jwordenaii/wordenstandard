@@ -85,13 +85,35 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
-test('homepage estimate smoke flow', async ({ page }) => {
+test('homepage education-first smoke flow', async ({ page }) => {
   await page.goto('/')
 
-  await expect(page.getByRole('heading', { name: /The Premier/i })).toBeVisible()
-  await expect(page.getByRole('heading', { name: /Your Estimate in 60 Seconds/i })).toBeVisible()
-  await page.getByRole('button', { name: /Driveway/i }).click()
-  await expect(page.getByRole('button', { name: /Next Step/i })).toBeEnabled()
+  await expect(page.getByRole('heading', { name: /Educate First/i })).toBeVisible()
+  await expect(page.getByText(/Award-winning Virginia paving company/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /The right paving decision starts before the proposal/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Everything your pavement needs/i })).toBeVisible()
+  await expect(page.getByText(/50\/50/i)).toBeVisible()
+  await expect(page.getByText(/Sealcoating, crack sealing, and pavement preservation programs/i)).toBeVisible()
+  await expect(page.getByText(/Asphalt repair, pothole patching, milling, and overlays/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Real paving prices come from real site conditions/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /The answer should come from the pavement/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Owners still need a checklist/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Asphalt questions buyers ask before they call/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Dinwiddie to Fairfax/i })).toBeVisible()
+  await expect(page.getByText(/rural residential corridors between the larger cities/i)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Dinwiddie', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Richmond', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Williamsburg', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'New Kent', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: /JWORDENAI Teaser/i })).toBeVisible()
+})
+
+test('jwordenai teaser smoke flow', async ({ page }) => {
+  await page.goto('/jwordenai')
+
+  await expect(page.getByRole('heading', { name: 'JWORDENAI' })).toBeVisible()
+  await expect(page.getByText(/The tools stay private/i)).toBeVisible()
+  await expect(page.getByText(/No public estimating engine/i)).toBeVisible()
 })
 
 test('command center smoke flow', async ({ page }) => {
