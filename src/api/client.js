@@ -708,6 +708,11 @@ export const api = {
   dispatchUpsertJob: (payload) => protectedRequest('POST', '/api/v1/admin/dispatch/jobs', payload),
   dispatchDeleteJob: (id) => protectedRequest('DELETE', `/api/v1/admin/dispatch/jobs/${encodeURIComponent(id)}`),
   dispatchAssign:   (jobId) => protectedRequest('GET', `/api/v1/admin/dispatch/assign/${encodeURIComponent(jobId)}`),
+  // ── Asphalt thermal lay-down window (Ship E) ─────────────────────────────
+  thermalWindow: (params) => {
+    const q = new URLSearchParams(params).toString();
+    return request('GET', `/api/v1/thermal/window?${q}`);
+  },
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

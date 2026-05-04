@@ -30,6 +30,7 @@ const TABS = [
   { id: 'integrations', label: 'Integrations' },
   { id: 'search-pulse', label: 'Search Pulse' },
   { id: 'dispatch', label: 'Dispatch' },
+  { id: 'thermal', label: 'Thermal' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3681,6 +3682,103 @@ function SearchPulsePanel() {
   )
 }
 
+function ThermalPanel() {
+  const [params, setParams] = useState({ lat: 37.5407, lng: -77.4360, mix_temp_f: 290, lift_in: 2, target_breakdown_f: 240, target_finish_f: 175 })
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState('')
+
+  const fetchWindow = async () => {
+    setLoading(true); setErr('')
+    try {
+      const r = await api.thermalWindow(params)
+      setData(r)
+    } catch (e) {
+      setErr(e.message || 'failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => { fetchWindow() }, [])
+
+  const setP = (k, v) => setParams(p => ({ ...p, [k]: Number(v) || v }))
+  const statusColor = (s) => s === 'good' ? 'bg-emerald-500/20 text-emerald-200' : s === 'tight' ? 'bg-amber-500/20 text-amber-200' : 'bg-red-500/20 text-red-200'
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Asphalt Lay-Down Window</h2>
+          <p className="text-white/60 text-sm">NOAA hourly forecast + Chadbourn-style cooling model. Tells you when the mat will hit 175°F.</p>
+        </div>
+        <button type="button" onClick={fetchWindow} disabled={loading} className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-semibold hover:bg-white/20">{loading?'Loading…':'Refresh'}</button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-2 bg-white/5 rounded-lg p-3">
+        {[
+          ['lat','Latitude'],['lng','Longitude'],
+          ['mix_temp_f','Mix °F'],['lift_in','Lift in'],
+          ['target_breakdown_f','Breakdown °F'],['target_finish_f','Finish °F'],
+        ].map(([k,label])=>(
+          <label key={k} className="text-xs text-white/60">
+            {label}
+            <input type="number" step="0.0001" value={params[k]} onChange={e=>setP(k,e.target.value)} className="mt-0.5 w-full bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          </label>
+        ))}
+      </div>
+
+      {err && <div className="text-red-300 text-sm">{err}</div>}
+
+      {data?.ok === false && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded p-3 text-red-200 text-sm">{data.error}</div>
+      )}
+
+      {data?.ok && (
+        <>
+          {data.best_window ? (
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded p-3 text-emerald-100">
+              <div className="font-bold">Recommended pour window</div>
+              <div className="text-sm">{new Date(data.best_window.start).toLocaleString()} → {new Date(data.best_window.end).toLocaleString()}</div>
+              <div className="text-xs text-white/60 mt-1">avg air {data.best_window.avg_air_f}°F · avg wind {data.best_window.avg_wind_mph} mph</div>
+            </div>
+          ) : (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded p-3 text-amber-100 text-sm">No 3-hour "good" window in the next 48h. Consider warming the mix or thicker lift.</div>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-white/80">
+              <thead className="text-white/50">
+                <tr>
+                  <th className="text-left p-2">Time</th>
+                  <th className="text-left p-2">Air °F</th>
+                  <th className="text-left p-2">Wind</th>
+                  <th className="text-left p-2">Sky</th>
+                  <th className="text-left p-2">Min → Breakdown</th>
+                  <th className="text-left p-2">Min → Finish</th>
+                  <th className="text-left p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.hourly.slice(0, 24).map((h, i) => (
+                  <tr key={i} className="border-t border-white/10">
+                    <td className="p-2">{new Date(h.startTime).toLocaleString([], { weekday: 'short', hour: 'numeric' })}</td>
+                    <td className="p-2">{h.air_temp_f}</td>
+                    <td className="p-2">{h.wind_mph} mph</td>
+                    <td className="p-2 text-white/60">{h.sky}</td>
+                    <td className="p-2">{h.minutes_to_breakdown ?? '—'}</td>
+                    <td className="p-2 font-semibold">{h.minutes_to_finish ?? '—'}</td>
+                    <td className="p-2"><span className={`px-2 py-0.5 rounded ${statusColor(h.status)}`}>{h.status}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function DispatchPanel() {
   const [snap, setSnap] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -4501,6 +4599,10 @@ export default function CommandCenter() {
 
             {activeTab === 'dispatch' && (
               <DispatchPanel />
+            )}
+
+            {activeTab === 'thermal' && (
+              <ThermalPanel />
             )}
           </>
       </div>
