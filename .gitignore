@@ -37,3 +37,6 @@ dist-ssr
 openapi.json
 staging-compare.txt
 
+__pycache__/
+*.pyc
+
