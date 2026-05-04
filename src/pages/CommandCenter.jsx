@@ -1,5 +1,5 @@
-import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat } from 'lucide-react'
+import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, MessageSquare, Power, Send, Cpu, Eye, Wand2 } from 'lucide-react'
 import { api } from '@/api/client'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
@@ -21,12 +21,40 @@ function isCommandCenterPath() {
 }
 
 const TABS = [
+  { id: 'jarvis', label: 'Jarvis' },
   { id: 'richmond-grid', label: 'Richmond Grid' },
   { id: 'kpi', label: 'KPI Wall' },
   { id: 'crm', label: 'CRM Leads' },
   { id: 'ops', label: 'Ops Pipeline' },
   { id: 'civil-intel', label: 'Civil Intel' },
 ]
+
+// ── Autonomy master controls (you decide what runs on its own) ────────────
+const AUTONOMY_KEY = 'cc_autonomy_master_v1'
+const AUTONOMY_DOMAINS = [
+  { id: 'leadReplies',     label: 'Auto Lead Replies',       desc: 'Jarvis answers new lead messages without waiting for you.' },
+  { id: 'followUps',       label: 'Auto Follow-Ups',         desc: 'Schedule next-step nudges to warm leads on its own.' },
+  { id: 'weatherAlerts',   label: 'Weather-Based Reschedule',desc: 'Move jobs when storms threaten without asking.' },
+  { id: 'auditRemediation',label: 'Auto Audit Remediation',  desc: 'Run safe self-heal actions when audits flag issues.' },
+  { id: 'adBudget',        label: 'Auto Ad Budget Tuning',   desc: 'Shift Google Ads spend across campaigns automatically.' },
+  { id: 'twinSnapshots',   label: 'Auto Digital Twin Snapshots', desc: 'Take cognitive twin snapshots on schedule.' },
+]
+function readAutonomyState() {
+  if (typeof window === 'undefined') return { master: false, domains: {} }
+  try {
+    const raw = window.localStorage.getItem(AUTONOMY_KEY)
+    if (!raw) return { master: false, domains: {} }
+    const parsed = JSON.parse(raw)
+    return { master: Boolean(parsed.master), domains: parsed.domains || {} }
+  } catch {
+    return { master: false, domains: {} }
+  }
+}
+function writeAutonomyState(state) {
+  if (typeof window === 'undefined') return
+  try { window.localStorage.setItem(AUTONOMY_KEY, JSON.stringify(state)) } catch { /* ignore */ }
+  try { window.dispatchEvent(new CustomEvent('cc:autonomy-changed', { detail: state })) } catch { /* ignore */ }
+}
 
 const KPI_CARDS = [
   { label: 'Inbound Leads (7d)', value: '42', delta: '+18%', tone: 'good', icon: UserRound },
@@ -3093,11 +3121,390 @@ function InternalStrategyNotice() {
   )
 }
 
+// ── Jarvis chat + autonomy controls panel ───────────────────────────────────
+function JarvisChat({ compact = false }) {
+  const [messages, setMessages] = useState(() => ([
+    { role: 'jarvis', text: 'Online. Ask me anything about the business, or hit a quick prompt below.' },
+  ]))
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [statusOk, setStatusOk] = useState(null)
+  const scrollerRef = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    api.request('GET', '/api/v1/jarvis/status')
+      .then((r) => { if (!cancelled) setStatusOk(Boolean(r && (r.status === 'ONLINE' || r.identity === 'JARVIS'))) })
+      .catch(() => { if (!cancelled) setStatusOk(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (scrollerRef.current) scrollerRef.current.scrollTop = scrollerRef.current.scrollHeight
+  }, [messages])
+
+  const send = useCallback(async (text) => {
+    const query = (text ?? input).trim()
+    if (!query || sending) return
+    setInput('')
+    setMessages((prev) => [...prev, { role: 'you', text: query }])
+    setSending(true)
+    try {
+      const res = await api.jarvisCommand(query, 'JARVIS')
+      const reply = res?.response || res?.message || res?.reply || JSON.stringify(res)
+      setMessages((prev) => [...prev, { role: 'jarvis', text: String(reply) }])
+    } catch (err) {
+      setMessages((prev) => [...prev, { role: 'jarvis', text: `Error: ${err?.message || 'Jarvis unreachable'}` }])
+    } finally {
+      setSending(false)
+    }
+  }, [input, sending])
+
+  const quickPrompts = [
+    'Status report on the business right now',
+    'Top 3 leads to call today and why',
+    'Any safety or weather risks I should act on?',
+    'Summarize today\u2019s ad performance',
+  ]
+
+  return (
+    <div className={['rounded-2xl border border-white/10 bg-white/[0.04] flex flex-col', compact ? 'h-full' : 'min-h-[560px]'].join(' ')}>
+      <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-brand-amber/15 border border-brand-amber/40 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-brand-amber" />
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-white text-base leading-tight">Jarvis</h3>
+            <p className="text-white/40 text-xs">Your private AI ops officer</p>
+          </div>
+        </div>
+        <span className={[
+          'inline-flex items-center gap-1.5 rounded-full text-xs font-semibold px-2.5 py-1 border',
+          statusOk == null ? 'border-white/20 text-white/50 bg-white/5' :
+          statusOk ? 'border-emerald-300/40 text-emerald-200 bg-emerald-300/10' :
+                     'border-red-300/40 text-red-200 bg-red-300/10',
+        ].join(' ')}>
+          <span className={['w-1.5 h-1.5 rounded-full',
+            statusOk == null ? 'bg-white/30' : statusOk ? 'bg-emerald-300 animate-pulse' : 'bg-red-300'
+          ].join(' ')} />
+          {statusOk == null ? 'Checking…' : statusOk ? 'ONLINE' : 'OFFLINE'}
+        </span>
+      </div>
+
+      <div ref={scrollerRef} className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-3">
+        {messages.map((m, i) => (
+          <div key={i} className={['flex', m.role === 'you' ? 'justify-end' : 'justify-start'].join(' ')}>
+            <div className={[
+              'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap',
+              m.role === 'you'
+                ? 'bg-brand-amber/15 border border-brand-amber/40 text-amber-100'
+                : 'bg-white/[0.06] border border-white/10 text-white/90',
+            ].join(' ')}>{m.text}</div>
+          </div>
+        ))}
+        {sending ? (
+          <div className="flex justify-start">
+            <div className="rounded-2xl px-3.5 py-2.5 text-sm bg-white/[0.06] border border-white/10 text-white/60 inline-flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Jarvis is thinking…
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="px-4 md:px-5 pt-2 pb-3 border-t border-white/10">
+        <div className="flex flex-wrap gap-2 mb-2">
+          {quickPrompts.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => send(p)}
+              disabled={sending}
+              className="text-xs px-2.5 py-1.5 rounded-full bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:border-white/30 disabled:opacity-50"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+        <form onSubmit={(e) => { e.preventDefault(); send() }} className="flex items-center gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Tell Jarvis what to do…"
+            className="flex-1 bg-white/[0.05] border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/35 focus:outline-none focus:border-brand-amber/60"
+            disabled={sending}
+          />
+          <button
+            type="submit"
+            disabled={sending || !input.trim()}
+            className="inline-flex items-center gap-2 bg-brand-amber text-brand-navy font-semibold rounded-xl px-4 py-2.5 text-sm disabled:opacity-40"
+          >
+            <Send className="w-4 h-4" /> Send
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function JarvisAutonomy() {
+  const [autonomy, setAutonomy] = useState(readAutonomyState)
+
+  const toggleMaster = useCallback(() => {
+    setAutonomy((prev) => {
+      const next = { ...prev, master: !prev.master }
+      writeAutonomyState(next)
+      return next
+    })
+  }, [])
+
+  const toggleDomain = useCallback((id) => {
+    setAutonomy((prev) => {
+      const next = { ...prev, domains: { ...prev.domains, [id]: !prev.domains?.[id] } }
+      writeAutonomyState(next)
+      return next
+    })
+  }, [])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Power className={['w-4 h-4', autonomy.master ? 'text-emerald-300' : 'text-white/40'].join(' ')} />
+            <h3 className="font-display font-bold text-white text-base">Autonomy</h3>
+          </div>
+          <p className="text-white/45 text-xs mt-1">Master switch. Off = Jarvis only acts when you ask.</p>
+        </div>
+        <button
+          type="button"
+          onClick={toggleMaster}
+          aria-pressed={autonomy.master}
+          className={[
+            'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors',
+            autonomy.master ? 'border-emerald-300/50 bg-emerald-300/30' : 'border-white/20 bg-white/10',
+          ].join(' ')}
+        >
+          <span className={[
+            'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5',
+            autonomy.master ? 'translate-x-5' : 'translate-x-0.5',
+          ].join(' ')} />
+        </button>
+      </div>
+
+      <div className={['rounded-xl border px-3 py-2 text-xs',
+        autonomy.master
+          ? 'border-emerald-300/40 bg-emerald-300/10 text-emerald-100'
+          : 'border-white/10 bg-white/5 text-white/55',
+      ].join(' ')}>
+        {autonomy.master
+          ? 'Autonomy is ON. Per-domain switches below decide exactly what Jarvis runs by itself.'
+          : 'Autonomy is OFF. Everything waits for your approval.'}
+      </div>
+
+      <div className="space-y-2">
+        {AUTONOMY_DOMAINS.map((d) => {
+          const enabled = autonomy.master && Boolean(autonomy.domains?.[d.id])
+          return (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => toggleDomain(d.id)}
+              disabled={!autonomy.master}
+              className={[
+                'w-full text-left flex items-start justify-between gap-3 rounded-xl border px-3 py-2.5 transition-colors',
+                enabled
+                  ? 'border-emerald-300/40 bg-emerald-300/10'
+                  : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]',
+                !autonomy.master ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+              ].join(' ')}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white">{d.label}</p>
+                <p className="text-xs text-white/45 mt-0.5">{d.desc}</p>
+              </div>
+              <span className={[
+                'shrink-0 mt-0.5 inline-flex h-5 w-9 rounded-full border',
+                enabled ? 'border-emerald-300/60 bg-emerald-300/40' : 'border-white/20 bg-white/10',
+              ].join(' ')}>
+                <span className={[
+                  'inline-block h-3.5 w-3.5 mt-0.5 rounded-full bg-white transition-transform',
+                  enabled ? 'translate-x-4' : 'translate-x-0.5',
+                ].join(' ')} />
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[11px] text-white/45 leading-relaxed">
+        Settings save instantly to this device. Jarvis reads them on every action. Backend mirror endpoint coming next so toggles sync across your phone &amp; laptop.
+      </div>
+    </div>
+  )
+}
+
+function JarvisPanel() {
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
+      <div className="xl:col-span-2"><JarvisChat /></div>
+      <div><JarvisAutonomy /></div>
+    </div>
+  )
+}
+
+// ── PulseBar: 6-tile health strip across the top of every tab ───────────────
+function PulseTile({ label, value, tone, icon: Icon, onClick }) {
+  const toneRing = tone === 'good' ? 'border-emerald-300/40' : tone === 'warn' ? 'border-amber-300/40' : tone === 'bad' ? 'border-red-300/40' : 'border-white/15'
+  const toneText = tone === 'good' ? 'text-emerald-200' : tone === 'warn' ? 'text-amber-200' : tone === 'bad' ? 'text-red-200' : 'text-white/70'
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={['shrink-0 text-left rounded-xl border bg-white/[0.04] px-3 py-2 hover:bg-white/[0.07] transition-colors', toneRing].join(' ')}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className={['w-3.5 h-3.5', toneText].join(' ')} />
+        <span className="text-[10px] uppercase tracking-[0.14em] text-white/50">{label}</span>
+      </div>
+      <div className={['text-sm font-bold mt-0.5', toneText].join(' ')}>{value}</div>
+    </button>
+  )
+}
+
+function PulseBar({ onTabChange, onOpenJarvis }) {
+  const [pulse, setPulse] = useState({
+    jarvis: { label: 'Jarvis', value: '…', tone: 'idle' },
+    leads:  { label: 'Today\u2019s Leads', value: '…', tone: 'idle' },
+    jobs:   { label: 'Active Jobs', value: '…', tone: 'idle' },
+    estim:  { label: 'Open Estimates', value: '…', tone: 'idle' },
+    audit:  { label: 'Audit', value: '…', tone: 'idle' },
+    auto:   { label: 'Autonomy', value: 'OFF', tone: 'idle' },
+  })
+
+  useEffect(() => {
+    let cancelled = false
+    const refreshAuto = () => {
+      const s = readAutonomyState()
+      const enabledCount = Object.values(s.domains || {}).filter(Boolean).length
+      setPulse((p) => ({ ...p, auto: { label: 'Autonomy', value: s.master ? `ON · ${enabledCount}` : 'OFF', tone: s.master ? 'good' : 'idle' } }))
+    }
+    refreshAuto()
+    const onAuto = () => refreshAuto()
+    if (typeof window !== 'undefined') window.addEventListener('cc:autonomy-changed', onAuto)
+
+    Promise.allSettled([
+      api.request('GET', '/api/v1/jarvis/status'),
+      api.listRecentOperationalLeads(50).catch(() => null),
+      api.listJobs().catch(() => null),
+      api.listEstimates().catch(() => null),
+      api.listAuditEvents({ limit: 5 }).catch(() => null),
+    ]).then((results) => {
+      if (cancelled) return
+      const [j, leads, jobs, est, audit] = results
+      const jarvisOk = j.status === 'fulfilled' && j.value && (j.value.status === 'ONLINE' || j.value.identity === 'JARVIS')
+      const leadCount = leads.status === 'fulfilled' && Array.isArray(leads.value) ? leads.value.length : null
+      const jobCount  = jobs.status === 'fulfilled' && Array.isArray(jobs.value) ? jobs.value.length : null
+      const estCount  = est.status === 'fulfilled' && Array.isArray(est.value) ? est.value.length : null
+      const auditOk   = audit.status === 'fulfilled' && audit.value
+      setPulse((p) => ({
+        ...p,
+        jarvis: { label: 'Jarvis', value: jarvisOk ? 'ONLINE' : 'OFFLINE', tone: jarvisOk ? 'good' : 'bad' },
+        leads:  { label: 'Recent Leads', value: leadCount == null ? 'auth' : String(leadCount), tone: leadCount == null ? 'warn' : leadCount > 0 ? 'good' : 'idle' },
+        jobs:   { label: 'Active Jobs', value: jobCount == null ? 'auth' : String(jobCount), tone: jobCount == null ? 'warn' : 'idle' },
+        estim:  { label: 'Open Estimates', value: estCount == null ? 'auth' : String(estCount), tone: estCount == null ? 'warn' : 'idle' },
+        audit:  { label: 'Audit', value: auditOk ? 'OK' : 'auth', tone: auditOk ? 'good' : 'warn' },
+      }))
+    })
+    return () => {
+      cancelled = true
+      if (typeof window !== 'undefined') window.removeEventListener('cc:autonomy-changed', onAuto)
+    }
+  }, [])
+
+  return (
+    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 pb-3 pt-2 flex items-center gap-2 overflow-x-auto">
+      <PulseTile {...pulse.jarvis} icon={Bot}        onClick={onOpenJarvis} />
+      <PulseTile {...pulse.leads}  icon={UserRound}  onClick={() => onTabChange('crm')} />
+      <PulseTile {...pulse.jobs}   icon={HardHat}    onClick={() => onTabChange('ops')} />
+      <PulseTile {...pulse.estim}  icon={FileText}   onClick={() => onTabChange('ops')} />
+      <PulseTile {...pulse.audit}  icon={ShieldCheck} onClick={() => onTabChange('ops')} />
+      <PulseTile {...pulse.auto}   icon={Power}      onClick={onOpenJarvis} />
+    </div>
+  )
+}
+
+// ── Jarvis side drawer (opens on any tab) ───────────────────────────────────
+function JarvisDrawer({ open, onClose }) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  return (
+    <>
+      <div
+        className={[
+          'fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity',
+          open ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        ].join(' ')}
+        onClick={onClose}
+      />
+      <aside
+        className={[
+          'fixed top-0 right-0 h-full w-full sm:w-[440px] bg-brand-navy border-l border-white/10 z-50 transition-transform shadow-2xl',
+          open ? 'translate-x-0' : 'translate-x-full',
+        ].join(' ')}
+        aria-hidden={!open}
+      >
+        <div className="h-full flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4 text-brand-amber" />
+              <span className="font-display font-bold text-white text-sm">Jarvis</span>
+              <span className="text-[10px] text-white/40 ml-1">Press J to toggle · Esc to close</span>
+            </div>
+            <button type="button" onClick={onClose} className="text-white/50 hover:text-white text-sm px-2 py-1">Close</button>
+          </div>
+          <div className="flex-1 overflow-hidden p-3">
+            {open ? <JarvisChat compact /> : null}
+          </div>
+        </div>
+      </aside>
+    </>
+  )
+}
+
 export default function CommandCenter() {
-  const [activeTab, setActiveTab] = useState('richmond-grid')
+  const [activeTab, setActiveTab] = useState('jarvis')
   const strategyVisible = INTERNAL_STRATEGY_ENABLED && isCommandCenterPath()
   const [latestAudit, setLatestAudit] = useState(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const now = new Date()
+
+  // Keyboard shortcuts: J = Jarvis drawer, 1-6 = tabs (when not typing in an input)
+  useEffect(() => {
+    const onKey = (e) => {
+      const t = e.target
+      const inField = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)
+      if (inField) return
+      if (e.key === 'j' || e.key === 'J') {
+        e.preventDefault()
+        setDrawerOpen((v) => !v)
+        return
+      }
+      const idx = '123456'.indexOf(e.key)
+      if (idx >= 0 && TABS[idx]) {
+        e.preventDefault()
+        setActiveTab(TABS[idx].id)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div className="min-h-screen bg-brand-navy text-white">
@@ -3145,6 +3552,8 @@ export default function CommandCenter() {
         <>
           {!strategyVisible ? <InternalStrategyNotice /> : null}
           {strategyVisible ? <HubLinkPanel /> : null}
+
+          {activeTab === 'jarvis' && <JarvisPanel />}
 
           {activeTab === 'richmond-grid' && (
             <Suspense
@@ -3212,6 +3621,19 @@ export default function CommandCenter() {
             )}
           </>
       </div>
+
+      {/* ── Floating Jarvis button (always available on every tab) ───────── */}
+      <button
+        type="button"
+        onClick={() => setDrawerOpen(true)}
+        title="Open Jarvis (J)"
+        className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-brand-amber text-brand-navy font-bold px-4 py-3 shadow-2xl hover:scale-105 transition-transform"
+      >
+        <Bot className="w-5 h-5" />
+        <span className="hidden sm:inline">Ask Jarvis</span>
+      </button>
+
+      <JarvisDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   )
 }

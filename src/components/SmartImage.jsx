@@ -100,6 +100,7 @@ export default function SmartImage({
         width={width}
         height={height}
         loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : 'auto'}
         decoding="async"
         onLoad={() => setFailed(false)}
         onError={handleError}

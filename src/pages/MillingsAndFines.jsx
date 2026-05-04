@@ -79,6 +79,8 @@ export default function MillingsAndFines() {
                 src="/work/imported/KFC/IMG_9514.JPG" 
                 className="w-full h-[500px] object-cover rounded-2xl"
                 alt="Quality Asphalt Millings"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>

@@ -63,7 +63,7 @@ export default function VirginiaConcrete() {
             </div>
             <div className="lg:w-1/2 grid grid-cols-2 gap-4">
               <div className="space-y-4">
-                <img src={concreteImages[0]?.url || 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80'} className="rounded-2xl w-full h-64 object-cover border border-white/10" alt="Concrete Work" />
+                <img src={concreteImages[0]?.url || 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80'} className="rounded-2xl w-full h-64 object-cover border border-white/10" alt="Concrete Work" loading="lazy" decoding="async" />
                 <div className="bg-brand-amber p-6 rounded-2xl">
                   <p className="text-brand-navy font-black text-3xl">4000+</p>
                   <p className="text-brand-navy/80 font-bold uppercase text-xs tracking-tighter">PSI Minimum Strength</p>
@@ -75,7 +75,7 @@ export default function VirginiaConcrete() {
                   <p className="text-white font-bold">Reinforced</p>
                   <p className="text-white/40 text-xs">Rebar & Fiber Mesh Ready</p>
                 </div>
-                <img src={concreteImages[1]?.url || 'https://images.unsplash.com/photo-1517646282162-63234d8e78f9?auto=format&fit=crop&q=80'} className="rounded-2xl w-full h-80 object-cover border border-white/10" alt="Concrete Pouring" />
+                <img src={concreteImages[1]?.url || 'https://images.unsplash.com/photo-1517646282162-63234d8e78f9?auto=format&fit=crop&q=80'} className="rounded-2xl w-full h-80 object-cover border border-white/10" alt="Concrete Pouring" loading="lazy" decoding="async" />
               </div>
             </div>
           </div>

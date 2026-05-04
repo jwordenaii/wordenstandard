@@ -64,6 +64,9 @@ export default function AsphaltPaving() {
             src="/hero-paving.jpg" 
             className="w-full h-full object-cover opacity-60 scale-105"
             alt="Paving Excellence"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
           />
         </div>
         

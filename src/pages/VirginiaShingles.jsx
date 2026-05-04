@@ -65,6 +65,9 @@ export default function VirginiaShingles() {
                src={roofImages[0]?.url || 'https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80'} 
                className="rounded-3xl w-full h-[500px] object-cover border border-white/10 shadow-2xl" 
                alt="Roofing Project" 
+               loading="eager"
+               fetchpriority="high"
+               decoding="async"
              />
           </div>
         </div>

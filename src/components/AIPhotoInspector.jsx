@@ -169,7 +169,7 @@ export default function AIPhotoInspector() {
                   className="relative aspect-video overflow-hidden bg-background touch-none"
                   onPointerDown={handleMarkupPointer}
                 >
-                  <img src={previewUrl} alt="Pavement to analyze" className="w-full h-full object-cover" />
+                  <img src={previewUrl} alt="Pavement to analyze" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   <svg
                     className="absolute inset-0 w-full h-full"
                     viewBox="0 0 100 100"

@@ -63,6 +63,12 @@ export const SOCIAL_PROFILES = {
     handle: 'J. Worden & Sons',
     color: '#7AC142',
   },
+  tiktok: {
+    url: import.meta.env.VITE_TIKTOK_URL || 'https://www.tiktok.com/@jwordenandsonspaving',
+    label: 'TikTok',
+    handle: '@jwordenandsonspaving',
+    color: '#000000',
+  },
 }
 
 /** Ordered list for display in icon strips — only platforms with icon assets in SocialLinks.jsx. */
