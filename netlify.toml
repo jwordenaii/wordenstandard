@@ -9,11 +9,6 @@
 [functions]
   directory = "netlify/functions"
 
-[[plugins]]
-  package = "netlify-plugin-bundle-env"
-  [plugins.inputs]
-    directories = ["src"]
-
 [[redirects]]
   from = "https://jwordenasphaltpaving.com/*"
   to = "https://www.jwordenasphaltpaving.com/:splat"
