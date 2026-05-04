@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, ExternalLink, Award } from 'lucide-react';
 
@@ -66,7 +66,7 @@ const HOUZZ_REVIEWS = [
   },
 ];
 
-const HOUZZ_SCREENSHOT = 'https://media.api.com/images/public/69c853446b8987b1630018ff/9ca50477a_houzzcomjwordenawards.jpg';
+const HOUZZ_SCREENSHOT = '/logo.png';
 
 // Aggregate weighted average across all platforms (honest math, no inflation).
 const totalReviews = REVIEW_PLATFORMS.reduce((sum, p) => sum + p.count, 0);

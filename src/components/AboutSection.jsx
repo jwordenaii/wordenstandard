@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Users, Award, Thermometer } from 'lucide-react';
 import SmartImage from './SmartImage';
 
-const TEXTURE_IMG = 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
+const TEXTURE_IMG = '/hero-paving.jpg';
 
 const VALUES = [
 { icon: Shield, title: 'Built to Last', description: 'Every job engineered for decades of performance, not just aesthetics.' },

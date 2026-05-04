@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { getLocationBySlug, PRIMARY_DOMAIN } from '@/lib/locations';
@@ -30,7 +30,7 @@ export default function LocationPage() {
         '@type': 'GeneralContractor',
         '@id': `${PRIMARY_DOMAIN}${canonicalPath}#business`,
         name: `J. Worden & Sons Asphalt Paving — ${loc.city}`,
-        image: 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
+        image: '/hero-paving.jpg',
         url: `${PRIMARY_DOMAIN}${canonicalPath}`,
         telephone: '+1-804-446-1296',
         email: 'j.wordenandsonspaving@gmail.com',

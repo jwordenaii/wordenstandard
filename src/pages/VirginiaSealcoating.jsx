@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Link } from 'react-router-dom'
 import { ShieldCheck, Zap, Droplets, Target, Award, Construction, Star, Trophy } from 'lucide-react'
 import Navbar from '@/components/Navbar'
@@ -149,7 +149,7 @@ export default function VirginiaSealcoating() {
       <section className="relative pt-32 pb-24 overflow-hidden bg-black">
         <div className="absolute inset-0">
           <img
-            src="https://media.api.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg"
+            src="/work/imported/KFC/IMG_9496.JPG"
             className="w-full h-full object-cover opacity-25 grayscale"
             alt="Virginia sealcoating"
             loading="eager"

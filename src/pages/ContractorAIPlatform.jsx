@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart3, Bot, Camera, Map, Phone, Route } from 'lucide-react'
 import Navbar from '@/components/Navbar'
@@ -9,15 +9,15 @@ import { trackPhoneClick } from '@/lib/analytics'
 const REAL_PROJECT_IMAGES = [
   {
     segment: 'Residential Driveway',
-    src: 'https://media.api.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg',
+    src: '/work/imported/va cars photos and videos for website/IMG_8721.JPG',
   },
   {
     segment: 'Commercial Lot',
-    src: 'https://media.api.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg',
+    src: '/work/imported/KFC/IMG_9496.JPG',
   },
   {
     segment: 'HOA / Private Road',
-    src: 'https://media.api.com/images/public/69c853446b8987b1630018ff/d77831126_20170408_185318649_iOS.jpg',
+    src: '/work/imported/va cars photos and videos for website/IMG_8724.JPG',
   },
 ]
 

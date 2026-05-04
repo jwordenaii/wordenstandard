@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { trackEvent } from '@/lib/analytics';
 import SmartImage from './SmartImage';
 
-const HERO_IMAGE = 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
+const HERO_IMAGE = '/hero-paving.jpg';
 
 export default function HeroSection() {
   const scrollToQuote = () => {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 
 /**
  * Injects AI-search-optimized structured data on the homepage:
@@ -21,7 +21,7 @@ export default function HomeSchema() {
       url: 'https://www.jwordenasphaltpaving.com/',
       mainEntityOfPage: 'https://www.jwordenasphaltpaving.com/',
       logo: 'https://www.jwordenasphaltpaving.com/logo.png',
-      image: 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
+      image: '/hero-paving.jpg',
       description:
         'Family-owned asphalt paving contractor based in the Richmond metro for 40+ years. Core local service around Richmond, Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell, with residential driveways, commercial lots, sealcoating, asphalt repair, and pavement preservation as core services.',
       disambiguatingDescription:

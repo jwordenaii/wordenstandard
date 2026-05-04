@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle2, Phone, Construction, Layers, Droplets, HardHat } from 'lucide-react'
 import Navbar from '@/components/Navbar'
@@ -77,7 +77,7 @@ export default function MillingsAndFines() {
             </div>
             <div className="premium-panel p-2 rounded-3xl overflow-hidden shadow-2xl">
               <img 
-                src="https://media.api.com/images/public/69c853446b8987b1630018ff/e5adfa586_20180209_014945610_iOS.jpg" 
+                src="/work/imported/KFC/IMG_9514.JPG" 
                 className="w-full h-[500px] object-cover rounded-2xl"
                 alt="Quality Asphalt Millings"
               />

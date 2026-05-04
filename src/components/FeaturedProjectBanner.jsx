@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Calendar, Ruler } from 'lucide-react';
 
-const HERO_SHOT = 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
+const HERO_SHOT = '/hero-paving.jpg';
 
 export default function FeaturedProjectBanner() {
   const scrollToFootprint = () => {

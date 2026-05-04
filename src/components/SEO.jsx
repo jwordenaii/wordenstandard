@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { PRIMARY_DOMAIN } from '@/lib/locations';
 
 /**
@@ -10,7 +10,7 @@ export default function SEO({
   title,
   description,
   canonicalPath,
-  ogImage = 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg',
+  ogImage = '/hero-paving.jpg',
   ogType = 'website',
   jsonLd,
   noindex = false,

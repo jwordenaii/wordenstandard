@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Phone, ShieldCheck, Construction, HardHat, Award } from 'lucide-react'
@@ -61,7 +61,7 @@ export default function AsphaltPaving() {
         <div className="absolute inset-0 z-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
           <img 
-            src="https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg" 
+            src="/hero-paving.jpg" 
             className="w-full h-full object-cover opacity-60 scale-105"
             alt="Paving Excellence"
           />

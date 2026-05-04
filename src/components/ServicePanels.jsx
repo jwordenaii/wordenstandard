@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 
-const RESIDENTIAL_IMG = 'https://media.api.com/images/public/69c853446b8987b1630018ff/bcdbc0e7f_drivewatpavingphoto.jpg';
-const COMMERCIAL_IMG = 'https://media.api.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg';
-const INDUSTRIAL_IMG = 'https://media.api.com/images/public/69c853446b8987b1630018ff/5eb378b00_IMG_0844.jpg';
+const RESIDENTIAL_IMG = '/work/imported/va cars photos and videos for website/IMG_8721.JPG';
+const COMMERCIAL_IMG = '/work/imported/KFC/IMG_9496.JPG';
+const INDUSTRIAL_IMG = '/work/imported/va cars photos and videos for website/IMG_8838.JPG';
 
 const SECTORS = [
   { title: "National Retail", description: "Multi-site rollout and maintenance for commercial brands." },
