@@ -713,6 +713,11 @@ export const api = {
     const q = new URLSearchParams(params).toString();
     return request('GET', `/api/v1/thermal/window?${q}`);
   },
+  // ── Drone capture pipeline (Ship F) ──────────────────────────────────────
+  droneSnapshot: () => protectedRequest('GET', '/api/v1/admin/drone/snapshot'),
+  droneCaptures: (jobId) => protectedRequest('GET', `/api/v1/admin/drone/captures/${encodeURIComponent(jobId)}`),
+  droneUpload: (formData) => protectedFormRequest('/api/v1/admin/drone/upload', formData),
+  droneDeleteCapture: (jobId, capId) => protectedRequest('DELETE', `/api/v1/admin/drone/captures/${encodeURIComponent(jobId)}/${encodeURIComponent(capId)}`),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

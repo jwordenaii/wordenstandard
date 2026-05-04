@@ -31,6 +31,7 @@ const TABS = [
   { id: 'search-pulse', label: 'Search Pulse' },
   { id: 'dispatch', label: 'Dispatch' },
   { id: 'thermal', label: 'Thermal' },
+  { id: 'drone', label: 'Drone' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3682,6 +3683,125 @@ function SearchPulsePanel() {
   )
 }
 
+function DronePanel() {
+  const [snap, setSnap] = useState(null)
+  const [activeJob, setActiveJob] = useState('')
+  const [captures, setCaptures] = useState([])
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [draft, setDraft] = useState({ job_id: '', pilot: '', gps_lat: '', gps_lng: '', altitude_m: '', notes: '' })
+  const [files, setFiles] = useState([])
+
+  const reload = async () => {
+    try {
+      const s = await api.droneSnapshot()
+      setSnap(s)
+    } catch (e) { setErr(e.message || 'failed') }
+  }
+  useEffect(() => { reload() }, [])
+
+  const loadCaps = async (jid) => {
+    setActiveJob(jid)
+    try {
+      const r = await api.droneCaptures(jid)
+      setCaptures(r.captures || [])
+    } catch (e) { setErr(e.message || 'failed') }
+  }
+
+  const upload = async () => {
+    if (!draft.job_id || files.length === 0) { setErr('job_id + at least one file required'); return }
+    setBusy(true); setErr('')
+    try {
+      for (const f of files) {
+        const fd = new FormData()
+        fd.append('file', f)
+        fd.append('job_id', draft.job_id)
+        if (draft.pilot) fd.append('pilot', draft.pilot)
+        if (draft.gps_lat) fd.append('gps_lat', draft.gps_lat)
+        if (draft.gps_lng) fd.append('gps_lng', draft.gps_lng)
+        if (draft.altitude_m) fd.append('altitude_m', draft.altitude_m)
+        if (draft.notes) fd.append('notes', draft.notes)
+        await api.droneUpload(fd)
+      }
+      setFiles([])
+      await reload()
+      if (activeJob === draft.job_id) await loadCaps(draft.job_id)
+    } catch (e) {
+      setErr(e.message || 'upload failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const remove = async (cid) => {
+    if (!window.confirm('Delete this capture?')) return
+    try {
+      await api.droneDeleteCapture(activeJob, cid)
+      await reload()
+      await loadCaps(activeJob)
+    } catch (e) { setErr(e.message || 'delete failed') }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-white">Drone Capture Pipeline</h2>
+        <p className="text-white/60 text-sm">
+          Storage: <code className="text-white/80">{snap?.storage_path || '—'}</code> · Max {snap ? Math.round(snap.max_bytes / 1024 / 1024) : '?'} MB / file · {snap?.total_captures || 0} captures total
+        </p>
+      </div>
+      {err && <div className="text-red-300 text-sm">{err}</div>}
+
+      <div className="bg-white/5 rounded-lg p-3 space-y-2">
+        <div className="font-semibold text-white text-sm">Upload new capture</div>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+          <input value={draft.job_id} onChange={e=>setDraft(d=>({...d,job_id:e.target.value}))} placeholder="Job ID" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2" />
+          <input value={draft.pilot} onChange={e=>setDraft(d=>({...d,pilot:e.target.value}))} placeholder="Pilot" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.gps_lat} onChange={e=>setDraft(d=>({...d,gps_lat:e.target.value}))} placeholder="Lat" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.gps_lng} onChange={e=>setDraft(d=>({...d,gps_lng:e.target.value}))} placeholder="Lng" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.altitude_m} onChange={e=>setDraft(d=>({...d,altitude_m:e.target.value}))} placeholder="Alt (m)" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.notes} onChange={e=>setDraft(d=>({...d,notes:e.target.value}))} placeholder="Notes" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2 md:col-span-6" />
+        </div>
+        <input type="file" multiple accept="image/*,video/*" onChange={e=>setFiles(Array.from(e.target.files||[]))} className="text-white text-xs" />
+        <div className="text-white/60 text-xs">{files.length} file(s) staged</div>
+        <button type="button" onClick={upload} disabled={busy || !draft.job_id || files.length===0} className="px-4 py-1.5 rounded bg-brand-amber text-brand-navy font-semibold text-sm hover:opacity-90 disabled:opacity-50">{busy?'Uploading…':'Upload'}</button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <div className="font-semibold text-white text-sm mb-2">Jobs ({snap?.jobs?.length || 0})</div>
+          <div className="space-y-1">
+            {(snap?.jobs||[]).map(j => (
+              <button key={j.job_id} type="button" onClick={()=>loadCaps(j.job_id)}
+                className={`w-full text-left px-2 py-1.5 rounded text-xs ${activeJob===j.job_id?'bg-brand-amber text-brand-navy font-bold':'bg-white/5 text-white/80 hover:bg-white/10'}`}>
+                {j.job_id} · {j.count||0}
+              </button>
+            ))}
+            {(!snap?.jobs||snap.jobs.length===0) && <div className="text-white/40 text-xs">No drone jobs yet.</div>}
+          </div>
+        </div>
+        <div className="md:col-span-2">
+          <div className="font-semibold text-white text-sm mb-2">Captures{activeJob?` for ${activeJob}`:''} ({captures.length})</div>
+          <div className="space-y-1">
+            {captures.map(c=>(
+              <div key={c.id} className="bg-white/5 rounded px-3 py-2 text-xs text-white/80 flex items-center justify-between">
+                <div>
+                  <span className="font-mono">{c.id}</span> · {c.filename} · {Math.round(c.bytes/1024)} KB · {c.content_type}
+                  {c.gps_lat!=null && c.gps_lng!=null && <> · {c.gps_lat.toFixed(4)},{c.gps_lng.toFixed(4)}</>}
+                  {c.altitude_m!=null && <> · {c.altitude_m}m</>}
+                </div>
+                <button type="button" onClick={()=>remove(c.id)} className="text-red-300 hover:text-red-200">Delete</button>
+              </div>
+            ))}
+            {activeJob && captures.length===0 && <div className="text-white/40 text-xs">No captures.</div>}
+            {!activeJob && <div className="text-white/40 text-xs">Select a job to view captures.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ThermalPanel() {
   const [params, setParams] = useState({ lat: 37.5407, lng: -77.4360, mix_temp_f: 290, lift_in: 2, target_breakdown_f: 240, target_finish_f: 175 })
   const [data, setData] = useState(null)
@@ -4603,6 +4723,10 @@ export default function CommandCenter() {
 
             {activeTab === 'thermal' && (
               <ThermalPanel />
+            )}
+
+            {activeTab === 'drone' && (
+              <DronePanel />
             )}
           </>
       </div>
