@@ -694,6 +694,8 @@ export const api = {
   wearableSnapshot:   (crew_id) => protectedRequest('GET', `/api/v1/admin/wearables/snapshot${crew_id ? `?crew_id=${encodeURIComponent(crew_id)}` : ''}`),
   wearableCrews:      () => protectedRequest('GET', '/api/v1/admin/wearables/crews'),
   wearableConfig:     () => protectedRequest('GET', '/api/v1/admin/wearables/config'),
+  // ── Live Search Pulse / VA hotspot heatmap ───────────────────────────────
+  searchPulseSnapshot: (force = false) => protectedRequest('GET', `/api/v1/admin/search-pulse/snapshot${force ? '?force=true' : ''}`),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

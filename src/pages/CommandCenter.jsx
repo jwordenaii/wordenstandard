@@ -28,6 +28,7 @@ const TABS = [
   { id: 'ops', label: 'Ops Pipeline' },
   { id: 'civil-intel', label: 'Civil Intel' },
   { id: 'integrations', label: 'Integrations' },
+  { id: 'search-pulse', label: 'Search Pulse' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3576,6 +3577,109 @@ const INTEGRATION_GROUPS = [
   },
 ]
 
+function SearchPulsePanel() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState(null)
+
+  const refresh = async (force = false) => {
+    setLoading(true); setErr(null)
+    try {
+      const res = await api.searchPulseSnapshot(force)
+      setData(res)
+    } catch (e) {
+      setErr(e?.message || 'Failed to load')
+    } finally { setLoading(false) }
+  }
+  useEffect(() => { refresh(false) }, [])
+
+  const cells = data?.hotspots || []
+  const W = 720, H = 360
+  const lat = { min: 36.7, max: 38.5 }
+  const lng = { min: -78.6, max: -75.8 }
+  const xy = (la, ln) => ({
+    x: ((ln - lng.min) / (lng.max - lng.min)) * W,
+    y: H - ((la - lat.min) / (lat.max - lat.min)) * H,
+  })
+  const heatColor = (h) => {
+    const r = Math.round(255 * Math.min(1, h * 1.4))
+    const g = Math.round(180 * (1 - h))
+    return `rgba(${r},${g},40,0.75)`
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold text-brand-navy">Live Search Pulse — Virginia</h2>
+          <p className="text-sm text-brand-charcoal/70">SerpAPI snapshot of paid + organic competition by metro. Heat = ad density × organic count. 5-min cache.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => refresh(false)} disabled={loading}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-navy text-white text-sm hover:bg-brand-navy/90 disabled:opacity-60">
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+          <button onClick={() => refresh(true)} disabled={loading}
+            className="px-3 py-1.5 rounded-lg border border-brand-navy/20 text-sm hover:bg-brand-navy/5">Force</button>
+        </div>
+      </div>
+
+      {err && <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">{err}</div>}
+      {data && data.ok === false && (
+        <div className="p-3 rounded-lg bg-amber-50 text-amber-800 text-sm border border-amber-200">
+          {data.reason || 'SerpAPI not configured'} — paste SERPAPI_KEY in the Integrations tab.
+        </div>
+      )}
+
+      <div className="rounded-xl border border-brand-navy/10 bg-white p-4">
+        <div className="text-xs text-brand-charcoal/60 mb-2">Tracked terms: {(data?.terms || []).join(' · ') || '—'}</div>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg">
+          <text x="10" y="20" className="fill-slate-400 text-[10px]">VA hotspots</text>
+          {cells.map((c) => {
+            const p = xy(c.lat, c.lng)
+            const r = 14 + (c.heat || 0) * 28
+            return (
+              <g key={c.id}>
+                <circle cx={p.x} cy={p.y} r={r} fill={heatColor(c.heat || 0)} stroke="#0f1f3d" strokeWidth="1" />
+                <text x={p.x} y={p.y + 4} textAnchor="middle" className="fill-white text-[10px] font-bold">
+                  {Math.round((c.heat || 0) * 100)}
+                </text>
+                <text x={p.x} y={p.y + r + 12} textAnchor="middle" className="fill-slate-700 text-[10px]">
+                  {c.name}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {cells.map((c) => (
+          <div key={c.id} className="rounded-lg border border-brand-navy/10 bg-white p-3">
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-brand-navy">{c.name}</div>
+              <div className="text-xs px-2 py-0.5 rounded-full"
+                   style={{ background: heatColor(c.heat || 0), color: '#fff' }}>
+                heat {Math.round((c.heat || 0) * 100)}
+              </div>
+            </div>
+            <ul className="mt-2 space-y-1">
+              {(c.terms || []).map((t, i) => (
+                <li key={i} className="text-xs text-brand-charcoal/80">
+                  <span className="font-medium">{t.term}</span>
+                  {t.ok
+                    ? <> — ads {t.ads}, organic {t.organic}{t.top_title ? ` · ${t.top_title.slice(0,60)}` : ''}</>
+                    : <span className="text-red-600"> — {t.detail || 'error'}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function IntegrationsPanel() {
   const [statusMap, setStatusMap] = useState({})
   const [tier, setTier] = useState('owner')
@@ -4189,6 +4293,10 @@ export default function CommandCenter() {
 
             {activeTab === 'integrations' && (
               <IntegrationsPanel />
+            )}
+
+            {activeTab === 'search-pulse' && (
+              <SearchPulsePanel />
             )}
           </>
       </div>
