@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from app.services.jarvis import jarvis
 from pydantic import BaseModel
 
