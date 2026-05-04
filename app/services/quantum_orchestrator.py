@@ -5,7 +5,6 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from app.schemas.universal_service import UniversalServiceLedger
 from app.schemas.scaling_architecture import GlobalScalingArch
-from app.services.ai_engine import AIEngine  # Assuming this exists for core AI
 from app.services.notifications import send_safety_alert
 
 logger = logging.getLogger(__name__)
