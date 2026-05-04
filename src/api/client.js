@@ -789,10 +789,41 @@ export const api = {
   integrations: integrationsClient,
 }
 
-// ── GA4 event helpers ─────────────────────────────────────────────────────────
+// ── GA4 / Google Ads event helpers ────────────────────────────────────────────
+// Map of internal event names → Netlify env vars holding the matching
+// Google Ads conversion label (format "AbCdEf12-3"). When set, the event
+// also fires `gtag('event','conversion', { send_to: 'AW-XXX/LABEL', value })`
+// so the click is counted in Google Ads. Set these in Netlify → Site settings
+// → Environment variables, then redeploy:
+//   VITE_GADS_CONVERSION_ID            = AW-18031160509   (already in <head>)
+//   VITE_GADS_LABEL_LEAD_FORM          = <label from Google Ads conversion>
+//   VITE_GADS_LABEL_PHONE_CLICK        = <label>
+//   VITE_GADS_LABEL_QUOTE_REQUEST      = <label>
+const ADS_ID = import.meta.env.VITE_GADS_CONVERSION_ID || 'AW-18031160509'
+const ADS_CONVERSION_MAP = {
+  contact_form_submit: import.meta.env.VITE_GADS_LABEL_LEAD_FORM,
+  generate_lead:       import.meta.env.VITE_GADS_LABEL_LEAD_FORM,
+  phone_click:         import.meta.env.VITE_GADS_LABEL_PHONE_CLICK,
+  quote_request:       import.meta.env.VITE_GADS_LABEL_QUOTE_REQUEST,
+  qualified_lead_signal: import.meta.env.VITE_GADS_LABEL_LEAD_FORM,
+}
+// Estimated lead value (USD) — used for value-based bidding/ROAS reporting.
+const LEAD_VALUE_USD = Number(import.meta.env.VITE_GADS_LEAD_VALUE_USD) || 50
+
 export function trackEvent(eventName, params = {}) {
-  if (typeof window.gtag === 'function') {
-    window.gtag('event', eventName, params)
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
+  // 1. Always fire the GA4 event
+  window.gtag('event', eventName, params)
+  // 2. If this event maps to a configured Google Ads conversion, fire it too.
+  //    Skip on explicit failures (e.g. form submit error).
+  if (params && params.success === false) return
+  const label = ADS_CONVERSION_MAP[eventName]
+  if (label && ADS_ID) {
+    window.gtag('event', 'conversion', {
+      send_to: `${ADS_ID}/${label}`,
+      value: params.value ?? LEAD_VALUE_USD,
+      currency: 'USD',
+    })
   }
 }
 

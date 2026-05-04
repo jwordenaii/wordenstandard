@@ -10,13 +10,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Google tag (gtag.js) — Google Ads Conversion Tracking -->
+    <!-- Google tag (gtag.js) — Google Ads + GA4
+         To enable GA4, add your G-XXXXXXXXXX measurement ID below.
+         Conversion labels are configured via Vite env vars in Netlify:
+           VITE_GADS_LABEL_LEAD_FORM, VITE_GADS_LABEL_PHONE_CLICK -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18031160509"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'AW-18031160509');
+      // Enhanced conversions: forward email/phone hashed automatically
+      gtag('set', 'allow_enhanced_conversions', true);
+      // Add GA4 here when you have a G-XXX id:
+      // gtag('config', 'G-XXXXXXXXXX');
     </script>
 
     <!-- Primary SEO -->
