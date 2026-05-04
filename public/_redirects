@@ -74,7 +74,8 @@ https://www.kansascitypavingpros.com/* https://www.jwordenasphaltpaving.com/loca
 # ============================================================
 # PATH-LEVEL REDIRECTS (legacy URLs → current structure)
 # ============================================================
-/contact                    /           301!
+# NOTE: /contact MUST resolve to the SPA Contact page (used by Google Ads).
+# Do NOT add a redirect here for /contact.
 /fredericksburg-va-paving   /locations  301!
 
 # ============================================================
