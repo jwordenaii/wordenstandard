@@ -53,6 +53,7 @@ const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const CustomerPortal = lazy(() => import('./pages/CustomerPortal'));
+const StaffPortal = lazy(() => import('./pages/StaffPortal'));
 const AdminDocuments = lazy(() => import('./pages/AdminDocuments'));
 const AdminSlackSettings = lazy(() => import('./pages/AdminSlackSettings'));
 const LeadInbox = lazy(() => import('./pages/LeadInbox'));
@@ -266,6 +267,7 @@ const AuthenticatedApp = () => {
         <Route path="/advisory/state/:stateCode" element={<RequireInternalAdvisory><AdvisoryStateDetail /></RequireInternalAdvisory>} />
         <Route path="/advisory/:category" element={<RequireInternalAdvisory><AdvisoryCategoryHub /></RequireInternalAdvisory>} />
 
+        <Route path="/staff" element={<StaffPortal />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>

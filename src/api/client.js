@@ -727,6 +727,42 @@ export const api = {
   // ── Roller compaction telemetry (Ship H) ────────────────────────────────
   rollerSnapshot: () => protectedRequest('GET', '/api/v1/admin/roller/snapshot'),
   rollerSession: (sid) => protectedRequest('GET', `/api/v1/admin/roller/sessions/${encodeURIComponent(sid)}`),
+  // ── Staff portal (Ship I) ─────────────────────────────────────────
+  staffLogin: (username, password) => request('POST', '/api/v1/staff/login', { username, password }),
+  staffMe: (token) => {
+    return fetch(`${BASE}/api/v1/staff/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(new Error(j.detail || `HTTP ${r.status}`))))
+  },
+  staffCheckin: (token, formData) => {
+    return fetch(`${BASE}/api/v1/staff/checkin`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(new Error(j.detail || `HTTP ${r.status}`))))
+  },
+  staffCheckins: (token) => {
+    return fetch(`${BASE}/api/v1/staff/checkins`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(new Error(j.detail || `HTTP ${r.status}`))))
+  },
+  adminStaffUsers: () => protectedRequest('GET', '/api/v1/admin/staff/users'),
+  adminCreateStaffUser: (body) => protectedRequest('POST', '/api/v1/admin/staff/users', body),
+  adminStaffCheckins: (limit = 100) => protectedRequest('GET', `/api/v1/admin/staff/checkins?limit=${limit}`),
+  // ── Worker profiles (admin) ──────────────────────────────────────────────
+  adminWorkers: () => protectedRequest('GET', '/api/v1/admin/staff/workers'),
+  adminCreateWorker: (body) => protectedRequest('POST', '/api/v1/admin/staff/workers', body),
+  adminWorker: (id) => protectedRequest('GET', `/api/v1/admin/staff/workers/${id}`),
+  adminUpdateWorker: (id, body) => protectedRequest('PATCH', `/api/v1/admin/staff/workers/${id}`, body),
+  adminUploadWorkerDoc: (profileId, formData) => protectedFormRequest(`/api/v1/admin/staff/workers/${profileId}/docs`, formData),
+  adminReviewDoc: (docId, body) => protectedRequest('PATCH', `/api/v1/admin/staff/docs/${docId}`, body),
+  adminCompliance: () => protectedRequest('GET', '/api/v1/admin/staff/compliance'),
+  adminVaLaw: () => protectedRequest('GET', '/api/v1/admin/staff/va-law'),
+  adminCdlRequirements: () => protectedRequest('GET', '/api/v1/admin/staff/cdl-requirements'),
+  // ── Staff self-service (Bearer JWT) ─────────────────────────────────────
+  staffMyProfile: (token) => fetch(`${BASE}/api/v1/staff/my-profile`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(new Error(j.detail || `HTTP ${r.status}`)))),
+  staffMyDocs: (token) => fetch(`${BASE}/api/v1/staff/my-docs`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(new Error(j.detail || `HTTP ${r.status}`)))),
+  staffUploadMyDoc: (token, formData) => fetch(`${BASE}/api/v1/staff/my-docs`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(new Error(j.detail || `HTTP ${r.status}`)))),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

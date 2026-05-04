@@ -1503,3 +1503,115 @@ class PavingEvaluation(Base):
             f"<PavingEvaluation id={self.id} region={self.region!r} "
             f"sqft={self.calculated_sqft} damage={self.damage_type!r}>"
         )
+
+
+# ── Staff Portal (Ship I) ───────────────────────────────────────────────────
+
+STAFF_ROLES = {"field", "foreman", "admin"}
+
+
+class StaffUser(Base):
+    """Field / foreman / admin staff account for the staff portal."""
+
+    __tablename__ = "staff_users"
+    __table_args__ = (UniqueConstraint("username", name="uq_staff_username"),)
+
+    id            = Column(Integer, primary_key=True, index=True)
+    username      = Column(String(60), nullable=False, unique=True, index=True)
+    role          = Column(String(20), nullable=False, default="field")  # field|foreman|admin
+    password_hash = Column(String(256), nullable=False)
+    is_active     = Column(Boolean, default=True, nullable=False)
+    created_at    = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<StaffUser id={self.id} username={self.username!r} role={self.role!r}>"
+
+
+class DailyCheckIn(Base):
+    """Staff daily check-in with optional GPS and photo."""
+
+    __tablename__ = "daily_checkins"
+
+    id             = Column(Integer, primary_key=True, index=True)
+    user_id        = Column(Integer, nullable=False, index=True)
+    note           = Column(Text, nullable=True)
+    photo_filename = Column(String(300), nullable=True)  # stored under STAFF_PHOTO_PATH
+    gps_lat        = Column(Float, nullable=True)
+    gps_lng        = Column(Float, nullable=True)
+    checked_in_at  = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<DailyCheckIn id={self.id} user_id={self.user_id} at={self.checked_in_at!r}>"
+
+
+# ── Worker Profiles & Compliance Documents (Ship I) ─────────────────────────
+
+WORKER_TYPES = {"employee_ft", "employee_pt", "employee_temp", "subcontractor", "general_labor", "cdl_driver"}
+WORKER_STATUS_VALUES = {"active", "inactive", "pending_docs", "terminated", "suspended"}
+CDL_CLASSES = {"A", "B", "C"}
+
+
+class WorkerProfile(Base):
+    """
+    Onboarding profile for any worker type (employee, sub, CDL driver, day labor).
+    Linked optionally to StaffUser if the worker has portal login access.
+    """
+
+    __tablename__ = "worker_profiles"
+    __table_args__ = (UniqueConstraint("staff_user_id", name="uq_worker_staff_user"),)
+
+    id              = Column(Integer, primary_key=True, index=True)
+    # Optional link to StaffUser (portal login)
+    staff_user_id   = Column(Integer, nullable=True, index=True)
+    full_name       = Column(String(200), nullable=False)
+    worker_type     = Column(String(30), nullable=False)   # WORKER_TYPES
+    pay_type        = Column(String(10), nullable=False, default="w2")   # w2 | 1099
+    status          = Column(String(20), nullable=False, default="pending_docs")
+    hire_date       = Column(DateTime(timezone=True), nullable=True)
+    termination_date = Column(DateTime(timezone=True), nullable=True)
+    phone           = Column(String(30), nullable=True)
+    email           = Column(String(254), nullable=True)
+    address         = Column(String(400), nullable=True)
+    ssn_last4       = Column(String(4), nullable=True)   # LAST 4 ONLY — never store full SSN
+    # CDL-specific fields
+    cdl_number      = Column(String(30), nullable=True)
+    cdl_state       = Column(String(2), nullable=True)
+    cdl_class       = Column(String(5), nullable=True)   # A | B | C
+    cdl_expiry      = Column(DateTime(timezone=True), nullable=True)
+    dot_medical_expiry = Column(DateTime(timezone=True), nullable=True)
+    fmcsa_clearinghouse_queried = Column(Boolean, default=False, nullable=False)
+    # Subcontractor-specific
+    company_name    = Column(String(200), nullable=True)
+    ein             = Column(String(20), nullable=True)
+    # Admin
+    notes           = Column(Text, nullable=True)
+    created_at      = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    updated_at      = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<WorkerProfile id={self.id} name={self.full_name!r} type={self.worker_type!r}>"
+
+
+class WorkerDocument(Base):
+    """
+    Compliance document uploaded for a WorkerProfile.
+    doc_type values defined in app/services/staff_compliance.DOC_LABELS.
+    status: pending | approved | rejected | expired
+    """
+
+    __tablename__ = "worker_documents"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    profile_id      = Column(Integer, nullable=False, index=True)
+    doc_type        = Column(String(60), nullable=False, index=True)
+    filename        = Column(String(300), nullable=True)   # stored under STAFF_DOCS_PATH
+    status          = Column(String(20), nullable=False, default="pending")  # pending|approved|rejected|expired
+    expiry_date     = Column(DateTime(timezone=True), nullable=True)
+    notes           = Column(String(500), nullable=True)
+    uploaded_at     = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    reviewed_at     = Column(DateTime(timezone=True), nullable=True)
+    reviewed_by     = Column(String(60), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<WorkerDocument id={self.id} profile={self.profile_id} type={self.doc_type!r} status={self.status!r}>"
+
