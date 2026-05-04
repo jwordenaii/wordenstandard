@@ -5,6 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  VITE_API_BASE_URL = "https://codexbuildfreeofbase44-production.up.railway.app"
+  VITE_SITE_URL = "https://www.jwordenasphaltpaving.com"
 
 [functions]
   directory = "netlify/functions"
