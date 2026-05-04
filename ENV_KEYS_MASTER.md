@@ -79,6 +79,19 @@ These three unlock everything we built today. Get them first.
 
 ---
 
+## 4.5 · SMS verification (Twilio Verify — NEW)
+
+| Variable | Notes |
+|---|---|
+| **`TWILIO_ACCOUNT_SID`** | Starts with `AC…`. https://console.twilio.com/ |
+| **`TWILIO_AUTH_TOKEN`** | 32-char hex. **Treat like a password — rotate if leaked.** |
+| **`TWILIO_VERIFY_SERVICE_SID`** | Starts with `VA…`. Twilio Console → Verify → Services. |
+| `ADMIN_2FA_PHONE` | Optional. E.164 phone for the `/admin/start` shortcut, e.g. `+18044461296`. |
+
+Endpoints exposed: `POST /api/v1/twilio/verify/start`, `POST /api/v1/twilio/verify/check`, `POST /api/v1/twilio/verify/admin/start`, `GET /api/v1/twilio/verify/status`.
+
+---
+
 ## 5 · Email (SendGrid)
 
 | Variable | Required | Notes |

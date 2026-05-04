@@ -678,6 +678,11 @@ export const api = {
       subject,
       body,
     }),
+  // ── Twilio Verify (SMS OTP) ────────────────────────────────────────────────
+  twilioVerifyStatus:  () => request('GET',  '/api/v1/twilio/verify/status'),
+  twilioVerifyStart:   (to, channel = 'sms') => request('POST', '/api/v1/twilio/verify/start', { to, channel }),
+  twilioVerifyCheck:   (to, code) => request('POST', '/api/v1/twilio/verify/check', { to, code }),
+  twilioVerifyAdminStart: () => request('POST', '/api/v1/twilio/verify/admin/start'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────
   getAutonomyState: () => request('GET', '/api/v1/autonomy/state'),
   freezeAutonomy: (reason = 'manual') => request('POST', '/api/v1/autonomy/freeze', { reason }),
