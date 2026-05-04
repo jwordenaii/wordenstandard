@@ -185,42 +185,12 @@
     X-Robots-Tag = "noindex, nofollow, noarchive"
 
 [[headers]]
-  for = "/residential"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/residential/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
   for = "/home-services"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow, noarchive"
 
 [[headers]]
   for = "/home-services/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/general-contracting"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/general-contracting/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/tar-and-chip"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/tar-and-chip/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow, noarchive"
 
