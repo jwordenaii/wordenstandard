@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, MapPin, Clock, CheckCircle2, AlertCircle, Image as ImageIcon, LogOut, User, HardHat, FileText, Thermometer, Zap, ShieldAlert, Truck, Navigation, Package, Settings, Eye, Loader2 } from 'lucide-react';
+import { Camera, MapPin, Clock, CheckCircle2, AlertCircle, LogOut, User, HardHat, FileText, Thermometer, Zap, ShieldAlert, Truck, Navigation, Package, Settings, Eye, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CrewFieldApp() {

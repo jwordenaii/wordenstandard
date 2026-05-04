@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, ShieldCheck, Building2, Phone, Star, CheckCircle2, Waves, Truck } from 'lucide-react'
+import { MapPin, ShieldCheck, Building2, Phone, Waves } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'

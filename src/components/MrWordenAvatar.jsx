@@ -17,7 +17,7 @@
  * no WebGL/canvas) so it renders instantly on every page without blocking
  * the main thread or requiring a GPU context.
  */
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 /** The SVG character art for Mr. Worden, simplified to a minimalist, smart AI indicator. */

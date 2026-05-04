@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Cloud, CloudRain, Wind, Thermometer, CheckCircle2, AlertTriangle, XCircle, Search, Info } from 'lucide-react';
+import { Cloud, CloudRain, Thermometer, CheckCircle2, AlertTriangle, XCircle, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPavingForecast } from '@/api/weather';
 

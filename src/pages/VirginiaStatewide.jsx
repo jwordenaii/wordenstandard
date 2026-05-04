@@ -9,8 +9,7 @@
 
 import { useState, useMemo } from 'react';
 import {
-  VA_ALL_LOCALITIES, VA_VDOT_DISTRICTS, VA_BOUNDS,
-  localitiesByDistrict, PRIMARY_LOCALITIES, EXTENDED_LOCALITIES,
+  VA_ALL_LOCALITIES, VA_VDOT_DISTRICTS, VA_BOUNDS, PRIMARY_LOCALITIES, EXTENDED_LOCALITIES,
 } from '../data/virginia_counties';
 import { api } from '../api/client';
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Home, ShieldCheck, Zap, Droplets, Target, Award, Construction, Star, Trash2 } from 'lucide-react'
+import { ShieldCheck, Zap, Construction, Trash2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'

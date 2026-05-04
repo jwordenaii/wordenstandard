@@ -61,15 +61,15 @@ jobs:
           [ -n "$VITE_API_BASE_URL" ] || (echo "::error::Missing VITE_API_BASE_URL" && exit 1)
           [ -n "$VITE_SITE_URL" ] || (echo "::error::Missing VITE_SITE_URL" && exit 1)
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || 'https://codexbuildfreeofbase44-production.up.railway.app' }}
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL || 'https://www.jwordenasphaltpaving.com' }}
 
       # ── Build ──────────────────────────────────────────────────────────────
       - name: Build front-end
         run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || 'https://codexbuildfreeofbase44-production.up.railway.app' }}
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL || 'https://www.jwordenasphaltpaving.com' }}
           VITE_GA4_ID: ${{ secrets.VITE_GA4_ID }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
@@ -126,8 +126,8 @@ jobs:
       - name: Smoke-test app import
         run: python -c "from app.main import app; print('FastAPI app loaded OK')"
         env:
-          JWORDEN_MASTER_KEY: ${{ secrets.JWORDEN_MASTER_KEY }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWORDEN_MASTER_KEY: ${{ secrets.JWORDEN_MASTER_KEY || 'ci-master-key' }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'ci-jwt-secret' }}
           AUTO_CREATE_TABLES: "true"
 
       # ── Database migrations ────────────────────────────────────────────────
@@ -140,8 +140,8 @@ jobs:
       - name: Run backend tests
         run: pytest -q tests/backend
         env:
-          JWORDEN_MASTER_KEY: ${{ secrets.JWORDEN_MASTER_KEY }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWORDEN_MASTER_KEY: ${{ secrets.JWORDEN_MASTER_KEY || 'ci-master-key' }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'ci-jwt-secret' }}
           AUTO_CREATE_TABLES: "true"
 
       # ── Build production Docker image ─────────────────────────────────────
@@ -185,8 +185,8 @@ jobs:
       - name: Backend API tests
         run: pytest -q tests/backend
         env:
-          JWORDEN_MASTER_KEY: ${{ secrets.JWORDEN_MASTER_KEY }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWORDEN_MASTER_KEY: ${{ secrets.JWORDEN_MASTER_KEY || 'ci-master-key' }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'ci-jwt-secret' }}
           AUTO_CREATE_TABLES: "true"
 
       - name: Install Playwright browser

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Wrench, Droplets, ShieldCheck, Zap, MapPin, CheckCircle2, AlertTriangle, Phone } from 'lucide-react'
+import { Wrench, MapPin, AlertTriangle, Phone } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
