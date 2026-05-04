@@ -27,6 +27,7 @@ const TABS = [
   { id: 'crm', label: 'CRM Leads' },
   { id: 'ops', label: 'Ops Pipeline' },
   { id: 'civil-intel', label: 'Civil Intel' },
+  { id: 'integrations', label: 'Integrations' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3445,6 +3446,332 @@ function JarvisPanel() {
   )
 }
 
+// ── Integrations Panel: owner-only key paste UI ─────────────────────────────
+// Groups managed keys by provider, masks sensitive values, supports inline
+// edit + save + live "test connection" probes against the runtime store.
+const INTEGRATION_GROUPS = [
+  {
+    id: 'jarvis',
+    title: 'Jarvis Brain (Claude)',
+    desc: 'Anthropic Claude powers Jarvis chat + tool use.',
+    provider: 'anthropic',
+    keys: [
+      { name: 'ANTHROPIC_API_KEY', label: 'Anthropic API key', placeholder: 'sk-ant-…' },
+      { name: 'ANTHROPIC_MODEL',   label: 'Model (optional)',  placeholder: 'claude-3-5-sonnet-latest' },
+    ],
+    helpUrl: 'https://console.anthropic.com/settings/keys',
+  },
+  {
+    id: 'tavily',
+    title: 'Web Search (Tavily)',
+    desc: 'Free 1k searches/mo. Powers Jarvis live web look-ups.',
+    provider: 'tavily',
+    keys: [
+      { name: 'TAVILY_API_KEY',     label: 'Tavily API key',  placeholder: 'tvly-…' },
+      { name: 'TAVILY_MAX_RESULTS', label: 'Max results',     placeholder: '5' },
+    ],
+    helpUrl: 'https://app.tavily.com/',
+  },
+  {
+    id: 'vapi',
+    title: 'Voice Calling (Vapi)',
+    desc: 'Lets Jarvis place real outbound phone calls.',
+    provider: 'vapi',
+    keys: [
+      { name: 'VAPI_API_KEY',          label: 'Vapi API key',         placeholder: '…' },
+      { name: 'VAPI_PHONE_NUMBER_ID',  label: 'Phone Number ID' },
+      { name: 'VAPI_ASSISTANT_ID',     label: 'Assistant ID' },
+    ],
+    helpUrl: 'https://dashboard.vapi.ai/',
+  },
+  {
+    id: 'twilio',
+    title: 'SMS Verify (Twilio)',
+    desc: 'Lead phone verification + admin 2FA fallback. Rotate token from Twilio Console after pasting.',
+    provider: 'twilio',
+    keys: [
+      { name: 'TWILIO_ACCOUNT_SID',         label: 'Account SID',  placeholder: 'AC…' },
+      { name: 'TWILIO_AUTH_TOKEN',          label: 'Auth token' },
+      { name: 'TWILIO_VERIFY_SERVICE_SID',  label: 'Verify Service SID', placeholder: 'VA…' },
+      { name: 'ADMIN_2FA_PHONE',            label: 'Admin 2FA phone (E.164)', placeholder: '+18045550100' },
+    ],
+    helpUrl: 'https://console.twilio.com/',
+  },
+  {
+    id: 'sendgrid',
+    title: 'Email (SendGrid)',
+    desc: 'Transactional email — admin lead alerts, customer follow-ups.',
+    provider: 'sendgrid',
+    keys: [
+      { name: 'SENDGRID_API_KEY',   label: 'SendGrid API key', placeholder: 'SG.…' },
+      { name: 'SENDGRID_FROM_EMAIL',label: 'From email (verified sender)' },
+      { name: 'SENDGRID_FROM_NAME', label: 'From name' },
+      { name: 'ADMIN_NOTIFY_EMAIL', label: 'Admin notification recipient' },
+    ],
+    helpUrl: 'https://app.sendgrid.com/settings/api_keys',
+  },
+  {
+    id: 'google',
+    title: 'Google Suite (Ads / Search Console / GA4)',
+    desc: 'Ads tuning, organic-search insight, analytics. Used by Live Search Pulse + ad budget logic.',
+    provider: null,
+    keys: [
+      { name: 'GA4_PROPERTY_ID',           label: 'GA4 Property ID' },
+      { name: 'GSC_SITE_URL',              label: 'Search Console site URL', placeholder: 'sc-domain:jwordenasphaltpaving.com' },
+      { name: 'GOOGLE_ADS_DEVELOPER_TOKEN',label: 'Google Ads developer token' },
+      { name: 'GOOGLE_ADS_SITE_DOMAIN',    label: 'Google Ads site domain' },
+      { name: 'SERPAPI_KEY',               label: 'SerpAPI key (live SERP + heatmap)' },
+      { name: 'GOOGLE_TRENDS_GEO',         label: 'Trends geo (default US-VA)', placeholder: 'US-VA' },
+      { name: 'SEARCH_PULSE_TERMS',        label: 'Tracked terms (comma)', placeholder: 'asphalt paving richmond, sealcoating midlothian' },
+    ],
+    helpUrl: 'https://serpapi.com/',
+  },
+  {
+    id: 'company',
+    title: 'Company Info',
+    desc: 'Used in emails, schema.org, sitemaps.',
+    provider: null,
+    keys: [
+      { name: 'COMPANY_PHONE',   label: 'Phone' },
+      { name: 'COMPANY_EMAIL',   label: 'Email' },
+      { name: 'COMPANY_WEBSITE', label: 'Website' },
+      { name: 'COMPANY_ADDRESS', label: 'Address' },
+    ],
+  },
+  {
+    id: 'license',
+    title: 'License Tier (Owner-only)',
+    desc: 'Controls which premium features are visible. owner = master deployment, premium = licensee, lite = stripped-down.',
+    provider: null,
+    keys: [
+      { name: 'LICENSE_TIER', label: 'Tier (owner | premium | lite)', placeholder: 'owner' },
+    ],
+  },
+]
+
+function IntegrationsPanel() {
+  const [statusMap, setStatusMap] = useState({})
+  const [tier, setTier] = useState('owner')
+  const [features, setFeatures] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [drafts, setDrafts] = useState({}) // {KEY_NAME: 'value being typed'}
+  const [busy, setBusy] = useState({})     // {KEY_NAME: true}
+  const [testResults, setTestResults] = useState({})  // {provider: {ok, detail}}
+  const [error, setError] = useState('')
+
+  const refresh = useCallback(async () => {
+    setLoading(true); setError('')
+    try {
+      const [s, f] = await Promise.all([api.integrationsStatus(), api.getFeatures()])
+      setStatusMap(s.keys || {})
+      setTier(f.tier || 'owner')
+      setFeatures(f.features || {})
+    } catch (e) {
+      setError(e.message || 'Failed to load integrations')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { refresh() }, [refresh])
+
+  const onSave = async (name) => {
+    const value = drafts[name] ?? ''
+    setBusy((b) => ({ ...b, [name]: true }))
+    try {
+      const res = await api.integrationsPutKey(name, value)
+      setStatusMap((m) => ({ ...m, [name]: res.status }))
+      setDrafts((d) => { const n = { ...d }; delete n[name]; return n })
+    } catch (e) {
+      setError(`${name}: ${e.message}`)
+    } finally {
+      setBusy((b) => { const n = { ...b }; delete n[name]; return n })
+    }
+  }
+
+  const onClear = async (name) => {
+    if (!window.confirm(`Clear ${name}? It will fall back to the env var (if any).`)) return
+    setBusy((b) => ({ ...b, [name]: true }))
+    try {
+      const res = await api.integrationsPutKey(name, '')
+      setStatusMap((m) => ({ ...m, [name]: res.status }))
+    } catch (e) {
+      setError(`${name}: ${e.message}`)
+    } finally {
+      setBusy((b) => { const n = { ...b }; delete n[name]; return n })
+    }
+  }
+
+  const onTest = async (provider) => {
+    setTestResults((t) => ({ ...t, [provider]: { loading: true } }))
+    try {
+      const res = await api.integrationsTest(provider)
+      setTestResults((t) => ({ ...t, [provider]: res }))
+    } catch (e) {
+      setTestResults((t) => ({ ...t, [provider]: { ok: false, error: e.message } }))
+    }
+  }
+
+  if (loading && Object.keys(statusMap).length === 0) {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-white/70 flex items-center gap-3">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading integrations…
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Header strip */}
+      <div className="rounded-2xl border border-brand-amber/30 bg-gradient-to-br from-brand-navy to-[#0a1628] p-5 text-white">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h3 className="font-display font-bold text-xl">Integrations</h3>
+            <p className="text-white/70 text-sm">
+              Owner-only. Paste API keys here — services pick them up live, no redeploy.
+              Sensitive values are stored on the server and shown masked.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              tier === 'owner' ? 'bg-brand-amber text-brand-navy' :
+              tier === 'premium' ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-300/40' :
+              'bg-white/10 text-white/70 border border-white/20'
+            }`}>
+              Tier: {tier}
+            </span>
+            <button
+              type="button"
+              onClick={refresh}
+              className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15 border border-white/15"
+            >
+              <RefreshCw className="w-3 h-3" /> Refresh
+            </button>
+          </div>
+        </div>
+        {error && (
+          <div className="mt-3 text-sm text-red-200 bg-red-500/10 border border-red-300/30 rounded-md px-3 py-2">
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Group cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {INTEGRATION_GROUPS.map((g) => {
+          const tr = testResults[g.provider]
+          return (
+            <div key={g.id} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="flex items-start justify-between gap-3 mb-1">
+                <div>
+                  <h4 className="font-display font-bold text-white text-lg">{g.title}</h4>
+                  <p className="text-white/60 text-xs mt-1">{g.desc}</p>
+                </div>
+                {g.helpUrl && (
+                  <a href={g.helpUrl} target="_blank" rel="noreferrer"
+                     className="text-xs text-brand-amber hover:underline shrink-0">Get keys ↗</a>
+                )}
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {g.keys.map((k) => {
+                  const meta = statusMap[k.name] || {}
+                  const isSensitive = meta.sensitive
+                  const draft = drafts[k.name]
+                  const isDirty = draft !== undefined
+                  const placeholder = isSensitive && meta.set
+                    ? meta.preview || '••••'
+                    : (k.placeholder || '')
+                  return (
+                    <div key={k.name} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <label className="text-white/80 font-medium">
+                          {k.label}
+                          {meta.set && (
+                            <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide ${
+                              meta.source === 'runtime' ? 'bg-emerald-500/20 text-emerald-200' :
+                              meta.source === 'env'     ? 'bg-blue-500/20 text-blue-200' :
+                              'bg-white/10 text-white/60'
+                            }`}>
+                              {meta.source}
+                            </span>
+                          )}
+                        </label>
+                        <code className="text-white/40 text-[10px]">{k.name}</code>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type={isSensitive ? 'password' : 'text'}
+                          value={isDirty ? draft : (isSensitive ? '' : (meta.preview || ''))}
+                          onChange={(e) => setDrafts((d) => ({ ...d, [k.name]: e.target.value }))}
+                          placeholder={placeholder}
+                          className="flex-1 px-3 py-2 rounded-md bg-black/30 border border-white/15 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand-amber"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => onSave(k.name)}
+                          disabled={!isDirty || busy[k.name]}
+                          className="px-3 py-2 rounded-md bg-brand-amber text-brand-navy text-xs font-bold disabled:opacity-40 hover:brightness-110"
+                        >
+                          {busy[k.name] ? '…' : 'Save'}
+                        </button>
+                        {meta.source === 'runtime' && (
+                          <button
+                            type="button"
+                            onClick={() => onClear(k.name)}
+                            disabled={busy[k.name]}
+                            className="px-2 py-2 rounded-md bg-red-500/20 text-red-200 text-xs border border-red-300/30 hover:bg-red-500/30 disabled:opacity-40"
+                            title="Clear runtime value (env fallback remains)"
+                          >Clear</button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {g.provider && (
+                <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => onTest(g.provider)}
+                    disabled={tr?.loading}
+                    className="text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15 border border-white/15 inline-flex items-center gap-1"
+                  >
+                    {tr?.loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Activity className="w-3 h-3" />}
+                    Test connection
+                  </button>
+                  {tr && !tr.loading && (
+                    <span className={`text-xs ${tr.ok ? 'text-emerald-300' : 'text-red-300'}`}>
+                      {tr.ok ? '✓ ' : '✗ '}{tr.detail || tr.error || (tr.ok ? 'OK' : 'Failed')}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Feature flag matrix */}
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <h4 className="font-display font-bold text-white text-lg mb-3">Feature tier matrix</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {Object.entries(features).map(([name, enabled]) => (
+            <div key={name} className={`px-3 py-2 rounded-md border text-xs flex items-center justify-between ${
+              enabled ? 'bg-emerald-500/10 border-emerald-300/30 text-emerald-200'
+                      : 'bg-white/5 border-white/10 text-white/50'
+            }`}>
+              <span>{name}</span>
+              <span>{enabled ? '✓' : '—'}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── PulseBar: 6-tile health strip across the top of every tab ───────────────
 function PulseTile({ label, value, tone, icon: Icon, onClick }) {
   const toneRing = tone === 'good' ? 'border-emerald-300/40' : tone === 'warn' ? 'border-amber-300/40' : tone === 'bad' ? 'border-red-300/40' : 'border-white/15'
@@ -3831,6 +4158,10 @@ export default function CommandCenter() {
 
             {activeTab === 'civil-intel' && (
               <CivilContractorIntelligencePanel />
+            )}
+
+            {activeTab === 'integrations' && (
+              <IntegrationsPanel />
             )}
           </>
       </div>

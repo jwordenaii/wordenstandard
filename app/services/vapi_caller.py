@@ -22,19 +22,20 @@ import logging
 from typing import Any, Optional
 
 from app.services import autonomy_state
+from app.services import runtime_config as _cfg
 
 logger = logging.getLogger(__name__)
 
-_VAPI_KEY = os.environ.get("VAPI_API_KEY", "").strip()
-_VAPI_PHONE_ID = os.environ.get("VAPI_PHONE_NUMBER_ID", "").strip()
-_VAPI_ASSISTANT_ID = os.environ.get("VAPI_ASSISTANT_ID", "").strip()
+def _vapi_key()         -> str: return _cfg.get("VAPI_API_KEY")
+def _vapi_phone_id()    -> str: return _cfg.get("VAPI_PHONE_NUMBER_ID")
+def _vapi_assistant_id()-> str: return _cfg.get("VAPI_ASSISTANT_ID")
 _VAPI_URL = "https://api.vapi.ai/call"
 
 _E164_RE = re.compile(r"^\+\d{8,15}$")
 
 
 def is_available() -> bool:
-    return bool(_VAPI_KEY and _VAPI_PHONE_ID and _VAPI_ASSISTANT_ID)
+    return bool(_vapi_key() and _vapi_phone_id() and _vapi_assistant_id())
 
 
 def _normalize_phone(raw: str) -> Optional[str]:
@@ -73,12 +74,12 @@ async def place_call(
     if not is_available():
         missing = [
             name for name, val in (
-                ("VAPI_API_KEY", _VAPI_KEY),
-                ("VAPI_PHONE_NUMBER_ID", _VAPI_PHONE_ID),
-                ("VAPI_ASSISTANT_ID", _VAPI_ASSISTANT_ID),
+                ("VAPI_API_KEY", _vapi_key()),
+                ("VAPI_PHONE_NUMBER_ID", _vapi_phone_id()),
+                ("VAPI_ASSISTANT_ID", _vapi_assistant_id()),
             ) if not val
         ]
-        return {"ok": False, "error": f"Vapi not configured. Missing env: {', '.join(missing)}"}
+        return {"ok": False, "error": f"Vapi not configured. Missing: {', '.join(missing)} (set in Command Center → Integrations)"}
 
     e164 = _normalize_phone(to_number)
     if not e164:
@@ -96,8 +97,8 @@ async def place_call(
         return {"ok": False, "error": "httpx not installed"}
 
     payload: dict[str, Any] = {
-        "assistantId":    (assistant_id or _VAPI_ASSISTANT_ID),
-        "phoneNumberId":  _VAPI_PHONE_ID,
+        "assistantId":    (assistant_id or _vapi_assistant_id()),
+        "phoneNumberId":  _vapi_phone_id(),
         "customer":       {"number": e164},
     }
     if script_hint:
@@ -107,7 +108,7 @@ async def place_call(
         }
 
     headers = {
-        "Authorization": f"Bearer {_VAPI_KEY}",
+        "Authorization": f"Bearer {_vapi_key()}",
         "Content-Type":  "application/json",
     }
 

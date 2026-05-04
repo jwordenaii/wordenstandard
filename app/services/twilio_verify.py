@@ -24,6 +24,8 @@ from typing import Optional
 
 import httpx
 
+from app.services import runtime_config as _cfg
+
 logger = logging.getLogger(__name__)
 
 _BASE_URL = "https://verify.twilio.com/v2"
@@ -33,9 +35,9 @@ _PHONE_E164 = re.compile(r"^\+\d{8,15}$")
 
 def _creds() -> tuple[str, str, str]:
     return (
-        os.environ.get("TWILIO_ACCOUNT_SID", "").strip(),
-        os.environ.get("TWILIO_AUTH_TOKEN", "").strip(),
-        os.environ.get("TWILIO_VERIFY_SERVICE_SID", "").strip(),
+        _cfg.get("TWILIO_ACCOUNT_SID"),
+        _cfg.get("TWILIO_AUTH_TOKEN"),
+        _cfg.get("TWILIO_VERIFY_SERVICE_SID"),
     )
 
 

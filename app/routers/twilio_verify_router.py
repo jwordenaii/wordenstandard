@@ -33,6 +33,10 @@ class CheckRequest(BaseModel):
     code: str
 
 
+class AdminCheckRequest(BaseModel):
+    code: str
+
+
 @router.get("/status", summary="Is Twilio Verify configured?")
 async def verify_status():
     return {

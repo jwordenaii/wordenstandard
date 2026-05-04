@@ -683,6 +683,14 @@ export const api = {
   twilioVerifyStart:   (to, channel = 'sms') => request('POST', '/api/v1/twilio/verify/start', { to, channel }),
   twilioVerifyCheck:   (to, code) => request('POST', '/api/v1/twilio/verify/check', { to, code }),
   twilioVerifyAdminStart: () => request('POST', '/api/v1/twilio/verify/admin/start'),
+  // ── Owner-only Integrations panel (runtime keys + tier flags) ─────────────
+  integrationsStatus:  () => protectedRequest('GET',  '/api/v1/admin/integrations/status'),
+  integrationsPutKey:  (name, value) => protectedRequest('PUT',  '/api/v1/admin/integrations/keys', { name, value }),
+  integrationsBulk:    (updates) => protectedRequest('POST', '/api/v1/admin/integrations/bulk', { updates }),
+  integrationsReload:  () => protectedRequest('POST', '/api/v1/admin/integrations/reload'),
+  integrationsTest:    (provider) => protectedRequest('POST', '/api/v1/admin/integrations/test', { provider }),
+  // ── Public tier/feature flags (no secrets) ────────────────────────────────
+  getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────
   getAutonomyState: () => request('GET', '/api/v1/autonomy/state'),
   freezeAutonomy: (reason = 'manual') => request('POST', '/api/v1/autonomy/freeze', { reason }),

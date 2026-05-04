@@ -18,15 +18,20 @@ import os
 import logging
 from typing import Any
 
+from app.services import runtime_config as _cfg
+
 logger = logging.getLogger(__name__)
 
-_TAVILY_KEY = os.environ.get("TAVILY_API_KEY", "").strip()
+def _key() -> str:        return _cfg.get("TAVILY_API_KEY")
+def _max_results() -> int:
+    raw = _cfg.get("TAVILY_MAX_RESULTS") or "5"
+    try:    return int(raw)
+    except (TypeError, ValueError): return 5
 _TAVILY_URL = "https://api.tavily.com/search"
-_MAX_RESULTS = int(os.environ.get("TAVILY_MAX_RESULTS", "5"))
 
 
 def is_available() -> bool:
-    return bool(_TAVILY_KEY)
+    return bool(_key())
 
 
 async def search(query: str, *, max_results: int | None = None, deep: bool = False) -> dict[str, Any]:
@@ -38,13 +43,13 @@ async def search(query: str, *, max_results: int | None = None, deep: bool = Fal
     if not q:
         return {"query": "", "answer": None, "results": [], "engine": "tavily", "error": "empty query"}
 
-    if not _TAVILY_KEY:
+    if not _key():
         return {
             "query": q,
             "answer": None,
             "results": [],
             "engine": "tavily",
-            "error": "TAVILY_API_KEY not set — add it on Railway to enable live web search.",
+            "error": "TAVILY_API_KEY not set \u2014 add it in Command Center → Integrations to enable live web search.",
         }
 
     try:
@@ -53,12 +58,12 @@ async def search(query: str, *, max_results: int | None = None, deep: bool = Fal
         return {"query": q, "answer": None, "results": [], "engine": "tavily", "error": "httpx not installed"}
 
     payload = {
-        "api_key":            _TAVILY_KEY,
+        "api_key":            _key(),
         "query":              q,
         "search_depth":       "advanced" if deep else "basic",
         "include_answer":     True,
         "include_raw_content": False,
-        "max_results":        int(max_results or _MAX_RESULTS),
+        "max_results":        int(max_results or _max_results()),
     }
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
@@ -77,7 +82,7 @@ async def search(query: str, *, max_results: int | None = None, deep: bool = Fal
                     "snippet": (item.get("content") or "")[:500],
                     "score":   item.get("score"),
                 }
-                for item in (data.get("results") or [])[:int(max_results or _MAX_RESULTS)]
+                for item in (data.get("results") or [])[:int(max_results or _max_results())]
             ],
             "engine": "tavily",
         }

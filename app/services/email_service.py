@@ -30,15 +30,16 @@ import time
 from typing import Any
 
 from . import email_templates as tmpl
+from . import runtime_config as _cfg
 
 logger = logging.getLogger(__name__)
 
-# ── Configuration ──────────────────────────────────────────────────────────────
+# ── Configuration (live, runtime-config backed) ─────────────────────────────────────────────────────
 
-_API_KEY = os.getenv("SENDGRID_API_KEY", "").strip()
-_FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL", "").strip()
-_FROM_NAME = os.getenv("SENDGRID_FROM_NAME", "J. Worden & Sons Asphalt Paving").strip()
-_ADMIN_EMAIL = os.getenv("ADMIN_NOTIFY_EMAIL", "j.wordenandsonspaving@gmail.com").strip()
+def _api_key()    -> str: return _cfg.get("SENDGRID_API_KEY")
+def _from_email() -> str: return _cfg.get("SENDGRID_FROM_EMAIL")
+def _from_name()  -> str: return _cfg.get("SENDGRID_FROM_NAME") or "J. Worden & Sons Asphalt Paving"
+def _admin_email()-> str: return _cfg.get("ADMIN_NOTIFY_EMAIL") or "j.wordenandsonspaving@gmail.com"
 
 MAX_RETRIES = 3
 RETRY_BASE_DELAY = 1.0  # seconds; doubles on each retry
@@ -51,21 +52,21 @@ def _get_sg_client():
     Return an initialised SendGrid API client, or None if the SDK is not
     installed or the API key is missing.
     """
-    if not _API_KEY:
+    if not _api_key():
         logger.warning(
-            "SENDGRID_API_KEY not set — email sends will be skipped. "
-            "Set the env var to enable transactional email."
+            "SENDGRID_API_KEY not set \u2014 email sends will be skipped. "
+            "Set the key in Command Center → Integrations to enable transactional email."
         )
         return None
-    if not _FROM_EMAIL:
+    if not _from_email():
         logger.warning(
-            "SENDGRID_FROM_EMAIL not set — email sends will be skipped. "
-            "Set the env var to a verified SendGrid sender address."
+            "SENDGRID_FROM_EMAIL not set \u2014 email sends will be skipped. "
+            "Set the value in Command Center → Integrations to a verified SendGrid sender address."
         )
         return None
     try:
         import sendgrid  # type: ignore  # noqa: PLC0415
-        return sendgrid.SendGridAPIClient(api_key=_API_KEY)
+        return sendgrid.SendGridAPIClient(api_key=_api_key())
     except ImportError:
         logger.error(
             "sendgrid package not installed. "
@@ -103,8 +104,8 @@ def send_raw(
     if sg is None:
         return False
 
-    sender_email = from_email or _FROM_EMAIL
-    sender_name = from_name or _FROM_NAME
+    sender_email = from_email or _from_email()
+    sender_name = from_name or _from_name()
 
     try:
         from sendgrid.helpers.mail import (  # type: ignore  # noqa: PLC0415
@@ -210,15 +211,16 @@ def send_admin_notification(lead: Any) -> bool:
     Returns:
         True if the email was sent successfully.
     """
-    if not _ADMIN_EMAIL:
+    admin_email = _admin_email()
+    if not admin_email:
         logger.warning("send_admin_notification: ADMIN_NOTIFY_EMAIL not set — skipping")
         return False
 
     subject, html_body, plain_text = tmpl.admin_new_lead(lead)
     lead_id = getattr(lead, "id", None) or lead.get("id", "?")
-    logger.info("Sending admin notification for lead #%s to %s", lead_id, _ADMIN_EMAIL)
+    logger.info("Sending admin notification for lead #%s to %s", lead_id, admin_email)
     return send_raw(
-        to_email=_ADMIN_EMAIL,
+        to_email=admin_email,
         subject=subject,
         html_body=html_body,
         plain_text=plain_text,

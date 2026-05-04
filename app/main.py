@@ -247,6 +247,8 @@ from .routers import scaling as scaling_router
 from .routers import revenue as revenue_router
 from .routers import jarvis_router as jarvis_router
 from .routers import twilio_verify_router as twilio_verify_router
+from .routers import admin_integrations as admin_integrations_router
+from .routers import features as features_router
 from .services.quantum_orchestrator import global_quantum_orchestrator
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
@@ -502,6 +504,8 @@ app.include_router(admin_2fa_router.router)
 
 # Twilio Verify (SMS OTP for 2FA fallback + lead phone verification)
 app.include_router(twilio_verify_router.router)
+app.include_router(admin_integrations_router.router)
+app.include_router(features_router.router)
 
 # Human-in-the-loop review queue
 app.include_router(human_review_router.router)

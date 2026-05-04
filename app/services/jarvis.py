@@ -8,15 +8,16 @@ from app.services import autonomy_state
 from app.services import web_search as _web_search
 from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
+from app.services import runtime_config as _cfg
 
 logger = logging.getLogger(__name__)
 
 # ── Optional Anthropic Claude brain ───────────────────────────────────────────
-# When ANTHROPIC_API_KEY is set, Jarvis routes free-form queries through Claude
-# with a JWordenAI-aware system prompt. Falls back gracefully to canned
-# responses when the key is missing or the call fails.
-_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-_ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest").strip()
+# When ANTHROPIC_API_KEY is set (env OR runtime config), Jarvis routes free-form
+# queries through Claude with a JWordenAI-aware system prompt. Falls back
+# gracefully to canned responses when the key is missing or the call fails.
+def _anthropic_key()   -> str: return _cfg.get("ANTHROPIC_API_KEY")
+def _anthropic_model() -> str: return _cfg.get("ANTHROPIC_MODEL") or "claude-3-5-sonnet-latest"
 _ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 _ANTHROPIC_VERSION = "2023-06-01"
 
@@ -127,7 +128,7 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
     Returns {"text": str, "tool_calls": [{name, args, result}, ...]} or None on failure.
     Single-round tool use: Claude proposes tools, we run them, send results back, get final answer.
     """
-    if not _ANTHROPIC_KEY:
+    if not _anthropic_key():
         return None
     try:
         import httpx  # type: ignore
@@ -148,7 +149,7 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
     system = f"{JARVIS_SYSTEM_PROMPT}\n\n{persona_note}\n{state_note}"
 
     headers = {
-        "x-api-key":         _ANTHROPIC_KEY,
+        "x-api-key":         _anthropic_key(),
         "anthropic-version": _ANTHROPIC_VERSION,
         "content-type":      "application/json",
     }
@@ -158,7 +159,7 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
     # Two-round max: initial → optional tool use → final.
     for _round in range(2):
         payload = {
-            "model":      _ANTHROPIC_MODEL,
+            "model":      _anthropic_model(),
             "max_tokens": 800,
             "system":     system,
             "tools":      JARVIS_TOOLS,
