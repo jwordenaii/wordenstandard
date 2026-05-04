@@ -24,6 +24,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../api/client'
 import MrWordenAvatar from './MrWordenAvatar'
+import { voiceService } from '../lib/ElevenLabsService'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const BUSINESS_PHONE = '(804) 446-1296'
@@ -81,7 +82,11 @@ const PAGE_CONTEXT = {
   '/reviews': 'reviews page',
   '/service-areas': 'service areas page',
   '/blog': 'blog page',
-  '/visualizer': 'property visualizer tool',
+  '/driveway-ai': 'Driveway and parking lot AI scan studio',
+  '/visualizer': '4D property visualizer tool',
+  '/floor-plan-studio': '4D interior and floor plan design studio',
+  '/general-contracting': 'general contracting and paid design packet page',
+  '/jwordenai': 'JWORDENAI source and proof page',
 }
 
 const PAGE_HELP = {
@@ -209,24 +214,21 @@ function getPageHelp(pathname) {
 
 function HeaderAvatar() {
   return (
-    <div className="w-9 h-9 rounded-full bg-brand-amber/20 border-2 border-brand-amber/60 flex items-center justify-center flex-shrink-0 overflow-hidden" aria-hidden="true">
-      <svg viewBox="0 0 80 88" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-        <path d="M18 31 Q17 17 40 15 Q63 17 62 31 Z" fill="#f5a623" />
-        <rect x="13" y="29" width="54" height="6" rx="3" fill="#d4880a" />
-        <rect x="15" y="29" width="50" height="4.5" rx="2" fill="#f5a623" />
-        <rect x="36" y="22" width="8" height="5" rx="1.5" fill="#d4880a" opacity="0.8" />
-        <text x="40" y="26.5" fontSize="4" fill="white" textAnchor="middle" fontWeight="bold">JW</text>
-        <ellipse cx="40" cy="46" rx="18" ry="20" fill="#F4C3A1" />
-        <circle cx="32" cy="44" r="6.5" stroke="#4a4a4a" strokeWidth="1.8" fill="white" fillOpacity="0.6" />
-        <circle cx="48" cy="44" r="6.5" stroke="#4a4a4a" strokeWidth="1.8" fill="white" fillOpacity="0.6" />
-        <path d="M38.5 44 H41.5" stroke="#4a4a4a" strokeWidth="1.6" />
-        <circle cx="32" cy="44" r="2.8" fill="#2a1505" />
-        <circle cx="48" cy="44" r="2.8" fill="#2a1505" />
-        <path d="M31 54 Q36 57 40 55 Q44 57 49 54" stroke="#7a4a25" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        <path d="M33 57 Q40 62.5 47 57" stroke="#c8966c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-        <path d="M19 73 Q18 88 40 88 Q62 88 61 73 Q52 66 40 66 Q28 66 19 73 Z" fill="#1a1a2e" />
-        <path d="M37.5 66 L40 70 L42.5 66 L40 68.5 Z" fill="#f5a623" />
-        <path d="M38.5 70 L40 78 L41.5 70 Z" fill="#f5a623" />
+    <div className="relative h-11 w-11 flex-shrink-0 rounded-2xl border border-cyan-300/45 bg-slate-950 shadow-[0_0_24px_rgba(56,189,248,0.32)]" aria-hidden="true">
+      <div className="absolute inset-1 rounded-xl border border-brand-amber/50" />
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative h-11 w-11">
+        <path d="M32 4 L39 10 L50 10 L54 20 L61 28 L57 39 L57 51 L45 55 L32 62 L19 55 L7 51 L7 39 L3 28 L10 20 L14 10 L25 10Z" fill="#05070b" stroke="#f5a623" strokeWidth="1.4" />
+        <circle cx="32" cy="32" r="22" fill="#0f172a" stroke="#38bdf8" strokeWidth="0.8" opacity="0.9" />
+        <path d="M15 25 C16 13 23 7 32 7 C41 7 48 13 49 25Z" fill="#f5a623" />
+        <rect x="13" y="24" width="38" height="6" rx="3" fill="#0f172a" stroke="#f5a623" strokeWidth="1" />
+        <rect x="25" y="12" width="14" height="9" rx="3" fill="#020617" stroke="#f5a623" strokeWidth="1" />
+        <text x="32" y="19" fontSize="6" fill="#f8fafc" textAnchor="middle" fontWeight="900">JW</text>
+        <path d="M20 31 C21 22 26 18 32 18 C38 18 43 22 44 31 L42 42 C40 49 36 52 32 52 C28 52 24 49 22 42Z" fill="#0f172a" stroke="#bae6fd" strokeWidth="1" />
+        <rect x="21" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#38bdf8" strokeWidth="0.8" />
+        <rect x="33" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#38bdf8" strokeWidth="0.8" />
+        <circle cx="26" cy="34" r="1.4" fill="#7dd3fc" />
+        <circle cx="38" cy="34" r="1.4" fill="#7dd3fc" />
+        <path d="M25 43 C29 46 35 46 39 43" stroke="#f5a623" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
     </div>
   )
@@ -236,24 +238,40 @@ function HeaderAvatar() {
 
 const QUICK_ACTIONS = [
   {
-    id: 'quote',
-    emoji: '📋',
-    label: 'Get a Fast Quote',
-    sub: 'Free on-site estimate',
-    action: 'tab:lead',
+    id: 'scan',
+    emoji: '▣',
+    label: 'AI Scan Review',
+    sub: 'Driveway or lot triage',
+    action: 'chat:Help me start an AI pavement scan review for my driveway or small parking lot.',
     color: 'bg-brand-amber text-brand-navy',
   },
   {
-    id: 'schedule',
-    emoji: '📅',
-    label: 'Schedule Estimate',
-    sub: 'Pick a day that works',
-    action: 'tab:lead',
+    id: 'design',
+    emoji: '◆',
+    label: '4D Design Packet',
+    sub: 'Kitchen, patio, addition',
+    action: 'chat:I want a 4D design packet for a remodel, addition, patio, or property build.',
     color: 'bg-brand-navy text-white',
   },
   {
+    id: 'plan',
+    emoji: '▤',
+    label: 'Plan-To-Bid Prep',
+    sub: 'Plans, sketches, scope',
+    action: 'chat:I have plans or sketches and want a plan-to-bid readiness review.',
+    color: 'bg-white text-brand-navy border border-brand-navy/20',
+  },
+  {
+    id: 'quote',
+    emoji: '✓',
+    label: 'Free Estimate',
+    sub: 'Get on the schedule',
+    action: 'tab:lead',
+    color: 'bg-slate-900 text-white',
+  },
+  {
     id: 'call',
-    emoji: '📞',
+    emoji: '☎',
     label: 'Call Now',
     sub: BUSINESS_PHONE,
     action: `tel:${BUSINESS_PHONE_TEL}`,
@@ -261,17 +279,20 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'ask',
-    emoji: '💬',
-    label: 'Ask a Question',
-    sub: 'Chat with Mr. Worden',
+    emoji: '✦',
+    label: 'Ask Mr. Worden',
+    sub: 'Founder-level advice',
     action: 'tab:chat',
-    color: 'bg-white text-brand-navy border border-brand-navy/20',
+    color: 'bg-black text-white border border-brand-amber/40',
   },
 ]
 
 // ── Form options ──────────────────────────────────────────────────────────────
 
 const SERVICE_OPTIONS = [
+  { value: 'paid_scan_review', label: 'Paid AI Pavement / Damage Scan' },
+  { value: 'design_packet', label: '4D Design Packet' },
+  { value: 'plan_to_bid', label: 'Plan-To-Bid Readiness Review' },
   { value: '', label: 'Select service type\u2026' },
   { value: 'driveway', label: 'Residential Driveway' },
   { value: 'parking_lot', label: 'Commercial Parking Lot' },
@@ -404,10 +425,10 @@ const GREETING_DELAY_MS = 5500
 const MESSAGES_SS_KEY = 'mrw_messages'
 const MESSAGES_PERSIST_LIMIT = 40
 const DEFAULT_QUICK_REPLIES = [
-  'How much does it cost?',
-  'Do you serve my area?',
-  'Get a free estimate',
-  'Call me back',
+  'Start an AI scan review',
+  'Build a 4D design packet',
+  'Price my driveway or lot',
+  'Help me decide repair or replace',
 ]
 
 function buildInitialMessages() {
@@ -415,7 +436,7 @@ function buildInitialMessages() {
     {
       id: 0,
       role: 'bot',
-      text: `${timeOfDayGreeting()}, folks \u2014 pleasure to have y\u2019all here. I\u2019m a digital tribute to J. Worden Sr., founder of J. Worden & Sons Paving since 1984. Pull up a chair: ask me anything, get a ballpark, or let me get you on our schedule. What are you working on today?`,
+      text: `${timeOfDayGreeting()}. I am Mr. Worden, your digital founder concierge. Show me the pavement, the plan, the roof concern, the patio idea, or the remodel dream, and I will help you sort the smartest next move: free estimate, paid AI scan, drone review, 4D design packet, or plan-to-bid prep. What are we looking at today?`,
     },
   ]
 }
@@ -462,45 +483,29 @@ export default function ChatWidget() {
   const [voiceOn, setVoiceOn] = useState(() => ssGet('mrw_voice_on', false))
   useEffect(() => {
     ssSet('mrw_voice_on', voiceOn)
-    if (!voiceOn && typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel()
+    if (!voiceOn) {
+      voiceService.stop()
     }
   }, [voiceOn])
   const speak = useCallback(
     (text) => {
       if (!voiceOn || !text) return
-      if (typeof window === 'undefined' || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return
       try {
-        window.speechSynthesis.cancel()
-        const u = new window.SpeechSynthesisUtterance(text)
-        const voices = window.speechSynthesis.getVoices() || []
-        const preferred =
-          voices.find((v) => /en[-_]US/i.test(v.lang) && /male|daniel|fred|alex/i.test(v.name)) ||
-          voices.find((v) => /en[-_]US/i.test(v.lang)) ||
-          voices.find((v) => /^en/i.test(v.lang)) ||
-          null
-        if (preferred) u.voice = preferred
-        u.rate = 0.96
-        u.pitch = 0.92
-        u.volume = 1
-        u.lang = preferred?.lang || 'en-US'
-        window.speechSynthesis.speak(u)
+        voiceService.play(text)
       } catch {
-        /* not available */
+        /* fallback handled in service */
       }
     },
     [voiceOn]
   )
   useEffect(() => {
-    if (!open && typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel()
+    if (!open) {
+      voiceService.stop()
     }
   }, [open])
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel()
-      }
+      voiceService.stop()
     }
   }, [])
 
@@ -732,19 +737,21 @@ export default function ChatWidget() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="mb-3 w-[calc(100vw-1.5rem)] sm:w-96 bg-white rounded-2xl shadow-2xl border border-brand-navy/10 flex flex-col overflow-hidden"
+            className="mb-3 w-[calc(100vw-1.5rem)] sm:w-[420px] bg-white rounded-2xl shadow-[0_30px_80px_rgba(2,8,23,0.36)] border border-brand-amber/30 flex flex-col overflow-hidden"
             style={{ maxHeight: 'min(80vh, 560px)' }}
           >
             {/* Premium Header */}
-            <div className="bg-gradient-to-r from-brand-navy to-[#0e2240] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <div className="relative bg-[radial-gradient(circle_at_18%_0%,rgba(245,166,35,0.28),transparent_34%),linear-gradient(135deg,#05070b,#0e2240_52%,#111827)] text-white px-4 py-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
+              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-brand-amber/70 to-transparent" />
               <div className="flex items-center gap-2.5">
                 <HeaderAvatar />
                 <div>
-                  <div className="font-bold text-sm leading-tight">Mr. J. Worden</div>
+                  <div className="font-display font-black text-sm leading-tight uppercase">Mr. Worden</div>
                   <div className="text-white/60 text-xs flex items-center gap-1">
                     <span className={`inline-block w-1.5 h-1.5 rounded-full ${loading ? 'bg-brand-amber animate-pulse' : 'bg-green-400'}`} aria-hidden="true" />
-                    {loading ? 'Thinking\u2026' : 'Founder \u00b7 40+ Years in Paving'}
+                    {loading ? 'Reading the site file...' : 'First-of-its-kind AI concierge'}
                   </div>
+                  <div className="mt-0.5 text-[10px] uppercase text-brand-amber/90">Scan · Design · Bid Prep</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -779,10 +786,10 @@ export default function ChatWidget() {
             {/* Tabs */}
             <div className="flex border-b border-brand-navy/10 flex-shrink-0 bg-white" role="tablist">
               {[
-                { id: 'actions', label: '⚡ Quick' },
-                { id: 'chat', label: '💬 Chat' },
-                { id: 'help', label: '❓ Help' },
-                { id: 'lead', label: '📋 Quote' },
+                { id: 'actions', label: 'Command' },
+                { id: 'chat', label: 'Advisor' },
+                { id: 'help', label: 'Proof' },
+                { id: 'lead', label: 'Intake' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -808,9 +815,9 @@ export default function ChatWidget() {
               {activeTab === 'actions' && (
                 <div className="px-4 py-5 space-y-3">
                   <div className="text-center mb-4">
-                    <p className="text-brand-navy font-semibold text-sm">What can I help you with?</p>
+                    <p className="text-brand-navy font-display font-black uppercase text-sm">What should we build, scan, or solve?</p>
                     <p className="text-brand-navy/50 text-xs mt-0.5">
-                      {timeOfDayGreeting()} \u2014 J. Worden &amp; Sons, Chester, VA since 1984
+                      {timeOfDayGreeting()} - J. Worden &amp; Sons, Chester, VA since 1984
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -821,6 +828,9 @@ export default function ChatWidget() {
                         onClick={() => {
                           if (action.action.startsWith('tab:')) {
                             setActiveTab(action.action.replace('tab:', ''))
+                          } else if (action.action.startsWith('chat:')) {
+                            setActiveTab('chat')
+                            sendMessage(action.action.replace('chat:', ''))
                           } else if (action.action.startsWith('tel:')) {
                             window.location.href = action.action
                           }
@@ -828,14 +838,14 @@ export default function ChatWidget() {
                         className={`${action.color} rounded-xl px-3 py-3 text-left shadow-sm hover:opacity-90 active:scale-95 transition-all duration-150 flex flex-col`}
                       >
                         <span className="text-xl mb-1" aria-hidden="true">{action.emoji}</span>
-                        <span className="font-bold text-xs leading-tight">{action.label}</span>
+                        <span className="font-display font-black text-xs uppercase leading-tight">{action.label}</span>
                         <span className="text-[10px] opacity-70 mt-0.5 leading-tight">{action.sub}</span>
                       </button>
                     ))}
                   </div>
                   <div className="mt-4 pt-3 border-t border-brand-navy/10 text-center">
                     <p className="text-xs text-brand-navy/50">
-                      Pavement Mag Top 75 \u00b7 Best of Houzz \u00b7 40+ Years \u00b7 Licensed &amp; Insured
+                      Pavement Mag Top 75 · Best of Houzz · 40+ Years · Licensed &amp; Insured · JWORDENAI
                     </p>
                   </div>
                 </div>
@@ -894,7 +904,7 @@ export default function ChatWidget() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder="Ask Mr. Worden anything\u2026"
+                      placeholder="Ask about price, scans, 4D design, plans, drainage, or schedule..."
                       maxLength={800}
                       className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-amber/50 focus:border-brand-amber transition-colors"
                       aria-label="Message Mr. Worden"
@@ -1105,7 +1115,7 @@ export default function ChatWidget() {
 
       <MrWordenAvatar
         state={avatarState}
-        size={52}
+        size={76}
         onClick={() => setOpen((o) => !o)}
         isOpen={open}
         unread={unread}

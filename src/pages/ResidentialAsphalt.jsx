@@ -136,6 +136,12 @@ export default function ResidentialAsphalt() {
               Call 804-446-1296
             </a>
             <Link
+              to="/driveway-ai"
+              className="bg-foreground text-background px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-foreground/90 transition-colors"
+            >
+              Try Driveway + Lot AI
+            </Link>
+            <Link
               to="/#quote"
               className="border border-primary/50 text-primary px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors"
             >

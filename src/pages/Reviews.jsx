@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import SchemaMarkup, { reviewsSchema } from '../components/SchemaMarkup'
 import { api, trackEvent } from '../api/client'
 import SocialShare from '../components/SocialShare'
+import LiveReviewBadges from '../components/LiveReviewBadges'
 
 // Fallback in case API is unavailable
 const FALLBACK = {
@@ -124,6 +125,16 @@ export default function Reviews() {
         </div>
       </div>
 
+      {/* Platform Badges */}
+      <section className="py-12 bg-gray-50 border-b border-border/60">
+        <div className="max-w-4xl mx-auto px-4">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">
+            Verified On These Platforms
+          </p>
+          <LiveReviewBadges />
+        </div>
+      </section>
+
       {/* Aggregate score */}
       <section className="py-14 bg-background border-b border-border/60">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -189,22 +200,106 @@ export default function Reviews() {
         </div>
       </section>
 
+      {/* Google Maps Live Embed */}
+      <section className="py-16 bg-gray-50 border-t border-border/60">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="font-display font-black text-3xl text-foreground">Find Us on Google Maps</h2>
+            <p className="text-muted-foreground mt-2">See our live rating and read all reviews directly on Google</p>
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-border">
+            <iframe
+              src="https://maps.google.com/maps?q=J+Worden+%26+Sons+Asphalt+Paving+Chester+VA&output=embed"
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="J. Worden & Sons Asphalt Paving on Google Maps"
+            />
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+            <a
+              href="https://maps.google.com/maps?q=J+Worden+%26+Sons+Asphalt+Paving+Chester+VA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-5 py-3 shadow hover:shadow-md transition text-sm font-semibold text-gray-800"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Open in Google Maps
+            </a>
+            <a
+              href="https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-5 py-3 shadow hover:shadow-md transition text-sm font-semibold text-gray-800"
+            >
+              <span className="text-[#4dbc15] font-black text-base">h</span>
+              View on Houzz
+            </a>
+            <a
+              href="https://www.angi.com/companylist/us/va/chester/j-worden-and-sons-asphalt-paving-reviews-"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-5 py-3 shadow hover:shadow-md transition text-sm font-semibold text-gray-800"
+            >
+              <span className="text-[#FF6153] font-black text-sm">Angi</span>
+              View on Angi
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Leave a review CTA */}
       <section className="py-16 bg-brand-navy text-white text-center">
-        <div className="max-w-2xl mx-auto px-4">
+        <div className="max-w-3xl mx-auto px-4">
           <h2 className="font-display font-black text-3xl mb-4">Had a great experience?</h2>
           <p className="text-white/60 mb-8">
-            Your review helps other homeowners and businesses find quality asphalt contractors.
+            Your review helps other Virginia homeowners and businesses find quality asphalt contractors. Takes 60 seconds.
           </p>
-          <a
-            href={`https://g.page/r/${import.meta.env.VITE_GOOGLE_PLACE_ID || 'YOUR_GOOGLE_PLACE_ID'}/review`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary"
-            onClick={() => trackEvent('review_cta_click', { location: 'reviews_page' })}
-          >
-            Leave a Google Review ⭐
-          </a>
+          <div className="flex flex-wrap justify-center gap-4">
+            <a
+              href={`https://search.google.com/local/writereview?placeid=${import.meta.env.VITE_GOOGLE_PLACE_ID || 'ChIJG3X8o_OStokRzRynNBuVfQ0'}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-gray-100 transition"
+              onClick={() => trackEvent('review_cta_click', { platform: 'google', location: 'reviews_page' })}
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Review on Google ⭐
+            </a>
+            <a
+              href="https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#4dbc15] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#3da010] transition"
+              onClick={() => trackEvent('review_cta_click', { platform: 'houzz', location: 'reviews_page' })}
+            >
+              <span className="font-black text-lg leading-none">h</span>
+              Review on Houzz
+            </a>
+            <a
+              href="https://www.angi.com/companylist/us/va/chester/j-worden-and-sons-asphalt-paving-reviews-"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#FF6153] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#e54f43] transition"
+              onClick={() => trackEvent('review_cta_click', { platform: 'angi', location: 'reviews_page' })}
+            >
+              <span className="font-black text-sm leading-none">Angi</span>
+              Review on Angi
+            </a>
+          </div>
         </div>
       </section>
     </>

@@ -1,12 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Building2, CheckCircle2, ClipboardCheck, Phone, ShieldCheck } from 'lucide-react'
+import { BadgeDollarSign, Building2, CalendarClock, Camera, CheckCircle2, ClipboardCheck, Hammer, Home, Layers3, Palette, Phone, ScanLine, ShieldAlert, ShieldCheck, Sparkles } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
+import SmartImage from '@/components/SmartImage'
 import { trackPhoneClick } from '@/lib/analytics'
+import { SITE_IMAGES } from '@/lib/siteImages'
 
 const GC_SERVICES = [
+  'Paid scan and damage-intake packets for better owner decisions before major work',
   'Full permit acquisition and municipal coordination',
   'Bid package development and subcontractor management',
   'Milestone scheduling with weekly owner updates',
@@ -20,6 +23,77 @@ const GC_MARKETS = [
   'Ground-up franchise and QSR projects',
   'Industrial and logistics support builds',
   'Site-work coordinated paving and exterior scopes',
+  'Roof, exterior, drainage, and visible building-damage triage',
+  'Kitchen remodel, additions, patios, hardscapes, and interior design planning',
+]
+
+const DESIGN_INTELLIGENCE_ITEMS = [
+  {
+    title: '4D Kitchen Remodel Planning',
+    body: 'Turn photos, measurements, room goals, cabinet ideas, counters, flooring, lighting, schedule, and budget into a staged kitchen remodel packet before trades are scheduled.',
+    icon: Sparkles,
+  },
+  {
+    title: 'Additions And Floor Plans',
+    body: 'Use the floor-plan studio logic to sketch rooms, estimate square footage, test additions, compare layouts, and prepare a GC review packet with cost ranges and phasing notes.',
+    icon: Layers3,
+  },
+  {
+    title: 'Patios And Outdoor Living',
+    body: 'Connect hardscape design, pavers, concrete, drainage, grading, steps, seating areas, and landscape transitions into one visual owner decision flow.',
+    icon: Palette,
+  },
+  {
+    title: '4D Schedule Preview',
+    body: 'Show customers how the project unfolds over time: scan, design, permits, demo, rough-in, surfaces, finishes, inspection, punch list, and final handoff.',
+    icon: CalendarClock,
+  },
+]
+
+const SCAN_DECISION_ITEMS = [
+  {
+    title: 'Paid Property Scan Packets',
+    body: 'Customers can pay for a focused scan packet before committing to a full project. Photos, video, drone notes, measurements, visible damage, and owner concerns are organized into a readable review.',
+    icon: BadgeDollarSign,
+  },
+  {
+    title: 'Roof And Exterior Damage Triage',
+    body: 'The same intake model can flag missing shingles, flashing concerns, soft decking risk, wall cracks, fascia rot, water intrusion, settlement clues, and drainage problems for professional review.',
+    icon: Home,
+  },
+  {
+    title: 'Better Scope Decisions',
+    body: 'The goal is not to sell the biggest job. The scan helps owners see what can wait, what needs repair now, what needs an engineer, and what belongs in a full GC scope.',
+    icon: ScanLine,
+  },
+  {
+    title: 'Professional Review Boundary',
+    body: 'AI can organize evidence and rank risk, but final structural safety, roof condition, code, and repair decisions require a qualified contractor, roofer, inspector, or structural engineer.',
+    icon: ShieldAlert,
+  },
+]
+
+const PREMIUM_REVENUE_OFFERS = [
+  {
+    title: 'Paid Damage Scan',
+    price: '$149-$349+',
+    body: 'A focused customer-paid review for pavement, roof, exterior, drainage, or visible building concerns before a larger proposal is built.',
+  },
+  {
+    title: '4D Design Packet',
+    price: '$499-$1,500+',
+    body: 'Kitchen, addition, patio, hardscape, or interior planning packet with photos, dimensions, concept direction, range, and phasing.',
+  },
+  {
+    title: 'Commercial Site Assessment',
+    price: '$750-$2,500+',
+    body: 'Drone-recommended assessment for shopping centers, industrial lots, franchise sites, access phasing, pavement condition, and owner decision support.',
+  },
+  {
+    title: 'Plan-To-Bid Readiness',
+    price: '$350-$1,250+',
+    body: 'A paid pre-bid review for plans, sketches, photos, permits, measurements, risks, and scope questions before a full construction number is released.',
+  },
 ]
 
 const GC_FAQS = [
@@ -35,13 +109,25 @@ const GC_FAQS = [
     q: 'Can you manage active-site schedules for businesses that stay open?',
     a: 'Yes. We phase work around operating hours and maintain access planning so business operations can continue during construction.',
   },
+  {
+    q: 'Can a scan help before I pay for a full GC project?',
+    a: 'Yes. A paid scan packet can organize photos, video, drone notes, visible damage, measurements, and owner priorities so you can make a smarter decision before approving a large scope.',
+  },
+  {
+    q: 'Can this support roof or structural damage decisions?',
+    a: 'It can support triage by collecting evidence and flagging risks, but final roof, structural, safety, and code decisions should be reviewed by a qualified roofer, inspector, contractor, or structural engineer.',
+  },
+  {
+    q: 'Can this help with kitchen remodels, additions, patios, or interior design?',
+    a: 'Yes. The same scan-and-design workflow can organize photos, measurements, room layouts, finish ideas, hardscape options, budget ranges, and 4D phasing so owners understand the project before committing to a full remodel or build.',
+  },
 ]
 
 export default function GeneralContracting() {
   const canonicalPath = '/general-contracting'
   const title = 'General Contracting Services in Virginia | J. Worden & Sons'
   const description =
-    'Licensed general contracting for commercial and site-driven projects in Virginia. One accountable team for permitting, scheduling, quality control, and delivery.'
+    'Licensed general contracting for commercial, residential, remodel, interior, patio, and site-driven projects in Virginia, with paid scan packets and premium 4D design decision support.'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -65,6 +151,8 @@ export default function GeneralContracting() {
           'Permit and compliance coordination',
           'Construction scheduling and subcontractor management',
           'Commercial project delivery',
+          'Paid property scan and damage triage packets',
+          '4D kitchen remodel, addition, patio, hardscape, and interior design planning',
         ],
         url: 'https://www.jwordenasphaltpaving.com/general-contracting',
       },
@@ -94,14 +182,25 @@ export default function GeneralContracting() {
       <SEO title={title} description={description} canonicalPath={canonicalPath} jsonLd={jsonLd} />
       <Navbar />
 
-      <section className="relative border-b border-border pt-32 pb-16 md:pb-20 overflow-hidden">
-        <div className="absolute -top-16 right-0 w-72 h-72 rounded-full bg-primary/12 blur-3xl pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <section className="relative border-b border-border pt-32 pb-16 md:pb-20 overflow-hidden bg-black">
+        <div className="absolute inset-0 opacity-55">
+          <SmartImage
+            src={SITE_IMAGES.concretePatio}
+            alt="Concrete patio and exterior construction planning work"
+            width={1800}
+            height={1200}
+            priority
+            sizes="100vw"
+            className="h-full w-full"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,10,0.95)_0%,rgba(5,7,10,0.82)_48%,rgba(5,7,10,0.42)_100%)]" />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
           <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-4">General Contracting Division</p>
-          <h1 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight leading-[0.95] max-w-5xl">
+          <h1 className="font-display font-black text-white text-4xl md:text-6xl uppercase tracking-tight leading-[0.95] max-w-5xl">
             General Contracting Under One Accountable Team
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg mt-6 max-w-3xl leading-relaxed">
+          <p className="text-white/72 text-base md:text-lg mt-6 max-w-3xl leading-relaxed">
             From permit coordination to final closeout, we run construction delivery with clear scope,
             disciplined schedules, and single-source accountability for owners and operators.
           </p>
@@ -121,6 +220,146 @@ export default function GeneralContracting() {
             >
               Request GC Consultation
             </Link>
+            <Link
+              to="/jwordenai"
+              className="bg-foreground text-background px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-foreground/90 transition-colors inline-flex items-center gap-2"
+            >
+              <ScanLine className="w-4 h-4" />
+              View Scan Intelligence
+            </Link>
+            <Link
+              to="/visualizer"
+              className="border border-border text-foreground px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-card transition-colors inline-flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              Open 3D Visualizer
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 md:py-20 border-b border-border bg-background">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-8 items-start">
+            <div>
+              <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Premium 4D Design Intelligence</p>
+              <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95]">
+                Houzz-Style Design Power, Built For Real Construction Decisions
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mt-5 max-w-3xl">
+                Customers should not have to imagine the whole remodel from a flat proposal. JWORDENAI can support kitchen remodels, additions, patios, hardscapes, exterior upgrades, and interior design by turning photos, measurements, materials, floor plans, budgets, and schedule phases into a premium decision packet.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to="/visualizer"
+                  className="bg-foreground text-background px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-foreground/90 transition-colors inline-flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Launch 3D Build Visualizer
+                </Link>
+                <Link
+                  to="/floor-plan-studio"
+                  className="border border-border text-foreground px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-card transition-colors inline-flex items-center gap-2"
+                >
+                  <Layers3 className="w-4 h-4" />
+                  Interior Design Studio
+                </Link>
+                <Link
+                  to="/hardscapes"
+                  className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors inline-flex items-center gap-2"
+                >
+                  <Hammer className="w-4 h-4" />
+                  Patio & Hardscape Design
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {DESIGN_INTELLIGENCE_ITEMS.map((item) => {
+                const Icon = item.icon
+                return (
+                  <article key={item.title} className="border border-border bg-card p-5 shadow-sm">
+                    <Icon className="w-5 h-5 text-primary mb-4" />
+                    <h3 className="font-display font-black text-foreground text-xl uppercase tracking-tight leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-3">{item.body}</p>
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-18 border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-8 items-start">
+            <div>
+              <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Paid Scan Decision Support</p>
+              <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95]">
+                Get Paid To Scan, Then Help Customers Make Better Decisions
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mt-5 max-w-3xl">
+                JWORDENAI gives the GC division a clean front-end offer: scan the property, organize the visible evidence, explain risk, and help the owner decide whether they need repair, maintenance, engineering review, roof work, drainage correction, or a full GC-managed scope.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to="/jwordenai"
+                  className="border border-primary/40 text-primary px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-primary/10 transition-colors inline-flex items-center gap-2"
+                >
+                  <Camera className="w-4 h-4" />
+                  Read JWORDENAI Source Layer
+                </Link>
+                <Link
+                  to="/driveway-ai"
+                  className="border border-border text-foreground px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-background transition-colors inline-flex items-center gap-2"
+                >
+                  <ScanLine className="w-4 h-4" />
+                  Try Pavement Scan
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {SCAN_DECISION_ITEMS.map((item) => {
+                const Icon = item.icon
+                return (
+                  <article key={item.title} className="border border-border bg-background p-5">
+                    <Icon className="w-5 h-5 text-primary mb-4" />
+                    <h3 className="font-display font-black text-foreground text-xl uppercase tracking-tight leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-3">{item.body}</p>
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-18 border-b border-border bg-background">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="mb-8 max-w-4xl">
+            <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Revenue-first service design</p>
+            <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95]">
+              Turn Knowledge Into Paid Assessment Products
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed mt-5 max-w-3xl">
+              The public offer should not give away the operating system. It should sell decision clarity, collect better project evidence, and move qualified customers into paid review, design, drone, and GC planning paths.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {PREMIUM_REVENUE_OFFERS.map((offer) => (
+              <article key={offer.title} className="border border-border bg-card p-6 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <h3 className="font-display font-black text-foreground text-2xl uppercase tracking-tight leading-none">{offer.title}</h3>
+                  <span className="rounded-lg bg-primary/10 px-3 py-1.5 font-display text-sm font-black text-primary whitespace-nowrap">{offer.price}</span>
+                </div>
+                <p className="mt-5 text-sm text-muted-foreground leading-relaxed">{offer.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

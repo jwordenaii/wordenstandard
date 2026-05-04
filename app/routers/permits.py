@@ -95,6 +95,11 @@ class DporRequest(BaseModel):
     address: str | None = Field(default=None, max_length=300, description="Contractor address to look up")
 
 
+# Force Pydantic to resolve forward refs created by `from __future__ import annotations`.
+# Without this, /openapi.json raises PydanticUserError: "DporRequest is not fully defined".
+DporRequest.model_rebuild()
+
+
 @router.post(
     "/virginia/dpor",
     summary="DPOR license lookup — validate or enrich contractor / prospect intel",

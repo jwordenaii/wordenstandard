@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import SchemaMarkup from '../../components/SchemaMarkup'
 import DisclaimerBanner from '../../components/advisory/DisclaimerBanner'
 import StateSelector from '../../components/advisory/StateSelector'
+import PavingWeatherAdvisor from '../../components/advisory/PavingWeatherAdvisor'
 
 const CATEGORIES = [
   {
@@ -189,6 +191,37 @@ export default function AdvisoryHub() {
                 </div>
               </Link>
             ))}
+          </div>
+        </section>
+
+        {/* Weather Intelligence Tool */}
+        <section className="bg-slate-50 rounded-3xl p-8 border border-slate-200 shadow-inner">
+          <div className="flex flex-col lg:flex-row gap-12 items-start">
+            <div className="lg:w-1/3">
+              <span className="inline-block bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-4">
+                Field Intelligence
+              </span>
+              <h2 className="font-display font-black text-3xl text-brand-navy mb-4 leading-tight">
+                Paving Risk <br/> <span className="text-blue-600">Weather Engine</span>
+              </h2>
+              <p className="text-slate-600 leading-relaxed mb-6">
+                Critical civil projects fail when asphalt or sealcoat temperature thresholds aren't met. Our weather engine analyzes <strong>precipitation probability</strong>, <strong>ground temperature</strong>, and <strong>wind velocity</strong> to provide an instant "Pave vs. No-Pave" advisory.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  'Ground Temp > 50°F (Optimal)',
+                  'Rain Probability < 30%',
+                  'Safe Curing Wind Buffers',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm font-bold text-brand-navy">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" /> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="lg:w-2/3 w-full">
+              <PavingWeatherAdvisor />
+            </div>
           </div>
         </section>
 

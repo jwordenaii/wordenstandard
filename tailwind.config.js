@@ -19,6 +19,8 @@ export default {
         sm: "calc(var(--radius) - 4px)"
       },
       colors: {
+        "brand-navy": "#1a2744",
+        "brand-amber": "#f59e0b",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         amber: {

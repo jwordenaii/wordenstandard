@@ -12,9 +12,13 @@
 import { useState, useCallback, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { loadStripe } from '@stripe/stripe-js'
 import { api, trackEvent } from '../api/client'
 import BuildConfigurator from '../components/BuildConfigurator'
+import SEO from '../components/SEO'
 import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA } from '../components/SchemaMarkup'
+import SmartImage from '../components/SmartImage'
+import { SITE_IMAGES } from '../lib/siteImages'
 
 // Lazy-load the heavy Three.js canvas so the rest of the page is fast
 const PropertyVisualizer = lazy(() => import('../components/PropertyVisualizer'))
@@ -220,7 +224,7 @@ function QuoteForm({ config, onSuccess, onCancel }) {
 }
 
 // ── Success Panel ─────────────────────────────────────────────────────────────
-function SuccessPanel({ result }) {
+function SuccessPanel({ result, onStartCheckout, paymentStatus, paymentMsg }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -245,6 +249,23 @@ function SuccessPanel({ result }) {
           {result.narrative}
         </p>
       )}
+      <div className="mb-4 rounded-xl border border-brand-amber/35 bg-brand-amber/10 p-4 text-left">
+        <div className="text-brand-navy/50 text-xs uppercase tracking-wide mb-1">
+          Next Premium Step
+        </div>
+        <p className="font-display font-black text-brand-navy text-lg leading-tight">
+          Reserve a 4D design packet so the model, scope, range, and site questions move into estimator review.
+        </p>
+        <button
+          type="button"
+          onClick={onStartCheckout}
+          disabled={!result.lead_id || paymentStatus === 'starting'}
+          className="mt-3 w-full bg-brand-amber text-brand-navy rounded-lg px-4 py-3 text-sm font-black uppercase tracking-[0.12em] hover:bg-brand-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {paymentStatus === 'starting' ? 'Starting secure checkout...' : 'Reserve 4D Design Packet'}
+        </button>
+        {paymentMsg && <p className="mt-2 text-xs text-red-600">{paymentMsg}</p>}
+      </div>
       <div className="flex flex-col sm:flex-row gap-3">
         <a
           href="tel:+18044461296"
@@ -272,6 +293,8 @@ export default function Visualizer() {
   const [sugLoading, setSugLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [submitResult, setSubmitResult] = useState(null)
+  const [paymentStatus, setPaymentStatus] = useState('idle')
+  const [paymentMsg, setPaymentMsg] = useState('')
 
   // ── Parcel found callback ───────────────────────────────────────────────
   const handleParcelFound = useCallback((result) => {
@@ -317,27 +340,89 @@ export default function Visualizer() {
   const handleSuccess = (result) => {
     setSubmitResult(result)
     setShowForm(false)
+    setPaymentStatus('idle')
+    setPaymentMsg('')
+  }
+
+  const handleStartDesignCheckout = async () => {
+    if (!submitResult?.lead_id) {
+      setPaymentStatus('error')
+      setPaymentMsg('Save the design first so checkout can attach to the project file.')
+      return
+    }
+    setPaymentStatus('starting')
+    setPaymentMsg('')
+    try {
+      const successUrl = `${window.location.origin}/visualizer?payment=success`
+      const cancelUrl = `${window.location.origin}/visualizer?payment=cancel`
+      const data = await api.createCheckoutSession(submitResult.lead_id, successUrl, cancelUrl)
+      trackEvent('visualizer_design_packet_checkout_started', {
+        lead_id: submitResult.lead_id,
+        build_type: submitResult.build_type,
+      })
+      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
+      if (stripeKey && data.checkout_session_id?.startsWith('cs_')) {
+        const stripe = await loadStripe(stripeKey)
+        const redirect = await stripe?.redirectToCheckout({ sessionId: data.checkout_session_id })
+        if (redirect?.error) throw new Error(redirect.error.message || 'Stripe redirect failed')
+        return
+      }
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url
+        return
+      }
+      setPaymentStatus('error')
+      setPaymentMsg('Payment link unavailable. Please call the office to reserve this packet.')
+    } catch (error) {
+      setPaymentStatus('error')
+      setPaymentMsg(error.message || 'Checkout could not start. Please call the office.')
+    }
   }
 
   return (
     <>
+      <SEO
+        title="4D Design Visualizer | Additions, Patios, Driveways & Property Builds"
+        description="Use JWORDENAI to preview additions, patios, hardscapes, driveways, parking lots, new builds, materials, colors, and budget ranges before construction starts."
+        canonicalPath="/visualizer"
+      />
       <SchemaMarkup schema={LOCAL_BUSINESS_SCHEMA} />
 
       {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="bg-brand-navy text-white py-14 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative overflow-hidden bg-brand-navy text-white py-14 px-4">
+        <div className="absolute inset-0 opacity-35">
+          <SmartImage
+            src={SITE_IMAGES.patioFinish}
+            alt="Finished exterior patio and hardscape design inspiration"
+            width={1800}
+            height={1200}
+            priority
+            sizes="100vw"
+            className="h-full w-full"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/90 to-brand-navy/55" />
+        </div>
+        <div className="relative z-10 max-w-5xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <span className="text-brand-amber text-sm font-semibold uppercase tracking-widest mb-3 block">
-              3-D Property Visualizer
+              Premium 4D Design Visualizer
             </span>
             <h1 className="font-display font-black text-4xl sm:text-5xl mb-4 leading-tight">
-              See Your Build <span className="text-brand-amber">Before We Break Ground</span>
+              Bring The Dream Into <span className="text-brand-amber">Future Reality</span>
             </h1>
             <p className="text-white/60 text-lg max-w-2xl mx-auto leading-relaxed">
-              Design your driveway, parking lot, new home, or addition in an interactive 3-D model —
-              choose materials, colors, and get a live price estimate. Then submit your design as a
-              quote with one click.
+              Old project planning was guesswork. Use an interactive model for additions, patios,
+              hardscapes, driveways, parking lots, and new builds — choose materials, colors, and
+              reserve a paid design packet before crews ever break ground.
             </p>
+            <div className="mt-7 flex flex-wrap justify-center gap-3">
+              <Link to="/floor-plan-studio" className="rounded-lg bg-brand-amber px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-brand-navy hover:bg-brand-amber/90">
+                Interior Floor Plan Studio
+              </Link>
+              <Link to="/general-contracting" className="rounded-lg border border-white/25 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-white hover:border-brand-amber/60">
+                GC Design Services
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -449,7 +534,14 @@ export default function Visualizer() {
                 </div>
 
                 {/* Submit result */}
-                {submitResult && <SuccessPanel result={submitResult} />}
+                {submitResult && (
+                  <SuccessPanel
+                    result={submitResult}
+                    onStartCheckout={handleStartDesignCheckout}
+                    paymentStatus={paymentStatus}
+                    paymentMsg={paymentMsg}
+                  />
+                )}
               </div>
 
               {/* ── Right: Config panel ──────────────────────────────── */}
@@ -485,11 +577,11 @@ export default function Visualizer() {
                         onClick={() => setShowForm(true)}
                         className="w-full btn-primary py-4 text-base"
                       >
-                        Request This Build →
+                        Build My 4D Packet →
                       </button>
                     )}
                     <p className="text-center text-brand-navy/40 text-xs mt-2">
-                      Free quote · No obligation · Responds within 24 hrs
+                      Save the design first, then reserve the paid review packet.
                     </p>
                   </div>
                 )}

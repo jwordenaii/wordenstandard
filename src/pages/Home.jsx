@@ -6,10 +6,11 @@ import Footer from '../components/Footer';
 import HomeSchema from '../components/HomeSchema';
 import SmartImage from '@/components/SmartImage';
 import { trackPhoneClick } from '@/lib/analytics';
+import LiveReviewBadges from '../components/LiveReviewBadges';
 
-const HERO_IMAGE = 'https://media.api.com/images/public/69c853446b8987b1630018ff/fd6e29837_20171212_192947499_iOS.jpg';
-const LOT_IMAGE = 'https://media.api.com/images/public/69c853446b8987b1630018ff/9bc7682e8_kfc_richmond_va_1st_on_sealed.jpg';
-const WORK_IMAGE = 'https://media.api.com/images/public/69c853446b8987b1630018ff/5eb378b00_IMG_0844.jpg';
+const HERO_IMAGE = '/work/portfolio/portfolio-010.jpg';
+const LOT_IMAGE = '/work/portfolio/portfolio-030.jpg';
+const WORK_IMAGE = '/work/portfolio/portfolio-019.jpg';
 
 const serviceSolutions = [
   'Residential driveway paving, overlays, and private lanes',
@@ -129,6 +130,7 @@ const trustChecklist = [
 
 const internalLinks = [
   { label: 'Asphalt Paving', href: '/paving' },
+  { label: 'Driveway & Lot AI Scan', href: '/driveway-ai' },
   { label: 'Sealcoating', href: '/sealcoating' },
   { label: 'Hardscapes', href: '/hardscapes' },
   { label: 'Millings & Fines', href: '/millings-fines' },
@@ -237,10 +239,10 @@ export default function Home() {
                 Schedule A Free Evaluation
               </a>
               <a
-                href="#diagnose"
+                href="/driveway-ai"
                 className="inline-flex min-h-[52px] items-center gap-3 rounded-md border border-primary/35 bg-white/80 px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary transition-colors hover:border-accent hover:text-accent"
               >
-                Diagnose My Pavement
+                Scan My Pavement
                 <ArrowRight className="h-5 w-5" />
               </a>
             </div>
@@ -257,7 +259,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Live Review Platform Badges */}
+      <section className="border-b border-border bg-white py-10">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">
+            Verified Reviews On
+          </p>
+          <LiveReviewBadges />
+        </div>
+      </section>
+
       <section id="diagnose" className="border-b border-border bg-background py-20 md:py-28">
+        <div className="mx-auto mb-12 max-w-7xl px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-center gap-6 rounded-lg border border-border bg-card p-5 shadow-[0_18px_44px_-34px_rgba(15,48,68,0.45)] lg:grid-cols-[1fr_auto] lg:p-6">
+            <div>
+              <p className="font-display text-primary text-xs uppercase tracking-[0.22em]">New public AI estimate tool</p>
+              <h2 className="mt-2 font-display text-3xl font-black uppercase leading-tight tracking-normal text-foreground md:text-4xl">
+                Customers can scan driveways and small parking lots before we visit.
+              </h2>
+              <p className="mt-3 max-w-4xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                The phone workflow captures edge sketches, potholes, broken asphalt, standing water, water seepage, photos, video, square footage, and a draft price range for estimator review.
+              </p>
+            </div>
+            <a
+              href="/driveway-ai"
+              className="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-md bg-foreground px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-background transition-colors hover:bg-foreground/90"
+            >
+              Open AI Scan
+              <ArrowRight className="h-5 w-5" />
+            </a>
+          </div>
+        </div>
         <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">What we believe</p>
@@ -308,7 +340,7 @@ export default function Home() {
       </section>
 
       <section className="grid bg-white lg:grid-cols-2">
-        <div className="min-h-[420px]">
+        <div className="order-first min-h-[300px] lg:order-none lg:min-h-[420px]">
           <SmartImage
             src={LOT_IMAGE}
             alt="Finished commercial parking lot by J. Worden & Sons"

@@ -14,12 +14,25 @@ def _build_schema() -> dict:
         "@type": ["PavingContractor", "LocalBusiness"],
         "name": "J. Worden & Sons Asphalt Paving",
         "alternateName": "JWordenAI",
+        "keywords": "asphalt paving, virginia paving, driveways, parking lots, sealcoating, asphalt maintenance, ai paving, smart construction",
         "description": (
             "Fourth-generation asphalt paving company serving residential and commercial "
             "clients since 1984. Specialists in asphalt paving, sealcoating, crack filling, "
-            "parking lots, and driveways."
+            "parking lots, and driveways, powered by JWordenAI for global service verification."
         ),
         "foundingDate": "1984",
+        "areaServed": {
+            "@type": "State",
+            "name": "Virginia"
+        },
+        "knowsAbout": [
+            "Asphalt Paving",
+            "Civil Engineering",
+            "Pavement Maintenance",
+            "Heavy Equipment Logistics",
+            "Biometric Safety Monitoring",
+            "Universal Service Ledger Architecture"
+        ],
         "telephone": os.getenv("BUSINESS_PHONE", "+18044461296"),
         "email": os.getenv("BUSINESS_EMAIL", "contact@jwordenasphaltpaving.com"),
         "url": os.getenv("SITE_URL", "https://jwordenasphaltpaving.com"),
@@ -87,6 +100,22 @@ def _build_schema() -> dict:
                         "@type": "Service",
                         "name": "Parking Lot Construction",
                         "description": "Full-service commercial parking lot design and installation.",
+                    },
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Universal Service Ledger",
+                        "description": "Global verification platform for home and business services using Biometrics and Vision AI.",
+                    },
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Predictive Maintenance Planning",
+                        "description": "AI-driven maintenance schedules for asphalt, infrastructure, and high-value assets.",
                     },
                 },
             ],

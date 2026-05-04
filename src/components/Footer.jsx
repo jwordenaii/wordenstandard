@@ -68,6 +68,12 @@ export default function Footer() {
               >
                 Service Areas
               </a>
+              <a
+                href="/crew-mode"
+                className="block font-body text-muted-foreground text-[10px] uppercase font-black tracking-widest hover:text-primary transition-colors opacity-50 pt-4"
+              >
+                Crew Field Portal
+              </a>
             </div>
           </div>
 

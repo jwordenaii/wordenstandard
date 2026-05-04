@@ -18,6 +18,7 @@
 #   POST /api/v1/math-ai/pavement-score      — PCI pavement condition scoring
 #   POST /api/v1/math-ai/cost-estimate       — project cost estimation
 #   POST /api/v1/math-ai/maintenance-forecast — maintenance schedule forecasting
+#   POST /api/v1/global/*                    — universal service platform triage
 #   POST /api/v1/public/chat                  — Mr. Worden premium concierge chat (rate-limited)
 #
 # PROTECTED ENDPOINTS (require bearer token via verify_premium_security):
@@ -241,6 +242,11 @@ from .routers import search as search_router
 from .routers import public_chat as public_chat_router
 from .routers import operations as operations_router
 from .routers import audit_admin as audit_admin_router
+from .routers import global_platform as global_router
+from .routers import scaling as scaling_router
+from .routers import revenue as revenue_router
+from .routers import jarvis_router as jarvis_router
+from .services.quantum_orchestrator import global_quantum_orchestrator
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
 
@@ -407,6 +413,10 @@ app.include_router(subcontractors_router.router)
 app.include_router(market_intelligence_router.router)
 app.include_router(materials_router.router)
 app.include_router(tenants_router.router)
+app.include_router(global_router.router)
+app.include_router(scaling_router.router)
+app.include_router(revenue_router.router)
+app.include_router(jarvis_router.router)
 app.include_router(blog_router.router)
 app.include_router(vector_search_router.router)
 app.include_router(admin_vector_router.router)
@@ -497,6 +507,44 @@ app.include_router(search_router.router)
 app.include_router(public_chat_router.router)
 app.include_router(operations_router.router)
 app.include_router(audit_admin_router.router)
+
+
+# ── Resolve Pydantic forward references ──────────────────────────────────────
+# Many routers use `from __future__ import annotations`, which turns every
+# Pydantic model annotation into a ForwardRef. FastAPI's /openapi.json then
+# fails with PydanticUserError ("X is not fully defined"). Walk every BaseModel
+# in every loaded router module and call .model_rebuild() to resolve them.
+def _rebuild_router_models() -> None:
+    import inspect as _inspect
+    import sys as _sys
+    from pydantic import BaseModel as _BaseModel
+
+    rebuilt = 0
+    for _mod_name, _mod in list(_sys.modules.items()):
+        if not _mod_name.startswith("app.routers"):
+            continue
+        if _mod is None:
+            continue
+        try:
+            for _name, _obj in _inspect.getmembers(_mod, _inspect.isclass):
+                if _obj is _BaseModel:
+                    continue
+                if not issubclass(_obj, _BaseModel):
+                    continue
+                if _obj.__module__ != _mod_name:
+                    continue
+                try:
+                    _obj.model_rebuild()
+                    rebuilt += 1
+                except Exception:  # noqa: BLE001
+                    # Best-effort; individual model failures shouldn't block startup.
+                    pass
+        except Exception:  # noqa: BLE001
+            continue
+    logger.info("Pydantic model_rebuild() completed for %d router models", rebuilt)
+
+
+_rebuild_router_models()
 
 
 # ── Socket.IO ASGI mount ──────────────────────────────────────────────────────

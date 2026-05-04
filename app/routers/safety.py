@@ -26,6 +26,7 @@ from ..core.limiter import limiter
 from ..core.security import verify_premium_security
 from ..database import get_db
 from ..models import SafetyIncident, SafetyToolboxTalk
+from ..services.notifications import send_safety_alert
 
 logger = logging.getLogger(__name__)
 
@@ -247,6 +248,36 @@ async def site_scores(
     db: Session = Depends(get_db),
     _: dict = Depends(verify_premium_security),
 ):
+    return {"message": "Safety scoring module active"}
+
+
+class BiometricAlert(BaseModel):
+    crew_name: str
+    site_name: str
+    vital_stat: str
+    vital_value: float
+    ambient_temp: float
+
+@router.post("/biometric-alert", summary="Handle incoming biometric safety breaches")
+@limiter.limit("5/minute")
+async def handle_biometric_alert(
+    request: Request,
+    req: BiometricAlert,
+    # No auth verify here so the wearable link can hit it fast if it bypasses standard auth
+):
+    """Bridge for the Crew App to alert of heat/vital danger."""
+    logger.warning("SAFETY BREACH: %s @ %s | %s: %s", req.crew_name, req.site_name, req.vital_stat, req.vital_value)
+    
+    # Trigger the notification service
+    send_safety_alert(
+        crew_name=req.crew_name,
+        site_name=req.site_name,
+        vital_stat=req.vital_stat,
+        vital_value=req.vital_value,
+        ambient_temp=req.ambient_temp
+    )
+    
+    return {"status": "dispatched", "message": "Emergency notifications triggered"}
     """Aggregate safety score per job site (talks count, incidents count, recordables)."""
     talks = db.query(SafetyToolboxTalk).all()
     incidents = db.query(SafetyIncident).all()

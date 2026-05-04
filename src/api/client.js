@@ -119,7 +119,7 @@ export function clearAuthToken() {
   clearStoredAuthToken()
 }
 
-async function request(method, path, body) {
+export async function request(method, path, body) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
 
@@ -659,6 +659,9 @@ export const api = {
   askForeman: (data) => request('POST', '/api/v1/foreman/chat', data),
   getForemanStatus: () => request('GET', '/api/v1/foreman/status'),
   getVisionResult: (jobId) => request('GET', `/api/v1/ai/vision-result/${jobId}`),
+  // ── JARVIS Command Interface ───────────────────────────────────────────────
+  jarvisCommand: (query, persona = "JARVIS") =>
+    request('POST', '/api/v1/jarvis/command', { query, persona }),
   // ── Command Center dashboard metrics ──────────────────────────────────────
   getSiteMetrics: () => request('GET', '/api/v1/site-metrics'),
   // ── Property Visualizer (public, anonymous) ───────────────────────────────
@@ -701,6 +704,16 @@ export const api = {
   getStateInfo: (code) => request('GET', `/api/v1/compliance/state/${code}`),
   getVerificationHistory: (state, licenseNum) =>
     request('GET', `/api/v1/compliance/history${buildQS({ state_code: state, license_number: licenseNum })}`),
+  // ── Civil / contractor intelligence advisor ───────────────────────────────
+  getLegalStrategy: (data) => request('POST', '/api/v1/advisor/legal-strategy', data),
+  rankContractors: (data) => request('POST', '/api/v1/advisor/rank-contractors', data),
+  getTopStates: (disputeType = 'general', topN = 10) =>
+    request('GET', `/api/v1/advisor/top-states${buildQS({ dispute_type: disputeType, top_n: topN })}`),
+  getLicenseOptimizer: (topN = 10) =>
+    request('GET', `/api/v1/advisor/license-optimizer${buildQS({ top_n: topN })}`),
+  getReciprocityRanking: (homeState = 'VA', topN = 10) =>
+    request('GET', `/api/v1/advisor/reciprocity-ranking${buildQS({ home_state: homeState, top_n: topN })}`),
+  evaluateUtilityRisk: (data) => request('POST', '/api/v1/advisor/utility-risk', data),
   // ── What-If schedule simulator ────────────────────────────────────────────
   simulateSchedule: (data) => request('POST', '/api/v1/schedule/simulate', data),
   // ── Ads Intelligence (AI Max URL exclusions, CRM export, qualifier, anomaly) ─

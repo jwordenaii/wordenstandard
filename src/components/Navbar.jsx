@@ -5,11 +5,11 @@ import { trackPhoneClick } from '@/lib/analytics';
 import { PRIMARY_LOGO_URL } from '@/lib/branding';
 
 const NAV_LINKS = [
-  { label: 'Paving', href: '/paving' },
-  { label: 'Hardscapes', href: '/hardscapes' },
-  { label: 'Sealcoating', href: '/sealcoating' },
-  { label: 'Millings', href: '/millings-fines' },
-  { label: 'General Contracting', href: '/general-contracting' },
+  { label: 'Services', href: '/services' },
+  { label: 'AI Scan', href: '/driveway-ai' },
+  { label: '4D Studio', href: '/floor-plan-studio' },
+  { label: 'Visualizer', href: '/visualizer' },
+  { label: 'GC', href: '/general-contracting' },
   { label: 'JWordenAI', href: '/jwordenai' },
 ];
 

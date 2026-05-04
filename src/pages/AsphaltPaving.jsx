@@ -93,6 +93,9 @@ export default function AsphaltPaving() {
               <Link to="/contact" className="border-2 border-primary/40 text-white px-10 py-5 font-display font-bold text-sm tracking-widest uppercase hover:bg-primary/20 transition-all">
                 The Portfolio
               </Link>
+              <Link to="/driveway-ai" className="border-2 border-white/35 bg-white/10 text-white px-10 py-5 font-display font-bold text-sm tracking-widest uppercase hover:bg-white/20 transition-all">
+                AI Pavement Scan
+              </Link>
             </div>
           </motion.div>
         </div>

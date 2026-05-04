@@ -10,10 +10,11 @@
  *   4. Right panel shows total project estimate pulled from the backend catalog
  *   5. Send to quote — pre-fills the quote form with the estimate
  */
-import { useState, useCallback, lazy, Suspense, useRef } from 'react'
+import { useState, useCallback, lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { api } from '../api/client'
+import { loadStripe } from '@stripe/stripe-js'
+import SEO from '@/components/SEO'
+import { api, trackEvent } from '@/api/client'
 
 const GCFloorPlanCanvas = lazy(() => import('../components/GCFloorPlanCanvas'))
 
@@ -227,11 +228,140 @@ function CostPanel({ rooms, selectedRoom }) {
 
       <Link
         to={`/quote?sqft=${totalSqft}&service_type=general_contracting&estimate=${Math.round(estimate)}`}
-        className="block w-full text-center bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded py-2 transition-colors"
+        className="block w-full text-center border border-zinc-700 hover:border-amber-400 text-zinc-200 text-sm font-semibold rounded py-2 transition-colors"
       >
-        Request Formal Quote →
+        Full Project Quote
       </Link>
     </div>
+  )
+}
+
+function DesignPacketPanel({ rooms }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', projectGoal: '' })
+  const [status, setStatus] = useState('idle')
+  const [message, setMessage] = useState('')
+
+  const totalSqft = rooms.reduce((sum, room) => sum + room.widthFt * room.lengthFt, 0)
+  const estimate = quickEstimate(rooms)
+  const roomSummary = rooms
+    .map((room) => `${room.name}: ${room.widthFt}x${room.lengthFt} (${room.widthFt * room.lengthFt} sq ft)`)
+    .join('; ')
+
+  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    if (!form.name.trim() || !form.email.trim()) {
+      setStatus('error')
+      setMessage('Name and email are required to reserve a design packet.')
+      return
+    }
+
+    setStatus('submitting')
+    setMessage('')
+    try {
+      const result = await api.submitVisualProposal({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        notes: [
+          '[4D Floor Plan Studio]',
+          form.projectGoal ? `Owner goal: ${form.projectGoal}` : '',
+          `Rooms: ${roomSummary}`,
+          `Client-side rough interior estimate: $${Math.round(estimate).toLocaleString()}`,
+        ].filter(Boolean).join('\n'),
+        build_type: 'addition',
+        property_type: 'residential',
+        sqft: Math.max(totalSqft, 100),
+        floors: 1,
+        ground_material: null,
+        exterior_material: 'interior_design_packet',
+        roof_color: null,
+        state_code: null,
+        address: null,
+      })
+
+      trackEvent('floor_plan_design_packet_submitted', {
+        lead_id: result.lead_id,
+        sqft: totalSqft,
+        rooms: rooms.length,
+      })
+
+      if (!result.lead_id) {
+        setStatus('done')
+        setMessage('Design packet saved. Call the office to reserve paid review because checkout needs a lead ID.')
+        return
+      }
+
+      setStatus('checkout')
+      const successUrl = `${window.location.origin}/floor-plan-studio?payment=success`
+      const cancelUrl = `${window.location.origin}/floor-plan-studio?payment=cancel`
+      const checkout = await api.createCheckoutSession(result.lead_id, successUrl, cancelUrl)
+      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
+      if (stripeKey && checkout.checkout_session_id?.startsWith('cs_')) {
+        const stripe = await loadStripe(stripeKey)
+        const redirect = await stripe?.redirectToCheckout({ sessionId: checkout.checkout_session_id })
+        if (redirect?.error) throw new Error(redirect.error.message || 'Stripe redirect failed')
+        return
+      }
+      if (checkout.checkout_url) {
+        window.location.href = checkout.checkout_url
+        return
+      }
+      setStatus('error')
+      setMessage('Payment link unavailable. Please call the office to reserve this design packet.')
+    } catch (error) {
+      setStatus('error')
+      setMessage(error.message || 'Could not reserve the design packet. Please call the office.')
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="rounded bg-amber-400/10 border border-amber-400/30 p-3 space-y-3">
+      <div>
+        <h3 className="text-xs font-black uppercase tracking-wider text-amber-300">Paid 4D Design Packet</h3>
+        <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
+          Turn this room model into a reviewed kitchen, addition, remodel, or interior planning packet.
+        </p>
+      </div>
+      <input
+        required
+        value={form.name}
+        onChange={(event) => update('name', event.target.value)}
+        placeholder="Name"
+        className="w-full rounded bg-zinc-950 border border-zinc-700 text-sm text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-amber-400"
+      />
+      <input
+        required
+        type="email"
+        value={form.email}
+        onChange={(event) => update('email', event.target.value)}
+        placeholder="Email"
+        className="w-full rounded bg-zinc-950 border border-zinc-700 text-sm text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-amber-400"
+      />
+      <input
+        type="tel"
+        value={form.phone}
+        onChange={(event) => update('phone', event.target.value)}
+        placeholder="Phone"
+        className="w-full rounded bg-zinc-950 border border-zinc-700 text-sm text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-amber-400"
+      />
+      <textarea
+        value={form.projectGoal}
+        onChange={(event) => update('projectGoal', event.target.value)}
+        placeholder="Kitchen remodel, addition, patio tie-in, finishes, budget concerns..."
+        rows={3}
+        className="w-full resize-none rounded bg-zinc-950 border border-zinc-700 text-sm text-white px-2 py-2 focus:outline-none focus:ring-1 focus:ring-amber-400"
+      />
+      <button
+        type="submit"
+        disabled={status === 'submitting' || status === 'checkout'}
+        className="w-full rounded bg-amber-400 hover:bg-amber-300 text-zinc-950 text-xs font-black uppercase tracking-[0.12em] py-2.5 transition-colors disabled:opacity-60"
+      >
+        {status === 'submitting' ? 'Saving Design...' : status === 'checkout' ? 'Starting Checkout...' : 'Reserve Design Packet'}
+      </button>
+      {message && <p className={`text-xs ${status === 'error' ? 'text-red-300' : 'text-emerald-300'}`}>{message}</p>}
+    </form>
   )
 }
 
@@ -261,18 +391,49 @@ export default function FloorPlanStudio() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
+      <SEO
+        title="4D Interior Design Studio | Kitchen Remodels, Additions & Floor Plans"
+        description="A premium JWORDENAI floor plan and interior design studio for kitchen remodels, additions, room planning, live cost ranges, and future-ready GC decision support."
+        canonicalPath="/floor-plan-studio"
+      />
       {/* Header */}
-      <header className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">Floor Plan Studio</h1>
-          <p className="text-xs text-zinc-400">
-            Interactive 3D floor plan builder with live cost estimation
-          </p>
+      <header className="border-b border-zinc-800 bg-black/40 px-4 py-4 md:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-4xl">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-400">JWORDENAI interior design source layer</p>
+            <h1 className="mt-2 font-display text-3xl font-black uppercase leading-none tracking-tight text-white md:text-5xl">
+              4D Interior Design Studio
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-400 md:text-base">
+              Old remodel planning was flat drawings, guessing, and sticker shock. New tech brings the customer dream into future reality: rooms, kitchen layouts, additions, finishes, live scope ranges, and phased GC planning in one premium studio.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/general-contracting" className="rounded-lg border border-zinc-700 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-zinc-300 hover:border-amber-400 hover:text-white">
+              GC Services
+            </Link>
+            <Link to="/visualizer" className="rounded-lg border border-amber-400/50 bg-amber-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-amber-300 hover:bg-amber-400 hover:text-black">
+              3D Build Visualizer
+            </Link>
+          </div>
         </div>
-        <Link to="/general-contracting" className="text-xs text-zinc-500 hover:text-white transition-colors">
-          ← GC Services
-        </Link>
       </header>
+
+      <section className="border-b border-zinc-800 bg-zinc-900/80 px-4 py-4 md:px-6">
+        <div className="grid gap-3 md:grid-cols-4">
+          {[
+            ['Kitchen Remodels', 'Cabinet, counter, flooring, lighting, and appliance-move planning.'],
+            ['Additions', 'Room massing, square footage, layout, and budget signals before drawings.'],
+            ['Interior Design', 'Finish direction and room-by-room scope without confusing proposal language.'],
+            ['4D Phasing', 'Design, permits, demo, rough-in, finishes, inspection, and handoff.'],
+          ].map(([title, body]) => (
+            <div key={title} className="rounded-xl border border-zinc-800 bg-black/30 p-4">
+              <p className="font-display text-lg font-black uppercase leading-tight text-white">{title}</p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-500">{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel */}
@@ -309,6 +470,9 @@ export default function FloorPlanStudio() {
         {/* Right panel */}
         <aside className="w-64 border-l border-zinc-800 overflow-y-auto p-4 shrink-0">
           <CostPanel rooms={rooms} selectedRoom={selected} />
+          <div className="mt-4">
+            <DesignPacketPanel rooms={rooms} />
+          </div>
         </aside>
       </div>
     </div>

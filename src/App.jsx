@@ -12,6 +12,8 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import RouteLoader from '@/components/RouteLoader';
 import SplashScreen from '@/components/SplashScreen';
+import AdvisoryGate from '@/components/AdvisoryGate';
+import ChatWidget from '@/components/ChatWidget';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
@@ -22,6 +24,16 @@ const LeadConsultant = lazy(() => import('./pages/LeadConsultant'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const JobDetail = lazy(() => import('./pages/JobDetail'));
 const CrewReporting = lazy(() => import('./pages/CrewReporting'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Quote = lazy(() => import('./pages/Quote'));
+const Projects = lazy(() => import('./pages/Projects'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const Reviews = lazy(() => import('./pages/Reviews'));
+const Services = lazy(() => import('./pages/Services'));
+const ServiceAreas = lazy(() => import('./pages/ServiceAreas'));
+const CityPage = lazy(() => import('./pages/CityPage'));
+const StatePavingPage = lazy(() => import('./pages/StatePavingPage'));
 const LocationsIndex = lazy(() => import('./pages/LocationsIndex'));
 const LocationPage = lazy(() => import('./pages/LocationPage'));
 const RichmondCommercial = lazy(() => import('./pages/RichmondCommercial'));
@@ -29,6 +41,7 @@ const ResidentialAsphalt = lazy(() => import('./pages/ResidentialAsphalt'));
 const HomeServices = lazy(() => import('./pages/HomeServices'));
 const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
 const FloorPlanStudio = lazy(() => import('./pages/FloorPlanStudio'));
+const Visualizer = lazy(() => import('./pages/Visualizer'));
 const VirginiaStatewide = lazy(() => import('./pages/VirginiaStatewide'));
 const AutonomyDashboard = lazy(() => import('./pages/AutonomyDashboard'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
@@ -46,10 +59,29 @@ const LeadInbox = lazy(() => import('./pages/LeadInbox'));
 const VoiceCalls = lazy(() => import('./pages/VoiceCalls'));
 const RevenueDashboard = lazy(() => import('./pages/RevenueDashboard'));
 const CrewEta = lazy(() => import('./pages/CrewEta'));
+const CrewFieldApp = lazy(() => import('./pages/CrewFieldApp'));
 const AsphaltPaving = lazy(() => import('./pages/AsphaltPaving'));
 const Hardscapes = lazy(() => import('./pages/Hardscapes'));
 const VirginiaSealcoating = lazy(() => import('./pages/VirginiaSealcoating'));
+const VirginiaConcrete = lazy(() => import('./pages/VirginiaConcrete'));
+const VirginiaShingles = lazy(() => import('./pages/VirginiaShingles'));
 const MillingsAndFines = lazy(() => import('./pages/MillingsAndFines'));
+const ParkingLots = lazy(() => import('./pages/ParkingLots'));
+const RichmondPaving = lazy(() => import('./pages/RichmondPaving'));
+const CrackRepair = lazy(() => import('./pages/CrackRepair'));
+const ChesterfieldPaving = lazy(() => import('./pages/ChesterfieldPaving'));
+const HamptonRoadsPaving = lazy(() => import('./pages/HamptonRoadsPaving'));
+const FredericksburgPaving = lazy(() => import('./pages/FredericksburgPaving'));
+const NorthernVirginiaPaving = lazy(() => import('./pages/NorthernVirginiaPaving'));
+const ShenandoahValleyPaving = lazy(() => import('./pages/ShenandoahValleyPaving'));
+const DrivewayAI = lazy(() => import('./pages/DrivewayAI'));
+const AdvisoryHub = lazy(() => import('./pages/advisory/AdvisoryHub'));
+const AdvisoryCategoryHub = lazy(() => import('./pages/advisory/CategoryHub'));
+const AdvisoryStateDetail = lazy(() => import('./pages/advisory/StateDetail'));
+const AdvisoryStateCompare = lazy(() => import('./pages/advisory/StateCompare'));
+const AdvisoryUtilitiesHub = lazy(() => import('./pages/advisory/UtilitiesHub'));
+const AdvisoryLegalStrategy = lazy(() => import('./pages/advisory/LegalStrategyAdvisor'));
+const AdvisoryContractorRanker = lazy(() => import('./pages/advisory/ContractorRanker'));
 // Add page imports here
 
 // Initialise GA4 once — silently skipped when the measurement ID is not set.
@@ -132,6 +164,12 @@ const RequireAuth = ({ children }) => {
   return children;
 };
 
+const RequireInternalAdvisory = ({ children }) => (
+  <RequireAuth>
+    <AdvisoryGate>{children}</AdvisoryGate>
+  </RequireAuth>
+);
+
 const AuthenticatedApp = () => {
   const { isLoadingPublicSettings } = useAuth();
 
@@ -150,19 +188,46 @@ const AuthenticatedApp = () => {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/quote" element={<Quote />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/reviews" element={<Reviews />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/service-areas" element={<ServiceAreas />} />
+        <Route path="/service-areas/:slug" element={<CityPage />} />
+        <Route path="/states/:stateSlug" element={<StatePavingPage />} />
         <Route path="/locations" element={<LocationsIndex />} />
         <Route path="/locations/:slug" element={<LocationPage />} />
         <Route path="/paving" element={<AsphaltPaving />} />
+        <Route path="/residential" element={<ResidentialAsphalt />} />
+        <Route path="/home-services" element={<HomeServices />} />
         <Route path="/hardscapes" element={<Hardscapes />} />
         <Route path="/sealcoating" element={<VirginiaSealcoating />} />
+        <Route path="/concrete" element={<VirginiaConcrete />} />
+        <Route path="/shingles" element={<VirginiaShingles />} />
+        <Route path="/parking-lots" element={<ParkingLots />} />
+        <Route path="/richmond-paving" element={<RichmondPaving />} />
+        <Route path="/crack-repair" element={<CrackRepair />} />
+        <Route path="/chesterfield-paving" element={<ChesterfieldPaving />} />
+        <Route path="/hampton-roads-paving" element={<HamptonRoadsPaving />} />
+        <Route path="/fredericksburg-paving" element={<FredericksburgPaving />} />
+        <Route path="/northern-virginia-paving" element={<NorthernVirginiaPaving />} />
+        <Route path="/shenandoah-valley-paving" element={<ShenandoahValleyPaving />} />
         <Route path="/millings-fines" element={<MillingsAndFines />} />
+        <Route path="/tar-and-chip" element={<TarAndChip />} />
+        <Route path="/driveway-ai" element={<DrivewayAI />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/jwordenai" element={<JwordenAI />} />
         <Route path="/general-contracting" element={<GeneralContracting />} />
+        <Route path="/visualizer" element={<Visualizer />} />
+        <Route path="/floor-plan-studio" element={<FloorPlanStudio />} />
         <Route path="/lp/:slug" element={<LandingPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<CrewEta />} />
+        <Route path="/crew-mode" element={<CrewFieldApp />} />
         {publicAIPages.map(({ path, Component }) => (
           <Route key={path} path={path} element={<Component />} />
         ))}
@@ -172,12 +237,8 @@ const AuthenticatedApp = () => {
           <Route key={path} path={path} element={<RequireAuth><Component /></RequireAuth>} />
         ))}
         <Route path="/command-center" element={<RequireAuth><CommandCenter /></RequireAuth>} />
-        <Route path="/residential" element={<RequireAuth><ResidentialAsphalt /></RequireAuth>} />
-        <Route path="/home-services" element={<RequireAuth><HomeServices /></RequireAuth>} />
-        <Route path="/floor-plan-studio" element={<RequireAuth><FloorPlanStudio /></RequireAuth>} />
         <Route path="/virginia-statewide" element={<RequireAuth><VirginiaStatewide /></RequireAuth>} />
         <Route path="/autonomy" element={<RequireAuth><AutonomyDashboard /></RequireAuth>} />
-        <Route path="/tar-and-chip" element={<RequireAuth><TarAndChip /></RequireAuth>} />
         <Route path="/contractor-ai" element={<RequireAuth><ContractorAIPlatform /></RequireAuth>} />
         <Route path="/consultant" element={<RequireAuth><LeadConsultant /></RequireAuth>} />
         <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
@@ -190,6 +251,13 @@ const AuthenticatedApp = () => {
         <Route path="/leads" element={<RequireAuth><LeadInbox /></RequireAuth>} />
         <Route path="/voice-calls" element={<RequireAuth><VoiceCalls /></RequireAuth>} />
         <Route path="/revenue" element={<RequireAuth><RevenueDashboard /></RequireAuth>} />
+        <Route path="/advisory" element={<RequireInternalAdvisory><AdvisoryHub /></RequireInternalAdvisory>} />
+        <Route path="/advisory/compare" element={<RequireInternalAdvisory><AdvisoryStateCompare /></RequireInternalAdvisory>} />
+        <Route path="/advisory/utilities" element={<RequireInternalAdvisory><AdvisoryUtilitiesHub /></RequireInternalAdvisory>} />
+        <Route path="/advisory/legal-strategy" element={<RequireInternalAdvisory><AdvisoryLegalStrategy /></RequireInternalAdvisory>} />
+        <Route path="/advisory/contractor-ranker" element={<RequireInternalAdvisory><AdvisoryContractorRanker /></RequireInternalAdvisory>} />
+        <Route path="/advisory/state/:stateCode" element={<RequireInternalAdvisory><AdvisoryStateDetail /></RequireInternalAdvisory>} />
+        <Route path="/advisory/:category" element={<RequireInternalAdvisory><AdvisoryCategoryHub /></RequireInternalAdvisory>} />
 
         <Route path="*" element={<PageNotFound />} />
       </Routes>
@@ -207,6 +275,7 @@ function App() {
           <Router>
             <SplashScreen />
             <AuthenticatedApp />
+            <ChatWidget />
           </Router>
           <Toaster />
         </QueryClientProvider>

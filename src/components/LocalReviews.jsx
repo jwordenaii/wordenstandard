@@ -11,7 +11,7 @@ const REVIEW_PLATFORMS = [
     rating: 4.8,
     count: 12,
     url: 'https://www.houzz.com/professionals/stone-pavers-and-concrete/j-worden-and-sons-paving-l-l-c-pfvwus-pf~663227484',
-    accent: '3× Best of Houzz Service',
+    accent: '4× Best of Houzz Service',
   },
   {
     name: 'Angi',
@@ -30,11 +30,40 @@ const REVIEW_PLATFORMS = [
 ];
 
 const ACHIEVEMENTS = [
+  'Pavement Magazine Top 75 — 4 Categories',
   '2026 Top Contractor Award',
-  'Best of Houzz Service 2014, 2015, 2016',
-  'Houzz Recommended + 500 Saves Badges',
+  'Best of Houzz Service — 2014, 2015, 2016, 2023',
+  'Houzz Pro + Recommended + 500 Saves Badges',
   'NASCLA Certified',
   'Virginia Class A Contractor',
+];
+
+// Real verified review excerpts from houzz.com
+const HOUZZ_REVIEWS = [
+  {
+    author: 'jaclynforrester',
+    date: 'June 23, 2016',
+    rating: 5,
+    excerpt: "We had a major drainage issue in a brand new pea gravel driveway — a pond and sometimes an ice skating rink on one side. I called every reference and we drove by the addresses; all of his customers were happy with his work. In 4 days the driveway was done. It's beautiful, it drains perfectly, and Gene's communication and his team's professionalism were excellent. They truly care about their work.",
+  },
+  {
+    author: 'Greg Orlick',
+    date: 'April 19, 2022',
+    rating: 5,
+    excerpt: 'They paved our driveway 18 months ago with paver entries. Did a fabulous job. We ran into drainage issues, not their fault — they were great at fixing them and everything went as agreed. I would recommend them to everyone.',
+  },
+  {
+    author: 'daryllhall',
+    date: 'March 30, 2015',
+    rating: 5,
+    excerpt: 'J. Worden & Sons did a great job on our new driveway. Gene was friendly, courteous and provided excellent customer service. His crew even went above and beyond by moving and staging a supply of wood materials we had temporarily stored on our old driveway.',
+  },
+  {
+    author: 'Susan Armentrout',
+    date: 'November 9, 2013',
+    rating: 5,
+    excerpt: "We hired J. Worden & Sons to repair and repave our large asphalt driveway. Gene's many years of experience in this family owned business, fair price, and great finished projects in our neighborhood led us to contract with him. Friendly, professional and efficient crew with all the best machinery. We are very happy with the result.",
+  },
 ];
 
 const HOUZZ_SCREENSHOT = 'https://media.api.com/images/public/69c853446b8987b1630018ff/9ca50477a_houzzcomjwordenawards.jpg';
@@ -157,7 +186,7 @@ export default function LocalReviews() {
             <div className="relative bg-white p-6 md:p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-border">
               <img
                 src={HOUZZ_SCREENSHOT}
-                alt="Screenshot from houzz.com verifying J. Worden & Sons Paving has earned 3 Houzz Awards — Best of Houzz Service 2014, 2015, and 2016 — plus 2 Houzz Badges (Recommended and 500 Saves) and 12 verified customer reviews."
+                alt="Screenshot from houzz.com verifying J. Worden & Sons Paving has earned 4 Houzz Awards — Best of Houzz Service 2014, 2015, 2016, and 2023 — plus 3 Houzz Badges (Houzz Pro Software User, Recommended, and 500 Ideabook Saves) and 12 verified customer reviews."
                 loading="lazy"
                 className="max-w-full max-h-[520px] object-contain"
               />
@@ -172,19 +201,21 @@ export default function LocalReviews() {
                 // Houzz Awards — Verifiable on Houzz.com
               </p>
               <h3 className="font-display font-black text-foreground text-3xl md:text-4xl uppercase tracking-tight leading-[0.95] mb-5">
-                3 Houzz Awards.<br />
-                <span className="text-primary">2 Badges.</span>
+                4 Houzz Awards.<br />
+                <span className="text-primary">3 Badges.</span>
               </h3>
               <p className="font-body text-muted-foreground text-base leading-relaxed mb-6">
-                Best of Houzz Service winners for three consecutive years — 2014, 2015, and 2016 — awarded directly by Houzz based on verified client review scores. Plus the Houzz Recommended badge and 500 Saves milestone.
+                Best of Houzz Service winners across four years — 2014, 2015, 2016, and 2023 — awarded directly by Houzz based on verified client review scores. Plus the Houzz Pro Software, Recommended, and 500 Ideabook Saves badges.
               </p>
               <div className="space-y-2 mb-8">
                 {[
+                  'Best of Houzz Service — 2023',
                   'Best of Houzz Service — 2016',
                   'Best of Houzz Service — 2015',
                   'Best of Houzz Service — 2014',
+                  'Houzz Pro Software User Badge',
                   'Houzz Recommended Badge',
-                  'Houzz 500 Saves Badge',
+                  'Houzz 500 Ideabook Saves Badge',
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-3">
                     <span className="w-1.5 h-1.5 bg-primary shrink-0" />
@@ -227,6 +258,46 @@ export default function LocalReviews() {
                 </span>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Verified Houzz review excerpts */}
+        <div className="mt-12">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="font-display text-primary text-[10px] tracking-[0.3em] uppercase mb-2">
+                // Verified on Houzz.com
+              </p>
+              <h3 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight">
+                What Customers Say
+              </h3>
+            </div>
+            <a
+              href="https://www.houzz.com/professionals/stone-pavers-and-concrete/j-worden-and-sons-paving-l-l-c-pfvwus-pf~663227484"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-display text-primary text-[10px] tracking-[0.2em] uppercase hover:underline shrink-0"
+            >
+              All 12 Reviews on Houzz →
+            </a>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {HOUZZ_REVIEWS.map((r) => (
+              <div key={r.author} className="border border-border bg-card p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <StarRow rating={r.rating} />
+                  <span className="font-display text-muted-foreground text-[10px] tracking-[0.15em] uppercase">
+                    {r.date}
+                  </span>
+                </div>
+                <p className="font-body text-foreground text-sm leading-relaxed mb-4">
+                  “{r.excerpt}”
+                </p>
+                <p className="font-display text-primary text-[10px] tracking-[0.2em] uppercase">
+                  — {r.author} · Houzz
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

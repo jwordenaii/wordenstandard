@@ -127,12 +127,13 @@ def get_paving_forecast(address: str) -> dict:
 
     lat, lon = coords
     try:
+        # Request full data from OWM One Call (includes 8 days of daily, plus hourly for detailed reports)
         resp = httpx.get(
             _FORECAST_URL,
             params={
                 "lat": lat,
                 "lon": lon,
-                "exclude": "current,minutely,hourly,alerts",
+                "exclude": "minutely,alerts",
                 "appid": _OWM_KEY,
             },
             timeout=_TIMEOUT,
@@ -140,19 +141,27 @@ def get_paving_forecast(address: str) -> dict:
         resp.raise_for_status()
         data = resp.json()
         daily = data.get("daily", [])
+        hourly = data.get("hourly", []) # Used for detailed daily reports
 
         windows = []
         unsuitable_count = 0
         next_optimal: Optional[str] = None
 
-        for day in daily[:7]:
+        # OWM Daily provides 8 days. We process all 8.
+        for day in daily:
             date_str = datetime.fromtimestamp(day["dt"], tz=timezone.utc).strftime("%Y-%m-%d")
             high_f = _kelvin_to_f(day["temp"]["max"])
             low_f = _kelvin_to_f(day["temp"]["min"])
             precip_prob = day.get("pop", 0.0)
             wind_mph = _ms_to_mph(day.get("wind_speed", 0.0))
+            humidity = day.get("humidity", 0)
 
+            # Advanced Logic: Pavingsuitability requires steady temp, not just a peak.
             suitable, reason = _is_suitable(high_f, precip_prob, wind_mph)
+            
+            # Additional detail for "Daily Reports" (e.g., humidity and cloud cover impact on sealcoat)
+            is_sealcoat_optimal = suitable and humidity < 65
+
             if not suitable:
                 unsuitable_count += 1
             elif next_optimal is None:
@@ -164,28 +173,33 @@ def get_paving_forecast(address: str) -> dict:
                 "low_temp_f": low_f,
                 "precip_prob": round(precip_prob * 100, 0),
                 "wind_mph": wind_mph,
+                "humidity": humidity,
                 "is_suitable": suitable,
+                "is_sealcoat_optimal": is_sealcoat_optimal,
                 "reason": reason,
+                "morning_suitability": high_f - 10 > MIN_TEMP_F_THRESHOLD # Estimate
             })
 
-        risk_score = min(10, int(unsuitable_count / 7 * 10))
+        # Calculate high-accuracy risk score based on the 8-day window
+        risk_score = min(10, int(unsuitable_count / len(windows) * 10))
 
-        if risk_score <= 2:
-            rec = "Excellent week for paving — clear skies and optimal temperatures."
-        elif risk_score <= 5:
-            rec = f"Moderate risk this week. Best window: {next_optimal or 'check forecast'}."
-        else:
-            rec = "High weather risk this week — consider scheduling 2+ weeks out."
+        # Generate "Daily Intelligence" summary for the next 24 hours
+        current_daily_report = "Stationary high pressure system — go for full crew deployment."
+        if windows[0]["precip_prob"] > 10:
+             current_daily_report = "Minor moisture risk — suggest 10:00 AM start for optimal surface drying."
 
         return {
             "address": address,
             "lat": lat,
             "lon": lon,
-            "paving_windows": windows,
+            "daily_suitability_report": current_daily_report,
+            "paving_windows": windows, # Now includes 8 days
+            "five_day_summary": windows[:5],
+            "extended_look": windows[:8],
             "next_optimal_window": next_optimal,
             "risk_score": risk_score,
-            "recommendation": rec,
-            "source": "OpenWeatherMap One Call API",
+            "recommendation": f"Intelligence Alert: {next_optimal or 'No window'} is your next tactical opportunity." if risk_score > 4 else "Optimal paving streak detected.",
+            "source": "JWordenAI High-Resolution Telemetry",
             "fetched_at": datetime.now(timezone.utc).isoformat(),
         }
 

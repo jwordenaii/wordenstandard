@@ -1,7 +1,15 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight } from 'lucide-react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat } from 'lucide-react'
 import { api } from '@/api/client'
 import { Link } from 'react-router-dom'
+import states from '../data/legal/states'
+import constructionLicensing from '../data/legal/constructionLicensing'
+import mechanicsLienLaws from '../data/legal/mechanicsLienLaws'
+import promptPaymentLaws from '../data/legal/promptPaymentLaws'
+import contractLaw from '../data/legal/contractLaw'
+import roadsAndPavingRegulations from '../data/legal/roadsAndPavingRegulations'
+import { recommendStrategy, rankStatesByDispute, DISPUTE_TYPES, ROLES } from '../lib/lawyerRecommender'
+import { optimizeLicenseStates, getLienLeverageByState, rankContractorBids } from '../lib/contractorRanker'
 
 const RichmondGrid = lazy(() => import('../components/RichmondGrid'))
 const INTERNAL_STRATEGY_ENABLED = true
@@ -17,6 +25,7 @@ const TABS = [
   { id: 'kpi', label: 'KPI Wall' },
   { id: 'crm', label: 'CRM Leads' },
   { id: 'ops', label: 'Ops Pipeline' },
+  { id: 'civil-intel', label: 'Civil Intel' },
 ]
 
 const KPI_CARDS = [
@@ -2648,6 +2657,367 @@ function WeekendExecutionSprintPanel({ latestAudit }) {
   )
 }
 
+function CivilContractorIntelligencePanel() {
+  const [selectedState, setSelectedState] = useState('VA')
+  const [stateCodeInput, setStateCodeInput] = useState('VA')
+  const [market, setMarket] = useState('Richmond, VA')
+  const [disputeType, setDisputeType] = useState('general')
+  const [role, setRole] = useState('gc')
+  const [advisorData, setAdvisorData] = useState(null)
+  const [advisorStatus, setAdvisorStatus] = useState('idle')
+  const [utilityRisk, setUtilityRisk] = useState(null)
+
+  const validStateCodes = useMemo(() => new Set(states.map((stateRow) => stateRow.abbr)), [])
+  const stateCodeValid = validStateCodes.has(stateCodeInput)
+  const stateName = states.find((stateRow) => stateRow.abbr === selectedState)?.state || selectedState
+  const licensingEntry = constructionLicensing.find((entry) => entry.abbr === selectedState)
+  const lienEntry = mechanicsLienLaws.find((entry) => entry.abbr === selectedState)
+  const payEntry = promptPaymentLaws.find((entry) => entry.abbr === selectedState)
+  const contractEntry = contractLaw.find((entry) => entry.abbr === selectedState)
+  const roadsEntry = roadsAndPavingRegulations.find((entry) => entry.abbr === selectedState)
+
+  const localRankedStates = useMemo(
+    () => rankStatesByDispute(disputeType, mechanicsLienLaws, promptPaymentLaws, contractLaw).slice(0, 6),
+    [disputeType],
+  )
+
+  const localRecommendation = useMemo(
+    () => recommendStrategy(
+      selectedState,
+      disputeType,
+      role,
+      { lienEntry, payEntry, contractEntry },
+      localRankedStates,
+    ),
+    [contractEntry, disputeType, lienEntry, localRankedStates, payEntry, role, selectedState],
+  )
+
+  const licenseLeaders = useMemo(() => optimizeLicenseStates(constructionLicensing).slice(0, 6), [])
+  const lienLeaders = useMemo(() => getLienLeverageByState(mechanicsLienLaws).slice(0, 6), [])
+  const rankedBidDemo = useMemo(
+    () => rankContractorBids(
+      [
+        {
+          name: 'J. Worden & Sons Operating Model',
+          bidAmount: 128000,
+          licenseState: selectedState,
+          licenseClasses: licensingEntry?.licenseClasses || ['General contractor', 'Paving specialty'],
+          bondAmount: licensingEntry?.bondMinCommercial || 50000,
+          yearsExperience: 25,
+          hasInsurance: true,
+          workersComp: true,
+        },
+        {
+          name: 'Low-bid competitor model',
+          bidAmount: 91000,
+          licenseState: selectedState,
+          licenseClasses: ['Specialty'],
+          bondAmount: 0,
+          yearsExperience: 3,
+          hasInsurance: true,
+          workersComp: false,
+        },
+      ],
+      115000,
+      145000,
+    ),
+    [licensingEntry, selectedState],
+  )
+
+  const runAdvisor = useCallback(async () => {
+    setAdvisorStatus('loading')
+    try {
+      const [legalStrategy, topStates, licenseOptimizer, utility] = await Promise.all([
+        api.getLegalStrategy({ state: selectedState, dispute_type: disputeType, role }),
+        api.getTopStates(disputeType, 6),
+        api.getLicenseOptimizer(6),
+        api.evaluateUtilityRisk({ has_septic: false, has_well: false, has_detached_structures: true, has_pool: false }),
+      ])
+      setAdvisorData({ legalStrategy, topStates, licenseOptimizer })
+      setUtilityRisk(utility)
+      setAdvisorStatus('live')
+    } catch {
+      setAdvisorData(null)
+      setUtilityRisk(null)
+      setAdvisorStatus('fallback')
+    }
+  }, [disputeType, role, selectedState])
+
+  useEffect(() => {
+    runAdvisor()
+  }, [runAdvisor])
+
+  const activeStrategy = advisorData?.legalStrategy
+  const activeScores = activeStrategy?.scores || {
+    lien: localRecommendation.scores.lien,
+    payment: localRecommendation.scores.payment,
+    contract: localRecommendation.scores.contract,
+    composite: localRecommendation.composite,
+    label: localRecommendation.strengthLabel,
+  }
+  const activeActions = activeStrategy?.strategy?.key_actions || localRecommendation.strategy.keyActions
+  const activeTopStates = advisorData?.topStates?.states || localRankedStates
+  const activeLicenseLeaders = advisorData?.licenseOptimizer?.results || licenseLeaders
+
+  const applyStateCode = useCallback((nextValue) => {
+    const nextCode = String(nextValue || '').replace(/[^a-z]/gi, '').toUpperCase().slice(0, 2)
+    setStateCodeInput(nextCode)
+    if (validStateCodes.has(nextCode)) {
+      setSelectedState(nextCode)
+      const nextStateName = states.find((stateRow) => stateRow.abbr === nextCode)?.state || nextCode
+      setMarket((currentMarket) => currentMarket || `${nextStateName} operating market`)
+    }
+  }, [validStateCodes])
+
+  const planReadiness = [
+    { label: 'Plan upload intake', value: 'PDF/CAD/photos/documents', ready: true },
+    { label: 'Quantity takeoff', value: 'Area, depth, tonnage, edges, striping', ready: true },
+    { label: 'Cost catalog pricing', value: 'Labor, materials, trucking, equipment', ready: true },
+    { label: 'State law overlay', value: 'License, lien, prompt pay, DOT, utility rules', ready: true },
+    { label: 'Human bid approval', value: 'Estimator signs off before sending', ready: true },
+  ]
+
+  return (
+    <div className="space-y-4 md:space-y-5">
+      <div className="rounded-2xl border border-brand-amber/30 bg-brand-amber/10 p-4 md:p-5">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.16em] text-brand-amber mb-1">In-house prep system</p>
+            <h2 className="font-display font-black text-white text-2xl leading-tight">50-State Civil Contractor Intelligence</h2>
+            <p className="text-white/65 text-sm mt-2 max-w-3xl">
+              Same operating brain for all 50 states plus DC: state law, GC risk, paving rules, utility exposure, plan-to-bid prep, and award controls.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/advisory/legal-strategy" className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40">
+              Legal Advisor
+            </Link>
+            <Link to="/advisory/contractor-ranker" className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/85 hover:border-brand-amber/40">
+              Ranker
+            </Link>
+            <Link to={`/advisory/state/${selectedState}`} className="rounded-lg bg-brand-amber px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-brand-navy">
+              State File
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-5">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 xl:col-span-1">
+          <div className="flex items-center gap-2 mb-4">
+            <Globe className="w-4 h-4 text-brand-amber" />
+            <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Market Selector</h3>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-white/60 mb-1">Operating market</label>
+              <input
+                type="text"
+                value={market}
+                onChange={(event) => setMarket(event.target.value)}
+                placeholder="Detroit, MI"
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-amber"
+              />
+              <p className="mt-1 text-[11px] text-white/45">Type the city or territory label operators use internally.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/60 mb-1">State jurisdiction code</label>
+              <input
+                type="text"
+                value={stateCodeInput}
+                onChange={(event) => applyStateCode(event.target.value)}
+                placeholder="VA"
+                maxLength={2}
+                className={`w-full rounded-lg border bg-black/30 px-3 py-2 text-sm uppercase text-white focus:outline-none focus:ring-2 ${stateCodeValid ? 'border-white/15 focus:ring-brand-amber' : 'border-red-300/50 focus:ring-red-300'}`}
+              />
+              <p className={`mt-1 text-[11px] ${stateCodeValid ? 'text-white/45' : 'text-red-200'}`}>
+                {stateCodeValid ? `${stateName} loaded. Use any state abbreviation or DC.` : 'Enter a valid 2-letter state code or DC.'}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/60 mb-1">Situation</label>
+              <select
+                value={disputeType}
+                onChange={(event) => setDisputeType(event.target.value)}
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-amber"
+              >
+                {DISPUTE_TYPES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/60 mb-1">Role</label>
+              <select
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-amber"
+              >
+                {ROLES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={runAdvisor}
+              className="w-full rounded-lg bg-brand-amber px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-brand-navy"
+            >
+              Refresh Intelligence
+            </button>
+
+            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/65">
+              Source: {advisorStatus === 'live' ? 'Backend advisor live' : advisorStatus === 'loading' ? 'Loading backend advisor' : 'Local 50-state fallback'}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 xl:col-span-3">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Scale className="w-4 h-4 text-brand-amber" />
+                <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">{stateName} Strategy Snapshot</h3>
+              </div>
+              <p className="text-white/55 text-sm">Legal strength, licensing posture, and paving regulation prep for {market}.</p>
+            </div>
+            <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${statusTone(activeScores.composite || 0)}`}>
+              {activeScores.composite || 0}/100 · {activeScores.label || localRecommendation.strengthLabel}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+            {[
+              { label: 'Lien', value: activeScores.lien },
+              { label: 'Prompt Pay', value: activeScores.payment },
+              { label: 'Contract', value: activeScores.contract },
+              { label: 'Composite', value: activeScores.composite },
+            ].map((scoreRow) => (
+              <div key={scoreRow.label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-3">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-white/45">{scoreRow.label}</p>
+                <p className="text-white font-black text-2xl mt-1">{scoreRow.value || 0}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-brand-amber mb-2">Action checklist</p>
+              <div className="space-y-2">
+                {activeActions.slice(0, 5).map((action) => (
+                  <div key={action} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/75">
+                    {action}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-brand-amber mb-2">State rule file</p>
+              <div className="space-y-2 text-xs text-white/70">
+                <p>License required: {licensingEntry?.stateLicenseRequired ? 'Yes' : 'Local or category-specific'}</p>
+                <p>License classes: {(licensingEntry?.licenseClasses || []).slice(0, 3).join(', ') || 'Review state file'}</p>
+                <p>Commercial bond minimum: {licensingEntry?.bondMinCommercial ? `$${Number(licensingEntry.bondMinCommercial).toLocaleString()}` : 'No statewide value captured'}</p>
+                <p>Lien filing window: {lienEntry?.lienFilingDeadlineDays ? `${lienEntry.lienFilingDeadlineDays} days` : 'Review state lien file'}</p>
+                <p>Owner-to-GC pay clock: {payEntry?.ownerToGcDays ? `${payEntry.ownerToGcDays} days` : 'Review prompt-pay file'}</p>
+                <p>Road/paving file: {roadsEntry ? 'Loaded for DOT, encroachment, restoration and overweight rules' : 'State road file pending'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-4 h-4 text-brand-amber" />
+            <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Plan-to-Bid Readiness</h3>
+          </div>
+          <div className="space-y-2.5">
+            {planReadiness.map((row) => (
+              <div key={row.label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-white">{row.label}</p>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-300">Ready</span>
+                </div>
+                <p className="text-xs text-white/55 mt-1">{row.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2.5 text-xs text-amber-100">
+            Final bid flow: upload plans, extract quantities, price from catalog, overlay local rules, then require estimator approval before release.
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <HardHat className="w-4 h-4 text-brand-amber" />
+            <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Contractor Award Model</h3>
+          </div>
+          <div className="space-y-2.5">
+            {rankedBidDemo.map((bidRow) => (
+              <div key={bidRow.name} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-white">#{bidRow.rank} {bidRow.name}</p>
+                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${statusTone(bidRow.scores.composite)}`}>
+                    {bidRow.scores.composite}
+                  </span>
+                </div>
+                <p className="text-xs text-white/55 mt-1">{bidRow.rankLabel} · ${Number(bidRow.bidAmount).toLocaleString()}</p>
+                <p className="text-xs text-white/45 mt-1">{bidRow.recommendation}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em] mb-3">Expansion Signals</h3>
+          <div className="space-y-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.12em] text-brand-amber mb-2">Best base licenses</p>
+              <div className="flex flex-wrap gap-2">
+                {activeLicenseLeaders.slice(0, 6).map((stateRow) => (
+                  <span key={stateRow.abbr} className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-white/70">
+                    {stateRow.abbr} {stateRow.optimizer_score || stateRow.optimizerScore}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.12em] text-brand-amber mb-2">Strong lien leverage</p>
+              <div className="flex flex-wrap gap-2">
+                {lienLeaders.map((stateRow) => (
+                  <span key={stateRow.abbr} className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-white/70">
+                    {stateRow.abbr} {stateRow.lienScore}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.12em] text-brand-amber mb-2">Top dispute states</p>
+              <div className="flex flex-wrap gap-2">
+                {activeTopStates.slice(0, 6).map((stateRow) => (
+                  <span key={stateRow.abbr} className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-white/70">
+                    {stateRow.abbr} {stateRow.weighted || stateRow.composite || stateRow.score}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/65">
+              Utility risk sample: {utilityRisk?.risk_level || 'Local fallback'}. Private lines, 811 notices, and restoration rules stay inside the bid packet.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 md:px-5 py-4 text-xs text-white/55 leading-relaxed">
+        Advisory output is internal prep, not legal advice. For plan-based bids, the system should produce a draft estimate, risk sheet, and bid package, then require human estimator and legal review before customer release.
+      </div>
+    </div>
+  )
+}
+
 function PinGate({ onUnlock }) {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
@@ -2835,6 +3205,10 @@ export default function CommandCenter() {
                 <OperationsPipelinePanel />
                 <AuditFeedPanel />
               </div>
+            )}
+
+            {activeTab === 'civil-intel' && (
+              <CivilContractorIntelligencePanel />
             )}
           </>
       </div>

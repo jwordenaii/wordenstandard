@@ -52,6 +52,40 @@ export default function Hardscapes() {
             >
               Request Design Consultation
             </a>
+            <Link
+              to="/visualizer"
+              className="border-2 border-white/30 bg-white/10 px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-white hover:bg-white/20 transition-all"
+            >
+              4D Patio Visualizer
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 border-b border-border bg-background">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-8 items-start">
+            <div>
+              <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">Premium Design Intelligence</p>
+              <h2 className="font-display font-black text-foreground text-3xl md:text-5xl uppercase tracking-tight leading-[0.95]">
+                See The Patio, Pavers, Drainage, And Finish Before Construction Starts
+              </h2>
+              <p className="text-muted-foreground text-base leading-relaxed mt-5 max-w-3xl">
+                Our JWORDENAI design flow can turn customer photos, measurements, material preferences, drainage concerns, and outdoor-living ideas into a visual decision packet before a full hardscape proposal is approved.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                'Patio and outdoor room concepts',
+                'Pavers, concrete, cobblestone, and edging options',
+                '4D phasing from scan to base prep to final finish',
+              ].map((item) => (
+                <div key={item} className="border border-border bg-card p-5">
+                  <CheckCircle2 className="w-5 h-5 text-primary mb-3" />
+                  <p className="font-display font-black text-foreground text-xl uppercase tracking-tight leading-tight">{item}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

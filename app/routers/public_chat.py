@@ -158,13 +158,31 @@ def _stub_response(message: str, service_type: str | None = None) -> str:
     Returns a warm, on-brand reply that nudges toward conversion.
     """
     m = message.lower()
+    if any(w in m for w in ["scan", "pothole", "broken", "drainage", "water", "weeping", "parking lot"]):
+        return (
+            "The smart first move is to document the surface before anyone prices it blind. "
+            "For a driveway or small to medium lot, start with the AI scan review at /driveway-ai; "
+            "for shopping centers, industrial lots, or water movement problems, I would recommend a drone assessment. "
+            "What state is the property in?"
+        )
+    if any(w in m for w in ["4d", "design", "kitchen", "remodel", "addition", "patio", "floor plan"]):
+        return (
+            "That belongs in a 4D design packet, not a loose guess. "
+            "Use /visualizer for exterior property concepts or /floor-plan-studio for kitchens, interiors, additions, and layout planning. "
+            "Tell me what you want changed and whether you have photos, sketches, or plans."
+        )
+    if any(w in m for w in ["plan", "pdf", "blueprint", "bid", "scope", "drawing", "sketch"]):
+        return (
+            "Plans are worth reviewing carefully before a bid number gets attached to them. "
+            "I would start with plan-to-bid readiness: confirm scope, quantities, missing details, and risk items before pricing. "
+            "Do you have a PDF, sketch, or site photos ready?"
+        )
     if any(w in m for w in ["cost", "price", "how much", "estimate", "quote"]):
         return (
-            "Well now, I appreciate you askin' straight — that's how I like it too. "
-            "For residential driveways you're lookin' at $3.50 to $8.00 per square foot; "
+            "I appreciate a straight pricing question. "
+            "For residential driveways, public ballparks are $3.50 to $8.00 per square foot; "
             "commercial lots run $2.50 to $6.00. "
-            "But every job's got its own story — let us come take a look for free, no obligation. "
-            "Head over to our quote form and we'll get you on the schedule."
+            "Drainage, base depth, access, and urgency can move that number fast, so /quote is the right path for a free site estimate."
         )
     if any(w in m for w in ["sealcoat", "seal"]):
         return (
@@ -174,9 +192,9 @@ def _stub_response(message: str, service_type: str | None = None) -> str:
         )
     if any(w in m for w in ["schedule", "book", "appointment", "visit"]):
         return (
-            "You called the right place! "
-            "Head over to our quote form — fill in a few details and a small deposit will hold your spot. "
-            "We'll reach out within 24 hours to confirm your free on-site visit."
+            "Good. The fastest public path is /quote. "
+            "Send the location, scope, photos if you have them, and your timeline. "
+            "If it is a larger lot or drainage problem, ask for drone assessment in the notes."
         )
     if any(w in m for w in ["area", "serve", "location", "virginia", "richmond"]):
         return (
@@ -187,14 +205,15 @@ def _stub_response(message: str, service_type: str | None = None) -> str:
         )
     if any(w in m for w in ["concrete", "cobblestone", "brick", "paver"]):
         return (
-            "Yes sir, we do much more than asphalt — concrete, cobblestone, and brick pavers are all in our wheelhouse. "
+            "Yes, we do more than asphalt: concrete, cobblestone, and brick pavers are all in the public service mix. "
             "Each one has its own price range and best application. "
-            "What are you thinkin' about using it for? That'll help me point you in the right direction."
+            "What are you using it for, and what state is the property in?"
         )
     return (
-        "Much obliged for reaching out — J. Worden & Sons has been at this since 1984 "
-        "and we'd be honored to take a look at your project. "
-        "Tell me a little more about what you're working on and I'll give you a straight answer."
+        "I am Mr. Worden, your digital founder concierge. "
+        "Show me the pavement, plan, roof concern, patio idea, or remodel goal and I will point you to the smartest next move: "
+        "free estimate, AI scan review, drone assessment, 4D design packet, or plan-to-bid prep. "
+        "What are we looking at today?"
     )
 
 

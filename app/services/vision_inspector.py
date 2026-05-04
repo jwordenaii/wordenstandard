@@ -71,11 +71,13 @@ _RISK_LABELS: dict[str, str] = {
     "crack":         "Structural: Crack or surface defect detected",
     "pothole":       "Structural: Pothole or subsurface failure",
     "standing-water":"Drainage: Standing water detected",
+    "joint-gap":     "ASPHALT AI: Cold joint gap detected (Re-roll required)",
+    "uneven-mat":    "ASPHALT AI: Mat texture variation (Compaction check)",
     "equipment":     "Equipment on site",
     "vehicle":       "Vehicle on site",
 }
 
-_HIGH_RISK = {"no-hard-hat", "no-vest", "crack", "pothole"}
+_HIGH_RISK = {"no-hard-hat", "no-vest", "crack", "pothole", "joint-gap"}
 
 
 def detect_deviations(
