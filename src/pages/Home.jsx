@@ -15,6 +15,7 @@ const LOT_IMAGE = '/work/portfolio/portfolio-030.jpg';
 const WORK_IMAGE = '/work/portfolio/portfolio-019.jpg';
 
 const serviceSolutions = [
+  ' Serving Richmond, Chesterfield, Fredericksburg, and all of Central Virginia with top-tier asphalt paving solutions.',
   'Residential driveway paving, overlays, and private lanes',
   'Commercial asphalt paving and parking lot resurfacing',
   'Sealcoating, crack sealing, and pavement preservation programs',

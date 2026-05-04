@@ -10,7 +10,7 @@ import { trackPhoneClick } from '@/lib/analytics'
 const PAVING_SERVICES = [
   {
     title: 'Precision Asphalt Paving',
-    description: 'High-density asphalt mix designed for Virginia climate. Every job includes site grading, 6-inch stone base compaction, and dual-roller finishing.',
+    description: 'High-density asphalt mix designed for Virginia climate, specifically tailored for Richmond, Chesterfield, and Fredericksburg. Every job includes site grading, 6-inch stone base compaction, and dual-roller finishing.',
     icon: <Construction className="w-6 h-6 text-primary" />
   },
   {

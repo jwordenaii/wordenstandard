@@ -118,7 +118,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="font-body text-muted-foreground text-xs">
-            © 2026 J. Worden & Sons Asphalt Paving. All rights reserved.
+            © 2026 J. Worden & Sons Asphalt Paving. All rights reserved. Serving Richmond, VA and surrounding areas.
           </p>
           <p className="font-body text-muted-foreground text-xs">
             Licensed · Bonded · Insured · VA Contractor
