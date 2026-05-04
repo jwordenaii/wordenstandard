@@ -113,7 +113,7 @@ export default function JwordenAI() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070707] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <SEO
         title="JWORDENAI | Construction Intelligence Teaser"
         description="A public preview of the private construction intelligence system supporting J. Worden & Sons Asphalt Paving, including the Driveway + Lot AI Scan source experience."
@@ -183,7 +183,7 @@ export default function JwordenAI() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {scanSignals.map((signal) => (
-              <div key={signal} className="border border-white/10 bg-[#111111] p-5">
+              <div key={signal} className="border border-white/10 bg-background p-5">
                 <Camera className="mb-4 h-5 w-5 text-primary" />
                 <p className="font-display text-2xl uppercase leading-tight text-white">{signal}</p>
               </div>
@@ -192,7 +192,7 @@ export default function JwordenAI() {
         </div>
       </section>
 
-      <section className="border-b border-white/10 bg-[#101214] py-16 md:py-20">
+      <section className="border-b border-border bg-background py-16 md:py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 max-w-4xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Beyond pavement</p>
@@ -207,7 +207,7 @@ export default function JwordenAI() {
             {futureScanChannels.map((channel) => {
               const Icon = channel.icon;
               return (
-                <article key={channel.title} className="bg-[#151515] p-8">
+                <article key={channel.title} className="bg-card p-8">
                   <Icon className="mb-8 h-7 w-7 text-primary" />
                   <h3 className="font-display text-3xl uppercase leading-none text-white">{channel.title}</h3>
                   <p className="mt-5 text-sm leading-relaxed text-zinc-400">{channel.body}</p>
@@ -245,7 +245,7 @@ export default function JwordenAI() {
             {designScanChannels.map((channel) => {
               const Icon = channel.icon;
               return (
-                <article key={channel.title} className="bg-[#151515] p-8">
+                <article key={channel.title} className="bg-card p-8">
                   <Icon className="mb-8 h-7 w-7 text-primary" />
                   <h3 className="font-display text-3xl uppercase leading-none text-white">{channel.title}</h3>
                   <p className="mt-5 text-sm leading-relaxed text-zinc-400">{channel.body}</p>
@@ -256,7 +256,7 @@ export default function JwordenAI() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#101214] py-20 md:py-28">
+      <section className="border-y border-border bg-background py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-12 max-w-4xl">
             <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">What it previews</p>
@@ -268,7 +268,7 @@ export default function JwordenAI() {
             {teaserCards.map((card) => {
               const Icon = card.icon;
               return (
-                <article key={card.title} className="bg-[#151515] p-8">
+                <article key={card.title} className="bg-card p-8">
                   <Icon className="mb-8 h-7 w-7 text-primary" />
                   <h3 className="font-display text-3xl uppercase leading-none text-white">{card.title}</h3>
                   <p className="mt-5 text-sm leading-relaxed text-zinc-400">{card.body}</p>
@@ -294,7 +294,7 @@ export default function JwordenAI() {
             {revenueLayers.map((layer) => {
               const Icon = layer.icon;
               return (
-                <article key={layer.title} className="bg-[#151515] p-8">
+                <article key={layer.title} className="bg-card p-8">
                   <Icon className="mb-8 h-7 w-7 text-primary" />
                   <h3 className="font-display text-3xl uppercase leading-none text-white">{layer.title}</h3>
                   <p className="mt-5 text-sm leading-relaxed text-zinc-400">{layer.body}</p>
@@ -319,7 +319,7 @@ export default function JwordenAI() {
           </div>
           <div className="space-y-4">
             {boundaries.map((item) => (
-              <div key={item} className="border-l border-primary bg-[#181818] p-5 font-display text-2xl uppercase text-white">
+              <div key={item} className="border-l border-primary bg-background p-5 font-display text-2xl uppercase text-white">
                 {item}
               </div>
             ))}
