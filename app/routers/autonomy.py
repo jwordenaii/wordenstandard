@@ -22,14 +22,66 @@ from pydantic import BaseModel, Field
 from ..core.security import verify_premium_security
 from ..services.orchestrator import GoalType, GoalResult, execute_goal, get_rl_weights
 from ..services.cognitive_twin import get_twin_status, snapshot_project
+from ..services import autonomy_state
 
 logger = logging.getLogger(__name__)
+
+# ── Public kill-switch sub-router ─────────────────────────────────────────────
+# NO auth on /state and /freeze: by design — easy to STOP, hard to START.
+# /unfreeze lives on the protected `router` below (requires admin token).
+public_router = APIRouter(prefix="/api/v1/autonomy", tags=["autonomy"])
+
+
+class FreezeRequest(BaseModel):
+    reason: Optional[str] = Field(None, description="Optional human-readable reason")
+
+
+@public_router.get("/state", summary="Read current Jarvis autonomy state (public)")
+def autonomy_get_state():
+    """Public read so the Command Center UI can sync without an auth round-trip."""
+    return autonomy_state.get_state()
+
+
+@public_router.post("/freeze", summary="PANIC: freeze all Jarvis autonomy (public)")
+def autonomy_freeze(req: Optional[FreezeRequest] = None):
+    """
+    Public on purpose. Anyone holding the URL can hit the brakes.
+    A determined attacker can already DOS this endpoint; the worst they
+    can do here is *disable* automation, which is the safe-by-default outcome.
+    """
+    reason = (req.reason if req else None) or "manual"
+    state = autonomy_state.freeze(reason=reason)
+    logger.warning("[AUTONOMY] FROZEN — reason=%s", reason)
+    return state
+
 
 router = APIRouter(
     prefix="/api/v1/autonomy",
     tags=["autonomy"],
     dependencies=[Depends(verify_premium_security)],
 )
+
+
+# ── Authenticated kill-switch operations ──────────────────────────────────────
+
+@router.post("/unfreeze", summary="Lift the freeze and restore autonomy controls")
+def autonomy_unfreeze():
+    """Auth-protected because turning autonomy back ON is the dangerous direction."""
+    state = autonomy_state.unfreeze()
+    logger.warning("[AUTONOMY] UNFROZEN by authenticated operator")
+    return state
+
+
+@router.post("/master", summary="Set master autonomy switch (refused while frozen)")
+def autonomy_set_master(enabled: bool):
+    state = autonomy_state.set_master(enabled)
+    return state
+
+
+@router.post("/domain/{domain_id}", summary="Set per-domain autonomy switch")
+def autonomy_set_domain(domain_id: str, enabled: bool):
+    state = autonomy_state.set_domain(domain_id, enabled)
+    return state
 
 # ── In-memory goal cache (production: swap for Redis / DB) ────────────────────
 _GOAL_CACHE: dict[str, dict] = {}

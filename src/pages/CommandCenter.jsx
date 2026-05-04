@@ -65,11 +65,19 @@ function writeAutonomyState(state) {
 function triggerPanic(reason = 'manual') {
   const next = { master: false, domains: {}, frozen: true, frozenAt: new Date().toISOString(), reason }
   writeAutonomyState(next)
+  // Defense-in-depth: also tell the backend so server-side autonomy stops too.
+  // Best-effort, never throws — UI freeze succeeds even if network fails.
+  try {
+    api.freezeAutonomy?.(reason)?.catch?.(() => { /* ignore */ })
+  } catch { /* ignore */ }
   return next
 }
 function unfreeze() {
   const next = { master: false, domains: {}, frozen: false, frozenAt: null }
   writeAutonomyState(next)
+  try {
+    api.unfreezeAutonomy?.()?.catch?.(() => { /* ignore */ })
+  } catch { /* ignore */ }
   return next
 }
 
@@ -3146,12 +3154,20 @@ function JarvisChat({ compact = false }) {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [statusOk, setStatusOk] = useState(null)
+  const [engine, setEngine] = useState(null)        // 'anthropic-claude' | 'heuristic-fallback'
+  const [backendFrozen, setBackendFrozen] = useState(false)
   const scrollerRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
-    api.request('GET', '/api/v1/jarvis/status')
-      .then((r) => { if (!cancelled) setStatusOk(Boolean(r && (r.status === 'ONLINE' || r.identity === 'JARVIS'))) })
+    api.jarvisStatus()
+      .then((r) => {
+        if (cancelled) return
+        const ok = Boolean(r && (r.status === 'ONLINE' || r.identity === 'JARVIS'))
+        setStatusOk(ok)
+        setEngine(r?.engine || null)
+        setBackendFrozen(Boolean(r?.autonomy?.frozen))
+      })
       .catch(() => { if (!cancelled) setStatusOk(false) })
     return () => { cancelled = true }
   }, [])
@@ -3193,20 +3209,33 @@ function JarvisChat({ compact = false }) {
           </div>
           <div>
             <h3 className="font-display font-bold text-white text-base leading-tight">Jarvis</h3>
-            <p className="text-white/40 text-xs">Your private AI ops officer</p>
+            <p className="text-white/40 text-xs">
+              {engine === 'anthropic-claude'
+                ? 'Powered by Claude · live brain'
+                : engine === 'heuristic-fallback'
+                  ? 'Heuristic mode · add ANTHROPIC_API_KEY to unlock Claude'
+                  : 'Your private AI ops officer'}
+            </p>
           </div>
         </div>
-        <span className={[
-          'inline-flex items-center gap-1.5 rounded-full text-xs font-semibold px-2.5 py-1 border',
-          statusOk == null ? 'border-white/20 text-white/50 bg-white/5' :
-          statusOk ? 'border-emerald-300/40 text-emerald-200 bg-emerald-300/10' :
-                     'border-red-300/40 text-red-200 bg-red-300/10',
-        ].join(' ')}>
-          <span className={['w-1.5 h-1.5 rounded-full',
-            statusOk == null ? 'bg-white/30' : statusOk ? 'bg-emerald-300 animate-pulse' : 'bg-red-300'
-          ].join(' ')} />
-          {statusOk == null ? 'Checking…' : statusOk ? 'ONLINE' : 'OFFLINE'}
-        </span>
+        <div className="flex items-center gap-2">
+          {backendFrozen ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold px-2 py-0.5 border border-red-400/50 text-red-100 bg-red-500/15">
+              BACKEND FROZEN
+            </span>
+          ) : null}
+          <span className={[
+            'inline-flex items-center gap-1.5 rounded-full text-xs font-semibold px-2.5 py-1 border',
+            statusOk == null ? 'border-white/20 text-white/50 bg-white/5' :
+            statusOk ? 'border-emerald-300/40 text-emerald-200 bg-emerald-300/10' :
+                       'border-red-300/40 text-red-200 bg-red-300/10',
+          ].join(' ')}>
+            <span className={['w-1.5 h-1.5 rounded-full',
+              statusOk == null ? 'bg-white/30' : statusOk ? 'bg-emerald-300 animate-pulse' : 'bg-red-300'
+            ].join(' ')} />
+            {statusOk == null ? 'Checking…' : statusOk ? 'ONLINE' : 'OFFLINE'}
+          </span>
+        </div>
       </div>
 
       <div ref={scrollerRef} className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-3">
@@ -3633,6 +3662,30 @@ export default function CommandCenter() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Sync local autonomy state with backend on mount.
+  // If backend says frozen, mirror it locally; if backend is OK but local is
+  // frozen we leave local frozen (operator's last word wins).
+  useEffect(() => {
+    let cancelled = false
+    api.getAutonomyState?.()
+      .then((server) => {
+        if (cancelled || !server) return
+        if (server.frozen) {
+          const cur = readAutonomyState()
+          if (!cur.frozen) {
+            writeAutonomyState({
+              master: false, domains: {},
+              frozen: true,
+              frozenAt: server.frozenAt || new Date().toISOString(),
+              reason: server.reason || 'backend',
+            })
+          }
+        }
+      })
+      .catch(() => { /* silent — UI still has its local state */ })
+    return () => { cancelled = true }
   }, [])
 
   return (

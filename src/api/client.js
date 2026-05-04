@@ -662,6 +662,11 @@ export const api = {
   // ── JARVIS Command Interface ───────────────────────────────────────────────
   jarvisCommand: (query, persona = "JARVIS") =>
     request('POST', '/api/v1/jarvis/command', { query, persona }),
+  jarvisStatus: () => request('GET', '/api/v1/jarvis/status'),
+  // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────
+  getAutonomyState: () => request('GET', '/api/v1/autonomy/state'),
+  freezeAutonomy: (reason = 'manual') => request('POST', '/api/v1/autonomy/freeze', { reason }),
+  unfreezeAutonomy: () => protectedRequest('POST', '/api/v1/autonomy/unfreeze'),
   // ── Command Center dashboard metrics ──────────────────────────────────────
   getSiteMetrics: () => request('GET', '/api/v1/site-metrics'),
   // ── Property Visualizer (public, anonymous) ───────────────────────────────

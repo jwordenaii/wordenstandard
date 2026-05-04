@@ -1,10 +1,79 @@
 from __future__ import annotations
 import logging
+import os
 import asyncio
 from typing import Dict, Any, List, Optional
 from app.services.quantum_orchestrator import global_quantum_orchestrator
+from app.services import autonomy_state
 
 logger = logging.getLogger(__name__)
+
+# ── Optional Anthropic Claude brain ───────────────────────────────────────────
+# When ANTHROPIC_API_KEY is set, Jarvis routes free-form queries through Claude
+# with a JWordenAI-aware system prompt. Falls back gracefully to canned
+# responses when the key is missing or the call fails.
+_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+_ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest").strip()
+_ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+_ANTHROPIC_VERSION = "2023-06-01"
+
+JARVIS_SYSTEM_PROMPT = (
+    "You are JARVIS, the operational AI for JWordenAI — a Virginia-based asphalt paving, "
+    "sealcoating, and construction-intelligence platform owned by Jeremy Worden. "
+    "You speak in a calm, precise, Stark-style 'At your service, Sir' register. "
+    "Be brief by default (1-3 sentences) unless the operator asks for depth. "
+    "You have a hard kill-switch ('frozen' state) that overrides every autonomous action; "
+    "always honor it. You may discuss leads, jobs, estimates, weather impact on paving, "
+    "Virginia DOT compliance, sealcoating, and SEO. Refuse to schedule, send, or "
+    "modify anything without confirmation when the master autonomy switch is OFF."
+)
+
+
+async def _ask_claude(query: str, persona: str, autonomy: dict) -> Optional[str]:
+    if not _ANTHROPIC_KEY:
+        return None
+    try:
+        import httpx  # type: ignore
+    except ImportError:
+        return None
+
+    persona_note = (
+        "Adopt the 'Mr. Worden Sales' persona: warm, energetic, closing-oriented, "
+        "Richmond-Virginia paving expert."
+        if persona == "MR_WORDEN_SALES"
+        else "Maintain the JARVIS persona."
+    )
+    state_note = (
+        f"Current autonomy: master={autonomy.get('master')}, "
+        f"frozen={autonomy.get('frozen')}, domains={list((autonomy.get('domains') or {}).keys())}."
+    )
+    system = f"{JARVIS_SYSTEM_PROMPT}\n\n{persona_note}\n{state_note}"
+
+    payload = {
+        "model": _ANTHROPIC_MODEL,
+        "max_tokens": 600,
+        "system": system,
+        "messages": [{"role": "user", "content": query}],
+    }
+    headers = {
+        "x-api-key": _ANTHROPIC_KEY,
+        "anthropic-version": _ANTHROPIC_VERSION,
+        "content-type": "application/json",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.post(_ANTHROPIC_URL, json=payload, headers=headers)
+        if r.status_code != 200:
+            logger.warning("[JARVIS] Anthropic non-200: %s %s", r.status_code, r.text[:200])
+            return None
+        data = r.json()
+        blocks = data.get("content") or []
+        text = "".join(b.get("text", "") for b in blocks if isinstance(b, dict)).strip()
+        return text or None
+    except Exception as exc:  # noqa: BLE001 — fallback path
+        logger.warning("[JARVIS] Anthropic call failed: %s", exc)
+        return None
+
 
 class JarvisAI:
     """
@@ -59,10 +128,38 @@ class JarvisAI:
         A unified intelligence engine combining Lifestyle, Business Events, 
         Global Education, Federal Standards, and Supreme Court Legal Logic.
         """
-        query_lower = query.lower()
         context = context or {}
         persona = context.get("persona", "JARVIS")
-        
+
+        # ── Defense-in-depth: backend kill switch ─────────────────────────────
+        state = autonomy_state.get_state()
+        if state.get("frozen"):
+            return {
+                "source": self.identity,
+                "message": (
+                    "Sir, autonomy is currently FROZEN by the Command Center kill switch. "
+                    "I can answer questions, but I will not take any autonomous action "
+                    f"until you unfreeze me. (Frozen since {state.get('frozenAt')})"
+                ),
+                "action_required": False,
+                "frozen": True,
+                "intel_tier": "Safety-Override",
+            }
+
+        # ── Brain: Anthropic Claude (when configured) ─────────────────────────
+        claude_text = await _ask_claude(query, persona, state)
+        if claude_text:
+            return {
+                "source": self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
+                "message": claude_text,
+                "action_required": False,
+                "engine": "anthropic-claude",
+                "model": _ANTHROPIC_MODEL,
+                "autonomy": {"master": state.get("master"), "frozen": False},
+            }
+
+        # ── Fallback: legacy heuristic responses ──────────────────────────────
+        query_lower = query.lower()
         if persona == "MR_WORDEN_SALES":
             return await self._converse_mr_worden_sales(query_lower, context)
 

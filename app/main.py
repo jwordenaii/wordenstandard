@@ -491,6 +491,7 @@ app.include_router(vdot_bids_router.router)
 
 # Level 4 Autonomous Intelligence
 app.include_router(autonomy_router.router)
+app.include_router(autonomy_router.public_router)  # public kill-switch /state + /freeze
 
 # Automated quoting engine (PavingEvaluation → priced proposal)
 app.include_router(quotes_router.router)
