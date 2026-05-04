@@ -79,6 +79,26 @@ https://www.kansascitypavingpros.com/* https://www.jwordenasphaltpaving.com/loca
 /fredericksburg-va-paving   /locations  301!
 
 # ============================================================
+# AD LANDING ALIASES — common Google Ads URL variants that
+# previously rendered React's PageNotFound (soft 404). Route
+# them to the right destination so paid clicks always convert.
+# ============================================================
+/free-estimate         /contact        301!
+/get-quote             /quote          301!
+/get-a-quote           /quote          301!
+/estimate              /contact        301!
+/free-quote            /quote          301!
+/request-estimate      /contact        301!
+/request-a-quote       /quote          301!
+/asphalt-paving        /paving         301!
+/asphalt               /paving         301!
+/driveway              /residential    301!
+/driveways             /residential    301!
+/parking-lot           /parking-lots   301!
+/seal-coating          /sealcoating    301!
+/sealing               /sealcoating    301!
+
+# ============================================================
 # SPA FALLBACK (must be LAST)
 # Any unmatched path serves the React app's index.html
 # ============================================================
