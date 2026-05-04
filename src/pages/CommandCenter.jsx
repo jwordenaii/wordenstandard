@@ -33,6 +33,7 @@ const TABS = [
   { id: 'thermal', label: 'Thermal' },
   { id: 'drone', label: 'Drone' },
   { id: 'lidar', label: 'LiDAR' },
+  { id: 'roller', label: 'Roller' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3684,6 +3685,86 @@ function SearchPulsePanel() {
   )
 }
 
+function RollerPanel() {
+  const [snap, setSnap] = useState(null)
+  const [activeId, setActiveId] = useState('')
+  const [detail, setDetail] = useState(null)
+  const [err, setErr] = useState('')
+
+  const reload = async () => {
+    try { setSnap(await api.rollerSnapshot()) } catch (e) { setErr(e.message || 'failed') }
+  }
+  useEffect(() => {
+    reload()
+    const t = setInterval(reload, 5000)
+    return () => clearInterval(t)
+  }, [])
+
+  const open = async (sid) => {
+    setActiveId(sid)
+    try { setDetail(await api.rollerSession(sid)) } catch (e) { setErr(e.message || 'failed') }
+  }
+
+  const cells = detail?.cells ? Object.entries(detail.cells) : []
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-white">Roller Compaction Telemetry</h2>
+        <p className="text-white/60 text-sm">
+          State: <code className="text-white/80">{snap?.state_path || '—'}</code> · Cell size: ~{snap?.cell_meters || 3} m · Live polling 5s
+        </p>
+        <p className="text-white/50 text-xs">Phone POSTs to <code>/api/v1/roller/start|sample|end</code> with a <code>session_id</code>; if <code>ROLLER_INGEST_KEY</code> is set, include header <code>X-Roller-Key</code>.</p>
+      </div>
+      {err && <div className="text-red-300 text-sm">{err}</div>}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <div className="font-semibold text-white text-sm mb-2">Sessions ({snap?.sessions?.length || 0})</div>
+          <div className="space-y-1">
+            {(snap?.sessions||[]).map(s => (
+              <button key={s.session_id} type="button" onClick={()=>open(s.session_id)}
+                className={`w-full text-left px-2 py-1.5 rounded text-xs ${activeId===s.session_id?'bg-brand-amber text-brand-navy font-bold':'bg-white/5 text-white/80 hover:bg-white/10'}`}>
+                <div>{s.session_id} {s.ended_at && <span className="text-white/40">(ended)</span>}</div>
+                <div className="text-[10px] opacity-70">{s.samples} samples · {s.cells} cells {s.operator?`· ${s.operator}`:''}</div>
+              </button>
+            ))}
+            {(!snap?.sessions||snap.sessions.length===0) && <div className="text-white/40 text-xs">No active sessions.</div>}
+          </div>
+        </div>
+        <div className="md:col-span-2">
+          {detail ? (
+            <div className="space-y-3">
+              <div className="bg-white/5 rounded p-3 text-sm text-white">
+                <div className="font-semibold">{detail.session_id}</div>
+                <div className="text-white/70 text-xs">job: {detail.job_id || '—'} · operator: {detail.operator || '—'} · mix: {detail.mix || '—'}</div>
+                {detail.summary && (
+                  <div className="grid grid-cols-4 gap-2 mt-2 text-xs">
+                    <div className="bg-white/5 rounded p-2"><div className="text-white/50">Cells</div><div className="text-white font-bold text-base">{detail.summary.cells}</div></div>
+                    <div className="bg-white/5 rounded p-2"><div className="text-white/50">Max pass</div><div className="text-white font-bold text-base">{detail.summary.max_pass}</div></div>
+                    <div className="bg-white/5 rounded p-2"><div className="text-white/50">Avg pass</div><div className="text-white font-bold text-base">{detail.summary.avg_pass}</div></div>
+                    <div className="bg-white/5 rounded p-2"><div className="text-white/50">Avg IRI</div><div className="text-white font-bold text-base">{detail.summary.avg_iri}</div></div>
+                  </div>
+                )}
+              </div>
+              <div className="font-semibold text-white text-sm">Cells ({cells.length})</div>
+              <div className="space-y-1 max-h-96 overflow-auto">
+                {cells.slice(0, 200).map(([cellKey, c]) => (
+                  <div key={cellKey} className="bg-white/5 rounded px-3 py-1.5 text-xs text-white/80 flex items-center justify-between">
+                    <span className="font-mono">{cellKey}</span>
+                    <span>passes <b className="text-white">{c.passes}</b> · iri {c.iri_proxy ?? 0} · g {c.last_g ?? '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-white/40 text-xs">Select a session to inspect compaction state.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function LidarPanel() {
   const [snap, setSnap] = useState(null)
   const [activeBucket, setActiveBucket] = useState('')
@@ -4847,6 +4928,10 @@ export default function CommandCenter() {
 
             {activeTab === 'lidar' && (
               <LidarPanel />
+            )}
+
+            {activeTab === 'roller' && (
+              <RollerPanel />
             )}
           </>
       </div>

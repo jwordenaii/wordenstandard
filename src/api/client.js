@@ -724,6 +724,9 @@ export const api = {
   lidarMatch: (lat, lng) => protectedRequest('GET', `/api/v1/admin/lidar/match?lat=${lat}&lng=${lng}`),
   lidarUpload: (formData) => protectedFormRequest('/api/v1/admin/lidar/upload', formData),
   lidarDeleteScan: (bucket, scanId) => protectedRequest('DELETE', `/api/v1/admin/lidar/scans/${encodeURIComponent(bucket)}/${encodeURIComponent(scanId)}`),
+  // ── Roller compaction telemetry (Ship H) ────────────────────────────────
+  rollerSnapshot: () => protectedRequest('GET', '/api/v1/admin/roller/snapshot'),
+  rollerSession: (sid) => protectedRequest('GET', `/api/v1/admin/roller/sessions/${encodeURIComponent(sid)}`),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────
