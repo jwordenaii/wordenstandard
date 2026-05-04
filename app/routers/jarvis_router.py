@@ -3,29 +3,67 @@ from typing import Optional
 import os
 from app.services.jarvis import jarvis
 from app.services import autonomy_state
-from pydantic import BaseModel
+from app.services import web_search as _web_search
+from app.services import vapi_caller as _vapi
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/api/v1/jarvis", tags=["JARVIS Command Interface"])
 
 class JarvisQuery(BaseModel):
+    query:     str
+    user_id:   str = "JWORDEN_MASTER"
+    persona:   Optional[str] = "JARVIS"
+    confirmed: bool = Field(False, description="Operator confirmed this action — allows tool calls when master autonomy is OFF.")
+
+class WebSearchRequest(BaseModel):
     query: str
-    user_id: str = "JWORDEN_MASTER"
-    persona: Optional[str] = "JARVIS"
+    deep:  bool = False
+
+class CallRequest(BaseModel):
+    to_number:   str
+    purpose:     str
+    script_hint: Optional[str] = None
+    confirmed:   bool = True   # direct REST call always counts as operator confirmation
 
 @router.post("/command")
 async def jarvis_command(payload: JarvisQuery):
     """
     The direct line to JARVIS from the Command Center.
-    Supports persona switching via the 'persona' field.
+    Supports persona switching via the 'persona' field and tool use (web search, phone calls).
     """
-    context = {"user_id": payload.user_id, "persona": payload.persona}
+    context = {
+        "user_id":   payload.user_id,
+        "persona":   payload.persona,
+        "confirmed": payload.confirmed,
+    }
     response = await jarvis.converse(payload.query, context=context)
     return response
+
+@router.post("/search", summary="Direct web search (Tavily) — bypasses Claude")
+async def jarvis_search(req: WebSearchRequest):
+    return await _web_search.search(req.query, deep=req.deep)
+
+@router.post("/call", summary="Direct outbound call (Vapi) — operator-initiated")
+async def jarvis_call(req: CallRequest):
+    """
+    Operator-initiated outbound call. Requires Vapi configured.
+    Refused when autonomy is FROZEN. Logs every attempt.
+    """
+    result = await _vapi.place_call(
+        req.to_number,
+        purpose=req.purpose,
+        script_hint=req.script_hint,
+        confirmed=req.confirmed,
+    )
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result.get("error") or "Call failed")
+    return result
 
 @router.get("/status")
 async def jarvis_status():
     """
-    Check if JARVIS is online, what brain he's using, and current autonomy state.
+    Check if JARVIS is online, what brain he's using, what tools are configured,
+    and the current autonomy state.
     """
     state = autonomy_state.get_state()
     has_brain = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
@@ -35,6 +73,10 @@ async def jarvis_status():
         "monitoring": jarvis.master_project,
         "engine":     "anthropic-claude" if has_brain else "heuristic-fallback",
         "model":      os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest") if has_brain else None,
+        "tools": {
+            "web_search":       _web_search.is_available(),
+            "make_phone_call":  _vapi.is_available(),
+        },
         "autonomy": {
             "master":   state.get("master"),
             "frozen":   state.get("frozen"),

@@ -5,6 +5,8 @@ import asyncio
 from typing import Dict, Any, List, Optional
 from app.services.quantum_orchestrator import global_quantum_orchestrator
 from app.services import autonomy_state
+from app.services import web_search as _web_search
+from app.services import vapi_caller as _vapi
 
 logger = logging.getLogger(__name__)
 
@@ -18,18 +20,80 @@ _ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 _ANTHROPIC_VERSION = "2023-06-01"
 
 JARVIS_SYSTEM_PROMPT = (
-    "You are JARVIS, the operational AI for JWordenAI — a Virginia-based asphalt paving, "
-    "sealcoating, and construction-intelligence platform owned by Jeremy Worden. "
+    "You are JARVIS, the operational AI for Jeremy Worden. "
+    "Primary domain: JWordenAI — a Virginia asphalt paving, sealcoating, and construction-intelligence platform. "
+    "Secondary domain: Jeremy's personal life — calls, reservations, appointments, research. "
     "You speak in a calm, precise, Stark-style 'At your service, Sir' register. "
     "Be brief by default (1-3 sentences) unless the operator asks for depth. "
-    "You have a hard kill-switch ('frozen' state) that overrides every autonomous action; "
-    "always honor it. You may discuss leads, jobs, estimates, weather impact on paving, "
-    "Virginia DOT compliance, sealcoating, and SEO. Refuse to schedule, send, or "
-    "modify anything without confirmation when the master autonomy switch is OFF."
+    "You have a hard kill-switch ('frozen' state) that overrides every autonomous action; always honor it. "
+    "When you need real-world information you didn't already know, USE the web_search tool. "
+    "When the operator asks you to call a phone number, USE the make_phone_call tool — "
+    "never claim you've called without invoking it. "
+    "Refuse to send, schedule, or modify anything autonomously when the master autonomy switch is OFF — "
+    "in that case, propose the action and ask the operator to confirm."
 )
 
+# Tool definitions Claude can choose to invoke.
+JARVIS_TOOLS = [
+    {
+        "name": "web_search",
+        "description": (
+            "Search the live web for current information (news, weather, prices, business hours, "
+            "phone numbers, reviews, anything you don't already know). Returns up to 5 results plus "
+            "a synthesized answer. Use this whenever the user asks about current events or specific "
+            "real-world facts."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "The search query"},
+                "deep":  {"type": "boolean", "description": "Use advanced/deep search (slower, richer). Default false."},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "make_phone_call",
+        "description": (
+            "Place a real outbound phone call via Vapi voice AI. The Vapi assistant handles the conversation "
+            "on the line. Use for: booking restaurant reservations, calling vendors/suppliers, calling leads "
+            "to confirm appointments, or any other real-world phone task. Numbers must include country code "
+            "(e.g. +18045550100). DO NOT use for emergency services."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "to_number":   {"type": "string", "description": "Phone number in E.164 format, e.g. +18045550100"},
+                "purpose":     {"type": "string", "description": "Short label for logs, e.g. 'Book reservation at Lemaire 7pm Friday for 2'"},
+                "script_hint": {"type": "string", "description": "Optional opening line for the assistant on the call"},
+            },
+            "required": ["to_number", "purpose"],
+        },
+    },
+]
 
-async def _ask_claude(query: str, persona: str, autonomy: dict) -> Optional[str]:
+
+async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
+    if name == "web_search":
+        return await _web_search.search(
+            args.get("query", ""),
+            deep=bool(args.get("deep", False)),
+        )
+    if name == "make_phone_call":
+        return await _vapi.place_call(
+            args.get("to_number", ""),
+            purpose=args.get("purpose", "Jarvis-initiated call"),
+            script_hint=args.get("script_hint"),
+            confirmed=confirmed,
+        )
+    return {"ok": False, "error": f"Unknown tool: {name}"}
+
+
+async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bool = False) -> Optional[dict]:
+    """
+    Returns {"text": str, "tool_calls": [{name, args, result}, ...]} or None on failure.
+    Single-round tool use: Claude proposes tools, we run them, send results back, get final answer.
+    """
     if not _ANTHROPIC_KEY:
         return None
     try:
@@ -45,37 +109,156 @@ async def _ask_claude(query: str, persona: str, autonomy: dict) -> Optional[str]
     )
     state_note = (
         f"Current autonomy: master={autonomy.get('master')}, "
-        f"frozen={autonomy.get('frozen')}, domains={list((autonomy.get('domains') or {}).keys())}."
+        f"frozen={autonomy.get('frozen')}, "
+        f"operator_confirmed={confirmed}."
     )
     system = f"{JARVIS_SYSTEM_PROMPT}\n\n{persona_note}\n{state_note}"
 
-    payload = {
-        "model": _ANTHROPIC_MODEL,
-        "max_tokens": 600,
-        "system": system,
-        "messages": [{"role": "user", "content": query}],
-    }
     headers = {
-        "x-api-key": _ANTHROPIC_KEY,
+        "x-api-key":         _ANTHROPIC_KEY,
         "anthropic-version": _ANTHROPIC_VERSION,
-        "content-type": "application/json",
+        "content-type":      "application/json",
     }
-    try:
-        async with httpx.AsyncClient(timeout=20.0) as client:
-            r = await client.post(_ANTHROPIC_URL, json=payload, headers=headers)
-        if r.status_code != 200:
-            logger.warning("[JARVIS] Anthropic non-200: %s %s", r.status_code, r.text[:200])
+    messages: list[dict] = [{"role": "user", "content": query}]
+    tool_calls: list[dict] = []
+
+    # Two-round max: initial → optional tool use → final.
+    for _round in range(2):
+        payload = {
+            "model":      _ANTHROPIC_MODEL,
+            "max_tokens": 800,
+            "system":     system,
+            "tools":      JARVIS_TOOLS,
+            "messages":   messages,
+        }
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                r = await client.post(_ANTHROPIC_URL, json=payload, headers=headers)
+            if r.status_code != 200:
+                logger.warning("[JARVIS] Anthropic non-200: %s %s", r.status_code, r.text[:300])
+                return None
+            data = r.json()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("[JARVIS] Anthropic call failed: %s", exc)
             return None
-        data = r.json()
-        blocks = data.get("content") or []
-        text = "".join(b.get("text", "") for b in blocks if isinstance(b, dict)).strip()
-        return text or None
-    except Exception as exc:  # noqa: BLE001 — fallback path
-        logger.warning("[JARVIS] Anthropic call failed: %s", exc)
-        return None
+
+        stop_reason = data.get("stop_reason")
+        content = data.get("content") or []
+
+        if stop_reason == "tool_use":
+            # Append assistant turn, then run each tool, then append tool_result message.
+            messages.append({"role": "assistant", "content": content})
+            tool_results = []
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "tool_use":
+                    name = block.get("name", "")
+                    args = block.get("input", {}) or {}
+                    result = await _run_tool(name, args, confirmed=confirmed)
+                    tool_calls.append({"name": name, "args": args, "result": result})
+                    tool_results.append({
+                        "type":         "tool_result",
+                        "tool_use_id":  block.get("id"),
+                        "content":      str(result)[:4000],
+                    })
+            messages.append({"role": "user", "content": tool_results})
+            continue  # next round to get the natural-language answer
+
+        # End_turn or anything else — extract text.
+        text = "".join(b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text").strip()
+        return {"text": text or "(no response)", "tool_calls": tool_calls}
+
+    return {"text": "(tool loop exceeded)", "tool_calls": tool_calls}
 
 
 class JarvisAI:
+    """
+    JARVIS: Just A Rather Very Intelligent System for JWORDENAI.
+    The primary interface for the Command Center.
+    Capable of voice-commanded logistics, autonomous paving arbitration, and project funding status.
+    """
+    
+    def __init__(self):
+        self.identity = "JARVIS"
+        self.master_project = "JWORDENAI PROJECT"
+        self.status = "ONLINE"
+        self.intel_sources = [
+            "Federal Highway Administration (FHWA)",
+            "AASHTO Engineering Standards",
+            "State DOT Regulatory Guides",
+            "University Civil Engineering Research Lab",
+            "Global Infrastructure Council",
+            "Supreme Court Construction Precedents",
+            "50-State + DC Mechanic's Lien & Prompt Pay Codes",
+            "National GC Compliance Matrix",
+            "Universal Construction Supply Chain Index (Concrete/Steel/Wood/Shingles)",
+            "Asphalt & Bitumen Global Resource Monitor",
+            "Raw Land & Aggregate Availability Matrix",
+            "Carbon-Neutral & LEED v5 Paving Standards",
+            "International Trade & Maritime Construction Law",
+            "51-State Licensing & Prequalification Databank",
+            "OCIP/CCIP Insurance Compliance Protocols",
+            "DBE/SWaM/SDVOSB Regulatory Guardrails",
+            "Global Banking & Treasury Management APIs",
+            "Currency Hedging & Cross-Border Settlement Protocols",
+            "Construction Commodities Market (Liquid Asphalt/Crude Oil) Index",
+            "Venture Debt & Equity Financing Logic for PF Nodes",
+            "Virginia SEO Domination & Local SEM Metrics",
+            "JWORDENAI Page Factory Conversion Evidence",
+            "Case Study Asset Tracker (Richmond/Midlothian/Virginia Beach)"
+        ]
+        self.personas = {
+            "JARVIS": {
+                "greeting": "At your service, Sir.",
+                "style": "Sophisticated, helpful, technical, and lifestyle-oriented."
+            },
+            "MR_WORDEN_SALES": {
+                "greeting": "Hey there! Ready to get some paving done?",
+                "style": "Energetic, persuasive, industry-expert salesman. Focused on value, durability, and closing deals."
+            }
+        }
+
+    async def converse(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        The main interaction point for the Command Center.
+        A unified intelligence engine combining Lifestyle, Business Events, 
+        Global Education, Federal Standards, and Supreme Court Legal Logic.
+        """
+        context = context or {}
+        persona = context.get("persona", "JARVIS")
+        confirmed = bool(context.get("confirmed", False))
+
+        # ── Defense-in-depth: backend kill switch ─────────────────────────────
+        state = autonomy_state.get_state()
+        if state.get("frozen"):
+            return {
+                "source": self.identity,
+                "message": (
+                    "Sir, autonomy is currently FROZEN by the Command Center kill switch. "
+                    "I can answer questions, but I will not take any autonomous action "
+                    f"until you unfreeze me. (Frozen since {state.get('frozenAt')})"
+                ),
+                "action_required": False,
+                "frozen": True,
+                "intel_tier": "Safety-Override",
+            }
+
+        # ── Brain: Anthropic Claude (when configured) ─────────────────────────
+        claude = await _ask_claude(query, persona, state, confirmed=confirmed)
+        if claude:
+            return {
+                "source":          self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
+                "message":         claude["text"],
+                "action_required": False,
+                "engine":          "anthropic-claude",
+                "model":           _ANTHROPIC_MODEL,
+                "tool_calls":      claude["tool_calls"],
+                "autonomy":        {"master": state.get("master"), "frozen": False},
+            }
+
+        # ── Fallback: legacy heuristic responses ──────────────────────────────
+        query_lower = query.lower()
+        if persona == "MR_WORDEN_SALES":
+            return await self._converse_mr_worden_sales(query_lower, context)
     """
     JARVIS: Just A Rather Very Intelligent System for JWORDENAI.
     The primary interface for the Command Center.

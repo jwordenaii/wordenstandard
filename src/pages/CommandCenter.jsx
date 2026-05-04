@@ -3156,6 +3156,7 @@ function JarvisChat({ compact = false }) {
   const [statusOk, setStatusOk] = useState(null)
   const [engine, setEngine] = useState(null)        // 'anthropic-claude' | 'heuristic-fallback'
   const [backendFrozen, setBackendFrozen] = useState(false)
+  const [tools, setTools] = useState({ web_search: false, make_phone_call: false })
   const scrollerRef = useRef(null)
 
   useEffect(() => {
@@ -3167,6 +3168,10 @@ function JarvisChat({ compact = false }) {
         setStatusOk(ok)
         setEngine(r?.engine || null)
         setBackendFrozen(Boolean(r?.autonomy?.frozen))
+        setTools({
+          web_search:      Boolean(r?.tools?.web_search),
+          make_phone_call: Boolean(r?.tools?.make_phone_call),
+        })
       })
       .catch(() => { if (!cancelled) setStatusOk(false) })
     return () => { cancelled = true }
@@ -3176,16 +3181,20 @@ function JarvisChat({ compact = false }) {
     if (scrollerRef.current) scrollerRef.current.scrollTop = scrollerRef.current.scrollHeight
   }, [messages])
 
-  const send = useCallback(async (text) => {
+  const send = useCallback(async (text, opts = {}) => {
     const query = (text ?? input).trim()
     if (!query || sending) return
     setInput('')
     setMessages((prev) => [...prev, { role: 'you', text: query }])
     setSending(true)
     try {
-      const res = await api.jarvisCommand(query, 'JARVIS')
+      // confirmed=true when operator clicked a button (not free-typing)
+      const res = await api.jarvisCommand(query, 'JARVIS', { confirmed: Boolean(opts.confirmed) })
       const reply = res?.response || res?.message || res?.reply || JSON.stringify(res)
-      setMessages((prev) => [...prev, { role: 'jarvis', text: String(reply) }])
+      const toolNote = Array.isArray(res?.tool_calls) && res.tool_calls.length
+        ? `\n\n[used ${res.tool_calls.length} tool${res.tool_calls.length > 1 ? 's' : ''}: ${res.tool_calls.map(t => t.name).join(', ')}]`
+        : ''
+      setMessages((prev) => [...prev, { role: 'jarvis', text: String(reply) + toolNote }])
     } catch (err) {
       setMessages((prev) => [...prev, { role: 'jarvis', text: `Error: ${err?.message || 'Jarvis unreachable'}` }])
     } finally {
@@ -3196,8 +3205,8 @@ function JarvisChat({ compact = false }) {
   const quickPrompts = [
     'Status report on the business right now',
     'Top 3 leads to call today and why',
-    'Any safety or weather risks I should act on?',
-    'Summarize today\u2019s ad performance',
+    'What\u2019s the weather forecast for Richmond this week?',
+    'Find me top-rated steakhouses in Richmond open tonight',
   ]
 
   return (
@@ -3219,6 +3228,16 @@ function JarvisChat({ compact = false }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {tools.web_search ? (
+            <span title="Web search via Tavily — ready" className="inline-flex items-center gap-1 rounded-full text-[10px] font-bold px-2 py-0.5 border border-sky-300/40 text-sky-100 bg-sky-300/10">
+              <Globe className="w-3 h-3" /> Web
+            </span>
+          ) : null}
+          {tools.make_phone_call ? (
+            <span title="Outbound calls via Vapi — ready" className="inline-flex items-center gap-1 rounded-full text-[10px] font-bold px-2 py-0.5 border border-emerald-300/40 text-emerald-100 bg-emerald-300/10">
+              <Phone className="w-3 h-3" /> Call
+            </span>
+          ) : null}
           {backendFrozen ? (
             <span className="inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold px-2 py-0.5 border border-red-400/50 text-red-100 bg-red-500/15">
               BACKEND FROZEN

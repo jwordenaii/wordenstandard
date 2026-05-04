@@ -660,9 +660,18 @@ export const api = {
   getForemanStatus: () => request('GET', '/api/v1/foreman/status'),
   getVisionResult: (jobId) => request('GET', `/api/v1/ai/vision-result/${jobId}`),
   // ── JARVIS Command Interface ───────────────────────────────────────────────
-  jarvisCommand: (query, persona = "JARVIS") =>
-    request('POST', '/api/v1/jarvis/command', { query, persona }),
+  jarvisCommand: (query, persona = "JARVIS", { confirmed = false } = {}) =>
+    request('POST', '/api/v1/jarvis/command', { query, persona, confirmed }),
   jarvisStatus: () => request('GET', '/api/v1/jarvis/status'),
+  jarvisSearch: (query, deep = false) =>
+    request('POST', '/api/v1/jarvis/search', { query, deep }),
+  jarvisCall: (toNumber, purpose, scriptHint) =>
+    request('POST', '/api/v1/jarvis/call', {
+      to_number: toNumber,
+      purpose,
+      script_hint: scriptHint || undefined,
+      confirmed: true,
+    }),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────
   getAutonomyState: () => request('GET', '/api/v1/autonomy/state'),
   freezeAutonomy: (reason = 'manual') => request('POST', '/api/v1/autonomy/freeze', { reason }),
