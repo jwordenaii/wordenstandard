@@ -46,6 +46,12 @@ export const PHONE_SCHEMA = '+1-804-446-1296' // schema.org-friendly format
 
 export const EMAIL = 'j.wordenandsonspaving@gmail.com'
 
+export const SOCIAL_PROFILES = {
+  facebook: 'https://www.facebook.com/jwordenpaving',
+  linkedin: 'https://www.linkedin.com/company/j-worden-sons-asphalt-paving-inc/',
+  instagram: 'https://www.instagram.com/j.worden_paving/',
+}
+
 export const ADDRESS = {
   streetAddress: '1601 Ware Bottom Springs Rd, Suite 214',
   addressLocality: 'Chester',
@@ -59,14 +65,25 @@ export const GEO = {
   longitude: -77.4326,
 }
 
+// Price range on a scale of 1-4 dollar signs.
+export const PRICE_RANGE = '$$$'
+
 export const OPENING_HOURS = [
   {
-    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    opens: '07:00',
-    closes: '17:00',
+    dayOfWeek: [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ],
+    opens: '00:00',
+    closes: '23:59',
   },
 ]
-export const HOURS_DISPLAY = 'Mon–Fri 7am–5pm'
+export const HOURS_DISPLAY = '24/7 Customer Service'
 
 // Aggregate rating snapshot — bump these when GBP review count moves.
 // Must match what the Reviews page and Footer display.
@@ -76,6 +93,41 @@ export const AGGREGATE_RATING = {
   worstRating: '1',
   reviewCount: '87',
 }
+
+// Detailed service list for hasOffer schema property
+export const SERVICES_OFFERED = [
+  { name: 'Asphalt Paving' },
+  { name: 'Driveway Paving' },
+  { name: 'Commercial Paving' },
+  { name: 'Parking Lot Paving' },
+  { name: 'Asphalt Sealcoating' },
+  { name: 'Asphalt Repair' },
+  { name: 'Tar and Chip Paving' },
+  { name: 'Industrial Paving' },
+  { name: 'Asphalt Milling' },
+  { name: 'Pavement Maintenance' },
+]
+
+// Geographic service areas for areaServed schema property
+export const SERVICE_AREAS = [
+  { type: 'State', name: 'Virginia' },
+  { type: 'City', name: 'Richmond' },
+  { type: 'City', name: 'Virginia Beach' },
+  { type: 'City', name: 'Roanoke' },
+  { type: 'City', name: 'Fredericksburg' },
+  { type: 'City', name: 'Williamsburg' },
+  { type: 'City', name: 'Harrisonburg' },
+  { type: 'City', name: 'Winchester' },
+  { type: 'City', name: 'Charlottesville' },
+  { type: 'City', name: 'Lynchburg' },
+  { type: 'City', name: 'Chester' },
+  { type: 'City', name: 'Midlothian' },
+  { type: 'City', name: 'Short Pump' },
+  { type: 'City', name: 'Glen Allen' },
+  { type: 'City', name: 'Henrico' },
+  { type: 'City', name: 'Chesapeake' },
+  { type: 'City', name: 'Stafford' },
+]
 
 // Founder used for Person / E-E-A-T schema on /about. Public site refers to
 // "Mr. Worden" — we mirror that exact phrasing here so the schema name

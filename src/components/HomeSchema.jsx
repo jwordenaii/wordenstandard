@@ -1,4 +1,22 @@
 ﻿import { useEffect } from 'react';
+import {
+  BUSINESS_NAME,
+  BUSINESS_LEGAL_NAME,
+  BUSINESS_DESCRIPTION,
+  BUSINESS_FOUNDING_YEAR,
+  PHONE_E164,
+  EMAIL,
+  ADDRESS,
+  GEO,
+  OPENING_HOURS,
+  AGGREGATE_RATING,
+  PRICE_RANGE,
+  SERVICES_OFFERED,
+  SERVICE_AREAS,
+  SOCIAL_PROFILES,
+  SCHEMA_IDS,
+  SITE_URL,
+} from '@/lib/businessInfo';
 
 /**
  * Injects AI-search-optimized structured data on the homepage:
@@ -13,192 +31,44 @@ export default function HomeSchema() {
   useEffect(() => {
     const localBusiness = {
       '@context': 'https://schema.org',
-      '@type': ['LocalBusiness', 'PavingContractor'],
-      '@id': 'https://www.jwordenasphaltpaving.com/#organization',
-      name: 'J. Worden & Sons Asphalt Paving',
-      legalName: 'J. Worden & Sons Paving, L.L.C.',
-      alternateName: ['J. Worden and Sons', 'JWorden Paving', 'J Worden Paving LLC'],
-      url: 'https://www.jwordenasphaltpaving.com/',
-      mainEntityOfPage: 'https://www.jwordenasphaltpaving.com/',
-      logo: 'https://www.jwordenasphaltpaving.com/logo.png',
-      image: '/hero-paving.jpg',
-      description:
-        'Family-owned asphalt paving contractor based in the Richmond metro for 40+ years. Core local service around Richmond, Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell, with residential driveways, commercial lots, sealcoating, asphalt repair, and pavement preservation as core services.',
-      disambiguatingDescription:
-        'J. Worden & Sons Asphalt Paving is an independent company operating at jwordenasphaltpaving.com and is not affiliated with Worden Paving.',
-      foundingDate: '1984',
-      identifier: [
-        {
-          '@type': 'PropertyValue',
-          propertyID: 'Primary Domain',
-          value: 'jwordenasphaltpaving.com',
-        },
-      ],
-      telephone: '+18044461296',
-      email: 'j.wordenandsonspaving@gmail.com',
-      priceRange: '$$-$$$',
+      '@type': ['PavingContractor', 'LocalBusiness'],
+      '@id': SCHEMA_IDS.localBusiness,
+      name: BUSINESS_NAME,
+      legalName: BUSINESS_LEGAL_NAME,
+      url: SITE_URL,
+      mainEntityOfPage: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
+      image: `${SITE_URL}/og-default.jpg`,
+      description: BUSINESS_DESCRIPTION,
+      foundingDate: BUSINESS_FOUNDING_YEAR,
+      telephone: PHONE_E164,
+      email: EMAIL,
+      priceRange: PRICE_RANGE,
       address: {
         '@type': 'PostalAddress',
-        streetAddress: '1601 Ware Bottom Springs Rd, Suite 214',
-        addressLocality: 'Chester',
-        addressRegion: 'VA',
-        postalCode: '23836',
-        addressCountry: 'US',
+        ...ADDRESS,
       },
       geo: {
         '@type': 'GeoCoordinates',
-        latitude: 37.3563,
-        longitude: -77.4411,
+        ...GEO,
       },
-      openingHoursSpecification: [
-        {
-          '@type': 'OpeningHoursSpecification',
-          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-          opens: '07:00',
-          closes: '18:00',
-        },
-        {
-          '@type': 'OpeningHoursSpecification',
-          dayOfWeek: 'Saturday',
-          opens: '08:00',
-          closes: '14:00',
-        },
-      ],
-      areaServed: [
-        { '@type': 'State', name: 'Virginia' },
-        { '@type': 'City', name: 'Richmond' },
-        { '@type': 'City', name: 'Chester' },
-        { '@type': 'AdministrativeArea', name: 'Chesterfield County' },
-        { '@type': 'City', name: 'Dinwiddie' },
-        { '@type': 'City', name: 'Petersburg' },
-        { '@type': 'City', name: 'Hopewell' },
-        { '@type': 'City', name: 'Midlothian' },
-        { '@type': 'City', name: 'Short Pump' },
-        { '@type': 'City', name: 'Henrico' },
-        { '@type': 'City', name: 'Glen Allen' },
-        { '@type': 'City', name: 'Mechanicsville' },
-        { '@type': 'City', name: 'Ashland' },
-        { '@type': 'City', name: 'Tuckahoe' },
-        { '@type': 'City', name: 'Bon Air' },
-        { '@type': 'City', name: 'Virginia Beach' },
-        { '@type': 'City', name: 'Chesapeake' },
-        { '@type': 'City', name: 'Williamsburg' },
-        { '@type': 'AdministrativeArea', name: 'New Kent County' },
-        { '@type': 'City', name: 'Roanoke' },
-        { '@type': 'City', name: 'Harrisonburg' },
-        { '@type': 'City', name: 'Winchester' },
-        { '@type': 'City', name: 'Fredericksburg' },
-        { '@type': 'City', name: 'Fairfax' },
-        { '@type': 'City', name: 'Stafford' },
-        { '@type': 'City', name: 'Spotsylvania' },
-      ],
-      serviceArea: [
-        {
-          '@type': 'AdministrativeArea',
-          name: 'Richmond Metro Area',
-          containsPlace: [
-            { '@type': 'City', name: 'Richmond' },
-            { '@type': 'City', name: 'Chester' },
-            { '@type': 'AdministrativeArea', name: 'Chesterfield County' },
-            { '@type': 'AdministrativeArea', name: 'Henrico County' },
-            { '@type': 'City', name: 'Midlothian' },
-            { '@type': 'City', name: 'Short Pump' },
-            { '@type': 'City', name: 'Glen Allen' },
-            { '@type': 'City', name: 'Bon Air' },
-            { '@type': 'City', name: 'Tuckahoe' },
-            { '@type': 'City', name: 'Mechanicsville' },
-            { '@type': 'City', name: 'Ashland' },
-            { '@type': 'City', name: 'Petersburg' },
-            { '@type': 'City', name: 'Hopewell' },
-          ],
-        },
-      ],
-      knowsAbout: [
-        'Richmond asphalt paving',
-        'Richmond driveway paving',
-        'Richmond sealcoating',
-        'Richmond asphalt repair',
-        'Chesterfield driveway paving',
-        'Henrico parking lot repair',
-        'Midlothian residential asphalt',
-        'Short Pump commercial asphalt maintenance',
-      ],
+      openingHoursSpecification: OPENING_HOURS,
       aggregateRating: {
         '@type': 'AggregateRating',
-        ratingValue: '4.9',
-        reviewCount: '1289',
-        bestRating: '5',
-        worstRating: '1',
+        ...AGGREGATE_RATING,
       },
-      hasOfferCatalog: {
-        '@type': 'OfferCatalog',
-        name: 'Asphalt Paving Services',
-        itemListElement: [
-          {
-            '@type': 'Offer',
-            itemOffered: {
-              '@type': 'Service',
-              name: 'Residential Asphalt Driveway Paving',
-              description:
-                'New installation, overlay, sealcoating, crack repair, and repair of residential asphalt driveways, private lanes, and rural entrances with correct stone base, drainage review, and maintenance planning.',
-            },
-          },
-          {
-            '@type': 'Offer',
-            itemOffered: {
-              '@type': 'Service',
-              name: 'Commercial Parking Lot Paving',
-              description:
-                'Commercial parking lot paving, resurfacing, repair, sealcoating, crack sealing, patching, and maintenance programs for retail, industrial, HOA, church, school, and facility properties.',
-            },
-          },
-          {
-            '@type': 'Offer',
-            itemOffered: {
-              '@type': 'Service',
-              name: 'Coastal Driveway Paving (Virginia Beach / Hampton Roads)',
-              description:
-                'Engineered coastal-spec driveways with woven geotextile, 6-inch #57 stone base, and PG 76-22 polymer-modified binder to resist sandy-soil pumping and salt aerosol oxidation.',
-            },
-          },
-          {
-            '@type': 'Offer',
-            itemOffered: {
-              '@type': 'Service',
-              name: 'Mountain-Grade Driveway Paving (Roanoke / I-81 Corridor)',
-              description:
-                'Blue Ridge freeze-thaw-rated paving with structural stone base, polymer binder, and engineered cross-drainage for sloped driveways in Roanoke, Harrisonburg, Winchester, and Smith Mountain Lake.',
-            },
-          },
-          {
-            '@type': 'Offer',
-            itemOffered: {
-              '@type': 'Service',
-              name: 'Sealcoating & Crack Repair',
-              description:
-                'Professional sealcoating, hot-pour crack repair, pothole patching, asphalt repair, and pavement preservation for residential driveways and commercial parking lots. Recommended before oxidation and water intrusion turn maintenance into replacement.',
-            },
-          },
-          {
-            '@type': 'Offer',
-            itemOffered: {
-              '@type': 'Service',
-              name: 'Richmond Metro Asphalt Paving, Sealcoating & Repair',
-              areaServed: {
-                '@type': 'AdministrativeArea',
-                name: 'Richmond Metro Area',
-              },
-              description:
-                'Residential driveway paving, commercial parking lot repair, sealcoating, crack sealing, pothole patching, milling, overlays, and pavement maintenance across Richmond, Chester, Chesterfield, Henrico, Midlothian, Short Pump, Glen Allen, Bon Air, Tuckahoe, Mechanicsville, Ashland, Petersburg, and Hopewell.',
-            },
-          },
-        ],
-      },
-      sameAs: [
-        'https://www.facebook.com/jwordenandsonspaving',
-        'https://www.houzz.com/professionals/paving-contractors/jworden-and-sons-paving',
-        'https://www.angi.com/companylist/us/va/chester/j-worden-and-sons-paving',
-      ],
+      areaServed: SERVICE_AREAS.map(area => ({
+        '@type': area.type,
+        name: area.name,
+      })),
+      hasOffer: SERVICES_OFFERED.map(service => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: service.name,
+        },
+      })),
+      sameAs: Object.values(SOCIAL_PROFILES),
     };
 
     const faqPage = {
