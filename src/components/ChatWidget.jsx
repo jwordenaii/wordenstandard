@@ -22,6 +22,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Phone, Volume2, VolumeX, X, Camera, Ruler, ClipboardList, CalendarCheck, MessageSquare } from 'lucide-react'
 import { api } from '../api/client'
 import MrWordenAvatar from './MrWordenAvatar'
 import { voiceService } from '../lib/ElevenLabsService'
@@ -207,26 +208,15 @@ function getPageHelp(pathname) {
   return PAGE_HELP[pathname] || PAGE_HELP.default
 }
 
-// ── Header avatar SVG (compact portrait of Mr. J. Worden Sr.) ─────────────────
+// ── Header avatar (clean JW monogram) ───────────────────────────────────────
 
 function HeaderAvatar() {
   return (
-    <div className="relative h-11 w-11 flex-shrink-0 rounded-2xl border border-brand-amber/45 bg-slate-950 shadow-[0_0_24px_rgba(245,166,35,0.32)]" aria-hidden="true">
-      <div className="absolute inset-1 rounded-xl border border-brand-amber/50" />
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative h-11 w-11">
-        <path d="M32 4 L39 10 L50 10 L54 20 L61 28 L57 39 L57 51 L45 55 L32 62 L19 55 L7 51 L7 39 L3 28 L10 20 L14 10 L25 10Z" fill="#05070b" stroke="#ff7a00" strokeWidth="1.4" />
-        <circle cx="32" cy="32" r="22" fill="#0f172a" stroke="#ff7a00" strokeWidth="0.8" opacity="0.9" />
-        <path d="M15 25 C16 13 23 7 32 7 C41 7 48 13 49 25Z" fill="#ff7a00" />
-        <rect x="13" y="24" width="38" height="6" rx="3" fill="#0f172a" stroke="#ff7a00" strokeWidth="1" />
-        <rect x="25" y="12" width="14" height="9" rx="3" fill="#020617" stroke="#ff7a00" strokeWidth="1" />
-        <text x="32" y="19" fontSize="6" fill="#f8fafc" textAnchor="middle" fontWeight="900">JW</text>
-        <path d="M20 31 C21 22 26 18 32 18 C38 18 43 22 44 31 L42 42 C40 49 36 52 32 52 C28 52 24 49 22 42Z" fill="#0f172a" stroke="#fde68a" strokeWidth="1" />
-        <rect x="21" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#ff7a00" strokeWidth="0.8" />
-        <rect x="33" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#ff7a00" strokeWidth="0.8" />
-        <circle cx="26" cy="34" r="1.4" fill="#ff9f1c" />
-        <circle cx="38" cy="34" r="1.4" fill="#ff9f1c" />
-        <path d="M25 43 C29 46 35 46 39 43" stroke="#ff7a00" strokeWidth="1.4" strokeLinecap="round" />
-      </svg>
+    <div
+      className="h-10 w-10 flex-shrink-0 rounded-full bg-brand-amber text-brand-navy flex items-center justify-center font-display font-black text-sm tracking-wide shadow-sm"
+      aria-hidden="true"
+    >
+      JW
     </div>
   )
 }
@@ -235,52 +225,48 @@ function HeaderAvatar() {
 
 const QUICK_ACTIONS = [
   {
-    id: 'scan',
-    emoji: '▣',
-    label: 'JWordenAI Scan',
-    sub: 'Driveway or lot triage',
-    action: 'chat:Help me start a JWordenAI pavement scan review for my driveway or small parking lot.',
-    color: 'bg-brand-amber text-brand-navy',
-  },
-  {
-    id: 'design',
-    emoji: '◆',
-    label: '4D Design Packet',
-    sub: 'Kitchen, patio, addition',
-    action: 'chat:I want a 4D design packet for a remodel, addition, patio, or property build.',
-    color: 'bg-brand-navy text-white',
-  },
-  {
-    id: 'plan',
-    emoji: '▤',
-    label: 'Plan-To-Bid Prep',
-    sub: 'Plans, sketches, scope',
-    action: 'chat:I have plans or sketches and want a plan-to-bid readiness review.',
-    color: 'bg-white text-brand-navy border border-brand-navy/20',
-  },
-  {
     id: 'quote',
-    emoji: '✓',
+    Icon: CalendarCheck,
     label: 'Free Estimate',
     sub: 'Get on the schedule',
     action: 'tab:lead',
-    color: 'bg-slate-900 text-white',
+    primary: true,
   },
   {
     id: 'call',
-    emoji: '☎',
+    Icon: Phone,
     label: 'Call Now',
     sub: BUSINESS_PHONE,
     action: `tel:${BUSINESS_PHONE_TEL}`,
-    color: 'bg-green-600 text-white',
+    primary: true,
+  },
+  {
+    id: 'scan',
+    Icon: Camera,
+    label: 'Pavement Scan',
+    sub: 'Driveway or lot triage',
+    action: 'chat:Help me start a JWordenAI pavement scan review for my driveway or small parking lot.',
+  },
+  {
+    id: 'design',
+    Icon: Ruler,
+    label: 'Design Packet',
+    sub: 'Patio, addition, remodel',
+    action: 'chat:I want a 4D design packet for a remodel, addition, patio, or property build.',
+  },
+  {
+    id: 'plan',
+    Icon: ClipboardList,
+    label: 'Plan-to-Bid',
+    sub: 'Plans, sketches, scope',
+    action: 'chat:I have plans or sketches and want a plan-to-bid readiness review.',
   },
   {
     id: 'ask',
-    emoji: '✦',
-    label: 'Ask Mr. Worden',
-    sub: 'Founder-level advice',
+    Icon: MessageSquare,
+    label: 'Ask a Question',
+    sub: 'Talk to the team',
     action: 'tab:chat',
-    color: 'bg-black text-white border border-brand-amber/40',
   },
 ]
 
@@ -734,48 +720,46 @@ export default function ChatWidget() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="mb-3 w-[calc(100vw-1.5rem)] sm:w-[420px] bg-white rounded-2xl shadow-[0_30px_80px_rgba(2,8,23,0.36)] border border-brand-amber/30 flex flex-col overflow-hidden"
+            className="mb-3 w-[calc(100vw-1.5rem)] sm:w-[400px] bg-white rounded-2xl shadow-xl border border-brand-navy/10 flex flex-col overflow-hidden"
             style={{ maxHeight: 'min(80vh, 560px)' }}
           >
-            {/* Premium Header */}
-            <div className="relative bg-[radial-gradient(circle_at_18%_0%,rgba(255,122,0,0.28),transparent_34%),linear-gradient(135deg,#05070b,#181818_52%,#111111)] text-white px-4 py-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
-              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-brand-amber/70 to-transparent" />
-              <div className="flex items-center gap-2.5">
+            {/* Header */}
+            <div className="bg-brand-navy text-white px-4 py-3 flex items-center justify-between flex-shrink-0 border-b-2 border-brand-amber">
+              <div className="flex items-center gap-3">
                 <HeaderAvatar />
                 <div>
-                  <div className="font-display font-black text-sm leading-tight uppercase">Mr. Worden</div>
-                  <div className="text-white/60 text-xs flex items-center gap-1">
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${loading ? 'bg-brand-amber animate-pulse' : 'bg-green-400'}`} aria-hidden="true" />
-                    {loading ? 'Reading the site file...' : 'First-of-its-kind AI concierge'}
+                  <div className="font-display font-bold text-sm leading-tight">Mr. Worden</div>
+                  <div className="text-white/70 text-xs flex items-center gap-1.5 mt-0.5">
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${loading ? 'bg-brand-amber animate-pulse' : 'bg-emerald-400'}`} aria-hidden="true" />
+                    {loading ? 'Thinking…' : 'Online · Reply in seconds'}
                   </div>
-                  <div className="mt-0.5 text-[10px] uppercase text-brand-amber/90">Scan · Design · Bid Prep</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <a
                   href={`tel:${BUSINESS_PHONE_TEL}`}
-                  className="bg-green-500 hover:bg-green-400 text-white text-xs font-bold px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                  className="bg-brand-amber hover:bg-brand-amber/90 text-brand-navy text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5"
                   aria-label={`Call ${BUSINESS_PHONE}`}
                 >
-                  <span aria-hidden="true">📞</span>
-                  <span className="hidden sm:inline">Call Now</span>
+                  <Phone className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="hidden sm:inline">Call</span>
                 </a>
                 <button
                   type="button"
                   onClick={() => setVoiceOn((v) => !v)}
-                  className="text-white/50 hover:text-white transition-colors text-sm"
+                  className="text-white/60 hover:text-white transition-colors p-1.5 rounded-md hover:bg-white/10"
                   aria-label={voiceOn ? 'Mute Mr. Worden' : 'Unmute Mr. Worden'}
                   aria-pressed={voiceOn}
                 >
-                  {voiceOn ? '🔊' : '🔇'}
+                  {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="text-white/50 hover:text-white transition-colors text-lg leading-none"
+                  className="text-white/60 hover:text-white transition-colors p-1.5 rounded-md hover:bg-white/10"
                   aria-label="Close Mr. Worden concierge"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -811,38 +795,44 @@ export default function ChatWidget() {
               {/* QUICK ACTIONS */}
               {activeTab === 'actions' && (
                 <div className="px-4 py-5 space-y-3">
-                  <div className="text-center mb-4">
-                    <p className="text-brand-navy font-display font-black uppercase text-sm">What should we build, scan, or solve?</p>
-                    <p className="text-brand-navy/50 text-xs mt-0.5">
-                      {timeOfDayGreeting()} - J. Worden &amp; Sons, Chester, VA since 1984
+                  <div className="mb-4">
+                    <p className="text-brand-navy font-display font-bold text-base">How can we help?</p>
+                    <p className="text-brand-navy/60 text-xs mt-0.5">
+                      {timeOfDayGreeting()} — J. Worden &amp; Sons, Chester, VA · Since 1984
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {QUICK_ACTIONS.map((action) => (
-                      <button
-                        key={action.id}
-                        type="button"
-                        onClick={() => {
-                          if (action.action.startsWith('tab:')) {
-                            setActiveTab(action.action.replace('tab:', ''))
-                          } else if (action.action.startsWith('chat:')) {
-                            setActiveTab('chat')
-                            sendMessage(action.action.replace('chat:', ''))
-                          } else if (action.action.startsWith('tel:')) {
-                            window.location.href = action.action
-                          }
-                        }}
-                        className={`${action.color} rounded-xl px-3 py-3 text-left shadow-sm hover:opacity-90 active:scale-95 transition-all duration-150 flex flex-col`}
-                      >
-                        <span className="text-xl mb-1" aria-hidden="true">{action.emoji}</span>
-                        <span className="font-display font-black text-xs uppercase leading-tight">{action.label}</span>
-                        <span className="text-[10px] opacity-70 mt-0.5 leading-tight">{action.sub}</span>
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    {QUICK_ACTIONS.map((action) => {
+                      const Icon = action.Icon
+                      const baseClasses = action.primary
+                        ? 'bg-brand-navy text-white border border-brand-navy hover:bg-brand-navy/90'
+                        : 'bg-white text-brand-navy border border-brand-navy/15 hover:border-brand-amber hover:bg-brand-amber/5'
+                      return (
+                        <button
+                          key={action.id}
+                          type="button"
+                          onClick={() => {
+                            if (action.action.startsWith('tab:')) {
+                              setActiveTab(action.action.replace('tab:', ''))
+                            } else if (action.action.startsWith('chat:')) {
+                              setActiveTab('chat')
+                              sendMessage(action.action.replace('chat:', ''))
+                            } else if (action.action.startsWith('tel:')) {
+                              window.location.href = action.action
+                            }
+                          }}
+                          className={`${baseClasses} rounded-lg px-3 py-3 text-left transition-colors duration-150 flex flex-col gap-1`}
+                        >
+                          <Icon className={`w-4 h-4 ${action.primary ? 'text-brand-amber' : 'text-brand-navy/70'}`} aria-hidden="true" />
+                          <span className="font-semibold text-xs leading-tight">{action.label}</span>
+                          <span className="text-[11px] opacity-70 leading-tight">{action.sub}</span>
+                        </button>
+                      )
+                    })}
                   </div>
                   <div className="mt-4 pt-3 border-t border-brand-navy/10 text-center">
-                    <p className="text-xs text-brand-navy/50">
-                      Pavement Mag Top 75 · Best of Houzz · 40+ Years · Licensed &amp; Insured · JWORDENAI
+                    <p className="text-[11px] text-brand-navy/50">
+                      Licensed &amp; Insured · 40+ Years · Pavement Mag Top 75
                     </p>
                   </div>
                 </div>
