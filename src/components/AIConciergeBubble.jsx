@@ -585,7 +585,7 @@ export default function AIConciergeBubble() {
               className="relative"
             >
               <div className="absolute inset-0 rounded-2xl bg-primary/24 blur-2xl scale-110 pointer-events-none" />
-              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-primary/14 via-transparent to-sky-300/12 blur-xl pointer-events-none" />
+              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-primary/14 via-transparent to-accent/18 blur-xl pointer-events-none" />
 
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
                 <div className="w-[116px] h-[148px] rounded-2xl border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
@@ -730,7 +730,7 @@ export default function AIConciergeBubble() {
               </div>
             </div>
 
-            <div className="px-4 py-2.5 border-b border-primary/20 bg-gradient-to-r from-primary/10 via-transparent to-sky-300/10">
+            <div className="px-4 py-2.5 border-b border-primary/20 bg-gradient-to-r from-primary/10 via-transparent to-accent/12">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 overflow-x-auto">
                   {TRUST_SIGNALS.map((item) => (

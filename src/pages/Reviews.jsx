@@ -109,7 +109,7 @@ export default function Reviews() {
       {/* Header */}
       <div className="bg-brand-navy pt-32 pb-20 text-white text-center relative overflow-hidden">
         <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-20 right-0 w-72 h-72 rounded-full bg-sky-400/15 blur-3xl" />
+        <div className="absolute -bottom-20 right-0 w-72 h-72 rounded-full bg-accent/15 blur-3xl" />
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="font-display font-black text-5xl md:text-6xl mb-4">
             Customer <span className="text-brand-amber">Reviews</span>

@@ -114,7 +114,7 @@ export default function Blog() {
 
       <section className="pt-32 pb-12 border-b border-border relative overflow-hidden">
         <div className="absolute -top-20 right-0 w-72 h-72 rounded-full bg-primary/16 blur-3xl" />
-        <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-sky-400/12 blur-3xl" />
+        <div className="absolute bottom-0 -left-16 w-56 h-56 rounded-full bg-accent/12 blur-3xl" />
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-3">
             // Knowledge Base

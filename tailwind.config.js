@@ -19,13 +19,13 @@ export default {
         sm: "calc(var(--radius) - 4px)"
       },
       colors: {
-        "brand-navy": "#1a2744",
-        "brand-amber": "#f59e0b",
+        "brand-navy": "#111827",
+        "brand-amber": "#f5a623",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         amber: {
-          DEFAULT: "hsl(43, 100%, 50%)",
-          dark: "hsl(43, 80%, 40%)"
+          DEFAULT: "hsl(35, 92%, 51%)",
+          dark: "hsl(32, 87%, 42%)"
         },
         obsidian: "hsl(0, 0%, 4%)",
         steel: "hsl(210, 4%, 31%)",

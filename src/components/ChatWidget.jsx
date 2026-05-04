@@ -211,20 +211,20 @@ function getPageHelp(pathname) {
 
 function HeaderAvatar() {
   return (
-    <div className="relative h-11 w-11 flex-shrink-0 rounded-2xl border border-cyan-300/45 bg-slate-950 shadow-[0_0_24px_rgba(56,189,248,0.32)]" aria-hidden="true">
+    <div className="relative h-11 w-11 flex-shrink-0 rounded-2xl border border-brand-amber/45 bg-slate-950 shadow-[0_0_24px_rgba(245,166,35,0.32)]" aria-hidden="true">
       <div className="absolute inset-1 rounded-xl border border-brand-amber/50" />
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative h-11 w-11">
         <path d="M32 4 L39 10 L50 10 L54 20 L61 28 L57 39 L57 51 L45 55 L32 62 L19 55 L7 51 L7 39 L3 28 L10 20 L14 10 L25 10Z" fill="#05070b" stroke="#f5a623" strokeWidth="1.4" />
-        <circle cx="32" cy="32" r="22" fill="#0f172a" stroke="#38bdf8" strokeWidth="0.8" opacity="0.9" />
+        <circle cx="32" cy="32" r="22" fill="#0f172a" stroke="#f5a623" strokeWidth="0.8" opacity="0.9" />
         <path d="M15 25 C16 13 23 7 32 7 C41 7 48 13 49 25Z" fill="#f5a623" />
         <rect x="13" y="24" width="38" height="6" rx="3" fill="#0f172a" stroke="#f5a623" strokeWidth="1" />
         <rect x="25" y="12" width="14" height="9" rx="3" fill="#020617" stroke="#f5a623" strokeWidth="1" />
         <text x="32" y="19" fontSize="6" fill="#f8fafc" textAnchor="middle" fontWeight="900">JW</text>
-        <path d="M20 31 C21 22 26 18 32 18 C38 18 43 22 44 31 L42 42 C40 49 36 52 32 52 C28 52 24 49 22 42Z" fill="#0f172a" stroke="#bae6fd" strokeWidth="1" />
-        <rect x="21" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#38bdf8" strokeWidth="0.8" />
-        <rect x="33" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#38bdf8" strokeWidth="0.8" />
-        <circle cx="26" cy="34" r="1.4" fill="#7dd3fc" />
-        <circle cx="38" cy="34" r="1.4" fill="#7dd3fc" />
+        <path d="M20 31 C21 22 26 18 32 18 C38 18 43 22 44 31 L42 42 C40 49 36 52 32 52 C28 52 24 49 22 42Z" fill="#0f172a" stroke="#fde68a" strokeWidth="1" />
+        <rect x="21" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#f5a623" strokeWidth="0.8" />
+        <rect x="33" y="30" width="10" height="8" rx="3" fill="#020617" stroke="#f5a623" strokeWidth="0.8" />
+        <circle cx="26" cy="34" r="1.4" fill="#fbbf24" />
+        <circle cx="38" cy="34" r="1.4" fill="#fbbf24" />
         <path d="M25 43 C29 46 35 46 39 43" stroke="#f5a623" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
     </div>

@@ -38,16 +38,16 @@ function JWordenSVG({ talking = false, state = 'idle', eyeDx = 0, eyeDy = 0, aud
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
         <radialGradient id="dot-grad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="70%" stopColor="#0ea5e9" />
-          <stop offset="100%" stopColor="#0369a1" />
+          <stop offset="0%" stopColor="#fbbf24" />
+          <stop offset="70%" stopColor="#f5a623" />
+          <stop offset="100%" stopColor="#b45309" />
         </radialGradient>
       </defs>
 
       {/* Outer focus rings */}
       <motion.circle
         cx="50" cy="50" r="42"
-        stroke="#38bdf8"
+        stroke="#f5a623"
         strokeWidth="1"
         strokeDasharray="4 8"
         animate={{ rotate: 360 }}
@@ -85,7 +85,7 @@ function JWordenSVG({ talking = false, state = 'idle', eyeDx = 0, eyeDy = 0, aud
                 cx={50 + Math.cos(angle * Math.PI / 180) * 30}
                 cy={50 + Math.sin(angle * Math.PI / 180) * 30}
                 r="2"
-                fill={audioActive ? "#38bdf8" : "#f5a623"}
+                fill="#f5a623"
                 animate={{
                   scale: audioActive ? [0, 2.5, 0] : [0, 1.5, 0],
                   opacity: [0, 1, 0]
@@ -141,7 +141,7 @@ export default function MrWordenAvatar({
   const floatAnim = { y: [0, -3, 0] }
   const floatTransition = { repeat: Infinity, duration: 4, ease: 'easeInOut' }
 
-  const glowColor = isActive ? 'rgba(56,189,248,0.4)' : 'rgba(56,189,248,0.1)'
+  const glowColor = isActive ? 'rgba(245,166,35,0.4)' : 'rgba(245,166,35,0.1)'
 
   const buttonRef = useRef(null)
 
@@ -176,7 +176,7 @@ export default function MrWordenAvatar({
       </motion.div>
 
       {/* Tiny clean label */}
-      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-slate-900/80 border border-white/10 text-[8px] font-bold text-cyan-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-slate-900/80 border border-white/10 text-[8px] font-bold text-brand-amber uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
         {audioActive ? 'SPEAKING' : 'AI'}
       </div>
 
@@ -188,7 +188,7 @@ export default function MrWordenAvatar({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            className="absolute -top-1 -right-1 bg-cyan-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-lg border border-slate-900"
+            className="absolute -top-1 -right-1 bg-brand-amber text-brand-navy text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-lg border border-slate-900"
           >
             {unread}
           </motion.div>
