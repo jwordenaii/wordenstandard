@@ -92,6 +92,7 @@ FEATURE_TIERS: dict[str, str] = {
     "advanced_analytics":   "premium",
     "search_pulse_heatmap": "premium",
     "crew_wearables":       "premium",
+    "truck_dispatch":       "premium",
     # owner-only (master deployment never licensed out)
     "integrations_panel":   "owner",
     "autonomy_kill_switch": "owner",

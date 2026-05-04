@@ -696,6 +696,18 @@ export const api = {
   wearableConfig:     () => protectedRequest('GET', '/api/v1/admin/wearables/config'),
   // ── Live Search Pulse / VA hotspot heatmap ───────────────────────────────
   searchPulseSnapshot: (force = false) => protectedRequest('GET', `/api/v1/admin/search-pulse/snapshot${force ? '?force=true' : ''}`),
+  // ── Dump-truck dispatch (Ship D) ──────────────────────────────────────────
+  dispatchSnapshot: () => protectedRequest('GET', '/api/v1/admin/dispatch/snapshot'),
+  dispatchTrucks:   () => protectedRequest('GET', '/api/v1/admin/dispatch/trucks'),
+  dispatchUpsertTruck: (payload) => protectedRequest('POST', '/api/v1/admin/dispatch/trucks', payload),
+  dispatchDeleteTruck: (id) => protectedRequest('DELETE', `/api/v1/admin/dispatch/trucks/${encodeURIComponent(id)}`),
+  dispatchDrivers:  () => protectedRequest('GET', '/api/v1/admin/dispatch/drivers'),
+  dispatchUpsertDriver: (payload) => protectedRequest('POST', '/api/v1/admin/dispatch/drivers', payload),
+  dispatchDeleteDriver: (id) => protectedRequest('DELETE', `/api/v1/admin/dispatch/drivers/${encodeURIComponent(id)}`),
+  dispatchJobs:     () => protectedRequest('GET', '/api/v1/admin/dispatch/jobs'),
+  dispatchUpsertJob: (payload) => protectedRequest('POST', '/api/v1/admin/dispatch/jobs', payload),
+  dispatchDeleteJob: (id) => protectedRequest('DELETE', `/api/v1/admin/dispatch/jobs/${encodeURIComponent(id)}`),
+  dispatchAssign:   (jobId) => protectedRequest('GET', `/api/v1/admin/dispatch/assign/${encodeURIComponent(jobId)}`),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

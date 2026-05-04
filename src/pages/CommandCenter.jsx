@@ -29,6 +29,7 @@ const TABS = [
   { id: 'civil-intel', label: 'Civil Intel' },
   { id: 'integrations', label: 'Integrations' },
   { id: 'search-pulse', label: 'Search Pulse' },
+  { id: 'dispatch', label: 'Dispatch' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3680,6 +3681,205 @@ function SearchPulsePanel() {
   )
 }
 
+function DispatchPanel() {
+  const [snap, setSnap] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [err, setErr] = useState('')
+  const [tab, setTab] = useState('jobs')
+  const [drafts, setDrafts] = useState({ truck: {}, driver: {}, job: {} })
+  const [busy, setBusy] = useState(false)
+  const [assignFor, setAssignFor] = useState(null)
+  const [assignResult, setAssignResult] = useState(null)
+
+  const reload = async () => {
+    setLoading(true); setErr('')
+    try {
+      const data = await api.dispatchSnapshot()
+      setSnap(data)
+    } catch (e) {
+      setErr(e.message || 'failed to load')
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => { reload() }, [])
+
+  const submit = async (kind) => {
+    const payload = drafts[kind]
+    if (!payload || Object.keys(payload).length === 0) return
+    setBusy(true)
+    try {
+      if (kind === 'truck')  await api.dispatchUpsertTruck(payload)
+      if (kind === 'driver') await api.dispatchUpsertDriver(payload)
+      if (kind === 'job')    await api.dispatchUpsertJob(payload)
+      setDrafts(d => ({ ...d, [kind]: {} }))
+      await reload()
+    } catch (e) {
+      setErr(e.message || 'save failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const remove = async (kind, id) => {
+    if (!window.confirm(`Delete this ${kind}?`)) return
+    setBusy(true)
+    try {
+      if (kind === 'truck')  await api.dispatchDeleteTruck(id)
+      if (kind === 'driver') await api.dispatchDeleteDriver(id)
+      if (kind === 'job')    await api.dispatchDeleteJob(id)
+      await reload()
+    } catch (e) {
+      setErr(e.message || 'delete failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const runAssign = async (jobId) => {
+    setAssignFor(jobId); setAssignResult(null)
+    try {
+      const r = await api.dispatchAssign(jobId)
+      setAssignResult(r)
+    } catch (e) {
+      setAssignResult({ error: e.message || 'failed' })
+    }
+  }
+
+  const setDraft = (kind, k, v) =>
+    setDrafts(d => ({ ...d, [kind]: { ...d[kind], [k]: v } }))
+
+  if (loading && !snap) {
+    return <div className="text-white/70 p-6">Loading dispatch board…</div>
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Dump-Truck Dispatch</h2>
+          <p className="text-white/60 text-sm">
+            {snap?.maps_configured
+              ? 'Google Maps drive-time enabled — assignments use real road distance.'
+              : 'Google Maps key missing — assignments use straight-line distance fallback.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={reload}
+          disabled={loading}
+          className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-semibold hover:bg-white/20"
+        >
+          {loading ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
+      {err && <div className="text-red-300 text-sm">{err}</div>}
+
+      <div className="flex gap-2 border-b border-white/10">
+        {['jobs', 'trucks', 'drivers'].map(t => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={`px-4 py-2 text-sm font-semibold ${tab === t ? 'text-brand-amber border-b-2 border-brand-amber' : 'text-white/60 hover:text-white'}`}
+          >
+            {t.toUpperCase()} ({snap?.[t]?.length || 0})
+          </button>
+        ))}
+      </div>
+
+      {tab === 'trucks' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-2 bg-white/5 rounded-lg p-3">
+            <input value={drafts.truck.name||''} onChange={e=>setDraft('truck','name',e.target.value)} placeholder="Truck name (T-101)" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2" />
+            <input value={drafts.truck.plate||''} onChange={e=>setDraft('truck','plate',e.target.value)} placeholder="Plate" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.truck.capacity_tons||''} onChange={e=>setDraft('truck','capacity_tons',Number(e.target.value)||0)} placeholder="Tons" type="number" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.truck.lat||''} onChange={e=>setDraft('truck','lat',Number(e.target.value)||0)} placeholder="Lat" type="number" step="0.0001" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.truck.lng||''} onChange={e=>setDraft('truck','lng',Number(e.target.value)||0)} placeholder="Lng" type="number" step="0.0001" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <button type="button" onClick={()=>submit('truck')} disabled={busy} className="md:col-span-6 px-3 py-1.5 rounded bg-brand-amber text-brand-navy font-semibold text-sm hover:opacity-90 disabled:opacity-50">Add Truck</button>
+          </div>
+          <div className="space-y-1">
+            {(snap?.trucks||[]).map(t=>(
+              <div key={t.id} className="bg-white/5 rounded px-3 py-2 flex items-center justify-between text-sm text-white/90">
+                <div><span className="font-semibold">{t.name}</span> · {t.plate||'no plate'} · {t.capacity_tons}T · status {t.status}</div>
+                <button type="button" onClick={()=>remove('truck',t.id)} className="text-red-300 hover:text-red-200 text-xs">Delete</button>
+              </div>
+            ))}
+            {(!snap?.trucks||snap.trucks.length===0) && <div className="text-white/50 text-sm">No trucks yet.</div>}
+          </div>
+        </div>
+      )}
+
+      {tab === 'drivers' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2 bg-white/5 rounded-lg p-3">
+            <input value={drafts.driver.name||''} onChange={e=>setDraft('driver','name',e.target.value)} placeholder="Driver name" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2" />
+            <input value={drafts.driver.phone||''} onChange={e=>setDraft('driver','phone',e.target.value)} placeholder="Phone" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.driver.cdl_class||''} onChange={e=>setDraft('driver','cdl_class',e.target.value)} placeholder="CDL Class" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.driver.preferred_truck_id||''} onChange={e=>setDraft('driver','preferred_truck_id',e.target.value)} placeholder="Preferred truck id" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <button type="button" onClick={()=>submit('driver')} disabled={busy} className="md:col-span-5 px-3 py-1.5 rounded bg-brand-amber text-brand-navy font-semibold text-sm hover:opacity-90 disabled:opacity-50">Add Driver</button>
+          </div>
+          <div className="space-y-1">
+            {(snap?.drivers||[]).map(d=>(
+              <div key={d.id} className="bg-white/5 rounded px-3 py-2 flex items-center justify-between text-sm text-white/90">
+                <div><span className="font-semibold">{d.name}</span> · {d.phone||'—'} · CDL {d.cdl_class||'?'} · status {d.status}</div>
+                <button type="button" onClick={()=>remove('driver',d.id)} className="text-red-300 hover:text-red-200 text-xs">Delete</button>
+              </div>
+            ))}
+            {(!snap?.drivers||snap.drivers.length===0) && <div className="text-white/50 text-sm">No drivers yet.</div>}
+          </div>
+        </div>
+      )}
+
+      {tab === 'jobs' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-2 bg-white/5 rounded-lg p-3">
+            <input value={drafts.job.site_name||''} onChange={e=>setDraft('job','site_name',e.target.value)} placeholder="Site name" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2" />
+            <input value={drafts.job.address||''} onChange={e=>setDraft('job','address',e.target.value)} placeholder="Address" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2" />
+            <input value={drafts.job.tons_needed||''} onChange={e=>setDraft('job','tons_needed',Number(e.target.value)||0)} placeholder="Tons needed" type="number" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.job.priority||''} onChange={e=>setDraft('job','priority',e.target.value)} placeholder="Priority (low/normal/high)" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.job.lat||''} onChange={e=>setDraft('job','lat',Number(e.target.value)||0)} placeholder="Lat" type="number" step="0.0001" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.job.lng||''} onChange={e=>setDraft('job','lng',Number(e.target.value)||0)} placeholder="Lng" type="number" step="0.0001" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+            <input value={drafts.job.scheduled_start||''} onChange={e=>setDraft('job','scheduled_start',e.target.value)} placeholder="Start (YYYY-MM-DD HH:MM)" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 col-span-2" />
+            <button type="button" onClick={()=>submit('job')} disabled={busy} className="md:col-span-6 px-3 py-1.5 rounded bg-brand-amber text-brand-navy font-semibold text-sm hover:opacity-90 disabled:opacity-50">Add Job</button>
+          </div>
+          <div className="space-y-1">
+            {(snap?.jobs||[]).map(j=>(
+              <div key={j.id} className="bg-white/5 rounded px-3 py-2 text-sm text-white/90">
+                <div className="flex items-center justify-between">
+                  <div><span className="font-semibold">{j.site_name}</span> · {j.tons_needed}T · {j.priority} · {j.scheduled_start||'no time'}</div>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={()=>runAssign(j.id)} className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-200 text-xs font-semibold hover:bg-emerald-500/30">Recommend Crew</button>
+                    <button type="button" onClick={()=>remove('job',j.id)} className="text-red-300 hover:text-red-200 text-xs">Delete</button>
+                  </div>
+                </div>
+                {assignFor === j.id && assignResult && (
+                  <div className="mt-2 ml-2 border-l-2 border-brand-amber/50 pl-3 space-y-1">
+                    {assignResult.error && <div className="text-red-300 text-xs">{assignResult.error}</div>}
+                    {(assignResult.ranked||[]).slice(0,3).map((r,idx)=>(
+                      <div key={idx} className="text-xs">
+                        <span className="font-bold text-brand-amber">#{idx+1}</span>{' '}
+                        {r.truck.name} ({r.truck.capacity_tons}T) ·{' '}
+                        driver: {r.driver?.name||'—'} ·{' '}
+                        {r.drive_minutes!=null ? `${r.drive_minutes} min drive` : (r.miles!=null ? `${r.miles} mi` : 'no location')} ·{' '}
+                        score {r.score}
+                      </div>
+                    ))}
+                    {(!assignResult.ranked||assignResult.ranked.length===0) && !assignResult.error && (
+                      <div className="text-white/50 text-xs">No active trucks available.</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+            {(!snap?.jobs||snap.jobs.length===0) && <div className="text-white/50 text-sm">No jobs scheduled.</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function IntegrationsPanel() {
   const [statusMap, setStatusMap] = useState({})
   const [tier, setTier] = useState('owner')
@@ -4297,6 +4497,10 @@ export default function CommandCenter() {
 
             {activeTab === 'search-pulse' && (
               <SearchPulsePanel />
+            )}
+
+            {activeTab === 'dispatch' && (
+              <DispatchPanel />
             )}
           </>
       </div>

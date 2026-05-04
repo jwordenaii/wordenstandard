@@ -251,6 +251,7 @@ from .routers import admin_integrations as admin_integrations_router
 from .routers import features as features_router
 from .routers import crew_wearables as crew_wearables_router
 from .routers import search_pulse_router
+from .routers import dispatch_router
 from .services.quantum_orchestrator import global_quantum_orchestrator
 from .routers.websocket_events import sio
 from .services.monitoring_service import monitoring
@@ -511,6 +512,7 @@ app.include_router(features_router.router)
 app.include_router(crew_wearables_router.public_router)
 app.include_router(crew_wearables_router.admin_router)
 app.include_router(search_pulse_router.router)
+app.include_router(dispatch_router.router)
 
 # Human-in-the-loop review queue
 app.include_router(human_review_router.router)
