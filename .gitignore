@@ -42,3 +42,9 @@ __pycache__/
 
 # media URL mapping artifact
 .media-url-map.json
+
+# Stray local build/test artifacts
+build_*.txt
+build.log
+lint.log
+staging-compare.txt

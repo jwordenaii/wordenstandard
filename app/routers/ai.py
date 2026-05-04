@@ -13,6 +13,7 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -199,7 +200,11 @@ async def photo_inspect(
 
     openai_key = os.getenv("OPENAI_API_KEY", "")
     if openai_key:
-        analysis = _openai_analysis(image_bytes, file.content_type)
+        # Run blocking OpenAI SDK call off the event loop so concurrent
+        # requests aren't starved while we wait for the model response.
+        analysis = await run_in_threadpool(
+            _openai_analysis, image_bytes, file.content_type
+        )
         # If the analysis engine is stub_fallback, the OpenAI call failed entirely.
         # Return 503 so callers know the AI service is degraded.
         if analysis.get("engine") == "stub_fallback":
@@ -402,7 +407,15 @@ async def chat(request: Request, req: ChatRequest, db: Session = Depends(get_db)
     # Load conversation history
     history = get_session(session_id, db=db)
 
-    decision = run_chat(req.question, state_code=req.state_code, history=history, page_context=req.page_context)
+    # run_chat performs blocking OpenAI + DB work — push it to the threadpool
+    # so the event loop stays responsive for other concurrent visitors.
+    decision = await run_in_threadpool(
+        run_chat,
+        req.question,
+        state_code=req.state_code,
+        history=history,
+        page_context=req.page_context,
+    )
 
     # Save user message + AI response to session
     try:
@@ -493,39 +506,43 @@ async def contact_suggest(request: Request, req: ContactSuggestRequest):
     if client is None:
         return _stub_suggest(req.message)
 
-    try:
-        import json as _json
-        prompt = (
-            "You are a paving company intake assistant. Given the customer's message, "
-            "return JSON with two fields:\n"
-            '  "service_type": one of ["driveway", "parking_lot", "sealcoating", "crack_filling", "paving", "other", null]\n'
-            '  "hint": a one-sentence tip to help the customer add useful detail (max 100 chars), or null\n'
-            "Return only valid JSON, no markdown fences."
-        )
-
-        def _call():
-            return client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": req.message[:500]},
-                ],
-                max_tokens=80,
-                temperature=0.3,
-                timeout=15,
+    def _do_suggest() -> ContactSuggestResponse:
+        try:
+            import json as _json
+            prompt = (
+                "You are a paving company intake assistant. Given the customer's message, "
+                "return JSON with two fields:\n"
+                '  "service_type": one of ["driveway", "parking_lot", "sealcoating", "crack_filling", "paving", "other", null]\n'
+                '  "hint": a one-sentence tip to help the customer add useful detail (max 100 chars), or null\n'
+                "Return only valid JSON, no markdown fences."
             )
 
-        response = _retry_with_backoff(_call, retries=2, base_delay=0.5)
-        raw = response.choices[0].message.content or ""
-        if "```" in raw:
-            raw = raw.split("```")[1].lstrip("json").strip()
-        data = _json.loads(raw)
-        return ContactSuggestResponse(
-            service_type=data.get("service_type") or None,
-            hint=data.get("hint") or None,
-            engine="gpt-4o-mini",
-        )
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("contact_suggest OpenAI call failed after retries: %s", exc)
-        _capture_exception(exc, context="contact_suggest")
-        return _stub_suggest(req.message)
+            def _call():
+                return client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": prompt},
+                        {"role": "user", "content": req.message[:500]},
+                    ],
+                    max_tokens=80,
+                    temperature=0.3,
+                    timeout=15,
+                )
+
+            response = _retry_with_backoff(_call, retries=2, base_delay=0.5)
+            raw = response.choices[0].message.content or ""
+            if "```" in raw:
+                raw = raw.split("```")[1].lstrip("json").strip()
+            data = _json.loads(raw)
+            return ContactSuggestResponse(
+                service_type=data.get("service_type") or None,
+                hint=data.get("hint") or None,
+                engine="gpt-4o-mini",
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("contact_suggest OpenAI call failed after retries: %s", exc)
+            _capture_exception(exc, context="contact_suggest")
+            return _stub_suggest(req.message)
+
+    # Push blocking OpenAI work to the threadpool to keep the event loop free.
+    return await run_in_threadpool(_do_suggest)
