@@ -462,6 +462,20 @@ export default function ChatWidget() {
   const [aiSuggestion, setAiSuggestion] = useState(null)
   const suggestTimerRef = useRef(null)
 
+  // Phone verification (Twilio Verify) — gates lead submission when configured
+  const [verifyEnabled, setVerifyEnabled] = useState(false)
+  const [verifyMode, setVerifyMode]       = useState('idle')   // 'idle' | 'pending' | 'verifying'
+  const [verifyCode, setVerifyCode]       = useState('')
+  const [verifyError, setVerifyError]     = useState('')
+  const [phoneVerified, setPhoneVerified] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    api.twilioVerifyStatus()
+      .then((r) => { if (!cancelled) setVerifyEnabled(Boolean(r?.configured)) })
+      .catch(() => { /* silent — fall back to no-gate behaviour */ })
+    return () => { cancelled = true }
+  }, [])
+
   // Premium voice
   const [voiceOn, setVoiceOn] = useState(() => ssGet('mrw_voice_on', false))
   useEffect(() => {
@@ -662,6 +676,29 @@ export default function ChatWidget() {
 
   const handleLeadSubmit = async (e) => {
     e.preventDefault()
+
+    // Phone verification gate — only when Twilio is configured AND phone hasn't been verified yet.
+    // If Twilio is OFF, behaviour is unchanged.
+    if (verifyEnabled && !phoneVerified && leadForm.phone) {
+      setVerifyError('')
+      setLeadStatus('submitting')
+      try {
+        const r = await api.twilioVerifyStart(leadForm.phone, 'sms')
+        if (r?.ok) {
+          setVerifyMode('pending')
+          setLeadStatus('idle')
+          return
+        }
+        // If start failed, surface error but still allow user to retry / fall through.
+        setVerifyError(r?.error || 'Could not send verification code. Please double-check the phone number.')
+        setLeadStatus('idle')
+        return
+      } catch (err) {
+        // Network or unexpected — fall through to plain submit so we never block a real lead.
+        console.warn('Twilio verify start failed, submitting unverified:', err)
+      }
+    }
+
     setLeadStatus('submitting')
     setLeadError('')
     try {
@@ -673,6 +710,7 @@ export default function ChatWidget() {
         leadForm.timeframe && `Timeline: ${leadForm.timeframe}`,
         leadForm.sqft && `Project size: ~${leadForm.sqft} sq ft`,
         leadForm.notes && `Notes: ${leadForm.notes}`,
+        phoneVerified && 'Phone verified via SMS ✅',
       ].filter(Boolean)
 
       await api.submitContact({
@@ -684,9 +722,44 @@ export default function ChatWidget() {
       setLeadStatus('success')
       setLeadForm(LEAD_INITIAL)
       setAiSuggestion(null)
+      setPhoneVerified(false)
+      setVerifyMode('idle')
+      setVerifyCode('')
     } catch (err) {
       setLeadError(err.message || 'Something went wrong. Please try again.')
       setLeadStatus('error')
+    }
+  }
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault()
+    setVerifyError('')
+    setVerifyMode('verifying')
+    try {
+      const r = await api.twilioVerifyCheck(leadForm.phone, verifyCode)
+      if (r?.ok) {
+        setPhoneVerified(true)
+        setVerifyMode('idle')
+        setVerifyCode('')
+        // Auto-resume submission with the verified phone
+        await handleLeadSubmit({ preventDefault: () => {} })
+      } else {
+        setVerifyError('That code didn\u2019t match. Please try again.')
+        setVerifyMode('pending')
+      }
+    } catch (err) {
+      setVerifyError(err.message || 'Verification failed.')
+      setVerifyMode('pending')
+    }
+  }
+
+  const handleResendCode = async () => {
+    setVerifyError('')
+    try {
+      const r = await api.twilioVerifyStart(leadForm.phone, 'sms')
+      if (!r?.ok) setVerifyError(r?.error || 'Could not resend code.')
+    } catch (err) {
+      setVerifyError(err.message || 'Could not resend code.')
     }
   }
 
@@ -1071,13 +1144,57 @@ export default function ChatWidget() {
                         </p>
                       )}
 
-                      <button
-                        type="submit"
-                        disabled={leadStatus === 'submitting'}
-                        className="w-full bg-brand-navy text-white text-sm font-bold rounded-lg py-2.5 hover:bg-brand-navy/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        {leadStatus === 'submitting' ? 'Sending\u2026' : '📋 Request Free Estimate'}
-                      </button>
+                      {verifyMode === 'pending' ? (
+                        <div className="rounded-lg border border-brand-amber/40 bg-brand-amber/5 p-3 space-y-2">
+                          <p className="text-xs text-brand-navy font-semibold">
+                            📲 We just texted a 6-digit code to {leadForm.phone}
+                          </p>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              autoComplete="one-time-code"
+                              maxLength={10}
+                              value={verifyCode}
+                              onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
+                              placeholder="123456"
+                              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono tracking-widest text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-amber/50"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyCode}
+                              disabled={verifyCode.length < 4 || verifyMode === 'verifying'}
+                              className="bg-brand-amber text-brand-navy text-xs font-bold rounded-lg px-3 py-2 hover:bg-brand-amber/90 disabled:opacity-60"
+                            >
+                              {verifyMode === 'verifying' ? '\u2026' : 'Verify'}
+                            </button>
+                          </div>
+                          {verifyError && (
+                            <p className="text-red-600 text-[11px]">{verifyError}</p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={handleResendCode}
+                            className="text-[11px] text-brand-navy/60 hover:underline"
+                          >
+                            Didn\u2019t get it? Resend code
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="submit"
+                          disabled={leadStatus === 'submitting'}
+                          className="w-full bg-brand-navy text-white text-sm font-bold rounded-lg py-2.5 hover:bg-brand-navy/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {leadStatus === 'submitting'
+                            ? (verifyEnabled && !phoneVerified ? 'Sending code\u2026' : 'Sending\u2026')
+                            : phoneVerified
+                              ? '✅ Submit Verified Request'
+                              : verifyEnabled
+                                ? '📲 Verify Phone & Submit'
+                                : '📋 Request Free Estimate'}
+                        </button>
+                      )}
 
                       <div className="flex items-center gap-3 justify-center pt-1">
                         <a href={`tel:${BUSINESS_PHONE_TEL}`}
