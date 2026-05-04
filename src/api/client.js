@@ -672,6 +672,12 @@ export const api = {
       script_hint: scriptHint || undefined,
       confirmed: true,
     }),
+  jarvisEmail: (subject, body, toEmail = null) =>
+    request('POST', '/api/v1/jarvis/email', {
+      to_email: toEmail || undefined,
+      subject,
+      body,
+    }),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────
   getAutonomyState: () => request('GET', '/api/v1/autonomy/state'),
   freezeAutonomy: (reason = 'manual') => request('POST', '/api/v1/autonomy/freeze', { reason }),

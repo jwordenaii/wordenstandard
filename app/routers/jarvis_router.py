@@ -5,6 +5,8 @@ from app.services.jarvis import jarvis
 from app.services import autonomy_state
 from app.services import web_search as _web_search
 from app.services import vapi_caller as _vapi
+from app.services import email_service as _email
+import asyncio
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/api/v1/jarvis", tags=["JARVIS Command Interface"])
@@ -24,6 +26,11 @@ class CallRequest(BaseModel):
     purpose:     str
     script_hint: Optional[str] = None
     confirmed:   bool = True   # direct REST call always counts as operator confirmation
+
+class EmailRequest(BaseModel):
+    to_email: Optional[str] = None
+    subject:  str
+    body:     str
 
 @router.post("/command")
 async def jarvis_command(payload: JarvisQuery):
@@ -59,6 +66,19 @@ async def jarvis_call(req: CallRequest):
         raise HTTPException(status_code=400, detail=result.get("error") or "Call failed")
     return result
 
+@router.post("/email", summary="Direct email send (SendGrid) — operator-initiated")
+async def jarvis_email(req: EmailRequest):
+    to_addr = (req.to_email or os.environ.get("ADMIN_NOTIFY_EMAIL") or "j.wordenandsonspaving@gmail.com").strip()
+    safe = (req.body or "").replace("&", "&amp;").replace("<", "&lt;")
+    html = f"<pre style='font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap'>{safe}</pre>"
+    ok = await asyncio.to_thread(
+        _email.send_raw,
+        to_email=to_addr, subject=req.subject, html_body=html, plain_text=req.body,
+    )
+    if not ok:
+        raise HTTPException(status_code=400, detail="Email send failed (check SENDGRID_API_KEY + SENDGRID_FROM_EMAIL on Railway)")
+    return {"ok": True, "to": to_addr, "subject": req.subject}
+
 @router.get("/status")
 async def jarvis_status():
     """
@@ -76,6 +96,7 @@ async def jarvis_status():
         "tools": {
             "web_search":       _web_search.is_available(),
             "make_phone_call":  _vapi.is_available(),
+            "send_email":       bool(os.environ.get("SENDGRID_API_KEY", "").strip() and os.environ.get("SENDGRID_FROM_EMAIL", "").strip()),
         },
         "autonomy": {
             "master":   state.get("master"),

@@ -7,6 +7,7 @@ from app.services.quantum_orchestrator import global_quantum_orchestrator
 from app.services import autonomy_state
 from app.services import web_search as _web_search
 from app.services import vapi_caller as _vapi
+from app.services import email_service as _email
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ JARVIS_SYSTEM_PROMPT = (
     "When you need real-world information you didn't already know, USE the web_search tool. "
     "When the operator asks you to call a phone number, USE the make_phone_call tool — "
     "never claim you've called without invoking it. "
+    "When the operator asks you to send an email or 'email me X', USE the send_email tool. "
+    "Default the recipient to j.wordenandsonspaving@gmail.com unless told otherwise. "
     "Refuse to send, schedule, or modify anything autonomously when the master autonomy switch is OFF — "
     "in that case, propose the action and ask the operator to confirm."
 )
@@ -70,6 +73,23 @@ JARVIS_TOOLS = [
             "required": ["to_number", "purpose"],
         },
     },
+    {
+        "name": "send_email",
+        "description": (
+            "Send a transactional email via SendGrid. Use for: sending the operator a document, "
+            "emailing summaries, forwarding the master keys list, customer follow-ups, etc. "
+            "Default recipient is j.wordenandsonspaving@gmail.com when none is given."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "to_email":   {"type": "string", "description": "Recipient email address"},
+                "subject":    {"type": "string", "description": "Email subject line"},
+                "body":       {"type": "string", "description": "Plain-text body of the email (HTML will be auto-generated)"},
+            },
+            "required": ["subject", "body"],
+        },
+    },
 ]
 
 
@@ -86,6 +106,19 @@ async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
             script_hint=args.get("script_hint"),
             confirmed=confirmed,
         )
+    if name == "send_email":
+        to_addr = (args.get("to_email") or os.environ.get("ADMIN_NOTIFY_EMAIL") or "j.wordenandsonspaving@gmail.com").strip()
+        subject = (args.get("subject") or "Message from Jarvis").strip()
+        body    = args.get("body") or ""
+        html    = "<pre style='font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap'>" + (body.replace("&", "&amp;").replace("<", "&lt;")) + "</pre>"
+        try:
+            ok = await asyncio.to_thread(
+                _email.send_raw,
+                to_email=to_addr, subject=subject, html_body=html, plain_text=body,
+            )
+            return {"ok": bool(ok), "to": to_addr, "subject": subject}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
     return {"ok": False, "error": f"Unknown tool: {name}"}
 
 

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, MessageSquare, Power, Send, Cpu, Eye, Wand2 } from 'lucide-react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, MessageSquare, Power, Send, Cpu, Eye, Wand2 } from 'lucide-react'
 import { api } from '@/api/client'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
@@ -3156,7 +3156,7 @@ function JarvisChat({ compact = false }) {
   const [statusOk, setStatusOk] = useState(null)
   const [engine, setEngine] = useState(null)        // 'anthropic-claude' | 'heuristic-fallback'
   const [backendFrozen, setBackendFrozen] = useState(false)
-  const [tools, setTools] = useState({ web_search: false, make_phone_call: false })
+  const [tools, setTools] = useState({ web_search: false, make_phone_call: false, send_email: false })
   const scrollerRef = useRef(null)
 
   useEffect(() => {
@@ -3171,6 +3171,7 @@ function JarvisChat({ compact = false }) {
         setTools({
           web_search:      Boolean(r?.tools?.web_search),
           make_phone_call: Boolean(r?.tools?.make_phone_call),
+          send_email:      Boolean(r?.tools?.send_email),
         })
       })
       .catch(() => { if (!cancelled) setStatusOk(false) })
@@ -3236,6 +3237,11 @@ function JarvisChat({ compact = false }) {
           {tools.make_phone_call ? (
             <span title="Outbound calls via Vapi — ready" className="inline-flex items-center gap-1 rounded-full text-[10px] font-bold px-2 py-0.5 border border-emerald-300/40 text-emerald-100 bg-emerald-300/10">
               <Phone className="w-3 h-3" /> Call
+            </span>
+          ) : null}
+          {tools.send_email ? (
+            <span title="Email via SendGrid — ready" className="inline-flex items-center gap-1 rounded-full text-[10px] font-bold px-2 py-0.5 border border-amber-300/40 text-amber-100 bg-amber-300/10">
+              <Mail className="w-3 h-3" /> Email
             </span>
           ) : null}
           {backendFrozen ? (
