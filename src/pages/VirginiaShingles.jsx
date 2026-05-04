@@ -66,7 +66,7 @@ export default function VirginiaShingles() {
                className="rounded-3xl w-full h-[500px] object-cover border border-white/10 shadow-2xl" 
                alt="Roofing Project" 
                loading="eager"
-               fetchpriority="high"
+               fetchPriority="high"
                decoding="async"
              />
           </div>

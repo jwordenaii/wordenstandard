@@ -65,7 +65,7 @@ export default function AsphaltPaving() {
             className="w-full h-full object-cover opacity-60 scale-105"
             alt="Paving Excellence"
             loading="eager"
-            fetchpriority="high"
+            fetchPriority="high"
             decoding="async"
           />
         </div>
