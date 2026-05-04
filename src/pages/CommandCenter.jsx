@@ -40,20 +40,37 @@ const AUTONOMY_DOMAINS = [
   { id: 'twinSnapshots',   label: 'Auto Digital Twin Snapshots', desc: 'Take cognitive twin snapshots on schedule.' },
 ]
 function readAutonomyState() {
-  if (typeof window === 'undefined') return { master: false, domains: {} }
+  if (typeof window === 'undefined') return { master: false, domains: {}, frozen: false, frozenAt: null }
   try {
     const raw = window.localStorage.getItem(AUTONOMY_KEY)
-    if (!raw) return { master: false, domains: {} }
+    if (!raw) return { master: false, domains: {}, frozen: false, frozenAt: null }
     const parsed = JSON.parse(raw)
-    return { master: Boolean(parsed.master), domains: parsed.domains || {} }
+    return {
+      master:   Boolean(parsed.master),
+      domains:  parsed.domains || {},
+      frozen:   Boolean(parsed.frozen),
+      frozenAt: parsed.frozenAt || null,
+    }
   } catch {
-    return { master: false, domains: {} }
+    return { master: false, domains: {}, frozen: false, frozenAt: null }
   }
 }
 function writeAutonomyState(state) {
   if (typeof window === 'undefined') return
   try { window.localStorage.setItem(AUTONOMY_KEY, JSON.stringify(state)) } catch { /* ignore */ }
   try { window.dispatchEvent(new CustomEvent('cc:autonomy-changed', { detail: state })) } catch { /* ignore */ }
+}
+// PANIC: hard freeze. Forces master OFF, clears all domains, sets frozen=true.
+// Frozen state survives page reload. Use unfreeze() to clear.
+function triggerPanic(reason = 'manual') {
+  const next = { master: false, domains: {}, frozen: true, frozenAt: new Date().toISOString(), reason }
+  writeAutonomyState(next)
+  return next
+}
+function unfreeze() {
+  const next = { master: false, domains: {}, frozen: false, frozenAt: null }
+  writeAutonomyState(next)
+  return next
 }
 
 const KPI_CARDS = [
@@ -3251,8 +3268,16 @@ function JarvisChat({ compact = false }) {
 function JarvisAutonomy() {
   const [autonomy, setAutonomy] = useState(readAutonomyState)
 
+  // Listen for panic/unfreeze events from anywhere (header button, etc.)
+  useEffect(() => {
+    const onChange = () => setAutonomy(readAutonomyState())
+    if (typeof window !== 'undefined') window.addEventListener('cc:autonomy-changed', onChange)
+    return () => { if (typeof window !== 'undefined') window.removeEventListener('cc:autonomy-changed', onChange) }
+  }, [])
+
   const toggleMaster = useCallback(() => {
     setAutonomy((prev) => {
+      if (prev.frozen) return prev // hard guard: cannot enable while frozen
       const next = { ...prev, master: !prev.master }
       writeAutonomyState(next)
       return next
@@ -3261,18 +3286,22 @@ function JarvisAutonomy() {
 
   const toggleDomain = useCallback((id) => {
     setAutonomy((prev) => {
+      if (prev.frozen || !prev.master) return prev
       const next = { ...prev, domains: { ...prev.domains, [id]: !prev.domains?.[id] } }
       writeAutonomyState(next)
       return next
     })
   }, [])
 
+  const masterDisabled = autonomy.frozen
+  const domainsDisabled = autonomy.frozen || !autonomy.master
+
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Power className={['w-4 h-4', autonomy.master ? 'text-emerald-300' : 'text-white/40'].join(' ')} />
+            <Power className={['w-4 h-4', autonomy.master && !autonomy.frozen ? 'text-emerald-300' : 'text-white/40'].join(' ')} />
             <h3 className="font-display font-bold text-white text-base">Autonomy</h3>
           </div>
           <p className="text-white/45 text-xs mt-1">Master switch. Off = Jarvis only acts when you ask.</p>
@@ -3280,44 +3309,52 @@ function JarvisAutonomy() {
         <button
           type="button"
           onClick={toggleMaster}
-          aria-pressed={autonomy.master}
+          disabled={masterDisabled}
+          aria-pressed={autonomy.master && !autonomy.frozen}
           className={[
-            'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors',
-            autonomy.master ? 'border-emerald-300/50 bg-emerald-300/30' : 'border-white/20 bg-white/10',
+            'relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 transition-colors',
+            masterDisabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer',
+            autonomy.master && !autonomy.frozen ? 'border-emerald-300/50 bg-emerald-300/30' : 'border-white/20 bg-white/10',
           ].join(' ')}
         >
           <span className={[
             'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5',
-            autonomy.master ? 'translate-x-5' : 'translate-x-0.5',
+            autonomy.master && !autonomy.frozen ? 'translate-x-5' : 'translate-x-0.5',
           ].join(' ')} />
         </button>
       </div>
 
-      <div className={['rounded-xl border px-3 py-2 text-xs',
-        autonomy.master
-          ? 'border-emerald-300/40 bg-emerald-300/10 text-emerald-100'
-          : 'border-white/10 bg-white/5 text-white/55',
-      ].join(' ')}>
-        {autonomy.master
-          ? 'Autonomy is ON. Per-domain switches below decide exactly what Jarvis runs by itself.'
-          : 'Autonomy is OFF. Everything waits for your approval.'}
-      </div>
+      {autonomy.frozen ? (
+        <div className="rounded-xl border border-red-300/50 bg-red-300/10 px-3 py-2 text-xs text-red-100">
+          <span className="font-bold">FROZEN</span> · Jarvis is locked out of all autonomous action since {autonomy.frozenAt ? new Date(autonomy.frozenAt).toLocaleString() : 'manual trigger'}. Use the red header button to unfreeze.
+        </div>
+      ) : (
+        <div className={['rounded-xl border px-3 py-2 text-xs',
+          autonomy.master
+            ? 'border-emerald-300/40 bg-emerald-300/10 text-emerald-100'
+            : 'border-white/10 bg-white/5 text-white/55',
+        ].join(' ')}>
+          {autonomy.master
+            ? 'Autonomy is ON. Per-domain switches below decide exactly what Jarvis runs by itself.'
+            : 'Autonomy is OFF. Everything waits for your approval.'}
+        </div>
+      )}
 
       <div className="space-y-2">
         {AUTONOMY_DOMAINS.map((d) => {
-          const enabled = autonomy.master && Boolean(autonomy.domains?.[d.id])
+          const enabled = !autonomy.frozen && autonomy.master && Boolean(autonomy.domains?.[d.id])
           return (
             <button
               key={d.id}
               type="button"
               onClick={() => toggleDomain(d.id)}
-              disabled={!autonomy.master}
+              disabled={domainsDisabled}
               className={[
                 'w-full text-left flex items-start justify-between gap-3 rounded-xl border px-3 py-2.5 transition-colors',
                 enabled
                   ? 'border-emerald-300/40 bg-emerald-300/10'
                   : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]',
-                !autonomy.master ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                domainsDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               ].join(' ')}
             >
               <div className="min-w-0">
@@ -3478,6 +3515,98 @@ function JarvisDrawer({ open, onClose }) {
   )
 }
 
+// ── Panic / kill switch ─────────────────────────────────────────────────────
+// One-tap freeze of all Jarvis autonomy. Persists across reloads.
+// Two-tap to confirm so accidental clicks don't fire.
+function PanicButton() {
+  const [autonomy, setAutonomy] = useState(readAutonomyState)
+  const [confirming, setConfirming] = useState(false)
+  const confirmTimer = useRef(null)
+
+  useEffect(() => {
+    const onChange = () => setAutonomy(readAutonomyState())
+    if (typeof window !== 'undefined') window.addEventListener('cc:autonomy-changed', onChange)
+    return () => { if (typeof window !== 'undefined') window.removeEventListener('cc:autonomy-changed', onChange) }
+  }, [])
+
+  useEffect(() => () => { if (confirmTimer.current) clearTimeout(confirmTimer.current) }, [])
+
+  const handleClick = useCallback(() => {
+    if (autonomy.frozen) {
+      // Already frozen → this button now means "unfreeze"
+      unfreeze()
+      setConfirming(false)
+      return
+    }
+    if (!confirming) {
+      setConfirming(true)
+      // Auto-cancel confirm after 4s
+      if (confirmTimer.current) clearTimeout(confirmTimer.current)
+      confirmTimer.current = setTimeout(() => setConfirming(false), 4000)
+      return
+    }
+    triggerPanic('header-button')
+    setConfirming(false)
+  }, [autonomy.frozen, confirming])
+
+  if (autonomy.frozen) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        title="Unfreeze: re-enable Autonomy controls"
+        className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 border border-red-400/60 text-red-100 text-xs font-bold px-3 py-1.5 hover:bg-red-500/30 transition-colors animate-pulse"
+      >
+        <AlertTriangle className="w-3.5 h-3.5" />
+        FROZEN — Tap to Unfreeze
+      </button>
+    )
+  }
+
+  if (confirming) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        title="Tap again to freeze Jarvis"
+        className="inline-flex items-center gap-1.5 rounded-full bg-red-600 border-2 border-red-300 text-white text-xs font-bold px-3 py-1.5 hover:bg-red-500 shadow-lg animate-pulse"
+      >
+        <AlertTriangle className="w-3.5 h-3.5" />
+        Confirm PANIC?
+      </button>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      title="Panic: freeze all Jarvis autonomy instantly"
+      className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-red-400/30 text-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-500/15 hover:border-red-400/60 transition-colors"
+    >
+      <AlertTriangle className="w-3.5 h-3.5" />
+      PANIC
+    </button>
+  )
+}
+
+function FrozenBanner() {
+  const [autonomy, setAutonomy] = useState(readAutonomyState)
+  useEffect(() => {
+    const onChange = () => setAutonomy(readAutonomyState())
+    if (typeof window !== 'undefined') window.addEventListener('cc:autonomy-changed', onChange)
+    return () => { if (typeof window !== 'undefined') window.removeEventListener('cc:autonomy-changed', onChange) }
+  }, [])
+  if (!autonomy.frozen) return null
+  return (
+    <div className="bg-red-600/90 text-white text-sm text-center py-2 px-4 border-b border-red-300/50">
+      <AlertTriangle className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+      <span className="font-bold">Jarvis is FROZEN.</span> All autonomous action is blocked.
+      {autonomy.frozenAt ? <span className="opacity-80 ml-2 hidden sm:inline">Since {new Date(autonomy.frozenAt).toLocaleString()}</span> : null}
+    </div>
+  )
+}
+
 export default function CommandCenter() {
   const [activeTab, setActiveTab] = useState('jarvis')
   const strategyVisible = INTERNAL_STRATEGY_ENABLED && isCommandCenterPath()
@@ -3508,6 +3637,7 @@ export default function CommandCenter() {
 
   return (
     <div className="min-h-screen bg-brand-navy text-white">
+      <FrozenBanner />
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="border-b border-white/10 bg-brand-navy/95 sticky top-0 z-30">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -3518,6 +3648,7 @@ export default function CommandCenter() {
             <p className="text-white/40 text-xs mt-0.5">Internal operations dashboard</p>
           </div>
           <div className="flex items-center gap-2">
+            <PanicButton />
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 text-white/60 text-xs font-semibold px-3 py-1">
               Internal
             </span>
@@ -3527,13 +3658,17 @@ export default function CommandCenter() {
           </div>
         </div>
 
+        {/* ── PulseBar (one-glance vitals) ─────────────────────────────────── */}
+        <PulseBar onTabChange={setActiveTab} onOpenJarvis={() => setDrawerOpen(true)} />
+
         {/* ── Tab bar ──────────────────────────────────────────────────────── */}
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 flex gap-1 pb-0 overflow-x-auto">
-          {TABS.map((tab) => (
+          {TABS.map((tab, i) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
+              title={`Press ${i + 1} to switch`}
               className={[
                 'shrink-0 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors',
                 activeTab === tab.id
