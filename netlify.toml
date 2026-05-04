@@ -40,6 +40,12 @@
   force = true
 
 [[redirects]]
+  from = "/3ef8a81ce186414ca3235bebb5072f22.txt"
+  to = "/3ef8a81ce186414ca3235bebb5072f22.txt"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/*"
   to = "https://codexbuildfreeofbase44-production.up.railway.app/api/:splat"
   status = 200
