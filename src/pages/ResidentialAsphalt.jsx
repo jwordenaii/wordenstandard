@@ -136,10 +136,10 @@ export default function ResidentialAsphalt() {
               Call 804-446-1296
             </a>
             <Link
-              to="/driveway-ai"
+              to="/jwordenai"
               className="bg-foreground text-background px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-foreground/90 transition-colors"
             >
-              Try Driveway + Lot AI
+              Open JWordenAI Scan
             </Link>
             <Link
               to="/#quote"

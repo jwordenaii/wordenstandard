@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -14,6 +14,8 @@ import RouteLoader from '@/components/RouteLoader';
 import SplashScreen from '@/components/SplashScreen';
 import AdvisoryGate from '@/components/AdvisoryGate';
 import ChatWidget from '@/components/ChatWidget';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
@@ -40,8 +42,6 @@ const RichmondCommercial = lazy(() => import('./pages/RichmondCommercial'));
 const ResidentialAsphalt = lazy(() => import('./pages/ResidentialAsphalt'));
 const HomeServices = lazy(() => import('./pages/HomeServices'));
 const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
-const FloorPlanStudio = lazy(() => import('./pages/FloorPlanStudio'));
-const Visualizer = lazy(() => import('./pages/Visualizer'));
 const VirginiaStatewide = lazy(() => import('./pages/VirginiaStatewide'));
 const AutonomyDashboard = lazy(() => import('./pages/AutonomyDashboard'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
@@ -74,7 +74,6 @@ const HamptonRoadsPaving = lazy(() => import('./pages/HamptonRoadsPaving'));
 const FredericksburgPaving = lazy(() => import('./pages/FredericksburgPaving'));
 const NorthernVirginiaPaving = lazy(() => import('./pages/NorthernVirginiaPaving'));
 const ShenandoahValleyPaving = lazy(() => import('./pages/ShenandoahValleyPaving'));
-const DrivewayAI = lazy(() => import('./pages/DrivewayAI'));
 const AdvisoryHub = lazy(() => import('./pages/advisory/AdvisoryHub'));
 const AdvisoryCategoryHub = lazy(() => import('./pages/advisory/CategoryHub'));
 const AdvisoryStateDetail = lazy(() => import('./pages/advisory/StateDetail'));
@@ -170,6 +169,14 @@ const RequireInternalAdvisory = ({ children }) => (
   </RequireAuth>
 );
 
+const PublicLayout = ({ children }) => (
+  <div className="min-h-screen bg-background font-body text-foreground">
+    <Navbar />
+    {children}
+    <Footer />
+  </div>
+);
+
 const AuthenticatedApp = () => {
   const { isLoadingPublicSettings } = useAuth();
 
@@ -188,16 +195,16 @@ const AuthenticatedApp = () => {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/quote" element={<Quote />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/reviews" element={<Reviews />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/service-areas" element={<ServiceAreas />} />
-        <Route path="/service-areas/:slug" element={<CityPage />} />
-        <Route path="/states/:stateSlug" element={<StatePavingPage />} />
+        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+        <Route path="/quote" element={<PublicLayout><Quote /></PublicLayout>} />
+        <Route path="/projects" element={<PublicLayout><Projects /></PublicLayout>} />
+        <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
+        <Route path="/reviews" element={<PublicLayout><Reviews /></PublicLayout>} />
+        <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
+        <Route path="/service-areas" element={<PublicLayout><ServiceAreas /></PublicLayout>} />
+        <Route path="/service-areas/:slug" element={<PublicLayout><CityPage /></PublicLayout>} />
+        <Route path="/states/:stateSlug" element={<PublicLayout><StatePavingPage /></PublicLayout>} />
         <Route path="/locations" element={<LocationsIndex />} />
         <Route path="/locations/:slug" element={<LocationPage />} />
         <Route path="/paving" element={<AsphaltPaving />} />
@@ -217,17 +224,17 @@ const AuthenticatedApp = () => {
         <Route path="/shenandoah-valley-paving" element={<ShenandoahValleyPaving />} />
         <Route path="/millings-fines" element={<MillingsAndFines />} />
         <Route path="/tar-and-chip" element={<TarAndChip />} />
-        <Route path="/driveway-ai" element={<DrivewayAI />} />
+        <Route path="/driveway-ai" element={<Navigate to="/jwordenai" replace />} />
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/jwordenai" element={<JwordenAI />} />
         <Route path="/general-contracting" element={<GeneralContracting />} />
-        <Route path="/visualizer" element={<Visualizer />} />
-        <Route path="/floor-plan-studio" element={<FloorPlanStudio />} />
+        <Route path="/visualizer" element={<Navigate to="/jwordenai" replace />} />
+        <Route path="/floor-plan-studio" element={<Navigate to="/jwordenai" replace />} />
         <Route path="/lp/:slug" element={<LandingPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/crew-eta" element={<CrewEta />} />
-        <Route path="/crew-mode" element={<CrewFieldApp />} />
+        <Route path="/crew-eta" element={<RequireAuth><CrewEta /></RequireAuth>} />
+        <Route path="/crew-mode" element={<RequireAuth><CrewFieldApp /></RequireAuth>} />
         {publicAIPages.map(({ path, Component }) => (
           <Route key={path} path={path} element={<Component />} />
         ))}

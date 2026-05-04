@@ -228,11 +228,11 @@ export default function GeneralContracting() {
               View Scan Intelligence
             </Link>
             <Link
-              to="/visualizer"
+              to="/quote"
               className="border border-border text-foreground px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase hover:bg-card transition-colors inline-flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4" />
-              Open 3D Visualizer
+              Request Design Review
             </Link>
           </div>
         </div>
@@ -251,18 +251,18 @@ export default function GeneralContracting() {
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
-                  to="/visualizer"
+                  to="/quote"
                   className="bg-foreground text-background px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-foreground/90 transition-colors inline-flex items-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
-                  Launch 3D Build Visualizer
+                  Request Design Review
                 </Link>
                 <Link
-                  to="/floor-plan-studio"
+                  to="/hardscapes"
                   className="border border-border text-foreground px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-card transition-colors inline-flex items-center gap-2"
                 >
                   <Layers3 className="w-4 h-4" />
-                  Interior Design Studio
+                  Hardscape Design
                 </Link>
                 <Link
                   to="/hardscapes"
@@ -312,11 +312,11 @@ export default function GeneralContracting() {
                   Read JWORDENAI Source Layer
                 </Link>
                 <Link
-                  to="/driveway-ai"
+                  to="/jwordenai"
                   className="border border-border text-foreground px-5 py-3 font-display font-bold text-xs tracking-[0.14em] uppercase hover:bg-background transition-colors inline-flex items-center gap-2"
                 >
                   <ScanLine className="w-4 h-4" />
-                  Try Pavement Scan
+                  JWordenAI Scan
                 </Link>
               </div>
             </div>

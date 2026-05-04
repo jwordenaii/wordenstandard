@@ -53,10 +53,10 @@ export default function Hardscapes() {
               Request Design Consultation
             </a>
             <Link
-              to="/visualizer"
+              to="/jwordenai"
               className="border-2 border-white/30 bg-white/10 px-10 py-5 font-display font-bold text-sm tracking-widest uppercase text-white hover:bg-white/20 transition-all"
             >
-              4D Patio Visualizer
+              JWordenAI Scan
             </Link>
           </div>
         </div>

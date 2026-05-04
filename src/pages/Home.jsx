@@ -8,6 +8,7 @@ import SmartImage from '@/components/SmartImage';
 import { trackPhoneClick } from '@/lib/analytics';
 import LiveReviewBadges from '../components/LiveReviewBadges';
 import CommercialServicesHighlights from '../components/CommercialServicesHighlights';
+import CustomerProofGallery from '../components/CustomerProofGallery';
 
 const HERO_IMAGE = '/work/portfolio/portfolio-010.jpg';
 const LOT_IMAGE = '/work/portfolio/portfolio-030.jpg';
@@ -131,7 +132,7 @@ const trustChecklist = [
 
 const internalLinks = [
   { label: 'Asphalt Paving', href: '/paving' },
-  { label: 'Driveway & Lot AI Scan', href: '/driveway-ai' },
+  { label: 'JWordenAI Scan', href: '/jwordenai' },
   { label: 'Sealcoating', href: '/sealcoating' },
   { label: 'Hardscapes', href: '/hardscapes' },
   { label: 'Millings & Fines', href: '/millings-fines' },
@@ -242,10 +243,10 @@ export default function Home() {
                   Schedule A Free Evaluation
                 </a>
                 <a
-                  href="/driveway-ai"
+                  href="/jwordenai"
                   className="inline-flex min-h-[52px] items-center gap-3 rounded-md border border-primary/35 bg-white/80 px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-primary transition-colors hover:border-accent hover:text-accent"
                 >
-                  Scan My Pavement
+                  Open JWordenAI Scan
                   <ArrowRight className="h-5 w-5" />
                 </a>
               </div>
@@ -273,6 +274,8 @@ export default function Home() {
         </section>
 
         <CommercialServicesHighlights />
+
+        <CustomerProofGallery />
 
         {/* Service Solutions */}
         <section id="services" className="bg-[#eef4f1] py-20 md:py-28">

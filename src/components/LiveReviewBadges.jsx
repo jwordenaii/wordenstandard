@@ -1,12 +1,13 @@
 /**
  * LiveReviewBadges — shows live-linked platform trust badges
- * Google (Maps iframe + direct link), Houzz, and Angi
+ * Google, Houzz, Angi, and Pavement Magazine industry recognition
  */
 export default function LiveReviewBadges({ compact = false }) {
   const GOOGLE_SEARCH = 'J+Worden+%26+Sons+Asphalt+Paving+Chester+VA'
   const GOOGLE_REVIEW_URL = `https://search.google.com/local/writereview?placeid=${import.meta.env.VITE_GOOGLE_PLACE_ID || 'ChIJG3X8o_OStokRzRynNBuVfQ0'}`
   const HOUZZ_URL = 'https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947'
   const ANGI_URL = 'https://www.angi.com/companylist/us/va/chester/j-worden-and-sons-asphalt-paving-reviews-'
+  const PAVEMENT_URL = 'https://www.pavementonline.com/top-contractor'
 
   if (compact) {
     return (
@@ -54,12 +55,25 @@ export default function LiveReviewBadges({ compact = false }) {
             <div className="text-[10px] text-gray-500 leading-none mt-0.5">Verified Contractor</div>
           </div>
         </a>
+
+        <a
+          href={PAVEMENT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <span className="text-[#0f3044] font-black text-sm leading-none">PM</span>
+          <div className="text-left">
+            <div className="text-xs font-bold text-gray-800 leading-none">Pavement Magazine</div>
+            <div className="text-[10px] text-gray-500 leading-none mt-0.5">Top 75 Recognition</div>
+          </div>
+        </a>
       </div>
     )
   }
 
   return (
-    <div className="grid sm:grid-cols-3 gap-4">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Google */}
       <a
         href={GOOGLE_REVIEW_URL}
@@ -122,6 +136,26 @@ export default function LiveReviewBadges({ compact = false }) {
         </div>
         <span className="text-xs font-bold text-[#FF6153] group-hover:underline mt-1">
           View Angi Profile →
+        </span>
+      </a>
+
+      {/* Pavement Magazine */}
+      <a
+        href={PAVEMENT_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col items-center gap-3 bg-white border border-gray-100 rounded-2xl p-6 shadow hover:shadow-lg transition-all group"
+      >
+        <div className="w-10 h-10 rounded-xl bg-[#0f3044] flex items-center justify-center">
+          <span className="text-white font-black text-sm leading-none">PM</span>
+        </div>
+        <div className="text-center">
+          <div className="font-black text-lg text-gray-900">Pavement Magazine</div>
+          <div className="text-sm text-gray-500 mt-1">Top 75 Contractor Recognition</div>
+          <div className="text-xs text-gray-400 mt-2">Four paving categories</div>
+        </div>
+        <span className="text-xs font-bold text-[#0f3044] group-hover:underline mt-1">
+          Industry Recognition →
         </span>
       </a>
     </div>

@@ -154,8 +154,8 @@ export default function JwordenAI() {
               The public page is only a window. The live source is the Driveway + Lot AI Scan: customers sketch pavement, upload damage, flag water problems, and create an estimator-ready packet while the deeper system stays behind the company. The same scan pattern can extend into roofs, house damage, and structural triage with the right professional review boundaries.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Link to="/driveway-ai" className="inline-flex min-h-[52px] items-center gap-3 bg-primary px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-primary/90">
-                Open Driveway + Lot AI Scan
+              <Link to="/jwordenai" className="inline-flex min-h-[52px] items-center gap-3 bg-primary px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-primary/90">
+                Open JWordenAI Scan
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <a href="tel:+18044461296" onClick={() => trackPhoneClick('jwordenai_hero')} className="inline-flex min-h-[52px] items-center gap-3 border border-white/25 px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:border-primary/60">
@@ -229,12 +229,12 @@ export default function JwordenAI() {
               The same source layer can support kitchen remodels, home additions, interior design, patio installs, hardscapes, and outdoor living. The premium value is simple: show the customer the idea, the cost range, the risks, and the project timeline before they sign a full construction agreement.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link to="/visualizer" className="inline-flex min-h-[48px] items-center gap-3 bg-primary px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-primary/90">
-                Open 3D Visualizer
+              <Link to="/quote" className="inline-flex min-h-[48px] items-center gap-3 bg-primary px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-primary/90">
+                Request Design Review
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link to="/floor-plan-studio" className="inline-flex min-h-[48px] items-center gap-3 border border-primary/45 px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-black">
-                Interior Design Studio
+              <Link to="/general-contracting" className="inline-flex min-h-[48px] items-center gap-3 border border-primary/45 px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-black">
+                General Contracting
               </Link>
               <Link to="/general-contracting" className="inline-flex min-h-[48px] items-center gap-3 border border-white/25 px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:border-primary/60">
                 GC Design Services
@@ -334,9 +334,9 @@ export default function JwordenAI() {
             <h2 className="mt-2 font-display text-4xl uppercase leading-none md:text-6xl">Scan the pavement or talk to the paving company.</h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link to="/driveway-ai" className="inline-flex min-h-[52px] items-center gap-3 bg-black px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-white">
+            <Link to="/jwordenai" className="inline-flex min-h-[52px] items-center gap-3 bg-black px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-white">
               <ScanLine className="h-5 w-5" />
-              Start AI Scan
+              Start JWordenAI Scan
             </Link>
             <a href="tel:+18044461296" onClick={() => trackPhoneClick('jwordenai_teaser')} className="inline-flex min-h-[52px] items-center gap-3 border border-black/30 px-7 py-4 font-display text-lg uppercase tracking-[0.12em] text-black">
               <Phone className="h-5 w-5" />

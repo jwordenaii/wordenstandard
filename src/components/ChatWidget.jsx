@@ -82,11 +82,8 @@ const PAGE_CONTEXT = {
   '/reviews': 'reviews page',
   '/service-areas': 'service areas page',
   '/blog': 'blog page',
-  '/driveway-ai': 'Driveway and parking lot AI scan studio',
-  '/visualizer': '4D property visualizer tool',
-  '/floor-plan-studio': '4D interior and floor plan design studio',
   '/general-contracting': 'general contracting and paid design packet page',
-  '/jwordenai': 'JWORDENAI source and proof page',
+  '/jwordenai': 'JWORDENAI drone and camera pavement scanning page',
 }
 
 const PAGE_HELP = {
@@ -240,9 +237,9 @@ const QUICK_ACTIONS = [
   {
     id: 'scan',
     emoji: '▣',
-    label: 'AI Scan Review',
+    label: 'JWordenAI Scan',
     sub: 'Driveway or lot triage',
-    action: 'chat:Help me start an AI pavement scan review for my driveway or small parking lot.',
+    action: 'chat:Help me start a JWordenAI pavement scan review for my driveway or small parking lot.',
     color: 'bg-brand-amber text-brand-navy',
   },
   {
@@ -425,8 +422,8 @@ const GREETING_DELAY_MS = 5500
 const MESSAGES_SS_KEY = 'mrw_messages'
 const MESSAGES_PERSIST_LIMIT = 40
 const DEFAULT_QUICK_REPLIES = [
-  'Start an AI scan review',
-  'Build a 4D design packet',
+  'Start a JWordenAI scan review',
+  'Request a design consultation',
   'Price my driveway or lot',
   'Help me decide repair or replace',
 ]

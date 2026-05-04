@@ -5,11 +5,13 @@ import { trackPhoneClick } from '@/lib/analytics';
 import { PRIMARY_LOGO_URL } from '@/lib/branding';
 
 const NAV_LINKS = [
-  { label: 'Services', href: '/services' },
-  { label: 'AI Scan', href: '/driveway-ai' },
-  { label: '4D Studio', href: '/floor-plan-studio' },
-  { label: 'Visualizer', href: '/visualizer' },
+  { label: 'Paving', href: '/paving' },
+  { label: 'Sealcoating', href: '/sealcoating' },
+  { label: 'Commercial', href: '/parking-lots' },
+  { label: 'Hardscapes', href: '/hardscapes' },
   { label: 'GC', href: '/general-contracting' },
+  { label: 'About', href: '/about' },
+  { label: 'Blog', href: '/blog' },
   { label: 'JWordenAI', href: '/jwordenai' },
 ];
 
@@ -83,12 +85,12 @@ export default function Navbar() {
           </a>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-7 xl:gap-8">
+          <div className="hidden lg:flex items-center gap-4 xl:gap-5">
             {NAV_LINKS.map((link) =>
             <button
               key={link.label}
               onClick={() => scrollTo(link.href)}
-              className="font-display text-sm tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors duration-300">
+              className="font-display text-xs tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors duration-300 xl:text-sm">
               
                 {link.label}
               </button>
