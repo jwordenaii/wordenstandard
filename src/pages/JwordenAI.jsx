@@ -128,8 +128,8 @@ export default function JwordenAI() {
       />
       <Navbar />
 
-      <section className="relative overflow-hidden bg-black pt-36">
-        <div className="absolute inset-0 opacity-55">
+      <section className="relative overflow-hidden bg-white pt-36">
+        <div className="absolute inset-0 opacity-24">
           <SmartImage
             src={SITE_IMAGES.industrialWork}
             alt="Industrial site work and paving project visual proof"
@@ -137,28 +137,28 @@ export default function JwordenAI() {
             height={1200}
             priority
             sizes="100vw"
-            className="h-full w-full grayscale contrast-125"
+            className="h-full w-full grayscale contrast-110"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,0,0,0.96)_0%,rgba(0,0,0,0.84)_52%,rgba(50,40,15,0.62)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.92)_52%,rgba(255,122,0,0.18)_100%)]" />
         </div>
         <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-12 lg:px-8">
           <div className="max-w-5xl">
-            <div className="mb-7 inline-flex items-center gap-3 border border-primary/40 bg-primary/10 px-4 py-2 text-primary">
+            <div className="mb-7 inline-flex items-center gap-3 border border-primary/50 bg-primary/10 px-4 py-2 text-primary">
               <BrainCircuit className="h-4 w-4" />
               <span className="font-display text-sm uppercase tracking-[0.24em]">Private construction intelligence teaser</span>
             </div>
-            <h1 className="font-display text-7xl font-black uppercase leading-[0.82] tracking-normal text-white md:text-9xl">
+            <h1 className="font-display text-7xl font-black uppercase leading-[0.82] tracking-normal text-foreground md:text-9xl">
               JWORDENAI
             </h1>
-            <p className="mt-8 max-w-3xl text-xl leading-relaxed text-zinc-300 md:text-2xl">
+            <p className="mt-8 max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl">
               The public page is only a window. The live source is the Driveway + Lot AI Scan: customers sketch pavement, upload damage, flag water problems, and create an estimator-ready packet while the deeper system stays behind the company. The same scan pattern can extend into roofs, house damage, and structural triage with the right professional review boundaries.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Link to="/jwordenai" className="inline-flex min-h-[52px] items-center gap-3 bg-primary px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-primary/90">
+              <Link to="/jwordenai" className="inline-flex min-h-[52px] items-center gap-3 bg-primary px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
                 Open JWordenAI Scan
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <a href="tel:+18044461296" onClick={() => trackPhoneClick('jwordenai_hero')} className="inline-flex min-h-[52px] items-center gap-3 border border-white/25 px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:border-primary/60">
+              <a href="tel:+18044461296" onClick={() => trackPhoneClick('jwordenai_hero')} className="inline-flex min-h-[52px] items-center gap-3 border border-primary/45 bg-white px-7 py-4 font-display text-sm font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary hover:text-primary">
                 <Phone className="h-5 w-5" />
                 Call 804.446.1296
               </a>

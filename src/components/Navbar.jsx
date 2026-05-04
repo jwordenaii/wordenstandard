@@ -44,12 +44,12 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-xl border-b border-border shadow-[0_12px_28px_rgba(15,48,68,0.12)]'
-          : 'bg-white/86 backdrop-blur-md border-b border-white/70 shadow-[0_8px_24px_rgba(15,48,68,0.08)]'
+          ? 'bg-white border-b border-border shadow-[0_12px_28px_rgba(24,24,24,0.12)]'
+          : 'bg-white border-b border-border shadow-[0_8px_24px_rgba(24,24,24,0.08)]'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-24 md:h-28">
+        <div className="flex h-[72px] items-center justify-between md:h-20">
           {/* Logo — top left corner */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0 shrink-0" aria-label="J. Worden & Sons Asphalt Paving — Home">
             <img
@@ -57,8 +57,8 @@ export default function Navbar() {
               alt="J. Worden & Sons Asphalt Paving — Quality Work. Built To Last."
               width={560}
               height={120}
-              sizes="(max-width: 640px) 190px, (max-width: 768px) 250px, 340px"
-              className="h-12 sm:h-14 md:h-20 w-[190px] sm:w-[250px] md:w-[340px] object-contain quality-premium"
+              sizes="(max-width: 640px) 190px, (max-width: 768px) 240px, 300px"
+              className="h-12 sm:h-14 md:h-16 w-[190px] sm:w-[240px] md:w-[300px] object-contain quality-premium"
             />
           </button>
 
@@ -154,7 +154,7 @@ export default function Navbar() {
           exit={{ opacity: 0, y: 12, scale: 0.92 }}
           transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-4 right-4 z-[70] hidden rounded-xl border border-border bg-white/94 px-3 py-2 shadow-[0_14px_36px_rgba(15,48,68,0.2)] backdrop-blur-lg md:bottom-6 md:right-6 md:block"
+          className="fixed bottom-4 right-4 z-[70] hidden rounded-xl border border-border bg-white/94 px-3 py-2 shadow-[0_14px_36px_rgba(24,24,24,0.18)] backdrop-blur-lg md:bottom-6 md:right-6 md:block"
           aria-label="Back to top">
 
             <img

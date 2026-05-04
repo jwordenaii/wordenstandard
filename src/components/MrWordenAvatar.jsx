@@ -38,8 +38,8 @@ function JWordenSVG({ talking = false, state = 'idle', eyeDx = 0, eyeDy = 0, aud
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
         <radialGradient id="dot-grad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="70%" stopColor="#f5a623" />
+          <stop offset="0%" stopColor="#ff9f1c" />
+          <stop offset="70%" stopColor="#ff7a00" />
           <stop offset="100%" stopColor="#b45309" />
         </radialGradient>
       </defs>
@@ -47,7 +47,7 @@ function JWordenSVG({ talking = false, state = 'idle', eyeDx = 0, eyeDy = 0, aud
       {/* Outer focus rings */}
       <motion.circle
         cx="50" cy="50" r="42"
-        stroke="#f5a623"
+        stroke="#ff7a00"
         strokeWidth="1"
         strokeDasharray="4 8"
         animate={{ rotate: 360 }}
@@ -85,7 +85,7 @@ function JWordenSVG({ talking = false, state = 'idle', eyeDx = 0, eyeDy = 0, aud
                 cx={50 + Math.cos(angle * Math.PI / 180) * 30}
                 cy={50 + Math.sin(angle * Math.PI / 180) * 30}
                 r="2"
-                fill="#f5a623"
+                fill="#ff7a00"
                 animate={{
                   scale: audioActive ? [0, 2.5, 0] : [0, 1.5, 0],
                   opacity: [0, 1, 0]
@@ -141,7 +141,7 @@ export default function MrWordenAvatar({
   const floatAnim = { y: [0, -3, 0] }
   const floatTransition = { repeat: Infinity, duration: 4, ease: 'easeInOut' }
 
-  const glowColor = isActive ? 'rgba(245,166,35,0.4)' : 'rgba(245,166,35,0.1)'
+  const glowColor = isActive ? 'rgba(255,122,0,0.4)' : 'rgba(255,122,0,0.1)'
 
   const buttonRef = useRef(null)
 
