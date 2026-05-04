@@ -26,8 +26,6 @@ Environment variables (set in Railway):
   GOOGLE_ANALYTICS_PROPERTY_ID       — GA4 numeric property ID
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os

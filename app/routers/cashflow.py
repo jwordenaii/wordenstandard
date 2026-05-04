@@ -10,8 +10,6 @@ Routes:
   POST   /api/v1/cashflow/alert             — upsert alert threshold config
 """
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional

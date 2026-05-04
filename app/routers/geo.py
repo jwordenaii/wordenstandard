@@ -19,8 +19,6 @@ PostGIS spatial queries:
   columns + GIST indexes to project_sites and permit_leads.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import math

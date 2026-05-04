@@ -22,8 +22,6 @@ Graceful degradation
   unavailable, so the rest of the API continues to function normally.
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Optional
 

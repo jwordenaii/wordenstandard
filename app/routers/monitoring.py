@@ -13,8 +13,6 @@ returns the full monitoring configuration, including which integrations are
 active and the current Datadog/Slack settings.
 """
 
-from __future__ import annotations
-
 import logging
 import time
 

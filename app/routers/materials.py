@@ -8,8 +8,6 @@ Routes:
 Requires premium security — internal pricing intelligence.
 """
 
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, Request
 
 from ..core.limiter import limiter

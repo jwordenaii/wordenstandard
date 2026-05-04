@@ -21,8 +21,6 @@ WebSocket dashboard:
   For multi-worker setups, use Redis Pub/Sub as the broadcast backend.
 """
 
-from __future__ import annotations
-
 import asyncio
 import base64
 import json

@@ -10,8 +10,6 @@ The reindex operation is dispatched as a Celery background task so the
 HTTP response returns immediately without blocking on the full rebuild.
 """
 
-from __future__ import annotations
-
 import logging
 
 from fastapi import APIRouter, Depends, Request

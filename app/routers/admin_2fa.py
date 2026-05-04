@@ -12,8 +12,6 @@ POST /api/v1/admin/2fa/disable  — Disable 2FA (requires current password)
 GET  /api/v1/admin/2fa/status   — Check whether 2FA is currently enabled
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os

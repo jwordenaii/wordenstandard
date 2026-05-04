@@ -33,8 +33,6 @@ None of these routes are included in the customer-facing OpenAPI spec
 clients on other origins cannot reach them.
 """
 
-from __future__ import annotations
-
 import base64
 import json
 import logging

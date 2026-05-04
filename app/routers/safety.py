@@ -12,8 +12,6 @@ Routes:
   GET    /api/v1/safety/scores                 — per-site safety scores
 """
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime, timezone
 from typing import Optional

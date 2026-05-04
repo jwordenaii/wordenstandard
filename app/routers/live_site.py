@@ -19,8 +19,6 @@ No extra dependencies — uses FastAPI StreamingResponse with text/event-stream.
 Requires premium security via query param or header (checked once at connect).
 """
 
-from __future__ import annotations
-
 import asyncio
 import json
 import logging

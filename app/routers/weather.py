@@ -8,8 +8,6 @@ Routes:
 Requires premium security — used for internal scheduling decisions.
 """
 
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 

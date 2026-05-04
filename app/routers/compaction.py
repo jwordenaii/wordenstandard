@@ -14,8 +14,6 @@ shows over-compacted zones (too many passes) and under-compacted zones
 Requires premium security on read endpoints.
 """
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime, timezone
 from typing import List, Optional

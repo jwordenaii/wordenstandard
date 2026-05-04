@@ -10,8 +10,6 @@ Railway should be configured to use /health/ready as the health check path.
 Returns HTTP 200 when healthy, HTTP 503 when any critical dependency is down.
 """
 
-from __future__ import annotations
-
 import logging
 import time
 

@@ -16,8 +16,6 @@ with as-built specific context (expected dimensions, phase, trade scope) for
 deviation confidence scoring.
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Optional
 

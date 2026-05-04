@@ -40,8 +40,6 @@ Rate limiting
   Exceeding the limit closes the connection with code 1008 (Policy Violation).
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os

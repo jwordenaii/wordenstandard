@@ -11,8 +11,6 @@ Caching:
   cache warmer without going through the HTTP layer.
 """
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime, timedelta, timezone
 

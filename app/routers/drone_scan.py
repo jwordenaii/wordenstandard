@@ -13,8 +13,6 @@ of detected deviations is generated automatically.
 Requires premium security on all endpoints.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os

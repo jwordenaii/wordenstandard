@@ -12,8 +12,6 @@ those in the post (e.g. searching "driveway repair" finds posts about
 "asphalt patching" and "pothole filling").
 """
 
-from __future__ import annotations
-
 import logging
 
 from fastapi import APIRouter, HTTPException, Query, Request

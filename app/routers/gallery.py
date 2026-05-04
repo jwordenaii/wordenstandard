@@ -10,8 +10,6 @@ Images are stored as base64 data URIs in the database so no external
 storage service is required.  Uploads are limited to 10 MB per file.
 """
 
-from __future__ import annotations
-
 import base64
 import logging
 import uuid

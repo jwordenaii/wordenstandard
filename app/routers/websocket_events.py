@@ -36,8 +36,6 @@ Rate limiting
   10 messages per minute per session_id (shared with the WebSocket endpoint).
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os

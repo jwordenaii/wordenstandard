@@ -10,8 +10,6 @@ Routes
 All routes require premium security (bearer token or master key).
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Optional
 

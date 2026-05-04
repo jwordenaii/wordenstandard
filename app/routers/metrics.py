@@ -12,8 +12,6 @@ All endpoints are rate-limited to 30/minute and require the premium security
 header (master key or JWT).
 """
 
-from __future__ import annotations
-
 import logging
 import os
 import time

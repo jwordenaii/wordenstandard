@@ -13,8 +13,6 @@ Endpoints:
   GET  /intelligence-map              — map all platform capabilities to L1-L4
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Any, Optional
 

@@ -10,8 +10,6 @@ All endpoints use GPT-4o and fall back to structured templates when
 OPENAI_API_KEY is not set. All require premium auth.
 """
 
-from __future__ import annotations
-
 import logging
 import os
 from typing import Optional

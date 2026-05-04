@@ -11,8 +11,6 @@ Routes
   DELETE /api/v1/igrade/media/{id}     — remove a media file record
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Optional
 

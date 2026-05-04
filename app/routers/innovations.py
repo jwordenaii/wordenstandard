@@ -9,8 +9,6 @@ Routes:
   GET    /api/v1/innovations/adopted     — summary of adopted methods
 """
 
-from __future__ import annotations
-
 import logging
 from datetime import datetime, timezone
 from typing import Optional

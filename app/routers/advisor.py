@@ -9,8 +9,6 @@ Exposes:
   POST /api/v1/advisor/utility-risk       — Virginia 811 private-utility risk advisory
 """
 
-from __future__ import annotations
-
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from typing import Optional

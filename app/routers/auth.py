@@ -15,8 +15,6 @@ Flow:
   4. Client uses the JWT for all subsequent authenticated requests.
 """
 
-from __future__ import annotations
-
 import logging
 import os
 import hashlib

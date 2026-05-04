@@ -19,8 +19,6 @@ Rate limits
   Protected endpoint: 20/minute
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Any, Literal, Optional
 

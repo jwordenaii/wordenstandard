@@ -9,8 +9,6 @@ Routes:
 Requires premium security.
 """
 
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 

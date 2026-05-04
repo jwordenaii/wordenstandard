@@ -14,8 +14,6 @@ based on a topic prompt. Drafts are saved with status='draft' and must
 be reviewed + published via the admin dashboard.
 """
 
-from __future__ import annotations
-
 import logging
 import math
 import os

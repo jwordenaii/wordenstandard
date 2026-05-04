@@ -10,8 +10,6 @@ Routes:
   POST   /api/v1/project-metrics/{id}/case-study — GPT-4o case study generation
 """
 
-from __future__ import annotations
-
 import logging
 import os
 from datetime import datetime, timezone

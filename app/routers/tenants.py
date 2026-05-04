@@ -9,8 +9,6 @@ Routes:
 Requires master key (JWORDEN_MASTER_KEY) for all endpoints.
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Optional
 

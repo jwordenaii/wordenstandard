@@ -10,8 +10,6 @@ Routes:
   GET    /api/v1/retrospectives/surface      — surface relevant lessons for a bid
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import os

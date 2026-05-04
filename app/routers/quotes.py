@@ -15,8 +15,6 @@ POST /api/v1/leads/quote customer-facing endpoint).
   Base rehab markup:  1.4×         (Structural failure / alligator cracking)
 """
 
-from __future__ import annotations
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 

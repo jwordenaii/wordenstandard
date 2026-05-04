@@ -10,8 +10,6 @@ Routes:
   GET    /api/v1/bid-intelligence/summary          — quick win-rate stats
 """
 
-from __future__ import annotations
-
 import logging
 import os
 from datetime import datetime, timezone

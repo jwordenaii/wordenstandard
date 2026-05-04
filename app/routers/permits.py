@@ -10,7 +10,11 @@ Routes:
   POST /api/v1/permits/check               — Intelligent permit check (state + county + cost/size gates)
 """
 
-from __future__ import annotations
+# NOTE: Do NOT add `from __future__ import annotations` to this module.
+# FastAPI captures Pydantic-body annotations at route registration time; with
+# postponed evaluation, body models become ForwardRefs and /openapi.json
+# raises PydanticUserError. Python 3.11 already supports `list[…]` and `X | None`
+# natively, so the future import is unnecessary here.
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
