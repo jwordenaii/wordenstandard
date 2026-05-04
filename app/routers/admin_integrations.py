@@ -138,7 +138,16 @@ async def post_test(body: TestRequest, _: str = Depends(_require_owner)):
         return _test_sendgrid()
     if provider == "vapi":
         return _test_vapi()
+    if provider == "google":
+        from app.services import google_suite
+        return {"ok": True, "results": await google_suite.health_all()}
     raise HTTPException(status_code=400, detail=f"Unknown provider '{body.provider}'")
+
+
+@router.get("/google/health", summary="Live status for every Google sub-service")
+async def get_google_health(_: str = Depends(_require_owner)):
+    from app.services import google_suite
+    return await google_suite.health_all()
 
 
 # ── Provider connectivity probes (cheap, no side effects where possible) ──────

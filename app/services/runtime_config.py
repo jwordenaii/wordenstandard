@@ -54,12 +54,22 @@ MANAGED_KEYS: tuple[str, ...] = (
     # Company info (safe to manage from UI)
     "COMPANY_PHONE", "COMPANY_EMAIL", "COMPANY_WEBSITE", "COMPANY_ADDRESS",
     # Google integrations (large JSON blobs allowed)
-    "GA4_PROPERTY_ID", "GSC_SITE_URL",
+    "GA4_PROPERTY_ID", "GA4_SERVICE_ACCOUNT_JSON",
+    "GSC_SITE_URL", "GSC_SERVICE_ACCOUNT_JSON",
     "GOOGLE_ADS_DEVELOPER_TOKEN", "GOOGLE_ADS_SITE_DOMAIN",
+    "GOOGLE_ADS_REFRESH_TOKEN", "GOOGLE_ADS_CUSTOMER_ID", "GOOGLE_ADS_LOGIN_CUSTOMER_ID",
+    "GOOGLE_MAPS_API_KEY", "GOOGLE_PAGESPEED_API_KEY",
     # Live search intelligence (Google Trends / SerpAPI for hotspot heatmap)
     "SERPAPI_KEY", "GOOGLE_TRENDS_GEO", "SEARCH_PULSE_TERMS",
     # Licensing / tier (controls which premium features are exposed)
     "LICENSE_TIER",
+    # Crew wearable health monitoring (per-provider HMAC secrets + thresholds)
+    "WEARABLE_APPLE_HEALTH_SECRET", "WEARABLE_FITBIT_SECRET",
+    "WEARABLE_GARMIN_SECRET", "WEARABLE_WHOOP_SECRET", "WEARABLE_OURA_SECRET",
+    "WEARABLE_DEV_OPEN",
+    "WEARABLE_HR_SPIKE_BPM", "WEARABLE_HR_SUSTAINED_BPM",
+    "WEARABLE_SPO2_LOW", "WEARABLE_SPO2_CRITICAL",
+    "WEARABLE_SKIN_TEMP_HIGH_F", "WEARABLE_HRV_LOW_MS",
 )
 
 # Tier-gated feature catalogue. Used by the frontend + admin UI to decide which
@@ -81,6 +91,7 @@ FEATURE_TIERS: dict[str, str] = {
     "daily_checkin":        "premium",
     "advanced_analytics":   "premium",
     "search_pulse_heatmap": "premium",
+    "crew_wearables":       "premium",
     # owner-only (master deployment never licensed out)
     "integrations_panel":   "owner",
     "autonomy_kill_switch": "owner",
@@ -113,6 +124,10 @@ SENSITIVE_KEYS: frozenset[str] = frozenset({
     "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "TAVILY_API_KEY",
     "VAPI_API_KEY", "TWILIO_AUTH_TOKEN",
     "SENDGRID_API_KEY", "GOOGLE_ADS_DEVELOPER_TOKEN", "SERPAPI_KEY",
+    "GA4_SERVICE_ACCOUNT_JSON", "GSC_SERVICE_ACCOUNT_JSON",
+    "GOOGLE_ADS_REFRESH_TOKEN", "GOOGLE_MAPS_API_KEY", "GOOGLE_PAGESPEED_API_KEY",
+    "WEARABLE_APPLE_HEALTH_SECRET", "WEARABLE_FITBIT_SECRET",
+    "WEARABLE_GARMIN_SECRET", "WEARABLE_WHOOP_SECRET", "WEARABLE_OURA_SECRET",
 })
 
 

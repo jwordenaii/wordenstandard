@@ -689,6 +689,11 @@ export const api = {
   integrationsBulk:    (updates) => protectedRequest('POST', '/api/v1/admin/integrations/bulk', { updates }),
   integrationsReload:  () => protectedRequest('POST', '/api/v1/admin/integrations/reload'),
   integrationsTest:    (provider) => protectedRequest('POST', '/api/v1/admin/integrations/test', { provider }),
+  googleHealth:        () => protectedRequest('GET',  '/api/v1/admin/integrations/google/health'),
+  // ── Crew wearable health monitoring ───────────────────────────────────────
+  wearableSnapshot:   (crew_id) => protectedRequest('GET', `/api/v1/admin/wearables/snapshot${crew_id ? `?crew_id=${encodeURIComponent(crew_id)}` : ''}`),
+  wearableCrews:      () => protectedRequest('GET', '/api/v1/admin/wearables/crews'),
+  wearableConfig:     () => protectedRequest('GET', '/api/v1/admin/wearables/config'),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

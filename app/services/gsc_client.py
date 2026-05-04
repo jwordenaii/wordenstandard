@@ -70,7 +70,7 @@ def _build_service() -> Any | None:
 
 
 def _site_url() -> str:
-    return os.getenv("GSC_SITE_URL", "").strip()
+    return _cfg.get("GSC_SITE_URL")
 
 
 def _date_range(days: int = 28) -> tuple[str, str]:

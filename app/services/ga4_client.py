@@ -69,7 +69,7 @@ def _build_client() -> Any | None:
 
 
 def _property_id() -> str:
-    pid = os.getenv("GA4_PROPERTY_ID", "").strip()
+    pid = _cfg.get("GA4_PROPERTY_ID")
     if pid and not pid.startswith("properties/"):
         pid = f"properties/{pid}"
     return pid
