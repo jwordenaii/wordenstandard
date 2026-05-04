@@ -718,6 +718,12 @@ export const api = {
   droneCaptures: (jobId) => protectedRequest('GET', `/api/v1/admin/drone/captures/${encodeURIComponent(jobId)}`),
   droneUpload: (formData) => protectedFormRequest('/api/v1/admin/drone/upload', formData),
   droneDeleteCapture: (jobId, capId) => protectedRequest('DELETE', `/api/v1/admin/drone/captures/${encodeURIComponent(jobId)}/${encodeURIComponent(capId)}`),
+  // ── LiDAR / iPhone scan ingestion (Ship G) ──────────────────────────────
+  lidarSnapshot: () => protectedRequest('GET', '/api/v1/admin/lidar/snapshot'),
+  lidarScans: (bucket) => protectedRequest('GET', `/api/v1/admin/lidar/scans/${encodeURIComponent(bucket)}`),
+  lidarMatch: (lat, lng) => protectedRequest('GET', `/api/v1/admin/lidar/match?lat=${lat}&lng=${lng}`),
+  lidarUpload: (formData) => protectedFormRequest('/api/v1/admin/lidar/upload', formData),
+  lidarDeleteScan: (bucket, scanId) => protectedRequest('DELETE', `/api/v1/admin/lidar/scans/${encodeURIComponent(bucket)}/${encodeURIComponent(scanId)}`),
   // ── Public tier/feature flags (no secrets) ────────────────────────────────
   getFeatures: () => request('GET', '/api/v1/features'),
   // ── Autonomy kill switch (defense-in-depth, layer 2) ─────────────────────

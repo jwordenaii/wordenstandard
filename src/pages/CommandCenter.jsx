@@ -32,6 +32,7 @@ const TABS = [
   { id: 'dispatch', label: 'Dispatch' },
   { id: 'thermal', label: 'Thermal' },
   { id: 'drone', label: 'Drone' },
+  { id: 'lidar', label: 'LiDAR' },
 ]
 
 // ── Autonomy master controls (you decide what runs on its own) ────────────
@@ -3683,6 +3684,121 @@ function SearchPulsePanel() {
   )
 }
 
+function LidarPanel() {
+  const [snap, setSnap] = useState(null)
+  const [activeBucket, setActiveBucket] = useState('')
+  const [scans, setScans] = useState([])
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [draft, setDraft] = useState({ job_id: '', parcel_id: '', operator: '', gps_lat: '', gps_lng: '', notes: '' })
+  const [files, setFiles] = useState([])
+  const [matchProbe, setMatchProbe] = useState(null)
+
+  const reload = async () => {
+    try { setSnap(await api.lidarSnapshot()) } catch (e) { setErr(e.message || 'failed') }
+  }
+  useEffect(() => { reload() }, [])
+
+  const loadScans = async (bucket) => {
+    setActiveBucket(bucket)
+    try { const r = await api.lidarScans(bucket); setScans(r.scans || []) } catch (e) { setErr(e.message || 'failed') }
+  }
+
+  const probe = async () => {
+    if (!draft.gps_lat || !draft.gps_lng) return
+    try { const r = await api.lidarMatch(draft.gps_lat, draft.gps_lng); setMatchProbe(r.match) } catch (e) { setErr(e.message || 'failed') }
+  }
+
+  const upload = async () => {
+    if (files.length === 0) { setErr('attach at least one scan'); return }
+    setBusy(true); setErr('')
+    try {
+      for (const f of files) {
+        const fd = new FormData()
+        fd.append('file', f)
+        if (draft.job_id) fd.append('job_id', draft.job_id)
+        if (draft.parcel_id) fd.append('parcel_id', draft.parcel_id)
+        if (draft.operator) fd.append('operator', draft.operator)
+        if (draft.gps_lat) fd.append('gps_lat', draft.gps_lat)
+        if (draft.gps_lng) fd.append('gps_lng', draft.gps_lng)
+        if (draft.notes) fd.append('notes', draft.notes)
+        await api.lidarUpload(fd)
+      }
+      setFiles([])
+      await reload()
+      if (activeBucket) await loadScans(activeBucket)
+    } catch (e) { setErr(e.message || 'upload failed') } finally { setBusy(false) }
+  }
+
+  const remove = async (sid) => {
+    if (!window.confirm('Delete scan?')) return
+    try { await api.lidarDeleteScan(activeBucket, sid); await reload(); await loadScans(activeBucket) }
+    catch (e) { setErr(e.message || 'delete failed') }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-white">iPhone LiDAR Ingestion</h2>
+        <p className="text-white/60 text-sm">
+          Storage: <code className="text-white/80">{snap?.storage_path || '—'}</code> · Max {snap ? Math.round(snap.max_bytes / 1024 / 1024) : '?'} MB · Parcels loaded: {snap?.parcels_loaded ?? 0} · {snap?.total_scans || 0} scans total
+        </p>
+        {!snap?.parcel_registry && <p className="text-amber-300/80 text-xs">Set <code>PARCEL_REGISTRY_PATH</code> to a CSV (parcel_id,owner,address,lat,lng,acres) to auto-match GPS to parcel.</p>}
+      </div>
+      {err && <div className="text-red-300 text-sm">{err}</div>}
+
+      <div className="bg-white/5 rounded-lg p-3 space-y-2">
+        <div className="font-semibold text-white text-sm">Upload scan (USDZ / OBJ / PLY / GLB)</div>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+          <input value={draft.job_id} onChange={e=>setDraft(d=>({...d,job_id:e.target.value}))} placeholder="Job ID (opt)" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.parcel_id} onChange={e=>setDraft(d=>({...d,parcel_id:e.target.value}))} placeholder="Parcel ID (opt)" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.operator} onChange={e=>setDraft(d=>({...d,operator:e.target.value}))} placeholder="Operator" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.gps_lat} onChange={e=>setDraft(d=>({...d,gps_lat:e.target.value}))} placeholder="GPS lat" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <input value={draft.gps_lng} onChange={e=>setDraft(d=>({...d,gps_lng:e.target.value}))} placeholder="GPS lng" className="bg-white/10 text-white text-sm rounded px-2 py-1.5" />
+          <button type="button" onClick={probe} className="px-2 py-1.5 rounded bg-white/10 text-white text-xs hover:bg-white/20">Probe parcel</button>
+        </div>
+        {matchProbe && <div className="text-emerald-300 text-xs">Match: {matchProbe.parcel_id} · {matchProbe.address || matchProbe.owner} · {matchProbe.distance_mi} mi</div>}
+        <input value={draft.notes} onChange={e=>setDraft(d=>({...d,notes:e.target.value}))} placeholder="Notes" className="bg-white/10 text-white text-sm rounded px-2 py-1.5 w-full" />
+        <input type="file" multiple onChange={e=>setFiles(Array.from(e.target.files||[]))} className="text-white text-xs" />
+        <div className="text-white/60 text-xs">{files.length} file(s) staged</div>
+        <button type="button" onClick={upload} disabled={busy || files.length===0} className="px-4 py-1.5 rounded bg-brand-amber text-brand-navy font-semibold text-sm hover:opacity-90 disabled:opacity-50">{busy?'Uploading…':'Upload scan'}</button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <div className="font-semibold text-white text-sm mb-2">Buckets ({snap?.buckets?.length || 0})</div>
+          <div className="space-y-1">
+            {(snap?.buckets||[]).map(b => (
+              <button key={b.bucket} type="button" onClick={()=>loadScans(b.bucket)}
+                className={`w-full text-left px-2 py-1.5 rounded text-xs ${activeBucket===b.bucket?'bg-brand-amber text-brand-navy font-bold':'bg-white/5 text-white/80 hover:bg-white/10'}`}>
+                {b.bucket} · {b.count||0}
+              </button>
+            ))}
+            {(!snap?.buckets||snap.buckets.length===0) && <div className="text-white/40 text-xs">No scans yet.</div>}
+          </div>
+        </div>
+        <div className="md:col-span-2">
+          <div className="font-semibold text-white text-sm mb-2">Scans{activeBucket?` for ${activeBucket}`:''} ({scans.length})</div>
+          <div className="space-y-1">
+            {scans.map(s=>(
+              <div key={s.id} className="bg-white/5 rounded px-3 py-2 text-xs text-white/80 flex items-center justify-between">
+                <div>
+                  <span className="font-mono">{s.id}</span> · {s.filename} · {Math.round(s.bytes/1024)} KB
+                  {s.gps_lat!=null && s.gps_lng!=null && <> · {s.gps_lat.toFixed(4)},{s.gps_lng.toFixed(4)}</>}
+                  {s.matched_parcel && <span className="text-emerald-300"> · matched {s.matched_parcel.parcel_id}</span>}
+                </div>
+                <button type="button" onClick={()=>remove(s.id)} className="text-red-300 hover:text-red-200">Delete</button>
+              </div>
+            ))}
+            {activeBucket && scans.length===0 && <div className="text-white/40 text-xs">No scans.</div>}
+            {!activeBucket && <div className="text-white/40 text-xs">Select a bucket.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function DronePanel() {
   const [snap, setSnap] = useState(null)
   const [activeJob, setActiveJob] = useState('')
@@ -4727,6 +4843,10 @@ export default function CommandCenter() {
 
             {activeTab === 'drone' && (
               <DronePanel />
+            )}
+
+            {activeTab === 'lidar' && (
+              <LidarPanel />
             )}
           </>
       </div>

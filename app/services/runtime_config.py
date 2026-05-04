@@ -95,6 +95,7 @@ FEATURE_TIERS: dict[str, str] = {
     "truck_dispatch":       "premium",
     "asphalt_thermal":      "premium",
     "drone_capture":        "premium",
+    "lidar_ingest":         "premium",
     # owner-only (master deployment never licensed out)
     "integrations_panel":   "owner",
     "autonomy_kill_switch": "owner",
