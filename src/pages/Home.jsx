@@ -226,7 +226,7 @@ export default function Home() {
                 <span className="font-display text-sm uppercase tracking-[0.24em]">Award-winning Virginia paving company</span>
               </div>
               <h1 className="font-display text-5xl font-black uppercase leading-[0.88] tracking-normal text-foreground sm:text-6xl md:text-8xl lg:text-9xl">
-                Educate First.<br />
+                Educate First. V2<br />
                 <span className="text-primary">Pave Second.</span>
               </h1>
               <p className="mt-8 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-2xl">
