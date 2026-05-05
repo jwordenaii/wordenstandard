@@ -82,6 +82,7 @@ const AdvisoryStateCompare = lazy(() => import('./pages/advisory/StateCompare'))
 const AdvisoryUtilitiesHub = lazy(() => import('./pages/advisory/UtilitiesHub'));
 const AdvisoryLegalStrategy = lazy(() => import('./pages/advisory/LegalStrategyAdvisor'));
 const AdvisoryContractorRanker = lazy(() => import('./pages/advisory/ContractorRanker'));
+const AdvisoryTaxCompliance = lazy(() => import('./pages/advisory/TaxComplianceAdvisory'));
 // Add page imports here
 
 // Initialise GA4 once — silently skipped when the measurement ID is not set.
@@ -264,6 +265,7 @@ const AuthenticatedApp = () => {
         <Route path="/advisory/utilities" element={<RequireInternalAdvisory><AdvisoryUtilitiesHub /></RequireInternalAdvisory>} />
         <Route path="/advisory/legal-strategy" element={<RequireInternalAdvisory><AdvisoryLegalStrategy /></RequireInternalAdvisory>} />
         <Route path="/advisory/contractor-ranker" element={<RequireInternalAdvisory><AdvisoryContractorRanker /></RequireInternalAdvisory>} />
+        <Route path="/advisory/tax-compliance" element={<RequireInternalAdvisory><AdvisoryTaxCompliance /></RequireInternalAdvisory>} />
         <Route path="/advisory/state/:stateCode" element={<RequireInternalAdvisory><AdvisoryStateDetail /></RequireInternalAdvisory>} />
         <Route path="/advisory/:category" element={<RequireInternalAdvisory><AdvisoryCategoryHub /></RequireInternalAdvisory>} />
 

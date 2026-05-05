@@ -103,6 +103,14 @@ const CATEGORIES = [
     color: 'bg-emerald-50 border-emerald-200',
     accent: 'text-emerald-700',
   },
+  {
+    to: '/advisory/tax-compliance',
+    icon: '🧾',
+    title: 'Tax Compliance Advisory',
+    desc: 'Federal payroll (FICA, FUTA, 1099-NEC, Section 179), Virginia state tax (withholding, SUTA, sales/use), and county BPOL + machinery & tools rates for 10 VA localities.',
+    color: 'bg-amber-50 border-amber-200',
+    accent: 'text-amber-700',
+  },
 ]
 
 export default function AdvisoryHub() {
