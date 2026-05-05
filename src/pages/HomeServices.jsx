@@ -214,8 +214,7 @@ export default function HomeServices() {
                 Build The Full Plan
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                Need more than maintenance? Pair this page with our dedicated residential paving pillar for complete
-                replacement and major reconstruction options.
+                Need a full replacement or major reconstruction? We handle everything from base repair to new installation — get a free estimate and we'll walk you through every option.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link

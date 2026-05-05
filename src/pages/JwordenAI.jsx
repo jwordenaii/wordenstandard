@@ -215,7 +215,7 @@ export default function JwordenAI() {
               Built around the services property owners already search for.
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              This page connects the scan to the work customers need from an asphalt paving contractor: paving, sealcoating, repair, concrete, ADA, striping, drainage, and site maintenance. It is written for J. Worden & Sons, our Virginia service areas, and customers ready to ask for an estimate.
+              We handle every service the scan uncovers — paving, sealcoating, repair, concrete, ADA compliance, striping, drainage, and site maintenance. One call to J. Worden & Sons covers it all across Virginia.
             </p>
           </div>
           <div className="grid gap-px border border-border bg-border md:grid-cols-2 xl:grid-cols-3">
@@ -309,12 +309,12 @@ export default function JwordenAI() {
       <section className="border-b border-border bg-[#0b0b0b] py-16 md:py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 max-w-4xl">
-            <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Future technology teaser</p>
+            <p className="font-display text-sm uppercase tracking-[0.24em] text-primary">Coming next from J. Worden & Sons</p>
             <h2 className="mt-4 font-display text-5xl uppercase leading-none text-white md:text-7xl">
               The scan pattern can grow beyond pavement with the right review boundaries.
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-zinc-300">
-              JWORDENAI can preview where construction intake is going next: roof photos, exterior house damage, water intrusion, and structural triage packets. This page hints at future technology without opening the private company system.
+              We're expanding beyond pavement. Our team is evaluating roof photo intake, exterior damage review, water intrusion detection, and structural assessment — giving property owners a faster path to the right contractor and a sharper estimate before work begins.
             </p>
           </div>
           <div className="grid gap-px border border-white/10 bg-white/10 md:grid-cols-3">

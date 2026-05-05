@@ -57,9 +57,7 @@ export default function StatePavingPage() {
           </span>
           <h1 className="font-display font-black text-4xl md:text-6xl mt-3 mb-5">{model.h1}</h1>
           <p className="text-white/70 text-xl max-w-3xl">
-            This page framework is ready for tomorrow&rsquo;s state expansion. It is intentionally
-            built with helpful-content controls so every state page can become useful, original, and
-            Google-policy aligned before sitemap publishing.
+            J. Worden & Sons brings the same Virginia-proven process wherever we work — licensed crews, quality materials, and straight answers on cost and timeline before we ever break ground.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <Link to="/quote" className="btn-primary">

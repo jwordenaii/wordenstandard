@@ -75,7 +75,7 @@ function cityRankingSignals(area) {
   return [
     {
       title: `${area.city} service-area relevance`,
-      text: `This page connects asphalt paving, sealcoating, crack filling, parking lots, driveways, and maintenance to ${area.city}, ${area.stateCode} instead of relying on one generic statewide claim.`,
+      text: `J. Worden & Sons serves ${area.city}, ${area.stateCode} directly — asphalt paving, sealcoating, crack filling, parking lots, driveways, and ongoing maintenance handled by crews who know this market.`,
     },
     {
       title: 'Local corridors and landmarks',
@@ -272,11 +272,10 @@ export default function CityPage() {
               Local paving proof for {area.city}
             </span>
             <h2 className="section-heading mt-2 mb-3">
-              Why This Page Is Built to Help {area.city} Buyers Decide
+              What Sets J. Worden & Sons Apart in {area.city}
             </h2>
             <p className="text-brand-navy/60 max-w-2xl mx-auto">
-              Strong paving pages win when they prove the service, the place, the buyer type, and
-              the production details. This content connects those signals for {area.city},{' '}
+              Real crews, proven Virginia experience, and every service you need — here's how we earn your business in {area.city},{' '}
               {area.stateCode}.
             </p>
           </div>
