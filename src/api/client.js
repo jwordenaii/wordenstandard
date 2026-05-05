@@ -867,6 +867,28 @@ export const api = {
     } finally { clearTimeout(tId) }
   },
 
+  // ── Plan-to-Estimate Pipeline ──────────────────────────────────────────────
+  // Upload N plan files (PDF blueprints, civil drawings, GC takeoffs, sketches)
+  // and receive a priced estimate covering the combined scope.
+  estimateFromPlans: async (files, contact = {}) => {
+    const form = new FormData()
+    files.forEach((f) => form.append('files', f))
+    if (contact.name) form.append('contact_name', contact.name)
+    if (contact.email) form.append('contact_email', contact.email)
+    if (contact.address) form.append('project_address', contact.address)
+    if (contact.notes) form.append('notes', contact.notes)
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+    const controller = new AbortController()
+    const tId = setTimeout(() => controller.abort(), 120_000)
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/plan-estimator/from-files`, {
+        method: 'POST', body: form, signal: controller.signal,
+      })
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `HTTP ${res.status}`) }
+      return res.json()
+    } finally { clearTimeout(tId) }
+  },
+
   // ── SCC Business Verification ──────────────────────────────────────────────
   verifySccEntity: (params) => request('GET', `/api/v1/scc/verify${buildQS(params)}`),
   verifySccBatch: (entities) => request('POST', '/api/v1/scc/verify-batch', { entities }),

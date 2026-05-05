@@ -62,6 +62,7 @@ const RevenueDashboard = lazy(() => import('./pages/RevenueDashboard'));
 const CrewEta = lazy(() => import('./pages/CrewEta'));
 const CrewFieldApp = lazy(() => import('./pages/CrewFieldApp'));
 const FloorPlanStudio = lazy(() => import('./pages/FloorPlanStudio'));
+const PlansInbox = lazy(() => import('./pages/PlansInbox'));
 const AsphaltPaving = lazy(() => import('./pages/AsphaltPaving'));
 const Hardscapes = lazy(() => import('./pages/Hardscapes'));
 const VirginiaSealcoating = lazy(() => import('./pages/VirginiaSealcoating'));
@@ -233,6 +234,7 @@ const AuthenticatedApp = () => {
         <Route path="/general-contracting" element={<GeneralContracting />} />
         <Route path="/visualizer" element={<Navigate to="/jwordenai" replace />} />
         <Route path="/floor-plan-studio" element={<FloorPlanStudio />} />
+        <Route path="/plans-inbox" element={<PlansInbox />} />
         <Route path="/lp/:slug" element={<LandingPage />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />

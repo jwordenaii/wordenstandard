@@ -189,6 +189,7 @@ from .routers import follow_ups as follow_ups_router
 from .routers import proposals as proposals_router
 from .routers import weather as weather_router
 from .routers import documents as documents_router
+from .routers import plan_estimator as plan_estimator_router
 from .routers import analytics as analytics_router
 from .routers import voice as voice_router
 from .routers import lien_calendar as lien_calendar_router
@@ -417,6 +418,7 @@ app.include_router(follow_ups_router.router)
 app.include_router(proposals_router.router)
 app.include_router(weather_router.router)
 app.include_router(documents_router.router)
+app.include_router(plan_estimator_router.router)
 app.include_router(analytics_router.router)
 app.include_router(voice_router.router)
 app.include_router(lien_calendar_router.router)
