@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async'
 import * as Sentry from "@sentry/react";
 import App from '@/App.jsx'
 import '@/index.css'
@@ -39,5 +40,7 @@ if (typeof document !== 'undefined') {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <App />
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>
 )

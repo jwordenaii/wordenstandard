@@ -91,6 +91,18 @@ const STATIC_FALLBACK = [
   { month: "Mar", "Regional Compliance": 95, "Ad ROI": 3.1 },
 ];
 
+// Directly mutates the existing <meta name="robots"> tag so it overrides any
+// static value from index.html (react-helmet-async adds a second tag otherwise).
+function NoindexMeta() {
+  useEffect(() => {
+    const el = document.querySelector('meta[name="robots"]');
+    const prev = el ? el.getAttribute('content') : null;
+    if (el) el.setAttribute('content', 'noindex, nofollow');
+    return () => { if (el && prev !== null) el.setAttribute('content', prev); };
+  }, []);
+  return null;
+}
+
 const Dashboard = () => {
   const [chartData, setChartData] = useState(STATIC_FALLBACK);
   const [liveData, setLiveData] = useState({ trucks: [], compaction: [] });
@@ -137,6 +149,8 @@ const Dashboard = () => {
 
   return (
     <main className="bg-gray-50 min-h-screen">
+      {/* noindex — owner-only page, must not be crawled */}
+      <NoindexMeta />
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="bg-brand-navy text-white px-6 py-8">

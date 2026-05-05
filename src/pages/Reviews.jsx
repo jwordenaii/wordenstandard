@@ -85,7 +85,7 @@ export default function Reviews() {
   useEffect(() => {
     api
       .getReviews()
-      .then(setData)
+      .then((d) => setData(d?.aggregate_rating ? d : FALLBACK))
       .catch(() => setData(FALLBACK))
       .finally(() => setLoading(false))
     trackEvent('page_view', { page: '/reviews' })
