@@ -96,6 +96,7 @@ const Dashboard = () => {
   const [liveData, setLiveData] = useState({ trucks: [], compaction: [] });
   const [sseStatus, setSseStatus] = useState('connecting');
   const [openSections, setOpenSections] = useState(() => HUB_SECTIONS.map(() => true));
+  const [postStatus, setPostStatus] = useState(null);
   const esRef = useRef(null);
 
   useEffect(() => {
@@ -115,7 +116,19 @@ const Dashboard = () => {
 
   const toggleSection = (i) => setOpenSections(prev => prev.map((v, idx) => idx === i ? !v : v));
 
-  return (
+  const postTweet = async () => {
+    setPostStatus('posting');
+    try {
+      const res = await fetch('/.netlify/functions/auto-post-tweet', { method: 'POST' });
+      if (res.ok) {
+        setPostStatus('success');
+      } else {
+        setPostStatus('error');
+      }
+    } catch {
+      setPostStatus('error');
+    }
+  };
     <main className="bg-gray-50 min-h-screen">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -210,6 +223,25 @@ const Dashboard = () => {
             </CardContent>
           </ShadcnCard>
         </Grid>
+
+        {/* ── Social Media ────────────────────────────────────────────────── */}
+        <ShadcnCard>
+          <CardHeader><CardTitle>Social Media</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <Text>Generate and post AI-powered tweets to @JWordenandSons</Text>
+              <button
+                onClick={postTweet}
+                disabled={postStatus === 'posting'}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {postStatus === 'posting' ? 'Generating & Posting...' : 'Generate & Post AI Tweet'}
+              </button>
+              {postStatus === 'success' && <Text className="text-green-600">Tweet posted successfully!</Text>}
+              {postStatus === 'error' && <Text className="text-red-600">Failed to post tweet. Check env vars in Netlify.</Text>}
+            </div>
+          </CardContent>
+        </ShadcnCard>
 
         {/* ── Mega Navigation Hub ─────────────────────────────────────────── */}
         <div>
