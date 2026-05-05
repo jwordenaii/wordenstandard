@@ -34,7 +34,9 @@ exports.handler = async (event, context) => {
         'Authorization': `Bearer ${xaiApiKey}`,
       },
       body: JSON.stringify({
-        model: 'grok-4.20-reasoning',
+        model: 'grok-4.3',
+        max_output_tokens: 300,
+        stream: false,
         input: prompt,
       }),
     });
@@ -44,7 +46,7 @@ exports.handler = async (event, context) => {
     }
 
     const grokData = await grokResponse.json();
-    const tweetText = grokData.response?.trim();
+    const tweetText = (grokData.output?.[0]?.content?.[0]?.text || grokData.response || '').trim();
 
     if (!tweetText || tweetText.length > 280) {
       return {
