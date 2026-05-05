@@ -132,6 +132,37 @@ export default function Reviews() {
             Verified On These Platforms
           </p>
           <LiveReviewBadges />
+
+          {/* Houzz Awards */}
+          <div className="mt-8 pt-8 border-t border-border/50">
+            <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-5">Houzz Awards &amp; Recognition</p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <a
+                href="https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-[#111] border border-[#4dbc15]/50 hover:border-[#4dbc15] px-4 py-3 transition-colors group"
+              >
+                <span className="w-7 h-7 bg-[#4dbc15] flex items-center justify-center rounded font-black text-white text-sm">h</span>
+                <div>
+                  <p className="font-bold text-white text-xs tracking-wider uppercase leading-tight group-hover:text-[#4dbc15] transition-colors">Houzz Pro Certified</p>
+                  <p className="text-white/50 text-[10px]">Recommended · 500+ Saves</p>
+                </div>
+              </a>
+              {['2023', '2016', '2015', '2014'].map(year => (
+                <a
+                  key={year}
+                  href="https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center bg-[#111] border border-[#4dbc15]/40 hover:border-[#4dbc15] px-3 py-2 transition-colors"
+                >
+                  <span className="text-[#4dbc15] font-black text-[9px] tracking-widest uppercase">Best of Houzz</span>
+                  <span className="text-white font-bold text-base leading-tight">{year}</span>
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

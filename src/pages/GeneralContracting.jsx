@@ -238,6 +238,40 @@ export default function GeneralContracting() {
         </div>
       </section>
 
+      {/* Houzz Credentials Strip */}
+      <section className="py-8 bg-[#111] border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <a
+              href="https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 group"
+            >
+              <span className="w-9 h-9 bg-[#4dbc15] flex items-center justify-center rounded font-black text-white text-xl">h</span>
+              <div>
+                <p className="font-display font-black text-white text-sm tracking-widest uppercase leading-tight group-hover:text-[#4dbc15] transition-colors">Houzz Pro Certified</p>
+                <p className="text-white/50 text-xs mt-0.5">4.8 ★ · 12 Reviews · Recommended on Houzz · 500+ Ideabook Saves</p>
+              </div>
+            </a>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {['2023', '2016', '2015', '2014'].map(year => (
+                <a
+                  key={year}
+                  href="https://www.houzz.com/professionals/paving-contractors/j-worden-sons-asphalt-paving-pfvwus-pf~48430947"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center border border-[#4dbc15]/40 hover:border-[#4dbc15] bg-black px-4 py-2 transition-colors group"
+                >
+                  <span className="text-[#4dbc15] font-black text-[10px] tracking-widest uppercase">Best of Houzz</span>
+                  <span className="text-white font-display font-black text-xl leading-tight">{year}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 md:py-20 border-b border-border bg-background">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-8 items-start">
