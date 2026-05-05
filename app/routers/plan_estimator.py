@@ -21,8 +21,6 @@ Routes:
 Max upload: 20 MB per file, 5 files per request.
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Any
 
