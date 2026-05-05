@@ -1,15 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Camera, MapPin, Clock, CheckCircle2, AlertCircle, LogOut, User, HardHat, FileText, Thermometer, Zap, ShieldAlert, Truck, Navigation, Package, Settings, Eye, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { api } from '@/api/client';
+
+const LS_TOKEN = 'jworden_staff_token';
+const LS_USER = 'jworden_staff_user';
 
 export default function CrewFieldApp() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [pin, setPin] = useState('');
+  const [token, setToken] = useState(() => {
+    try { return localStorage.getItem(LS_TOKEN) || ''; } catch { return ''; }
+  });
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(LS_USER) || 'null'); } catch { return null; }
+  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
   const [currentJob, setCurrentJob] = useState(null);
   const [status, setStatus] = useState('idle'); // 'idle', 'clocked_in', 'working', 'break', 'transit'
   const [photos, setPhotos] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [submitState, setSubmitState] = useState('idle'); // 'idle', 'submitting', 'submitted', 'error'
+  const [submitError, setSubmitError] = useState('');
+  const isLoggedIn = Boolean(token && user);
   
   // Logistics State
   const [logistics, setLogistics] = useState({
@@ -49,52 +64,95 @@ export default function CrewFieldApp() {
     }
   }, [isLoggedIn, status]);
 
-  // Simulated Biometric/Wearable Sync
+  // Wearable biometric sync — only runs when VITE_WEARABLE_FEED_URL is
+  // configured and points at a real device gateway. Without a real feed we
+  // do NOT fire backend safety alerts (false positives create real noise).
   useEffect(() => {
-    if (status === 'working') {
-      const interval = setInterval(() => {
-        const hRate = Math.floor(85 + Math.random() * 40);
-        const bTemp = (98.6 + Math.random() * 1.5).toFixed(1);
+    if (status !== 'working') return;
+    const feedUrl = import.meta.env.VITE_WEARABLE_FEED_URL;
+    if (!feedUrl) return;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const res = await fetch(feedUrl, { headers: { Accept: 'application/json' } });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => null);
+        if (!data || cancelled) return;
+        const hRate = Number(data.heart_rate || data.heartRate || 0);
+        const bTemp = Number(data.body_temp_f || data.bodyTemp || 0);
+        const aTemp = Number(data.ambient_temp_f || data.ambientTemp || 84);
         const isWarning = bTemp > 100 || hRate > 120;
-
         setBiometrics(prev => ({
           ...prev,
-          heartRate: hRate,
-          bodyTemp: bTemp,
-          safetyStatus: isWarning ? 'warning' : 'optimal'
+          heartRate: hRate || prev.heartRate,
+          bodyTemp: bTemp || prev.bodyTemp,
+          ambientTemp: aTemp || prev.ambientTemp,
+          safetyStatus: isWarning ? 'warning' : 'optimal',
         }));
+      } catch {
+        /* ignore — wearable feed unreachable */
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [status]);
 
-        // TRIGGER EMERGENCY NOTIFICATION if transition into warning
-        if (isWarning && biometrics.safetyStatus !== 'warning') {
-           fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/safety/biometric-alert`, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({
-               crew_name: 'Dave (Foreman)',
-               site_name: '1284 Westbury Lane',
-               vital_stat: bTemp > 100 ? 'Body Temperature' : 'Heart Rate',
-               vital_value: bTemp > 100 ? parseFloat(bTemp) : hRate,
-               ambient_temp: 84
-             })
-           }).catch(e => console.error('Safety Alert Dispatch Failed:', e));
-        }
-
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [status, biometrics.safetyStatus]);
-
-  // Mock authentication logic
-  const handleLogin = (e) => {
+  // Real backend authentication via /api/v1/staff/login
+  const handleLogin = useCallback(async (e) => {
     e.preventDefault();
-    if (pin === '1234') { // Example PIN
-      setIsLoggedIn(true);
-    } else {
-      alert('Invalid Crew PIN');
+    setLoginError('');
+    if (!username || !password) {
+      setLoginError('Enter your crew username and password.');
+      return;
     }
-  };
+    setLoginLoading(true);
+    try {
+      const data = await api.staffLogin(username, password);
+      const nextUser = { username: data.username, role: data.role };
+      try {
+        localStorage.setItem(LS_TOKEN, data.token);
+        localStorage.setItem(LS_USER, JSON.stringify(nextUser));
+      } catch { /* private mode — keep session in memory */ }
+      setToken(data.token);
+      setUser(nextUser);
+      setPassword('');
+    } catch (ex) {
+      setLoginError(ex.message || 'Login failed. Check your credentials.');
+    } finally {
+      setLoginLoading(false);
+    }
+  }, [username, password]);
 
-  const crewMembers = ['Dave (Foreman)', 'Mike', 'Steve', 'Chris'];
+  const handleLogout = useCallback(() => {
+    try { localStorage.removeItem(LS_TOKEN); localStorage.removeItem(LS_USER); } catch { /* ignore */ }
+    setToken(''); setUser(null); setStatus('idle');
+  }, []);
+
+  // Submit shift report (clock-in + photos + GPS) to backend
+  const submitShiftReport = useCallback(async () => {
+    if (!token) return;
+    setSubmitState('submitting');
+    setSubmitError('');
+    try {
+      const fd = new FormData();
+      fd.append('status', status);
+      if (location?.lat) fd.append('lat', String(location.lat));
+      if (location?.lng) fd.append('lng', String(location.lng));
+      if (currentJob?.id) fd.append('job_id', String(currentJob.id));
+      if (logistics.activeVehicle) fd.append('vehicle', String(logistics.activeVehicle));
+      if (logistics.startTime) fd.append('vehicle_start', String(logistics.startTime));
+      photos.forEach((photo, idx) => {
+        if (photo instanceof File) fd.append(`photo_${idx}`, photo);
+      });
+      await api.staffCheckin(token, fd);
+      setSubmitState('submitted');
+      setTimeout(() => setSubmitState('idle'), 3000);
+    } catch (ex) {
+      setSubmitState('error');
+      setSubmitError(ex.message || 'Submit failed. Try again.');
+    }
+  }, [token, status, location, currentJob, logistics, photos]);
 
   if (!isLoggedIn) {
     return (
@@ -112,22 +170,38 @@ export default function CrewFieldApp() {
             <p className="text-white/50 text-xs uppercase tracking-widest mt-1">Field Intelligence Link</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-4">
+            {loginError && (
+              <div className="text-red-300 text-xs bg-red-500/10 border border-red-400/30 rounded-lg p-2 text-center">{loginError}</div>
+            )}
             <div>
-              <label className="block text-white/60 text-[10px] uppercase font-black tracking-widest mb-2 ml-1">Team Access PIN</label>
+              <label className="block text-white/60 text-[10px] uppercase font-black tracking-widest mb-2 ml-1">Username</label>
+              <input
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="crew.username"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-brand-amber focus:border-transparent transition-all outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-white/60 text-[10px] uppercase font-black tracking-widest mb-2 ml-1">Password</label>
               <input
                 type="password"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                placeholder="••••"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 text-center text-3xl text-white tracking-[0.5em] focus:ring-2 focus:ring-brand-amber focus:border-transparent transition-all outline-none"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-brand-amber focus:border-transparent transition-all outline-none"
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-brand-amber hover:bg-brand-amber/90 text-brand-navy font-black py-4 rounded-2xl uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-brand-amber/10"
+              disabled={loginLoading}
+              className="w-full bg-brand-amber hover:bg-brand-amber/90 text-brand-navy font-black py-4 rounded-2xl uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-brand-amber/10 disabled:opacity-60"
             >
-              Enter Field Mode
+              {loginLoading ? 'Signing in…' : 'Enter Field Mode'}
             </button>
           </form>
         </motion.div>
@@ -144,11 +218,11 @@ export default function CrewFieldApp() {
             <User className="w-4 h-4 text-brand-navy" />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase text-white/50 leading-none">Crew Alpha</p>
-            <p className="text-xs font-bold leading-none mt-1">Dave (Foreman)</p>
+            <p className="text-[10px] font-black uppercase text-white/50 leading-none">{user?.role || 'Crew'}</p>
+            <p className="text-xs font-bold leading-none mt-1">{user?.username || 'Field'}</p>
           </div>
         </div>
-        <button onClick={() => setIsLoggedIn(false)} className="p-2 hover:bg-white/10 rounded-lg">
+        <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-lg">
           <LogOut className="w-5 h-5" />
         </button>
       </div>
@@ -412,9 +486,20 @@ export default function CrewFieldApp() {
           animate={{ y: 0 }}
           className="fixed bottom-6 left-6 right-6 z-50"
         >
-          <button className="w-full bg-green-600 text-white font-black py-5 rounded-2xl uppercase tracking-[0.2em] shadow-2xl shadow-green-200 flex items-center justify-center gap-3">
-             <FileText className="w-5 h-5" />
-             Submit Shift Report
+          <button
+            onClick={submitShiftReport}
+            disabled={submitState === 'submitting'}
+            className={`w-full font-black py-5 rounded-2xl uppercase tracking-[0.2em] shadow-2xl flex items-center justify-center gap-3 transition-all ${
+              submitState === 'submitted' ? 'bg-emerald-600 text-white shadow-emerald-200'
+              : submitState === 'error' ? 'bg-red-600 text-white shadow-red-200'
+              : 'bg-green-600 text-white shadow-green-200 disabled:opacity-70'
+            }`}
+          >
+            {submitState === 'submitting' ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileText className="w-5 h-5" />}
+            {submitState === 'submitting' ? 'Submitting…'
+              : submitState === 'submitted' ? 'Shift Logged'
+              : submitState === 'error' ? (submitError || 'Retry Submit')
+              : 'Submit Shift Report'}
           </button>
         </motion.div>
       )}
