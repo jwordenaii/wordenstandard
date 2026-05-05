@@ -97,6 +97,7 @@ const Dashboard = () => {
   const [sseStatus, setSseStatus] = useState('connecting');
   const [openSections, setOpenSections] = useState(() => HUB_SECTIONS.map(() => true));
   const [postStatus, setPostStatus] = useState(null);
+  const [tweetError, setTweetError] = useState(null);
   const esRef = useRef(null);
 
   useEffect(() => {
@@ -118,15 +119,19 @@ const Dashboard = () => {
 
   const postTweet = async () => {
     setPostStatus('posting');
+    setTweetError(null);
     try {
       const res = await fetch('/.netlify/functions/auto-post-tweet', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setPostStatus('success');
       } else {
         setPostStatus('error');
+        setTweetError(data.details || data.error || `HTTP ${res.status}`);
       }
-    } catch {
+    } catch (err) {
       setPostStatus('error');
+      setTweetError(err.message);
     }
   };
 
@@ -240,7 +245,7 @@ const Dashboard = () => {
                 {postStatus === 'posting' ? 'Generating & Posting...' : 'Generate & Post AI Tweet'}
               </button>
               {postStatus === 'success' && <Text className="text-green-600">Tweet posted successfully!</Text>}
-              {postStatus === 'error' && <Text className="text-red-600">Failed to post tweet. Check env vars in Netlify.</Text>}
+              {postStatus === 'error' && <Text className="text-red-600">Failed to post tweet.{tweetError ? ` Error: ${tweetError}` : ''}</Text>}
             </div>
           </CardContent>
         </ShadcnCard>
