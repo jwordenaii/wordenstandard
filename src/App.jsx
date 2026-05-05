@@ -16,6 +16,7 @@ import AdvisoryGate from '@/components/AdvisoryGate';
 import ChatWidget from '@/components/ChatWidget';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import MobileCallBar from '@/components/MobileCallBar';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
@@ -174,10 +175,11 @@ const RequireInternalAdvisory = ({ children }) => (
 );
 
 const PublicLayout = ({ children }) => (
-  <div className="min-h-screen bg-background font-body text-foreground">
+  <div className="min-h-screen bg-background font-body text-foreground pb-20 md:pb-0">
     <Navbar />
     {children}
     <Footer />
+    <MobileCallBar />
   </div>
 );
 
