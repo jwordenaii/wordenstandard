@@ -48,6 +48,10 @@ These must be set for the application to start and function correctly in product
 | `GEMINI_API_KEY` | 🔴 SECRET | Planned multi-provider AI router | Google Gemini provider key for Google-aligned workflows and grounded content generation. |
 | `PERPLEXITY_API_KEY` | 🔴 SECRET | Planned multi-provider AI router | Perplexity provider key for web-grounded competitive research briefs. |
 | `ANTHROPIC_API_KEY` | 🔴 SECRET | Planned multi-provider AI router | Claude provider key for long-context and math-heavy reasoning workflows. |
+| `TWITTER_API_KEY` | 🔴 SECRET | Twitter/X integration | Twitter API Key (Consumer Key) from developer.twitter.com |
+| `TWITTER_API_SECRET` | 🔴 SECRET | Twitter/X integration | Twitter API Secret (Consumer Secret) from developer.twitter.com |
+| `TWITTER_ACCESS_TOKEN` | 🔴 SECRET | Twitter/X integration | Access Token for the @JWordenandSons account |
+| `TWITTER_ACCESS_TOKEN_SECRET` | 🔴 SECRET | Twitter/X integration | Access Token Secret for the @JWordenandSons account |
 | `OPENAI_CODEX_MODEL` | 🟡 INTERNAL | Planned multi-provider AI router | Optional codex model override for file/code task routing (example: `gpt-5.3-codex`). |
 | `GOOGLE_API_KEY` | 🔴 SECRET | Geo endpoints, review fetching | Required for live Google Maps / Places data. |
 | `STRIPE_SECRET_KEY` | 🔴 SECRET | `/api/v1/payments/checkout-session` | Stripe secret key. Use `sk_test_...` for staging, `sk_live_...` for production. |
