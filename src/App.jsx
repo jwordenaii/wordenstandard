@@ -267,7 +267,7 @@ const AuthenticatedApp = () => {
         <Route path="/advisory/state/:stateCode" element={<RequireInternalAdvisory><AdvisoryStateDetail /></RequireInternalAdvisory>} />
         <Route path="/advisory/:category" element={<RequireInternalAdvisory><AdvisoryCategoryHub /></RequireInternalAdvisory>} />
 
-        <Route path="/staff" element={<StaffPortal />} />
+        <Route path="/staff" element={<RequireAuth><StaffPortal /></RequireAuth>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>
