@@ -27,22 +27,15 @@ exports.handler = async (event, context) => {
     // Generate tweet content using Grok
     const prompt = "Generate a short, engaging tweet (under 280 characters) about asphalt paving tips, industry news, or construction advice for J Worden & Sons Asphalt Paving. Make it professional and helpful.";
     
-    const grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+    const grokResponse = await fetch('https://api.x.ai/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${xaiApiKey}`,
       },
       body: JSON.stringify({
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        model: 'grok-beta',
-        stream: false,
-        temperature: 0.7,
+        model: 'grok-4.20-reasoning',
+        input: prompt,
       }),
     });
 
@@ -51,7 +44,7 @@ exports.handler = async (event, context) => {
     }
 
     const grokData = await grokResponse.json();
-    const tweetText = grokData.choices[0]?.message?.content?.trim();
+    const tweetText = grokData.response?.trim();
 
     if (!tweetText || tweetText.length > 280) {
       return {
