@@ -54,3 +54,9 @@ build_*.txt
 build.log
 lint.log
 staging-compare.txt
+smoke-results.txt
+c.txt
+q.txt
+resp.txt
+*.tmp
+.DS_Store
