@@ -167,6 +167,7 @@ async def submit_quote(
     response: dict = {
         "status": "received",
         "message": "Thank you! We will contact you within 24 hours.",
+        "lead_id": db_lead.id,
         "lead_score": scoring["label"],
         "priority": scoring["priority"],
         "follow_up_sla": scoring["follow_up_sla"],

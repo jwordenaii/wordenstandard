@@ -94,7 +94,7 @@ def auth_status():
     mode = _auth_mode()
     auth_required = mode not in {"none", "off", "disabled", "0", "false"}
     admin_configured = bool(os.getenv("ADMIN_PIN") or (os.getenv("ADMIN_USERNAME") and os.getenv("ADMIN_PASSWORD")))
-    token_endpoint = None if os.getenv("ADMIN_PIN") else "/.netlify/functions/get-token" if auth_required else None
+    token_endpoint = "/.netlify/functions/get-token" if auth_required else None
     return AuthStatusResponse(
         auth_required=auth_required,
         auth_mode=mode,
