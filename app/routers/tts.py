@@ -77,8 +77,21 @@ async def speak(request: Request, payload: SpeakRequest = Body(...)) -> Response
 @router.get("/status")
 async def status() -> dict:
     """Which TTS provider is currently active (for the admin/Jarvis status panel)."""
+    import os as _os
+    # Diagnostic: show which AI provider keys the container can actually see.
+    def _seen(name: str) -> dict:
+        v = _os.environ.get(name, "")
+        return {"set": bool(v.strip()), "len": len(v)}
     return {
         "provider": tts_service.active_provider(),
         "default_voice": tts_service.DEFAULT_OPENAI_VOICE,
         "default_model": tts_service.DEFAULT_OPENAI_MODEL,
+        "env_check": {
+            "OPENAI_API_KEY":     _seen("OPENAI_API_KEY"),
+            "ANTHROPIC_API_KEY":  _seen("ANTHROPIC_API_KEY"),
+            "GOOGLE_API_KEY":     _seen("GOOGLE_API_KEY"),
+            "PERPLEXITY_API_KEY": _seen("PERPLEXITY_API_KEY"),
+            "XAI_API_KEY":        _seen("XAI_API_KEY"),
+            "ELEVENLABS_API_KEY": _seen("ELEVENLABS_API_KEY"),
+        },
     }
