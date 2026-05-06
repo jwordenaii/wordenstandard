@@ -60,6 +60,26 @@
   status = 200
   force = true
 
+# Owner shortcuts — easy-to-remember URLs Gene can type from any device.
+# All land at protected routes that require login (no extra PIN to remember).
+[[redirects]]
+  from = "/owner"
+  to = "/leads"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/inbox"
+  to = "/leads"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/admin"
+  to = "/command-center"
+  status = 302
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
