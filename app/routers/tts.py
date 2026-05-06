@@ -95,3 +95,33 @@ async def status() -> dict:
             "ELEVENLABS_API_KEY": _seen("ELEVENLABS_API_KEY"),
         },
     }
+
+
+@router.get("/claude-ping")
+async def claude_ping() -> dict:
+    """One-shot Claude smoke test — returns raw status + text or error."""
+    import os as _os
+    import httpx
+    key = _os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        return {"ok": False, "error": "ANTHROPIC_API_KEY not set on container"}
+    model = _os.environ.get("ANTHROPIC_MODEL") or "claude-sonnet-4-5"
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key":         key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type":      "application/json",
+                },
+                json={
+                    "model":      model,
+                    "max_tokens": 50,
+                    "messages":   [{"role": "user", "content": "Say PONG and nothing else."}],
+                },
+            )
+        body = r.text[:500]
+        return {"ok": r.status_code == 200, "model_tried": model, "status": r.status_code, "body": body}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
