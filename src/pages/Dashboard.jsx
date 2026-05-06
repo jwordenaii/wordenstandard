@@ -37,7 +37,7 @@ const HUB_SECTIONS = [
     color: 'border-l-cyan-500',
     links: [
       { to: '/jwordenai',       icon: '🤖', label: 'JWordenAI',              sub: 'Construction intelligence suite',     badge: 'AI' },
-      { to: '/command-center',  icon: '🛰️', label: 'Command Center',         sub: 'System keys · API health · config',  badge: null },
+      { to: '/command-center',  icon: '🦾', label: "Tony Stark's Dashboard", sub: 'Command Center · system keys · API health',  badge: null },
       { to: '/autonomy',        icon: '⚡', label: 'Autonomy Dashboard',     sub: 'Automated task status',               badge: null },
       { to: '/contractor-ai',   icon: '🏗️', label: 'Contractor AI Platform', sub: 'Bid analysis · scope generation',    badge: null },
       { to: '/virginia-statewide', icon: '🗺️', label: 'Virginia Statewide', sub: 'Market coverage + region metrics',   badge: null },

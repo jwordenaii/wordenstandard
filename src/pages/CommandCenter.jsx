@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, Power, Send } from 'lucide-react'
+import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, Power, Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { api } from '@/api/client'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
@@ -3165,6 +3165,79 @@ function JarvisChat({ compact = false }) {
   const [backendFrozen, setBackendFrozen] = useState(false)
   const [tools, setTools] = useState({ web_search: false, make_phone_call: false, send_email: false })
   const scrollerRef = useRef(null)
+  // ── Voice I/O (Web Speech API) ────────────────────────────────────────────
+  const [listening, setListening] = useState(false)
+  const [voiceSupported, setVoiceSupported] = useState(false)
+  const [speakReplies, setSpeakReplies] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage?.getItem('cc:jarvis:speak') === '1'
+  })
+  const recognitionRef = useRef(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { setVoiceSupported(false); return }
+    setVoiceSupported(true)
+    const rec = new SR()
+    rec.continuous = false
+    rec.interimResults = false
+    rec.lang = 'en-US'
+    rec.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((r) => r[0]?.transcript || '')
+        .join(' ')
+        .trim()
+      if (transcript) {
+        // Auto-send the transcript so the user doesn't need to click Send.
+        setListening(false)
+        // Defer to next tick so React state updates before send fires.
+        setTimeout(() => { sendRef.current?.(transcript) }, 0)
+      }
+    }
+    rec.onend = () => setListening(false)
+    rec.onerror = () => setListening(false)
+    recognitionRef.current = rec
+    return () => { try { rec.stop() } catch { /* noop */ } }
+  }, [])
+
+  const toggleListen = useCallback(() => {
+    const rec = recognitionRef.current
+    if (!rec) return
+    if (listening) {
+      try { rec.stop() } catch { /* noop */ }
+      setListening(false)
+    } else {
+      try { rec.start(); setListening(true) } catch { setListening(false) }
+    }
+  }, [listening])
+
+  const speak = useCallback((text) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis || !text) return
+    try {
+      window.speechSynthesis.cancel()
+      const utter = new window.SpeechSynthesisUtterance(text.slice(0, 600))
+      utter.rate = 1.05
+      utter.pitch = 1
+      utter.volume = 1
+      window.speechSynthesis.speak(utter)
+    } catch { /* noop */ }
+  }, [])
+
+  const toggleSpeakReplies = useCallback(() => {
+    setSpeakReplies((v) => {
+      const next = !v
+      try { window.localStorage?.setItem('cc:jarvis:speak', next ? '1' : '0') } catch { /* noop */ }
+      if (!next && typeof window !== 'undefined' && window.speechSynthesis) {
+        try { window.speechSynthesis.cancel() } catch { /* noop */ }
+      }
+      return next
+    })
+  }, [])
+
+  // sendRef lets the recognition callback call the latest `send` without
+  // re-binding the recognition listener every render.
+  const sendRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -3202,13 +3275,20 @@ function JarvisChat({ compact = false }) {
       const toolNote = Array.isArray(res?.tool_calls) && res.tool_calls.length
         ? `\n\n[used ${res.tool_calls.length} tool${res.tool_calls.length > 1 ? 's' : ''}: ${res.tool_calls.map(t => t.name).join(', ')}]`
         : ''
-      setMessages((prev) => [...prev, { role: 'jarvis', text: String(reply) + toolNote }])
+      const replyText = String(reply) + toolNote
+      setMessages((prev) => [...prev, { role: 'jarvis', text: replyText }])
+      if (speakReplies) speak(String(reply))
     } catch (err) {
-      setMessages((prev) => [...prev, { role: 'jarvis', text: `Error: ${err?.message || 'Jarvis unreachable'}` }])
+      const errText = `Error: ${err?.message || 'Jarvis unreachable'}`
+      setMessages((prev) => [...prev, { role: 'jarvis', text: errText }])
+      if (speakReplies) speak(errText)
     } finally {
       setSending(false)
     }
-  }, [input, sending])
+  }, [input, sending, speakReplies, speak])
+
+  // Keep the latest `send` accessible to the SpeechRecognition callback.
+  useEffect(() => { sendRef.current = send }, [send])
 
   const quickPrompts = [
     'Status report on the business right now',
@@ -3305,11 +3385,43 @@ function JarvisChat({ compact = false }) {
           ))}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); send() }} className="flex items-center gap-2">
+          {voiceSupported ? (
+            <button
+              type="button"
+              onClick={toggleListen}
+              disabled={sending}
+              title={listening ? 'Stop listening' : 'Hold to talk — click then speak'}
+              aria-pressed={listening}
+              className={[
+                'inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors',
+                listening
+                  ? 'border-red-300/60 bg-red-300/15 text-red-200 animate-pulse'
+                  : 'border-white/15 bg-white/[0.05] text-white/70 hover:text-white hover:border-white/30',
+                sending ? 'opacity-40 cursor-not-allowed' : '',
+              ].join(' ')}
+            >
+              {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={toggleSpeakReplies}
+            title={speakReplies ? 'Mute Jarvis voice' : 'Hear Jarvis speak replies'}
+            aria-pressed={speakReplies}
+            className={[
+              'inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors',
+              speakReplies
+                ? 'border-emerald-300/60 bg-emerald-300/15 text-emerald-200'
+                : 'border-white/15 bg-white/[0.05] text-white/70 hover:text-white hover:border-white/30',
+            ].join(' ')}
+          >
+            {speakReplies ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </button>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Tell Jarvis what to do…"
+            placeholder={listening ? 'Listening… speak now' : 'Tell Jarvis what to do…'}
             className="flex-1 bg-white/[0.05] border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/35 focus:outline-none focus:border-brand-amber/60"
             disabled={sending}
           />
@@ -4794,9 +4906,9 @@ export default function CommandCenter() {
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display font-black text-xl sm:text-2xl text-white leading-tight">
-              JWordenAI Command Center
+              Tony Stark's Dashboard
             </h1>
-            <p className="text-white/40 text-xs mt-0.5">Internal operations dashboard</p>
+            <p className="text-white/40 text-xs mt-0.5">JWordenAI Command Center — internal operations</p>
           </div>
           <div className="flex items-center gap-2">
             <PanicButton />
