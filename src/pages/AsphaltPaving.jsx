@@ -5,6 +5,7 @@ import { ShieldCheck, Construction, HardHat, Award } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
+import LiveReviewBadges from '@/components/LiveReviewBadges'
 import { trackPhoneClick } from '@/lib/analytics'
 
 const PAVING_SERVICES = [
@@ -101,6 +102,16 @@ export default function AsphaltPaving() {
               </Link>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Trust signals — verified review platforms */}
+      <section className="border-b border-border bg-white py-10">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">
+            Verified Reviews On
+          </p>
+          <LiveReviewBadges />
         </div>
       </section>
 

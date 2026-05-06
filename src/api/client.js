@@ -941,7 +941,25 @@ const ADS_CONVERSION_MAP = {
   phone_click:         import.meta.env.VITE_GADS_LABEL_PHONE_CLICK,
   quote_request:       import.meta.env.VITE_GADS_LABEL_QUOTE_REQUEST,
   qualified_lead_signal: import.meta.env.VITE_GADS_LABEL_LEAD_FORM,
+  // QuickQuoteBar + SMS deeplink events (added 2026-05) — these are the
+  // highest-converting paths from Google Ads traffic. Map them to the same
+  // Lead/Phone conversion labels so Google Ads can optimise bids on them.
+  quick_quote_submit:  import.meta.env.VITE_GADS_LABEL_LEAD_FORM,
+  sms_click:           import.meta.env.VITE_GADS_LABEL_PHONE_CLICK,
 }
+// Events that ALWAYS represent a conversion-worthy lead signal, even if no
+// Google Ads label env var is configured. We fire the GA4-recommended
+// `generate_lead` event so Google Ads can pick it up as a conversion via
+// "Import from Google Analytics" without any further config.
+const LEAD_GA4_FALLBACK_EVENTS = new Set([
+  'contact_form_submit',
+  'generate_lead',
+  'quote_request',
+  'qualified_lead_signal',
+  'quick_quote_submit',
+  'sms_click',
+  'phone_click',
+])
 // Estimated lead value (USD) — used for value-based bidding/ROAS reporting.
 const LEAD_VALUE_USD = Number(import.meta.env.VITE_GADS_LEAD_VALUE_USD) || 50
 
@@ -958,6 +976,17 @@ export function trackEvent(eventName, params = {}) {
       send_to: `${ADS_ID}/${label}`,
       value: params.value ?? LEAD_VALUE_USD,
       currency: 'USD',
+    })
+  }
+  // 3. Fallback: even without a label env var, fire the GA4-recommended
+  //    `generate_lead` event so Google Ads (with GA4 import) still counts it.
+  //    Skipped if this event itself is `generate_lead` to avoid double-fire.
+  if (eventName !== 'generate_lead' && LEAD_GA4_FALLBACK_EVENTS.has(eventName)) {
+    window.gtag('event', 'generate_lead', {
+      currency: 'USD',
+      value: params.value ?? LEAD_VALUE_USD,
+      lead_source: eventName,
+      ...params,
     })
   }
 }

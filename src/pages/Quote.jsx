@@ -103,6 +103,7 @@ const inputCls =
 
 export default function Quote() {
   const [step, setStep] = useState(1)
+  const [showFullForm, setShowFullForm] = useState(false)
   const [form, setForm] = useState(INITIAL_FORM)
   const [status, setStatus] = useState('idle')
   const [result, setResult] = useState(null)
@@ -375,13 +376,28 @@ export default function Quote() {
             <QuickQuoteBar
               source="quote_page_top"
               servicePreset="paving"
-              headline="Don't want to fill out a form? Just text me."
-              subline="Drop your number — we reply by text within 1 hour, 7 days a week."
+              headline="Fastest way: just text us your number."
+              subline="One tap. No form. We respond by text within 1 hour, 7 days a week."
             />
-            <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mt-4">
-              ── or use the full form below for a detailed estimate ──
-            </p>
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFullForm((v) => !v)
+                  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'quote_full_form_toggle', { opened: !showFullForm })
+                  }
+                }}
+                className="text-sm font-semibold uppercase tracking-widest text-brand-navy/70 underline-offset-4 hover:text-brand-navy hover:underline"
+                aria-expanded={showFullForm}
+              >
+                {showFullForm
+                  ? '── Hide detailed estimate form ──'
+                  : '── Need a detailed estimate? Open the full form ──'}
+              </button>
+            </div>
           </div>
+          {showFullForm && (
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10">
             <StepIndicator current={step} />
 
@@ -711,6 +727,7 @@ export default function Quote() {
               </div>
             )}
           </div>
+          )}
         </div>
       </section>
     </>
