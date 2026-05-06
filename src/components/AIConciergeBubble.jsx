@@ -267,9 +267,55 @@ export default function AIConciergeBubble() {
     }
   }, [listening, sending, booting, speaking, open]);
 
+  // Active <audio> element for neural TTS playback (so we can stop on cancel).
+  const neuralAudioRef = useRef(null);
+
+  const stopAllSpeech = useCallback(() => {
+    // Stop neural audio
+    if (neuralAudioRef.current) {
+      try {
+        neuralAudioRef.current.pause();
+        neuralAudioRef.current.src = '';
+      } catch {
+        /* ignore */
+      }
+      neuralAudioRef.current = null;
+    }
+    // Stop legacy browser TTS too (in case fallback was active)
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    if (ttsPacerRef.current) {
+      clearInterval(ttsPacerRef.current);
+      ttsPacerRef.current = null;
+    }
+  }, []);
+
+  // Last-resort browser-TTS fallback (only used if backend /tts/speak is down).
+  const speakLegacyFallback = useCallback(
+    (normalizedText, longForm) => {
+      if (!('speechSynthesis' in window)) return;
+      const utterance = new SpeechSynthesisUtterance(normalizedText);
+      utterance.rate = longForm ? 0.95 : 1.0;
+      utterance.pitch = 0.9;
+      utterance.volume = 1;
+      utterance.voice = founderVoiceRef.current || null;
+      utterance.onstart = () => setSpeaking(true);
+      utterance.onend = () => {
+        setSpeaking(false);
+        if (voiceMode === 'handsfree' && open) {
+          handsFreeRestartRef.current = setTimeout(() => startListening(), 350);
+        }
+      };
+      utterance.onerror = () => setSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    },
+    [voiceMode, open, startListening]
+  );
+
   const speakAssistant = useCallback(
-    (text) => {
-      if (!voiceOutputEnabled || !supportsSpeechOut || !('speechSynthesis' in window)) return;
+    async (text) => {
+      if (!voiceOutputEnabled) return;
       if (!text?.trim()) return;
 
       const normalizedText = text
@@ -278,34 +324,20 @@ export default function AIConciergeBubble() {
         .replace(/\.{3,}/g, '...')
         .trim();
 
-      window.speechSynthesis.cancel();
-      if (ttsPacerRef.current) {
-        clearInterval(ttsPacerRef.current);
-        ttsPacerRef.current = null;
-      }
-
-      const utterance = new SpeechSynthesisUtterance(normalizedText);
-
       const wordCount = normalizedText.split(/\s+/).filter(Boolean).length;
       const longForm = wordCount > 45;
 
-      utterance.rate = longForm ? 0.95 : 1.0;
-      utterance.pitch = 0.9;
-      utterance.volume = 1;
-      utterance.voice = founderVoiceRef.current || null;
+      // Stop anything currently playing
+      stopAllSpeech();
 
-      utterance.onstart = () => {
-        setSpeaking(true);
-        setSpeechPulse((p) => p + Math.max(1, Math.round(normalizedText.length / 6)));
-
-        ttsPacerRef.current = setInterval(() => {
-          setSpeechPulse((p) => p + 1);
-        }, longForm ? 190 : 160);
-      };
-      utterance.onboundary = () => {
+      // Lip-sync pacing (drives the avatar pulse) — independent of provider.
+      setSpeaking(true);
+      setSpeechPulse((p) => p + Math.max(1, Math.round(normalizedText.length / 6)));
+      ttsPacerRef.current = setInterval(() => {
         setSpeechPulse((p) => p + 1);
-      };
-      utterance.onend = () => {
+      }, longForm ? 190 : 160);
+
+      const finish = () => {
         setSpeaking(false);
         if (ttsPacerRef.current) {
           clearInterval(ttsPacerRef.current);
@@ -315,16 +347,46 @@ export default function AIConciergeBubble() {
           handsFreeRestartRef.current = setTimeout(() => startListening(), 350);
         }
       };
-      utterance.onerror = () => {
-        setSpeaking(false);
-        if (ttsPacerRef.current) {
-          clearInterval(ttsPacerRef.current);
-          ttsPacerRef.current = null;
-        }
-      };
-      window.speechSynthesis.speak(utterance);
+
+      // ── Primary: neural TTS via backend (OpenAI onyx / ElevenLabs) ──────────
+      try {
+        const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+        const resp = await fetch(`${apiBase}/api/v1/tts/speak`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: normalizedText }),
+        });
+        if (!resp.ok) throw new Error(`tts ${resp.status}`);
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        neuralAudioRef.current = audio;
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          if (neuralAudioRef.current === audio) neuralAudioRef.current = null;
+          finish();
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(url);
+          if (neuralAudioRef.current === audio) neuralAudioRef.current = null;
+          finish();
+        };
+        await audio.play();
+        return;
+      } catch (err) {
+        // Backend unavailable → fall through to legacy browser TTS
+        console.warn('[Jarvis TTS] neural unavailable, using browser fallback:', err);
+      }
+
+      // ── Fallback: 1990s browser voice (better than nothing) ─────────────────
+      if (supportsSpeechOut) {
+        speakLegacyFallback(normalizedText, longForm);
+        // legacy onend handler will call finish() via setSpeaking
+      } else {
+        finish();
+      }
     },
-    [voiceOutputEnabled, voiceMode, open, startListening, supportsSpeechOut]
+    [voiceOutputEnabled, voiceMode, open, startListening, supportsSpeechOut, stopAllSpeech, speakLegacyFallback]
   );
 
   const initConversation = async () => {
@@ -433,11 +495,7 @@ export default function AIConciergeBubble() {
   useEffect(() => {
     if (!open) {
       stopListening();
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      if (ttsPacerRef.current) {
-        clearInterval(ttsPacerRef.current);
-        ttsPacerRef.current = null;
-      }
+      stopAllSpeech();
       setSpeaking(false);
       return;
     }

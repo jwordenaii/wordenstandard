@@ -247,30 +247,55 @@ def _estimate_confidence(
 
 
 # ── AI caller ─────────────────────────────────────────────────────────────────
+# All model calls go through the unified llm_client shim, which routes to the
+# best provider per task (Claude Sonnet 4.6 for persona, Opus 4.6 for legal,
+# GPT-4o for vision, etc.) with silent fallback to OpenAI.
 
 def _call_openai(
     messages: list[dict],
     model: str = "gpt-4o",
     max_tokens: int = 400,
     temperature: float = 0.5,
+    task: str = "persona",
 ) -> tuple[str, bool]:
     """
-    Call OpenAI and return (text, error_occurred).
+    Call the multi-provider LLM router and return (text, error_occurred).
+    Name kept for backwards compatibility — actually routes through Claude
+    (or whatever provider the routing table picks for `task`).
     Falls back gracefully — never raises.
     """
     try:
-        client = _get_openai_client()
-        if client is None:
-            return "", True
-        resp = client.chat.completions.create(
-            model=model,
-            messages=messages,
+        from .llm_client import chat  # noqa: PLC0415
+
+        # Convert OpenAI-style messages → (system, history, user)
+        system_parts: list[str] = []
+        history: list[dict] = []
+        user_msg = ""
+        for m in messages:
+            role = m.get("role")
+            content = m.get("content", "")
+            if role == "system":
+                system_parts.append(content)
+            elif role == "user":
+                if user_msg:
+                    history.append({"role": "user", "content": user_msg})
+                user_msg = content
+            elif role == "assistant":
+                history.append({"role": "assistant", "content": content})
+
+        resp = chat(
+            task=task,
+            system="\n\n".join(p for p in system_parts if p),
+            user=user_msg,
+            history=history or None,
             max_tokens=max_tokens,
             temperature=temperature,
         )
-        return resp.choices[0].message.content or "", False
+        if resp.error or not resp.text:
+            return "", True
+        return resp.text, False
     except Exception as exc:  # noqa: BLE001
-        logger.error("OpenAI call failed (model=%s): %s", model, exc)
+        logger.error("LLM router call failed (task=%s): %s", task, exc)
         return "", True
 
 
@@ -360,7 +385,9 @@ def run_chat(
 
     messages.append({"role": "user", "content": user_msg})
 
-    answer, error = _call_openai(messages, model=model, max_tokens=350, temperature=0.6)
+    # Persona task → routes to Claude Sonnet 4.6 (legal sub-task escalates to Opus).
+    task = "legal" if is_legal else "persona"
+    answer, error = _call_openai(messages, model=model, max_tokens=350, temperature=0.6, task=task)
 
     if error or not answer:
         from ..routers.ai import _stub_chat  # type: ignore  # noqa: PLC0415
@@ -423,7 +450,8 @@ def run_compliance_check(state: str, scope: str) -> AIDecision:
         {"role": "system", "content": JWORDEN_SYSTEM_PROMPT},
         {"role": "user",   "content": prompt},
     ]
-    answer, error = _call_openai(messages, model="gpt-4o", max_tokens=300, temperature=0.3)
+    # Compliance briefing → Claude Opus 4.6 (highest reasoning).
+    answer, error = _call_openai(messages, model="gpt-4o", max_tokens=300, temperature=0.3, task="legal")
 
     if error or not answer:
         answer = rule_result["legal_notes"]
@@ -469,7 +497,8 @@ def score_lead_with_ai(lead_data: dict) -> dict:
     )
 
     messages = [{"role": "user", "content": prompt}]
-    raw, error = _call_openai(messages, model="gpt-4o-mini", max_tokens=100, temperature=0.1)
+    # Cheap classification → GPT-4o-mini (Haiku 4.5 fallback).
+    raw, error = _call_openai(messages, model="gpt-4o-mini", max_tokens=100, temperature=0.1, task="classification")
 
     if error or not raw:
         return {**base_score, "ai_enhanced": False}

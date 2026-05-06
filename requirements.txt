@@ -6,6 +6,8 @@ python-engineio==4.9.0
 uvicorn[standard]==0.34.3
 pydantic[email]==2.11.4
 openai==1.78.1
+anthropic==0.39.0
+google-genai==0.3.0
 sentry-sdk[fastapi]==2.22.0
 python-jose[cryptography]==3.3.0
 psycopg2-binary==2.9.9

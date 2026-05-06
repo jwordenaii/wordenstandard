@@ -476,16 +476,17 @@ export default function ChatWidget() {
     return () => { cancelled = true }
   }, [])
 
-  // Premium voice
+  // Premium voice — uses voiceService (ElevenLabs + browser fallback in service).
   const [voiceOn, setVoiceOn] = useState(() => ssGet('mrw_voice_on', false))
+  const stopVoice = useCallback(() => {
+    voiceService.stop()
+  }, [])
   useEffect(() => {
     ssSet('mrw_voice_on', voiceOn)
-    if (!voiceOn) {
-      voiceService.stop()
-    }
-  }, [voiceOn])
+    if (!voiceOn) stopVoice()
+  }, [voiceOn, stopVoice])
   const speak = useCallback(
-    (text) => {
+    async (text) => {
       if (!voiceOn || !text) return
       try {
         voiceService.play(text)
@@ -496,15 +497,11 @@ export default function ChatWidget() {
     [voiceOn]
   )
   useEffect(() => {
-    if (!open) {
-      voiceService.stop()
-    }
-  }, [open])
+    if (!open) stopVoice()
+  }, [open, stopVoice])
   useEffect(() => {
-    return () => {
-      voiceService.stop()
-    }
-  }, [])
+    return () => stopVoice()
+  }, [stopVoice])
 
   const avatarState = loading
     ? 'talking'

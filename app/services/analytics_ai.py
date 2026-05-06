@@ -41,27 +41,23 @@ End with one clear, prioritized action item.
 # ── OpenAI helper ─────────────────────────────────────────────────────────────
 
 def _call_openai(system: str, user: str, max_tokens: int = 600) -> str:
-    """Call GPT-4o and return the text response, or a fallback string on error."""
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    if not api_key:
-        return (
-            "OpenAI API key not configured. Set OPENAI_API_KEY to enable AI analysis. "
-            "The raw data above is still available for manual review."
-        )
+    """Call the LLM router (Claude Sonnet 4.6 → GPT-4o fallback) and return text."""
     try:
-        from openai import OpenAI  # type: ignore
-
-        client = OpenAI(api_key=api_key)
-        resp = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
+        from .llm_client import chat  # noqa: PLC0415
+        resp = chat(
+            task="analytics",
+            system=system,
+            user=user,
             max_tokens=max_tokens,
             temperature=0.4,
         )
-        return resp.choices[0].message.content or ""
+        if resp.error or not resp.text:
+            return (
+                "AI analytics provider unavailable. "
+                "Set ANTHROPIC_API_KEY or OPENAI_API_KEY in Railway. "
+                "The raw data above is still available for manual review."
+            )
+        return resp.text
     except Exception as exc:  # noqa: BLE001
         logger.error("Analytics AI call failed: %s", exc)
         return f"AI analysis temporarily unavailable: {exc}"
