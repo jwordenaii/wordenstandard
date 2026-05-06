@@ -147,3 +147,28 @@ async def gemini_ping() -> dict:
         return {"ok": r.status_code == 200, "model_tried": model, "status": r.status_code, "body": r.text[:500]}
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+
+@router.get("/elevenlabs-ping")
+async def elevenlabs_ping() -> dict:
+    """Surface the exact ElevenLabs API error (auth, voice, quota, etc.)."""
+    import os as _os
+    import httpx
+    key = _os.environ.get("ELEVENLABS_API_KEY", "").strip()
+    if not key:
+        return {"ok": False, "error": "ELEVENLABS_API_KEY not set"}
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            r = await client.get(
+                "https://api.elevenlabs.io/v1/user",
+                headers={"xi-api-key": key},
+            )
+        return {
+            "ok": r.status_code == 200,
+            "status": r.status_code,
+            "key_len": len(key),
+            "key_prefix": key[:6] + "..." if len(key) > 6 else key,
+            "body": r.text[:600],
+        }
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
