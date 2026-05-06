@@ -284,7 +284,7 @@ class JarvisAI:
                 "message":         claude["text"],
                 "action_required": False,
                 "engine":          "anthropic-claude",
-                "model":           _ANTHROPIC_MODEL,
+                "model":           _anthropic_model(),
                 "tool_calls":      claude["tool_calls"],
                 "autonomy":        {"master": state.get("master"), "frozen": False},
             }
@@ -371,7 +371,7 @@ class JarvisAI:
                 "message": claude_text,
                 "action_required": False,
                 "engine": "anthropic-claude",
-                "model": _ANTHROPIC_MODEL,
+                "model": _anthropic_model(),
                 "autonomy": {"master": state.get("master"), "frozen": False},
             }
 
