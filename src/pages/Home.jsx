@@ -226,14 +226,14 @@ export default function Home() {
             <div className="max-w-5xl">
               <div className="mb-7 inline-flex items-center gap-3 rounded-md border border-primary/25 bg-white/88 px-4 py-2 text-primary shadow-[0_14px_30px_-24px_rgba(15,48,68,0.45)]">
                 <Award className="h-4 w-4" />
-                <span className="font-display text-sm uppercase tracking-[0.24em]">Award-winning Virginia paving company</span>
+                <span className="font-display text-sm uppercase tracking-[0.24em]">Free quotes • Same-week response • Central Virginia since 2005</span>
               </div>
               <h1 className="font-display text-5xl font-black uppercase leading-[0.88] tracking-normal text-foreground sm:text-6xl md:text-8xl lg:text-9xl">
-                Educate First.<br />
-                <span className="text-primary">Pave Second.</span>
+                Driveways &amp; Lots,<br />
+                <span className="text-primary">Done Right.</span>
               </h1>
               <p className="mt-8 max-w-3xl text-lg leading-relaxed text-muted-foreground md:text-2xl">
-                The other paving quote may tell you what they want to sell. We show you what your asphalt actually needs, what can wait, and where bad scopes waste money.
+                Asphalt paving, sealcoating, and parking lot repair across Richmond, Chesterfield, Henrico, and Central VA. Free on-site quote — text us your number and we'll respond within an hour, 7 days a week.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <a
