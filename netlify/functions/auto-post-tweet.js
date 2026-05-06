@@ -9,6 +9,21 @@ export const handler = async (event, context) => {
     };
   }
 
+  // dryRun support — skip the actual tweet post and just return what *would* be posted.
+  // Use ?dryRun=1 in the URL or {"dryRun":true} in the JSON body to verify creds + Grok
+  // without spamming the X timeline.
+  const queryDryRun = event.queryStringParameters && event.queryStringParameters.dryRun;
+  let bodyDryRun = false;
+  try {
+    if (event.body) {
+      const parsed = JSON.parse(event.body);
+      bodyDryRun = parsed && parsed.dryRun === true;
+    }
+  } catch {
+    // body wasn't JSON — ignore
+  }
+  const dryRun = Boolean(queryDryRun) || bodyDryRun;
+
   // Check for required environment variables
   const xaiApiKey = process.env.XAI_API_KEY;
   const twitterApiKey = process.env.TWITTER_API_KEY;
@@ -16,10 +31,26 @@ export const handler = async (event, context) => {
   const twitterAccessToken = process.env.TWITTER_ACCESS_TOKEN;
   const twitterAccessTokenSecret = process.env.TWITTER_ACCESS_TOKEN_SECRET;
 
-  if (!xaiApiKey || !twitterApiKey || !twitterApiSecret || !twitterAccessToken || !twitterAccessTokenSecret) {
+  // In dryRun, only require XAI key; report Twitter creds presence in response.
+  const credsPresent = {
+    XAI_API_KEY: Boolean(xaiApiKey),
+    TWITTER_API_KEY: Boolean(twitterApiKey),
+    TWITTER_API_SECRET: Boolean(twitterApiSecret),
+    TWITTER_ACCESS_TOKEN: Boolean(twitterAccessToken),
+    TWITTER_ACCESS_TOKEN_SECRET: Boolean(twitterAccessTokenSecret),
+  };
+
+  if (dryRun) {
+    if (!xaiApiKey) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'XAI_API_KEY not configured', dryRun: true, credsPresent }),
+      };
+    }
+  } else if (!xaiApiKey || !twitterApiKey || !twitterApiSecret || !twitterAccessToken || !twitterAccessTokenSecret) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'API credentials not configured' }),
+      body: JSON.stringify({ error: 'API credentials not configured', credsPresent }),
     };
   }
 
@@ -52,6 +83,20 @@ export const handler = async (event, context) => {
       return {
         statusCode: 500,
         body: JSON.stringify({ error: 'Generated tweet is invalid or too long' }),
+      };
+    }
+
+    // dryRun: stop here — verified Grok works without posting to X.
+    if (dryRun) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          success: true,
+          dryRun: true,
+          generated: tweetText,
+          credsPresent,
+          note: 'Grok generated tweet successfully. Tweet was NOT posted to X. Remove dryRun to post live.',
+        }),
       };
     }
 
