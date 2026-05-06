@@ -124,11 +124,21 @@ export default function Quote() {
 
   const handleSubmit = async () => {
     setStatus('submitting')
+    const payload = {
+      ...form,
+      project_size_sqft: form.project_size_sqft ? parseFloat(form.project_size_sqft) : null,
+    }
+
+    // Fire the always-on Netlify fallback in parallel with the primary
+    // backend POST. Even if the backend or SendGrid is broken, this
+    // guarantees Gene gets an email about every lead.
+    fetch('/.netlify/functions/lead-fallback-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, source: 'quote_page' }),
+    }).catch((err) => console.warn('[lead-fallback] non-blocking error', err))
+
     try {
-      const payload = {
-        ...form,
-        project_size_sqft: form.project_size_sqft ? parseFloat(form.project_size_sqft) : null,
-      }
       const data = await api.submitQuote(payload)
       setResult(data)
       setStatus('success')

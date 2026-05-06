@@ -104,6 +104,21 @@ export default function Contact() {
     }
     setStatus('submitting')
     setErrorMsg('')
+
+    // Always-on Netlify fallback so Gene gets an email even if backend
+    // or SendGrid is misconfigured. Non-blocking.
+    fetch('/.netlify/functions/lead-fallback-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email || '',
+        phone: form.phone || '',
+        message: buildMessageBody(),
+        source: 'contact_page',
+      }),
+    }).catch((err) => console.warn('[lead-fallback] non-blocking error', err))
+
     try {
       await api.submitContact({
         name: form.name,

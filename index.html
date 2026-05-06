@@ -125,6 +125,26 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!--
+      Netlify Forms registration: hidden form so Netlify's build-time
+      crawler detects "lead-fallback" and routes any POST to that form
+      name into the dashboard + email notifications. NEVER displayed.
+      Used by netlify/functions/lead-fallback-notify.js as a guaranteed
+      delivery path even when SendGrid is misconfigured.
+    -->
+    <form name="lead-fallback" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <input type="text" name="address" />
+      <input type="text" name="service" />
+      <textarea name="message"></textarea>
+      <input type="text" name="source" />
+      <input type="text" name="timestamp" />
+    </form>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

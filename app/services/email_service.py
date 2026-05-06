@@ -53,15 +53,15 @@ def _get_sg_client():
     installed or the API key is missing.
     """
     if not _api_key():
-        logger.warning(
-            "SENDGRID_API_KEY not set \u2014 email sends will be skipped. "
-            "Set the key in Command Center → Integrations to enable transactional email."
+        logger.error(
+            "LEAD-NOTIFY-FAILED: SENDGRID_API_KEY not set \u2014 customer leads are landing in the database but NOBODY IS BEING EMAILED. "
+            "FIX: Railway dashboard \u2192 codexbuildfreeofbase44 service \u2192 Variables \u2192 add SENDGRID_API_KEY (get a free key at sendgrid.com/free)."
         )
         return None
     if not _from_email():
-        logger.warning(
-            "SENDGRID_FROM_EMAIL not set \u2014 email sends will be skipped. "
-            "Set the value in Command Center → Integrations to a verified SendGrid sender address."
+        logger.error(
+            "LEAD-NOTIFY-FAILED: SENDGRID_FROM_EMAIL not set \u2014 leads are landing in DB but no email is going out. "
+            "FIX: Railway \u2192 Variables \u2192 add SENDGRID_FROM_EMAIL=j.wordenandsonspaving@gmail.com (and verify that sender in SendGrid)."
         )
         return None
     try:
