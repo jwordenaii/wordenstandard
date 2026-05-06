@@ -125,8 +125,15 @@ logging.config.dictConfig(_LOGGING_CONFIG)
 # ── Sentry (Feature: observability) ──────────────────────────────────────────
 # Initialised BEFORE the FastAPI app is created so every integration hooks in
 # at import time and no early errors are missed.
-_SENTRY_DSN = os.getenv("SENTRY_DSN", "")
-if _SENTRY_DSN:
+# Reject placeholder DSNs (e.g. "your-dsn-here") so we don't spam logs with
+# "Sentry init failed" warnings on dev/staging environments.
+import re as _re_dsn  # noqa: PLC0415
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
+_SENTRY_DSN_VALID = bool(
+    _SENTRY_DSN
+    and _re_dsn.match(r"^https://[^@]+@[^/]+\.ingest\.[^/]+/\d+", _SENTRY_DSN)
+)
+if _SENTRY_DSN_VALID:
     try:
         import sentry_sdk  # noqa: PLC0415
         from sentry_sdk.integrations.fastapi import FastApiIntegration  # noqa: PLC0415

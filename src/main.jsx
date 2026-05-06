@@ -6,9 +6,15 @@ import App from '@/App.jsx'
 import '@/index.css'
 import { trackEvent } from '@/api/client'
 
-if (import.meta.env.VITE_SENTRY_DSN) {
+// Only initialize Sentry when a real DSN is configured.
+// Sentry DSNs always start with "https://" and contain "@" + ".ingest." to
+// identify the project ingest host. Placeholders (e.g. "your-dsn-here",
+// "REPLACE_ME") are rejected silently so we don't spam the console.
+const _sentryDsn = (import.meta.env.VITE_SENTRY_DSN || '').trim()
+const _isValidSentryDsn = /^https:\/\/[^@]+@[^/]+\.ingest\.[^/]+\/\d+/.test(_sentryDsn)
+if (_isValidSentryDsn) {
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
+    dsn: _sentryDsn,
     integrations: [
       Sentry.browserTracingIntegration(),
       Sentry.replayIntegration(),
