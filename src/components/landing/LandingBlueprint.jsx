@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SEO from '@/components/SEO'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import QuickQuoteBar from '@/components/QuickQuoteBar'
 import { buildLandingJsonLd } from '@/lib/landingPages'
 import {
   trackLandingPageView,
@@ -59,6 +60,11 @@ export default function LandingBlueprint({ page }) {
             >
               Call 804-446-1296
             </a>
+          </div>
+
+          {/* 1-tap lead capture: just the phone number, no long form. */}
+          <div className="mt-8 max-w-2xl">
+            <QuickQuoteBar source={`lp:${page.slug || page.canonicalPath || 'unknown'}`} servicePreset="paving" />
           </div>
         </div>
       </section>

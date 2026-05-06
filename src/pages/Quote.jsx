@@ -4,6 +4,7 @@ import { api, trackEvent } from '../api/client'
 import { estimatePrice } from '../lib/pricing'
 import { STATE_OPTIONS, getStateSummary } from '../lib/states50'
 import { downloadPdf } from '../lib/pdfUtils'
+import QuickQuoteBar from '../components/QuickQuoteBar'
 import { loadStripe } from '@stripe/stripe-js'
 // ── Step definitions ──────────────────────────────────────────────────────────
 
@@ -369,6 +370,18 @@ export default function Quote() {
 
       <section className="py-16 bg-gray-50 min-h-[60vh]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          {/* Friction-free path: just send a phone number, skip the wizard. */}
+          <div className="mb-8">
+            <QuickQuoteBar
+              source="quote_page_top"
+              servicePreset="paving"
+              headline="Don't want to fill out a form? Just text me."
+              subline="Drop your number — we reply by text within 1 hour, 7 days a week."
+            />
+            <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mt-4">
+              ── or use the full form below for a detailed estimate ──
+            </p>
+          </div>
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10">
             <StepIndicator current={step} />
 

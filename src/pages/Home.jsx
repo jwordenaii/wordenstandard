@@ -9,6 +9,7 @@ import { trackPhoneClick } from '@/lib/analytics';
 import LiveReviewBadges from '../components/LiveReviewBadges';
 import CommercialServicesHighlights from '../components/CommercialServicesHighlights';
 import CustomerProofGallery from '../components/CustomerProofGallery';
+import QuickQuoteBar from '../components/QuickQuoteBar';
 
 const HERO_IMAGE = '/work/portfolio/portfolio-010.jpg';
 const LOT_IMAGE = '/work/portfolio/portfolio-030.jpg';
@@ -250,6 +251,11 @@ export default function Home() {
                   Open JWordenAI Scan
                   <ArrowRight className="h-5 w-5" />
                 </a>
+              </div>
+
+              {/* 1-tap lead capture: phone number only. Beats the long /quote form. */}
+              <div className="mt-8 max-w-2xl">
+                <QuickQuoteBar source="home_hero" servicePreset="paving" />
               </div>
             </div>
 
