@@ -125,3 +125,25 @@ async def claude_ping() -> dict:
         return {"ok": r.status_code == 200, "model_tried": model, "status": r.status_code, "body": body}
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+
+@router.get("/gemini-ping")
+async def gemini_ping() -> dict:
+    """One-shot Gemini smoke test."""
+    import os as _os
+    import httpx
+    key = _os.environ.get("GOOGLE_API_KEY", "").strip()
+    if not key:
+        return {"ok": False, "error": "GOOGLE_API_KEY not set on container"}
+    model = _os.environ.get("GOOGLE_MODEL") or "gemini-2.5-flash"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.post(
+                url,
+                headers={"content-type": "application/json"},
+                json={"contents": [{"parts": [{"text": "Say PONG and nothing else."}]}]},
+            )
+        return {"ok": r.status_code == 200, "model_tried": model, "status": r.status_code, "body": r.text[:500]}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
