@@ -31,7 +31,6 @@ class SpeakRequest(BaseModel):
 
 
 @router.post("/speak")
-@limiter.limit("30/minute")
 async def speak(request: Request, payload: SpeakRequest = Body(...)) -> Response:
     """
     Convert text to speech and stream MP3 back.
@@ -55,8 +54,8 @@ async def speak(request: Request, payload: SpeakRequest = Body(...)) -> Response
         # No provider configured — frontend should fall back to browser TTS.
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
-        logger.error("TTS synthesis failed: %s", exc)
-        raise HTTPException(status_code=502, detail="TTS provider error") from exc
+        logger.exception("TTS synthesis failed")
+        raise HTTPException(status_code=502, detail=f"TTS provider error: {type(exc).__name__}: {exc}") from exc
 
     # Light caching: identical short utterances (greetings, confirmations) re-use
     # browser cache rather than re-billing the TTS API.

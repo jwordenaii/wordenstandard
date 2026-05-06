@@ -29,10 +29,7 @@ class ElevenLabsService {
   }
 
   async play(text, voiceId = VOICE_ID) {
-    if (!text || !ELEVENLABS_API_KEY) {
-      console.warn('ElevenLabs API Key or text missing. Falling back to silent mode.')
-      return
-    }
+    if (!text) return
 
     try {
       this.stop()
@@ -43,36 +40,54 @@ class ElevenLabsService {
         return
       }
 
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'xi-api-key': ELEVENLABS_API_KEY,
-          },
-          body: JSON.stringify({
-            text: text,
-            model_id: 'eleven_flash_v2_5', // Ultra low latency high quality model
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.05,
-              use_speaker_boost: true,
-            },
-          }),
-        }
-      )
+      let blob = null
 
-      if (!response.ok) {
-        throw new Error(`ElevenLabs API error: ${response.statusText}`)
+      // ── Path A: Direct ElevenLabs (only if key is exposed to browser) ────
+      if (ELEVENLABS_API_KEY) {
+        try {
+          const response = await fetch(
+            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'xi-api-key': ELEVENLABS_API_KEY,
+              },
+              body: JSON.stringify({
+                text: text,
+                model_id: 'eleven_flash_v2_5',
+                voice_settings: {
+                  stability: 0.5,
+                  similarity_boost: 0.75,
+                  style: 0.05,
+                  use_speaker_boost: true,
+                },
+              }),
+            }
+          )
+          if (!response.ok) throw new Error(`ElevenLabs API error: ${response.statusText}`)
+          blob = await response.blob()
+        } catch (err) {
+          console.warn('[voiceService] ElevenLabs direct failed, falling back to backend:', err)
+        }
       }
 
-      const blob = await response.blob()
+      // ── Path B: Backend neural TTS (OpenAI onyx / ElevenLabs server-side) ─
+      if (!blob) {
+        const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+        const resp = await fetch(`${apiBase}/api/v1/tts/speak`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        })
+        if (!resp.ok) throw new Error(`backend TTS ${resp.status}`)
+        blob = await resp.blob()
+      }
+
       this.cache.set(text, blob)
       this._playBlob(blob)
     } catch (error) {
-      console.error('Failed to play ElevenLabs voice:', error)
+      console.error('Failed to play voice:', error)
     }
   }
 

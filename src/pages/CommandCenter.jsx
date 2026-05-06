@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, Power, Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { api, trackEvent } from '@/api/client'
+import { voiceService } from '../lib/ElevenLabsService'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
 import constructionLicensing from '../data/legal/constructionLicensing'
@@ -3382,24 +3383,15 @@ function JarvisChat({ compact = false }) {
   }, [listening])
 
   const speak = useCallback((text) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis || !text) return
-    try {
-      window.speechSynthesis.cancel()
-      const utter = new window.SpeechSynthesisUtterance(text.slice(0, 600))
-      utter.rate = 1.05
-      utter.pitch = 1
-      utter.volume = 1
-      window.speechSynthesis.speak(utter)
-    } catch { /* noop */ }
+    if (!text) return
+    try { voiceService.play(text.slice(0, 600)) } catch { /* fallback in service */ }
   }, [])
 
   const toggleSpeakReplies = useCallback(() => {
     setSpeakReplies((v) => {
       const next = !v
       try { window.localStorage?.setItem('cc:jarvis:speak', next ? '1' : '0') } catch { /* noop */ }
-      if (!next && typeof window !== 'undefined' && window.speechSynthesis) {
-        try { window.speechSynthesis.cancel() } catch { /* noop */ }
-      }
+      if (!next) { try { voiceService.stop() } catch { /* noop */ } }
       return next
     })
   }, [])
@@ -3694,12 +3686,8 @@ function SLABreachAlarmPanel() {
   const [lastCheck, setLastCheck] = useState(null)
 
   const speakAlarm = useCallback((text) => {
-    if (!armed || typeof window === 'undefined' || !window.speechSynthesis) return
-    try {
-      const u = new window.SpeechSynthesisUtterance(text)
-      u.rate = 1.05; u.pitch = 1.05; u.volume = 1
-      window.speechSynthesis.speak(u)
-    } catch { /* noop */ }
+    if (!armed || !text) return
+    try { voiceService.play(text) } catch { /* fallback in service */ }
   }, [armed])
 
   const readAlarmed = () => {
@@ -3856,13 +3844,8 @@ function HeyJarvisWakeWord() {
           window.dispatchEvent(new CustomEvent('cc:jarvis-prefill', { detail: { prompt } }))
           window.dispatchEvent(new CustomEvent('cc:open-jarvis-drawer'))
         } catch { /* noop */ }
-        // Brief audio confirmation
-        try {
-          if (window.speechSynthesis) {
-            const u = new window.SpeechSynthesisUtterance('Yes, sir.')
-            u.rate = 1.1; window.speechSynthesis.speak(u)
-          }
-        } catch { /* noop */ }
+        // Brief audio confirmation (neural)
+        try { voiceService.play('Yes, sir.') } catch { /* noop */ }
       }
     }
     rec.onend = () => {
