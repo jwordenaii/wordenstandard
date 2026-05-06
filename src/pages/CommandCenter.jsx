@@ -4042,12 +4042,17 @@ function JarvisAutonomy() {
 
 function JarvisPanel() {
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
-      <div className="xl:col-span-2 space-y-4 md:space-y-5">
+    <div className="grid grid-cols-1 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-5">
+      {/* Chat — biggest panel, takes 2 cols on xl, 2 cols on 2xl */}
+      <div className="xl:col-span-2 2xl:col-span-2 space-y-4 md:space-y-5">
         <JarvisChat />
+      </div>
+      {/* Voice ops column */}
+      <div className="space-y-4 md:space-y-5">
         <HeyJarvisWakeWord />
         <SLABreachAlarmPanel />
       </div>
+      {/* Autonomy + Activity column (collapses under chat at xl) */}
       <div className="space-y-4 md:space-y-5">
         <JarvisAutonomy />
         <JarvisActivityFeed />
@@ -5192,7 +5197,7 @@ function PulseBar({ onTabChange, onOpenJarvis }) {
   }, [])
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 pb-3 pt-2 flex items-center gap-2 overflow-x-auto">
+    <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 pb-3 pt-2 flex items-center gap-2 overflow-x-auto">
       <PulseTile {...pulse.jarvis} icon={Bot}        onClick={onOpenJarvis} />
       <PulseTile {...pulse.leads}  icon={UserRound}  onClick={() => onTabChange('crm')} />
       <PulseTile {...pulse.jobs}   icon={HardHat}    onClick={() => onTabChange('ops')} />
@@ -5223,7 +5228,7 @@ function JarvisDrawer({ open, onClose }) {
       />
       <aside
         className={[
-          'fixed top-0 right-0 h-full w-full sm:w-[440px] bg-brand-navy border-l border-white/10 z-50 transition-transform shadow-2xl',
+          'fixed top-0 right-0 h-full w-full sm:w-[440px] xl:w-[560px] bg-brand-navy border-l border-white/10 z-50 transition-transform shadow-2xl',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
         aria-hidden={!open}
@@ -5432,7 +5437,7 @@ export default function CommandCenter() {
       <FrozenBanner />
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="border-b border-white/10 bg-brand-navy/95 sticky top-0 z-30">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display font-black text-xl sm:text-2xl text-white leading-tight">
               Tony Stark's Dashboard
@@ -5454,7 +5459,7 @@ export default function CommandCenter() {
         <PulseBar onTabChange={setActiveTab} onOpenJarvis={() => setDrawerOpen(true)} />
 
         {/* ── Tab bar ──────────────────────────────────────────────────────── */}
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 flex gap-1 pb-0 overflow-x-auto">
+        <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 flex gap-1 pb-0 overflow-x-auto">
           {TABS.map((tab, i) => (
             <button
               key={tab.id}
@@ -5475,7 +5480,7 @@ export default function CommandCenter() {
       </div>
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 py-6">
         <>
           {!strategyVisible ? <InternalStrategyNotice /> : null}
           <TabDeepLinkBar activeTab={activeTab} />
