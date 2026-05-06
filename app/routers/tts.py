@@ -11,7 +11,7 @@ import hashlib
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Body, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from ..core.limiter import limiter
@@ -32,7 +32,7 @@ class SpeakRequest(BaseModel):
 
 @router.post("/speak")
 @limiter.limit("30/minute")
-async def speak(request: Request, payload: SpeakRequest) -> Response:
+async def speak(request: Request, payload: SpeakRequest = Body(...)) -> Response:
     """
     Convert text to speech and stream MP3 back.
 
