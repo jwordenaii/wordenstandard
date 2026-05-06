@@ -157,18 +157,21 @@ async def elevenlabs_ping() -> dict:
     key = _os.environ.get("ELEVENLABS_API_KEY", "").strip()
     if not key:
         return {"ok": False, "error": "ELEVENLABS_API_KEY not set"}
+    voice = _os.environ.get("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
+    model = _os.environ.get("ELEVENLABS_MODEL", "eleven_turbo_v2_5")
+    out: dict = {"key_len": len(key), "voice": voice, "model": model}
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            r = await client.get(
-                "https://api.elevenlabs.io/v1/user",
-                headers={"xi-api-key": key},
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            u = await client.get("https://api.elevenlabs.io/v1/user", headers={"xi-api-key": key})
+            out["user_status"] = u.status_code
+            t = await client.post(
+                f"https://api.elevenlabs.io/v1/text-to-speech/{voice}",
+                headers={"xi-api-key": key, "accept": "audio/mpeg", "content-type": "application/json"},
+                json={"text": "Test.", "model_id": model},
             )
-        return {
-            "ok": r.status_code == 200,
-            "status": r.status_code,
-            "key_len": len(key),
-            "key_prefix": key[:6] + "..." if len(key) > 6 else key,
-            "body": r.text[:600],
-        }
+            out["tts_status"] = t.status_code
+            out["tts_body"] = t.text[:400] if t.status_code != 200 else f"OK {len(t.content)} bytes"
+        return out
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+        out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
