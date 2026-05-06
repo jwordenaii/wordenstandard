@@ -5168,7 +5168,7 @@ function PulseBar({ onTabChange, onOpenJarvis }) {
     if (typeof window !== 'undefined') window.addEventListener('cc:autonomy-changed', onAuto)
 
     Promise.allSettled([
-      api.request('GET', '/api/v1/jarvis/status'),
+      api.jarvisStatus().catch(() => null),
       api.listRecentOperationalLeads(50).catch(() => null),
       api.listJobs().catch(() => null),
       api.listEstimates().catch(() => null),
