@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { PHONE_E164, PHONE_DISPLAY } from '../lib/businessInfo'
+import { PHONE_E164, PHONE_DISPLAY, SMS_E164, SMS_PREFILL } from '../lib/businessInfo'
 import { trackEvent } from '../api/client'
 
 /**
@@ -74,11 +74,22 @@ export default function MobileCallBar() {
           <span>Call {PHONE_DISPLAY}</span>
         </a>
         <a
+          href={`sms:${SMS_E164}?&body=${encodeURIComponent(SMS_PREFILL)}`}
+          className="flex items-center justify-center gap-2 min-h-[56px] px-4 bg-emerald-600 text-white font-extrabold text-base hover:bg-emerald-700 active:brightness-95 transition-colors"
+          onClick={() => trackEvent('sms_click', { location: 'mobile_call_bar' })}
+          aria-label="Text us for a free quote"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z" />
+          </svg>
+          Text
+        </a>
+        <a
           href="/quote"
-          className="flex items-center justify-center gap-2 min-h-[56px] px-5 bg-brand-amber text-brand-navy font-extrabold text-base hover:bg-brand-amber-dark active:brightness-95 transition-colors"
+          className="flex items-center justify-center gap-2 min-h-[56px] px-4 bg-brand-amber text-brand-navy font-extrabold text-base hover:bg-brand-amber-dark active:brightness-95 transition-colors"
           onClick={() => trackEvent('cta_click', { location: 'mobile_call_bar' })}
         >
-          Free Quote
+          Quote
         </a>
       </div>
     </div>

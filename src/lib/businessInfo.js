@@ -44,6 +44,11 @@ export const PHONE_E164 = '+18044461296' // for tel: links and schema
 export const PHONE_DISPLAY = '(804) 446-1296' // human-readable
 export const PHONE_SCHEMA = '+1-804-446-1296' // schema.org-friendly format
 
+// SMS-specific number for "Text Us" CTAs. Defaults to the main business
+// line; override here if Gene wants texts to land on a different cell.
+export const SMS_E164 = '+18044461296'
+export const SMS_PREFILL = 'Hi, I saw your website and want a free quote.'
+
 export const EMAIL = 'j.wordenandsonspaving@gmail.com'
 
 export const SOCIAL_PROFILES = {

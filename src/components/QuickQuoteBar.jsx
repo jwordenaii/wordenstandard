@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Phone, MessageSquare, CheckCircle2 } from 'lucide-react'
 import { api, trackEvent } from '../api/client'
-import { PHONE_E164, PHONE_DISPLAY } from '../lib/businessInfo'
+import { PHONE_E164, PHONE_DISPLAY, SMS_E164, SMS_PREFILL } from '../lib/businessInfo'
 
 /**
  * QuickQuoteBar — friction-free, single-input lead capture.
@@ -163,6 +163,14 @@ export default function QuickQuoteBar({
         >
           <Phone className="h-5 w-5" />
           Call Now
+        </a>
+        <a
+          href={`sms:${SMS_E164}?&body=${encodeURIComponent(SMS_PREFILL)}`}
+          onClick={() => trackEvent('sms_click', { location: `quick_quote:${source}` })}
+          className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-md border-2 border-emerald-600 px-5 font-display text-base font-extrabold uppercase tracking-wide text-emerald-700 transition-colors hover:bg-emerald-600 hover:text-white"
+        >
+          <MessageSquare className="h-5 w-5" />
+          Text Us
         </a>
       </div>
 
