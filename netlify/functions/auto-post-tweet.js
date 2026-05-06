@@ -80,6 +80,21 @@ export const handler = async (event, context) => {
     const tweetText = (grokData.output?.[0]?.content?.[0]?.text || grokData.response || '').trim();
 
     if (!tweetText || tweetText.length > 280) {
+      // In dryRun, return the raw Grok payload so we can see what shape it actually returned.
+      if (dryRun) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            success: false,
+            dryRun: true,
+            reason: !tweetText ? 'empty_text' : 'too_long',
+            extractedText: tweetText,
+            extractedLength: tweetText.length,
+            credsPresent,
+            rawGrokResponse: grokData,
+          }),
+        };
+      }
       return {
         statusCode: 500,
         body: JSON.stringify({ error: 'Generated tweet is invalid or too long' }),
