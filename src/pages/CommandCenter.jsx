@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, Power, Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
-import { api } from '@/api/client'
+import { api, trackEvent } from '@/api/client'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
 import constructionLicensing from '../data/legal/constructionLicensing'
@@ -113,6 +113,8 @@ const AUTOMATION_LOG_KEY = 'cc_automation_run_log_v1'
 const WEEKEND_SPRINT_STATE_KEY = 'cc_weekend_sprint_state_v1'
 const HUMAN_CHECKS_STATE_KEY = 'cc_human_checks_state_v1'
 const GOOGLE_ADS_BUDGET_STATE_KEY = 'cc_google_ads_budget_state_v1'
+const JARVIS_ACTIVITY_KEY = 'cc_jarvis_activity_v1'
+const SLA_ALARMED_KEY = 'cc_sla_alarmed_v1'
 
 function readAutomationRuns() {
   try {
@@ -133,6 +135,34 @@ function appendAutomationRun(run) {
     window.dispatchEvent(new CustomEvent('cc:automation-run-updated'))
   } catch {
     // Keep UI resilient even if storage fails.
+  }
+}
+
+// ── Jarvis live-activity feed (shared across CRM + dashboard panels) ───────
+function readJarvisActivity() {
+  try {
+    if (typeof window === 'undefined') return []
+    const raw = localStorage.getItem(JARVIS_ACTIVITY_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function appendJarvisActivity(entry) {
+  try {
+    if (typeof window === 'undefined') return
+    const stamped = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      ts: new Date().toISOString(),
+      ...entry,
+    }
+    const next = [stamped, ...readJarvisActivity()].slice(0, 60)
+    localStorage.setItem(JARVIS_ACTIVITY_KEY, JSON.stringify(next))
+    window.dispatchEvent(new CustomEvent('cc:jarvis-activity', { detail: stamped }))
+  } catch {
+    // best-effort logger
   }
 }
 
@@ -575,40 +605,179 @@ function ActivityFeed() {
 }
 
 function CrmTable() {
+  const [leads, setLeads] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [actingId, setActingId] = useState(null)
+  const [actionKind, setActionKind] = useState(null) // 'call' | 'email'
+  const [note, setNote] = useState('')
+  const [errorNote, setErrorNote] = useState('')
+
+  const reload = useCallback(async () => {
+    setLoading(true)
+    try {
+      const rows = await api.entities.Lead.list('-created_date', 25)
+      setLeads(Array.isArray(rows) ? rows : [])
+    } catch {
+      setLeads([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    reload()
+    const off = api.entities.Lead.subscribe?.(() => reload())
+    return () => { try { off?.() } catch { /* noop */ } }
+  }, [reload])
+
+  const callLead = useCallback(async (lead) => {
+    if (!lead?.phone) { setErrorNote(`No phone on file for ${lead.name || 'lead'}`); return }
+    setActingId(lead.id); setActionKind('call'); setNote(''); setErrorNote('')
+    try {
+      const res = await api.jarvisCall(
+        lead.phone,
+        `Reach ${lead.name || 'lead'} about ${lead.service_type || lead.surface_type || 'their estimate'}`,
+        `Hi this is Jarvis calling on behalf of J. Worden & Sons about your ${lead.service_type || 'paving'} request. Is now a good time?`
+      )
+      const ok = res?.status === 'queued' || res?.status === 'success' || res?.call_id
+      setNote(ok ? `☎️ Jarvis is calling ${lead.name || lead.phone}…` : (res?.message || 'Call request sent.'))
+      appendJarvisActivity({ kind: 'call', leadId: lead.id, leadName: lead.name, phone: lead.phone, status: ok ? 'queued' : 'unknown', detail: res?.message || '' })
+      try { trackEvent('jarvis_call_lead', { lead_id: lead.id, source: 'crm_table' }) } catch { /* noop */ }
+    } catch (err) {
+      setErrorNote(err?.message || 'Could not start the call.')
+      appendJarvisActivity({ kind: 'call', leadId: lead.id, leadName: lead.name, phone: lead.phone, status: 'failed', detail: err?.message || '' })
+    } finally {
+      setActingId(null); setActionKind(null)
+    }
+  }, [])
+
+  const emailLead = useCallback(async (lead) => {
+    if (!lead?.email) { setErrorNote(`No email on file for ${lead.name || 'lead'}`); return }
+    setActingId(lead.id); setActionKind('email'); setNote(''); setErrorNote('')
+    try {
+      const subject = `Following up on your ${lead.service_type || 'paving'} request — J. Worden & Sons`
+      const body = `Hi ${lead.name || 'there'},\n\nThanks for reaching out to J. Worden & Sons about your ${lead.service_type || 'project'}${lead.address ? ` at ${lead.address}` : ''}. We'd love to put together a free estimate. What's the best time for a quick call this week?\n\nWe're a 3rd-generation family business and every estimate is reviewed by Jeremy personally.\n\nReply to this email or text us at 804-446-1296.\n\n— J. Worden & Sons`
+      const res = await api.jarvisEmail(subject, body, lead.email)
+      const ok = res?.status === 'sent' || res?.status === 'queued' || res?.message_id
+      setNote(ok ? `✉️ Email sent to ${lead.email}` : (res?.message || 'Email request sent.'))
+      appendJarvisActivity({ kind: 'email', leadId: lead.id, leadName: lead.name, email: lead.email, status: ok ? 'sent' : 'unknown', detail: res?.message || '' })
+      try { trackEvent('jarvis_email_lead', { lead_id: lead.id, source: 'crm_table' }) } catch { /* noop */ }
+    } catch (err) {
+      setErrorNote(err?.message || 'Could not send email.')
+      appendJarvisActivity({ kind: 'email', leadId: lead.id, leadName: lead.name, email: lead.email, status: 'failed', detail: err?.message || '' })
+    } finally {
+      setActingId(null); setActionKind(null)
+    }
+  }, [])
+
+  const askJarvisDraft = useCallback((lead) => {
+    if (typeof window === 'undefined') return
+    const prompt = `Draft a reply for lead #${lead.id} — ${lead.name || 'unknown'} — about ${lead.service_type || 'their request'}. Then summarize next 3 steps to close them.`
+    window.dispatchEvent(new CustomEvent('cc:jarvis-prefill', { detail: { prompt } }))
+  }, [])
+
+  const rows = leads.length > 0 ? leads : null
+
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
       <div className="px-4 md:px-5 py-4 border-b border-white/10 flex items-center justify-between gap-3">
-        <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Active Leads Queue</h3>
-        <span className="text-xs text-white/55">Sorted by lead score</span>
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Active Leads Queue</h3>
+          <p className="text-white/45 text-xs mt-0.5">Tap Call or Email and Jarvis takes the action immediately.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={reload} className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-2.5 py-1.5 text-[11px] font-semibold text-white/70 hover:text-white hover:border-white/30">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </button>
+          <Link to="/leads" className="inline-flex items-center gap-1 rounded-lg border border-brand-amber/40 px-2.5 py-1.5 text-[11px] font-semibold text-brand-amber hover:bg-brand-amber/10">
+            Open Lead Inbox <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
       </div>
+
+      {note ? <div className="mx-4 md:mx-5 mt-3 rounded-lg border border-emerald-300/30 bg-emerald-300/10 px-3 py-2 text-xs text-emerald-200">{note}</div> : null}
+      {errorNote ? <div className="mx-4 md:mx-5 mt-3 rounded-lg border border-red-300/30 bg-red-300/10 px-3 py-2 text-xs text-red-200">{errorNote}</div> : null}
+
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px]">
+        <table className="w-full min-w-[860px]">
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-[0.14em] text-white/45 border-b border-white/10">
               <th className="px-4 md:px-5 py-3">Lead</th>
               <th className="px-4 py-3">Service</th>
               <th className="px-4 py-3">Score</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 md:px-5 py-3">Next Action</th>
+              <th className="px-4 md:px-5 py-3">Jarvis Actions</th>
             </tr>
           </thead>
           <tbody>
-            {CRM_LEADS.map((lead) => (
-              <tr key={lead.name} className="border-b border-white/10 last:border-b-0">
-                <td className="px-4 md:px-5 py-3.5">
-                  <p className="text-white text-sm font-semibold">{lead.name}</p>
-                  <p className="text-white/50 text-xs mt-0.5">{lead.city}</p>
-                </td>
-                <td className="px-4 py-3.5 text-white/75 text-sm">{lead.service}</td>
-                <td className="px-4 py-3.5">
-                  <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusTone(lead.score)}`}>
-                    {lead.score}
-                  </span>
-                </td>
-                <td className="px-4 py-3.5 text-white/75 text-sm">{lead.status}</td>
-                <td className="px-4 md:px-5 py-3.5 text-brand-amber text-sm font-semibold">{lead.next}</td>
-              </tr>
-            ))}
+            {loading && !rows ? (
+              <tr><td colSpan={5} className="px-4 py-6 text-center text-white/55 text-sm">Loading leads…</td></tr>
+            ) : rows ? (
+              rows.map((lead) => {
+                const score = Number(lead.score || 0)
+                const tier = String(lead.score_tier || (score >= 80 ? 'Hot' : score >= 60 ? 'Warm' : 'Nurture'))
+                const busyCall = actingId === lead.id && actionKind === 'call'
+                const busyEmail = actingId === lead.id && actionKind === 'email'
+                return (
+                  <tr key={lead.id} className="border-b border-white/10 last:border-b-0">
+                    <td className="px-4 md:px-5 py-3.5">
+                      <p className="text-white text-sm font-semibold">{lead.name || 'Website Visitor'}</p>
+                      <p className="text-white/50 text-xs mt-0.5">{lead.address || lead.city || '—'}</p>
+                      {lead.phone ? <p className="text-white/40 text-[11px] mt-0.5">{lead.phone}</p> : null}
+                    </td>
+                    <td className="px-4 py-3.5 text-white/75 text-sm">{lead.service_type || lead.surface_type || '—'}</td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusTone(score)}`}>{score || tier}</span>
+                    </td>
+                    <td className="px-4 py-3.5 text-white/75 text-sm capitalize">{lead.status || 'new'}</td>
+                    <td className="px-4 md:px-5 py-3.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => callLead(lead)}
+                          disabled={busyCall || !lead.phone}
+                          title={lead.phone ? `Have Jarvis call ${lead.phone}` : 'No phone on file'}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300/40 bg-emerald-300/10 px-2.5 py-1.5 text-[11px] font-bold text-emerald-200 hover:bg-emerald-300/15 disabled:opacity-40"
+                        >
+                          {busyCall ? <Loader2 className="w-3 h-3 animate-spin" /> : <Phone className="w-3 h-3" />} Call
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => emailLead(lead)}
+                          disabled={busyEmail || !lead.email}
+                          title={lead.email ? `Have Jarvis email ${lead.email}` : 'No email on file'}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-300/10 px-2.5 py-1.5 text-[11px] font-bold text-amber-100 hover:bg-amber-300/15 disabled:opacity-40"
+                        >
+                          {busyEmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />} Email
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => askJarvisDraft(lead)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-white/80 hover:bg-white/10"
+                        >
+                          <Bot className="w-3 h-3" /> Ask Jarvis
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
+            ) : (
+              CRM_LEADS.map((lead) => (
+                <tr key={lead.name} className="border-b border-white/10 last:border-b-0">
+                  <td className="px-4 md:px-5 py-3.5">
+                    <p className="text-white text-sm font-semibold">{lead.name}</p>
+                    <p className="text-white/50 text-xs mt-0.5">{lead.city}</p>
+                  </td>
+                  <td className="px-4 py-3.5 text-white/75 text-sm">{lead.service}</td>
+                  <td className="px-4 py-3.5">
+                    <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusTone(lead.score)}`}>{lead.score}</span>
+                  </td>
+                  <td className="px-4 py-3.5 text-white/75 text-sm">{lead.status}</td>
+                  <td className="px-4 md:px-5 py-3.5 text-brand-amber text-sm font-semibold">{lead.next}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -3290,6 +3459,19 @@ function JarvisChat({ compact = false }) {
   // Keep the latest `send` accessible to the SpeechRecognition callback.
   useEffect(() => { sendRef.current = send }, [send])
 
+  // Listen for prefill events from other panels (e.g. CRM "Ask Jarvis" button)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onPrefill = (ev) => {
+      const prompt = ev?.detail?.prompt
+      if (!prompt) return
+      setInput(prompt)
+      // Scroll into view if compact drawer is closed; user can hit Send.
+    }
+    window.addEventListener('cc:jarvis-prefill', onPrefill)
+    return () => window.removeEventListener('cc:jarvis-prefill', onPrefill)
+  }, [])
+
   const quickPrompts = [
     'Status report on the business right now',
     'Top 3 leads to call today and why',
@@ -3438,6 +3620,309 @@ function JarvisChat({ compact = false }) {
   )
 }
 
+// ── Live Jarvis Activity Feed ──────────────────────────────────────────────
+function JarvisActivityFeed({ compact = false }) {
+  const [items, setItems] = useState(() => readJarvisActivity())
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onUpdate = () => setItems(readJarvisActivity())
+    window.addEventListener('cc:jarvis-activity', onUpdate)
+    window.addEventListener('storage', (e) => { if (e.key === JARVIS_ACTIVITY_KEY) onUpdate() })
+    return () => window.removeEventListener('cc:jarvis-activity', onUpdate)
+  }, [])
+
+  const clear = useCallback(() => {
+    try { localStorage.removeItem(JARVIS_ACTIVITY_KEY) } catch { /* noop */ }
+    setItems([])
+  }, [])
+
+  const iconFor = (kind) => {
+    if (kind === 'call') return <Phone className="w-3.5 h-3.5 text-emerald-300" />
+    if (kind === 'email') return <Mail className="w-3.5 h-3.5 text-amber-300" />
+    if (kind === 'sla-alarm') return <AlertTriangle className="w-3.5 h-3.5 text-red-300" />
+    if (kind === 'wake') return <Mic className="w-3.5 h-3.5 text-sky-300" />
+    return <Bot className="w-3.5 h-3.5 text-white/70" />
+  }
+
+  return (
+    <div className={['rounded-2xl border border-white/10 bg-white/[0.04]', compact ? 'p-3' : 'p-4 md:p-5'].join(' ')}>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Jarvis Activity</h3>
+          <p className="text-white/45 text-xs mt-0.5">Live feed of every action Jarvis takes for you.</p>
+        </div>
+        <button type="button" onClick={clear} className="text-[11px] text-white/55 hover:text-white">Clear</button>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-sm text-white/55">No Jarvis activity yet. Tap Call or Email on a lead to see it stream in here.</p>
+      ) : (
+        <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+          {items.map((item) => (
+            <div key={item.id} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+              <div className="flex items-center gap-2">
+                {iconFor(item.kind)}
+                <p className="text-white text-xs font-semibold uppercase tracking-[0.08em]">{item.kind}</p>
+                <span className={[
+                  'ml-auto text-[10px] font-bold uppercase tracking-[0.12em]',
+                  item.status === 'failed' ? 'text-red-300' : item.status === 'sent' || item.status === 'queued' ? 'text-emerald-300' : 'text-amber-200',
+                ].join(' ')}>{item.status || ''}</span>
+              </div>
+              <p className="text-white/70 text-[12px] mt-1">
+                {item.leadName ? `${item.leadName} · ` : ''}{item.phone || item.email || item.detail || ''}
+              </p>
+              <p className="text-white/40 text-[10px] mt-0.5">{item.ts ? new Date(item.ts).toLocaleString() : ''}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── SLA Breach Alarm (auto-detect hot leads past SLA, voice-notify owner) ──
+function SLABreachAlarmPanel() {
+  const [breaches, setBreaches] = useState([])
+  const [armed, setArmed] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return window.localStorage?.getItem('cc:sla:armed') !== '0'
+  })
+  const [autoCall, setAutoCall] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage?.getItem('cc:sla:autocall') === '1'
+  })
+  const [lastCheck, setLastCheck] = useState(null)
+
+  const speakAlarm = useCallback((text) => {
+    if (!armed || typeof window === 'undefined' || !window.speechSynthesis) return
+    try {
+      const u = new window.SpeechSynthesisUtterance(text)
+      u.rate = 1.05; u.pitch = 1.05; u.volume = 1
+      window.speechSynthesis.speak(u)
+    } catch { /* noop */ }
+  }, [armed])
+
+  const readAlarmed = () => {
+    try { return JSON.parse(localStorage.getItem(SLA_ALARMED_KEY) || '[]') } catch { return [] }
+  }
+  const writeAlarmed = (ids) => {
+    try { localStorage.setItem(SLA_ALARMED_KEY, JSON.stringify(ids.slice(0, 200))) } catch { /* noop */ }
+  }
+
+  const check = useCallback(async () => {
+    try {
+      const all = await api.entities.Lead.list('-created_date', 100)
+      const now = Date.now()
+      const rows = (Array.isArray(all) ? all : []).map((lead) => {
+        const score = Number(lead.score || 0)
+        const tier = String(lead.score_tier || (score >= 80 ? 'hot' : score >= 60 ? 'warm' : 'nurture')).toLowerCase()
+        const created = new Date(lead.created_date || lead.created_at || 0).getTime()
+        if (!created) return null
+        const ageMin = Math.floor((now - created) / 60000)
+        const sla = tier === 'hot' ? 15 : tier === 'warm' ? 60 : null
+        if (!sla) return null
+        const status = String(lead.status || 'new').toLowerCase()
+        if (['won', 'lost', 'contacted'].includes(status)) return null
+        if (ageMin <= sla) return null
+        return { id: lead.id, name: lead.name || 'Website Visitor', phone: lead.phone, tier, ageMin, breachBy: ageMin - sla }
+      }).filter(Boolean).sort((a, b) => b.breachBy - a.breachBy)
+
+      setBreaches(rows)
+      setLastCheck(new Date())
+
+      // Trigger alarm only for newly breached leads (avoid repeat noise)
+      const alarmed = new Set(readAlarmed())
+      const fresh = rows.filter((r) => !alarmed.has(String(r.id)))
+      if (armed && fresh.length > 0) {
+        const top = fresh[0]
+        const msg = `Sir, ${fresh.length} hot lead${fresh.length > 1 ? 's are' : ' is'} past S L A. ${top.name}, ${top.breachBy} minutes overdue.`
+        speakAlarm(msg)
+        appendJarvisActivity({ kind: 'sla-alarm', leadId: top.id, leadName: top.name, phone: top.phone, status: 'alarmed', detail: msg })
+        if (autoCall && top.phone) {
+          try {
+            await api.jarvisCall(top.phone, `URGENT SLA breach \u2014 ${top.name}`, 'This is Jarvis from J. Worden & Sons following up on your recent paving estimate request. Do you have a quick minute?')
+            appendJarvisActivity({ kind: 'call', leadId: top.id, leadName: top.name, phone: top.phone, status: 'queued', detail: 'auto-call (SLA)' })
+          } catch (err) {
+            appendJarvisActivity({ kind: 'call', leadId: top.id, leadName: top.name, phone: top.phone, status: 'failed', detail: `auto-call failed: ${err?.message || ''}` })
+          }
+        }
+        // Mark all current breaches as alarmed (so we don't re-fire next tick).
+        const next = Array.from(new Set([...alarmed, ...rows.map((r) => String(r.id))]))
+        writeAlarmed(next)
+      }
+    } catch {
+      // backend may be cold; silently retry next tick
+    }
+  }, [armed, autoCall, speakAlarm])
+
+  useEffect(() => {
+    check()
+    const interval = setInterval(check, 60_000) // every minute
+    return () => clearInterval(interval)
+  }, [check])
+
+  const toggleArmed = () => setArmed((v) => {
+    const next = !v
+    try { localStorage.setItem('cc:sla:armed', next ? '1' : '0') } catch { /* noop */ }
+    return next
+  })
+  const toggleAutoCall = () => setAutoCall((v) => {
+    const next = !v
+    try { localStorage.setItem('cc:sla:autocall', next ? '1' : '0') } catch { /* noop */ }
+    return next
+  })
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em] inline-flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-300" /> SLA Breach Alarm
+          </h3>
+          <p className="text-white/45 text-xs mt-0.5">Hot lead unanswered &gt;15 min triggers a voice alert.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={toggleArmed} className={`text-[11px] font-bold rounded-full px-3 py-1.5 border ${armed ? 'border-red-300/40 bg-red-300/10 text-red-200' : 'border-white/15 text-white/55'}`}>
+            {armed ? 'ARMED' : 'Disarmed'}
+          </button>
+          <button type="button" onClick={toggleAutoCall} className={`text-[11px] font-bold rounded-full px-3 py-1.5 border ${autoCall ? 'border-emerald-300/40 bg-emerald-300/10 text-emerald-200' : 'border-white/15 text-white/55'}`}>
+            Auto-Call: {autoCall ? 'ON' : 'OFF'}
+          </button>
+        </div>
+      </div>
+      {breaches.length === 0 ? (
+        <p className="text-sm text-emerald-300">All clear. No leads past SLA right now.</p>
+      ) : (
+        <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+          {breaches.slice(0, 8).map((b) => (
+            <div key={b.id} className="rounded-lg border border-red-300/30 bg-red-300/10 px-3 py-2 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-red-100 text-sm font-semibold">{b.name}</p>
+                <p className="text-red-200/80 text-[11px] mt-0.5">{b.phone || 'no phone'} · {b.ageMin} min old · <span className="font-bold">{b.breachBy} min beyond SLA</span></p>
+              </div>
+              {b.phone ? (
+                <a href={`tel:${b.phone}`} className="inline-flex items-center gap-1 rounded-lg border border-red-200/40 bg-red-200/10 px-2.5 py-1.5 text-[11px] font-bold text-red-100 hover:bg-red-200/20">
+                  <Phone className="w-3 h-3" /> Call
+                </a>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="text-[10px] text-white/40 mt-3">Last check: {lastCheck ? lastCheck.toLocaleTimeString() : 'pending'}. Polls every 60s.</p>
+    </div>
+  )
+}
+
+// ── "Hey Jarvis" Wake Word listener (always-on, opt-in) ────────────────────
+function HeyJarvisWakeWord() {
+  const [enabled, setEnabled] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage?.getItem('cc:wakeword') === '1'
+  })
+  const [listening, setListening] = useState(false)
+  const [supported, setSupported] = useState(false)
+  const [lastHeard, setLastHeard] = useState('')
+  const recognitionRef = useRef(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    setSupported(Boolean(SR))
+  }, [])
+
+  useEffect(() => {
+    if (!enabled || typeof window === 'undefined') return
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+
+    let stopped = false
+    const rec = new SR()
+    rec.continuous = true
+    rec.interimResults = true
+    rec.lang = 'en-US'
+
+    rec.onresult = (event) => {
+      const last = event.results[event.results.length - 1]
+      const text = (last?.[0]?.transcript || '').toLowerCase().trim()
+      if (!text) return
+      setLastHeard(text)
+      if (text.includes('hey jarvis') || text.includes('hey, jarvis') || text.includes('jarvis')) {
+        // Strip wake phrase, dispatch the rest as a prefilled prompt + open drawer
+        const cleaned = text.replace(/.*jarvis[,]?\s*/i, '').trim()
+        const prompt = cleaned || 'Status report.'
+        appendJarvisActivity({ kind: 'wake', status: 'heard', detail: `\u201C${text}\u201D \u2192 ${prompt}` })
+        try {
+          window.dispatchEvent(new CustomEvent('cc:jarvis-prefill', { detail: { prompt } }))
+          window.dispatchEvent(new CustomEvent('cc:open-jarvis-drawer'))
+        } catch { /* noop */ }
+        // Brief audio confirmation
+        try {
+          if (window.speechSynthesis) {
+            const u = new window.SpeechSynthesisUtterance('Yes, sir.')
+            u.rate = 1.1; window.speechSynthesis.speak(u)
+          }
+        } catch { /* noop */ }
+      }
+    }
+    rec.onend = () => {
+      if (!stopped && enabled) {
+        // Auto-restart so it stays "always on"
+        try { rec.start(); setListening(true) } catch { setListening(false) }
+      } else {
+        setListening(false)
+      }
+    }
+    rec.onerror = () => { /* swallow; onend will restart */ }
+
+    try { rec.start(); setListening(true) } catch { setListening(false) }
+    recognitionRef.current = rec
+
+    return () => {
+      stopped = true
+      try { rec.stop() } catch { /* noop */ }
+      setListening(false)
+    }
+  }, [enabled])
+
+  const toggle = () => setEnabled((v) => {
+    const next = !v
+    try { localStorage.setItem('cc:wakeword', next ? '1' : '0') } catch { /* noop */ }
+    return next
+  })
+
+  if (!supported) {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+        <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em] inline-flex items-center gap-2">
+          <Mic className="w-4 h-4" /> Hey Jarvis Wake Word
+        </h3>
+        <p className="text-white/55 text-sm mt-2">Wake word requires Chrome, Edge, or Safari. Open the dashboard in one of those browsers.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+        <div>
+          <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em] inline-flex items-center gap-2">
+            <Mic className={`w-4 h-4 ${listening ? 'text-red-300 animate-pulse' : 'text-white/60'}`} /> Hey Jarvis Wake Word
+          </h3>
+          <p className="text-white/45 text-xs mt-0.5">Just say <span className="text-white/80 font-semibold">"Hey Jarvis, [your command]"</span> from anywhere on the dashboard.</p>
+        </div>
+        <button type="button" onClick={toggle} className={`text-[11px] font-bold rounded-full px-3 py-1.5 border ${enabled ? 'border-emerald-300/40 bg-emerald-300/10 text-emerald-200' : 'border-white/15 text-white/55'}`}>
+          {enabled ? (listening ? 'LISTENING' : 'STARTING\u2026') : 'OFF'}
+        </button>
+      </div>
+      {enabled && lastHeard ? (
+        <p className="text-[11px] text-white/45 mt-2 italic">Heard: "{lastHeard.slice(0, 80)}"</p>
+      ) : null}
+      <p className="text-[10px] text-white/40 mt-2">Tip: Microphone must stay allowed in browser settings. Drains battery faster on mobile \u2014 toggle off when done.</p>
+    </div>
+  )
+}
+
 function JarvisAutonomy() {
   const [autonomy, setAutonomy] = useState(readAutonomyState)
 
@@ -3558,8 +4043,15 @@ function JarvisAutonomy() {
 function JarvisPanel() {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
-      <div className="xl:col-span-2"><JarvisChat /></div>
-      <div><JarvisAutonomy /></div>
+      <div className="xl:col-span-2 space-y-4 md:space-y-5">
+        <JarvisChat />
+        <HeyJarvisWakeWord />
+        <SLABreachAlarmPanel />
+      </div>
+      <div className="space-y-4 md:space-y-5">
+        <JarvisAutonomy />
+        <JarvisActivityFeed />
+      </div>
     </div>
   )
 }
@@ -4846,6 +5338,36 @@ function FrozenBanner() {
   )
 }
 
+// ── Deep-link bar: each tab maps to a full standalone page (when one exists) ─
+const TAB_DEEP_LINKS = {
+  jarvis:       { to: '/voice-calls',     label: 'Voice Calls Log' },
+  ops:          { to: '/dashboard',       label: 'Operations Dashboard' },
+  crm:          { to: '/leads',           label: 'Lead Inbox' },
+  'civil-intel':{ to: '/contractor-ai',   label: 'Contractor AI Platform' },
+  integrations: { to: '/admin/documents', label: 'Admin Documents' },
+  dispatch:     { to: '/crew-eta',        label: 'Crew ETA Map' },
+  thermal:      { to: '/autonomy',        label: 'Autonomy Dashboard' },
+  drone:        { to: '/floor-plan-studio', label: 'Floor Plan Studio' },
+  lidar:        { to: '/jwordenai',       label: 'JWordenAI Scan' },
+  roller:       { to: '/crew-reporting',  label: 'Crew Reporting' },
+  'search-pulse': { to: '/revenue',       label: 'Revenue Dashboard' },
+}
+
+function TabDeepLinkBar({ activeTab }) {
+  const link = TAB_DEEP_LINKS[activeTab]
+  if (!link) return null
+  return (
+    <div className="mb-4 flex justify-end">
+      <Link
+        to={link.to}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-brand-amber hover:border-brand-amber/40"
+      >
+        <ArrowRight className="w-3 h-3" /> Open {link.label} (full page)
+      </Link>
+    </div>
+  )
+}
+
 export default function CommandCenter() {
   const [activeTab, setActiveTab] = useState('jarvis')
   const strategyVisible = INTERNAL_STRATEGY_ENABLED && isCommandCenterPath()
@@ -4872,6 +5394,13 @@ export default function CommandCenter() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Wake word ("Hey Jarvis") and CRM "Ask Jarvis" buttons can request the drawer
+  useEffect(() => {
+    const onOpen = () => setDrawerOpen(true)
+    window.addEventListener('cc:open-jarvis-drawer', onOpen)
+    return () => window.removeEventListener('cc:open-jarvis-drawer', onOpen)
   }, [])
 
   // Sync local autonomy state with backend on mount.
@@ -4949,6 +5478,7 @@ export default function CommandCenter() {
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
         <>
           {!strategyVisible ? <InternalStrategyNotice /> : null}
+          <TabDeepLinkBar activeTab={activeTab} />
           {strategyVisible ? <HubLinkPanel /> : null}
 
           {activeTab === 'jarvis' && <JarvisPanel />}
@@ -4996,6 +5526,7 @@ export default function CommandCenter() {
             {activeTab === 'crm' && (
               <div className="space-y-4 md:space-y-5">
                 <CrmTable />
+                <JarvisActivityFeed />
                 {strategyVisible ? <MrWordenAutopilotPanel /> : null}
                 {strategyVisible ? <ChannelPerformancePanel /> : null}
                 {strategyVisible ? <TempInAppOpsFallbackPanel /> : null}
