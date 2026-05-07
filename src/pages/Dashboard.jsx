@@ -37,7 +37,7 @@ const HUB_SECTIONS = [
     color: 'border-l-cyan-500',
     links: [
       { to: '/jwordenai',       icon: '🤖', label: 'JWordenAI',              sub: 'Construction intelligence suite',     badge: 'AI' },
-      { to: '/command-center',  icon: '🦾', label: "Tony Stark's Dashboard", sub: 'Command Center · system keys · API health',  badge: null },
+      { to: '/command-center',  icon: '🦾', label: "Tony Stark's Dashboard", sub: 'Command Center · system keys · API health',  badge: 'PREMIUM' },
       { to: '/autonomy',        icon: '⚡', label: 'Autonomy Dashboard',     sub: 'Automated task status',               badge: null },
       { to: '/contractor-ai',   icon: '🏗️', label: 'Contractor AI Platform', sub: 'Bid analysis · scope generation',    badge: null },
       { to: '/virginia-statewide', icon: '🗺️', label: 'Virginia Statewide', sub: 'Market coverage + region metrics',   badge: null },
@@ -81,6 +81,7 @@ const BADGE_COLORS = {
   NEW:   'bg-green-100 text-green-700 border-green-200',
   AI:    'bg-cyan-100 text-cyan-700 border-cyan-200',
   STAFF: 'bg-orange-100 text-orange-700 border-orange-200',
+  PREMIUM: 'bg-violet-100 text-violet-700 border-violet-200',
 };
 
 const BASE = import.meta.env.VITE_API_BASE_URL || '';
@@ -160,6 +161,9 @@ const Dashboard = () => {
             <p className="text-white/60 text-sm mt-1">Owner dashboard · {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
           <div className="flex items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-violet-300/50 bg-violet-500/15 px-3 py-1 text-xs font-semibold tracking-wide text-violet-100 uppercase">
+              Stark Mode Premium
+            </span>
             <span className={`h-2.5 w-2.5 rounded-full ${sseStatus === 'live' ? 'bg-green-400 animate-pulse' : sseStatus === 'error' ? 'bg-red-400' : 'bg-yellow-400'}`} />
             <span className="text-sm text-white/70">{sseStatus === 'live' ? 'Live stream active' : sseStatus === 'error' ? 'Stream offline' : 'Connecting…'}</span>
           </div>

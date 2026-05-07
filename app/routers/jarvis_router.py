@@ -7,6 +7,7 @@ from app.services import web_search as _web_search
 from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
 from app.services import runtime_config as _cfg
+from app.services import tts_service as _tts
 import asyncio
 from pydantic import BaseModel, Field
 
@@ -105,5 +106,64 @@ async def jarvis_status():
             "frozen":   state.get("frozen"),
             "frozenAt": state.get("frozenAt"),
         },
+    }
+
+
+@router.get("/readiness")
+async def jarvis_readiness():
+    """
+    Single endpoint to verify Jarvis is truly ready for production operation.
+    Returns a strict full-capacity flag plus detailed blockers.
+    """
+    state = autonomy_state.get_state()
+
+    anthropic_ready = bool(_cfg.get("ANTHROPIC_API_KEY").strip())
+    tavily_ready = _web_search.is_available()
+    call_ready = _vapi.is_available()
+    email_ready = bool(_cfg.get("SENDGRID_API_KEY").strip() and _cfg.get("SENDGRID_FROM_EMAIL").strip())
+    tts_provider = _tts.active_provider()
+    tts_ready = tts_provider != "none"
+    google_ready = bool((_cfg.get("GOOGLE_API_KEY") or _cfg.get("GEMINI_API_KEY")).strip())
+    frozen = bool(state.get("frozen"))
+
+    blockers: list[str] = []
+    if frozen:
+        blockers.append("Autonomy is frozen")
+    if not anthropic_ready:
+        blockers.append("ANTHROPIC_API_KEY missing")
+    if not tavily_ready:
+        blockers.append("TAVILY_API_KEY missing")
+    if not call_ready:
+        blockers.append("Vapi integration not fully configured")
+    if not email_ready:
+        blockers.append("SENDGRID_API_KEY/SENDGRID_FROM_EMAIL missing")
+    if not tts_ready:
+        blockers.append("No TTS provider configured (OPENAI_API_KEY or ELEVENLABS_API_KEY)")
+
+    full_capacity = len(blockers) == 0
+
+    return {
+        "ok": full_capacity,
+        "full_capacity": full_capacity,
+        "identity": jarvis.identity,
+        "status": "FROZEN" if frozen else jarvis.status,
+        "engine": "anthropic-claude" if anthropic_ready else "heuristic-fallback",
+        "model": (_cfg.get("ANTHROPIC_MODEL") or "claude-sonnet-4-5") if anthropic_ready else None,
+        "tools": {
+            "web_search": tavily_ready,
+            "make_phone_call": call_ready,
+            "send_email": email_ready,
+            "tts": tts_ready,
+        },
+        "providers": {
+            "google_or_gemini": google_ready,
+            "tts_provider": tts_provider,
+        },
+        "autonomy": {
+            "master": state.get("master"),
+            "frozen": frozen,
+            "frozenAt": state.get("frozenAt"),
+        },
+        "blockers": blockers,
     }
 

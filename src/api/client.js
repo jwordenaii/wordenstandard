@@ -669,6 +669,7 @@ export const api = {
   jarvisCommand: (query, persona = "JARVIS", { confirmed = false } = {}) =>
     request('POST', '/api/v1/jarvis/command', { query, persona, confirmed }),
   jarvisStatus: () => request('GET', '/api/v1/jarvis/status'),
+  jarvisReadiness: () => request('GET', '/api/v1/jarvis/readiness'),
   jarvisSearch: (query, deep = false) =>
     request('POST', '/api/v1/jarvis/search', { query, deep }),
   jarvisCall: (toNumber, purpose, scriptHint) =>
@@ -899,6 +900,7 @@ export const api = {
   getVdotBid: (id) => request('GET', `/api/v1/vdot-bids/${id}`),
   triggerVdotScan: (maxResults = 50) => request('POST', `/api/v1/vdot-bids/scan?max_results=${maxResults}`),
   getVdotStatus: () => request('GET', '/api/v1/vdot-bids/status'),
+  dashboardPreflight: () => request('GET', '/api/v1/ops/dashboard-preflight'),
   getMonitoringStatus: () => protectedRequest('GET', '/api/v1/admin/monitoring/status'),
   createEstimateFromLead: (leadId, scopeSummary) => protectedRequest('POST', '/api/v1/operations/estimates/from-lead', { lead_id: leadId, scope_summary: scopeSummary }),
   listEstimates: () => protectedRequest('GET', '/api/v1/operations/estimates'),

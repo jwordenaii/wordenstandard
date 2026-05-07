@@ -21,6 +21,11 @@ from ..services.celery_health import (
     check_queue_depth,
     check_redis_connection,
 )
+from ..services import autonomy_state
+from ..services import web_search as _web_search
+from ..services import vapi_caller as _vapi
+from ..services import tts_service as _tts
+from ..services import runtime_config as _cfg
 
 logger = logging.getLogger(__name__)
 
@@ -100,3 +105,89 @@ def health_ready():
 
     status_code = 200 if all_ok else 503
     return JSONResponse(content=payload, status_code=status_code)
+
+
+@router.get("/api/v1/ops/dashboard-preflight", summary="Command Center preflight (always 200)")
+def dashboard_preflight():
+    """
+    UI-safe readiness snapshot for the owner dashboards.
+
+    Always returns HTTP 200 so frontend polling does not hard-fail when one
+    subsystem is degraded. The payload contains strict flags for infra and
+    Jarvis full-capacity mode.
+    """
+    start = time.monotonic()
+
+    redis_status = check_redis_connection()
+    celery_status = check_celery_workers()
+    queue_status = check_queue_depth()
+
+    db_status: dict = {"ok": False, "error": "not checked"}
+    try:
+        from ..database import engine  # noqa: PLC0415
+        from sqlalchemy import text  # noqa: PLC0415
+
+        t0 = time.monotonic()
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        db_status = {"ok": True, "latency_ms": round((time.monotonic() - t0) * 1000, 2)}
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("DB preflight check failed: %s", exc)
+        db_status = {"ok": False, "error": str(exc)}
+
+    state = autonomy_state.get_state()
+    anthropic_ready = bool(_cfg.get("ANTHROPIC_API_KEY").strip())
+    web_ready = _web_search.is_available()
+    call_ready = _vapi.is_available()
+    email_ready = bool(_cfg.get("SENDGRID_API_KEY").strip() and _cfg.get("SENDGRID_FROM_EMAIL").strip())
+    tts_provider = _tts.active_provider()
+    tts_ready = tts_provider != "none"
+    frozen = bool(state.get("frozen"))
+
+    jarvis_blockers: list[str] = []
+    if frozen:
+        jarvis_blockers.append("Autonomy is frozen")
+    if not anthropic_ready:
+        jarvis_blockers.append("ANTHROPIC_API_KEY missing")
+    if not web_ready:
+        jarvis_blockers.append("TAVILY_API_KEY missing")
+    if not call_ready:
+        jarvis_blockers.append("Vapi integration not fully configured")
+    if not email_ready:
+        jarvis_blockers.append("SENDGRID_API_KEY/SENDGRID_FROM_EMAIL missing")
+    if not tts_ready:
+        jarvis_blockers.append("No TTS provider configured")
+
+    infra_ok = bool(redis_status.get("ok") and db_status.get("ok"))
+    jarvis_full_capacity = len(jarvis_blockers) == 0
+    elapsed_ms = round((time.monotonic() - start) * 1000, 2)
+
+    return {
+        "ok": infra_ok,
+        "status": "ready" if infra_ok else "degraded",
+        "infra": {
+            "redis": redis_status,
+            "database": db_status,
+            "celery": celery_status,
+            "queue": queue_status,
+        },
+        "jarvis": {
+            "full_capacity": jarvis_full_capacity,
+            "engine": "anthropic-claude" if anthropic_ready else "heuristic-fallback",
+            "model": (_cfg.get("ANTHROPIC_MODEL") or "claude-sonnet-4-5") if anthropic_ready else None,
+            "tools": {
+                "web_search": web_ready,
+                "make_phone_call": call_ready,
+                "send_email": email_ready,
+                "tts": tts_ready,
+            },
+            "tts_provider": tts_provider,
+            "autonomy": {
+                "master": state.get("master"),
+                "frozen": frozen,
+                "frozenAt": state.get("frozenAt"),
+            },
+            "blockers": jarvis_blockers,
+        },
+        "elapsed_ms": elapsed_ms,
+    }

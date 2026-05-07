@@ -3333,7 +3333,7 @@ function JarvisChat({ compact = false }) {
   const [statusOk, setStatusOk] = useState(null)
   const [engine, setEngine] = useState(null)        // 'anthropic-claude' | 'heuristic-fallback'
   const [backendFrozen, setBackendFrozen] = useState(false)
-  const [tools, setTools] = useState({ web_search: false, make_phone_call: false, send_email: false })
+  const [tools, setTools] = useState({ web_search: false, make_phone_call: false, send_email: false, tts: false })
   const scrollerRef = useRef(null)
   // ── Voice I/O (Web Speech API) ────────────────────────────────────────────
   const [listening, setListening] = useState(false)
@@ -3402,20 +3402,27 @@ function JarvisChat({ compact = false }) {
 
   useEffect(() => {
     let cancelled = false
-    api.jarvisStatus()
-      .then((r) => {
-        if (cancelled) return
-        const ok = Boolean(r && (r.status === 'ONLINE' || r.identity === 'JARVIS'))
-        setStatusOk(ok)
-        setEngine(r?.engine || null)
-        setBackendFrozen(Boolean(r?.autonomy?.frozen))
-        setTools({
-          web_search:      Boolean(r?.tools?.web_search),
-          make_phone_call: Boolean(r?.tools?.make_phone_call),
-          send_email:      Boolean(r?.tools?.send_email),
-        })
+    const applyStatus = (r) => {
+      if (cancelled) return
+      const ok = Boolean(r && (r.status === 'ONLINE' || r.identity === 'JARVIS' || r.ok === true))
+      setStatusOk(ok)
+      setEngine(r?.engine || null)
+      setBackendFrozen(Boolean(r?.autonomy?.frozen))
+      setTools({
+        web_search:      Boolean(r?.tools?.web_search),
+        make_phone_call: Boolean(r?.tools?.make_phone_call),
+        send_email:      Boolean(r?.tools?.send_email),
+        tts:             Boolean(r?.tools?.tts),
       })
-      .catch(() => { if (!cancelled) setStatusOk(false) })
+    }
+
+    api.jarvisReadiness()
+      .then((r) => applyStatus(r))
+      .catch(() => {
+        api.jarvisStatus()
+          .then((r) => applyStatus(r))
+          .catch(() => { if (!cancelled) setStatusOk(false) })
+      })
     return () => { cancelled = true }
   }, [])
 
@@ -3479,7 +3486,12 @@ function JarvisChat({ compact = false }) {
             <Bot className="w-4 h-4 text-brand-amber" />
           </div>
           <div>
-            <h3 className="font-display font-bold text-white text-base leading-tight">Jarvis</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-bold text-white text-base leading-tight">Jarvis</h3>
+              <span className="inline-flex items-center rounded-full border border-violet-300/40 bg-violet-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-violet-100">
+                Stark Mode Premium
+              </span>
+            </div>
             <p className="text-white/40 text-xs">
               {engine === 'anthropic-claude'
                 ? 'Powered by Claude · live brain'
@@ -3487,6 +3499,7 @@ function JarvisChat({ compact = false }) {
                   ? 'Heuristic mode · add ANTHROPIC_API_KEY to unlock Claude'
                   : 'Your private AI ops officer'}
             </p>
+            <p className="text-white/30 text-[11px]">Voice-first ops: press mic, speak naturally, execute fast.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -3503,6 +3516,11 @@ function JarvisChat({ compact = false }) {
           {tools.send_email ? (
             <span title="Email via SendGrid — ready" className="inline-flex items-center gap-1 rounded-full text-[10px] font-bold px-2 py-0.5 border border-amber-300/40 text-amber-100 bg-amber-300/10">
               <Mail className="w-3 h-3" /> Email
+            </span>
+          ) : null}
+          {tools.tts ? (
+            <span title="Neural voice synthesis — ready" className="inline-flex items-center gap-1 rounded-full text-[10px] font-bold px-2 py-0.5 border border-violet-300/40 text-violet-100 bg-violet-300/10">
+              <Volume2 className="w-3 h-3" /> TTS
             </span>
           ) : null}
           {backendFrozen ? (

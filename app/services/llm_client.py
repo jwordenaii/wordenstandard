@@ -14,7 +14,7 @@ Every model has ONE job it does better than the others. No redundancy.
 
   TASK                    → PRIMARY                          → FALLBACK
   ──────────────────────────────────────────────────────────────────────
-  jarvis                  → claude-opus-4-6                  → claude-sonnet-4-6
+    jarvis                  → claude-sonnet-4-6                → gpt-4o → grok-4 → gemini-2.5-pro → claude-opus-4-6
   reasoning / persona     → claude-sonnet-4-6                → gpt-4o
   proposals / contracts   → claude-sonnet-4-6                → gpt-4o
   review_reply            → claude-sonnet-4-6                → gpt-4o
@@ -23,7 +23,7 @@ Every model has ONE job it does better than the others. No redundancy.
   math / long_context     → gemini-2.5-pro                   → claude-sonnet-4-6
   web_research            → perplexity-sonar-pro             → gpt-4o
   social_signal (X)       → grok-4                           → (none)
-  fast / classification   → gpt-4o-mini                      → claude-haiku-4-5-20251001
+    fast / classification   → gpt-4o-mini                      → claude-sonnet-4-6
   analytics               → claude-sonnet-4-6                → gpt-4o
 
 Note on Opus 4.6 vs 4.7: 4.6 is the default because 4.7's updated tokenizer
@@ -54,6 +54,8 @@ import os
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from app.services import runtime_config as _cfg
+
 logger = logging.getLogger(__name__)
 
 # ── Task routing table ───────────────────────────────────────────────────────
@@ -61,7 +63,8 @@ logger = logging.getLogger(__name__)
 
 _ROUTES: dict[str, list[tuple[str, str]]] = {
     # task             provider_chain (provider, model)
-    "jarvis":          [("anthropic", "claude-opus-4-6"),     ("anthropic", "claude-sonnet-4-6"), ("openai", "gpt-4o")],
+    "jarvis":          [("anthropic", "claude-sonnet-4-6"),   ("openai", "gpt-4o"),               ("xai", "grok-4"),                  ("google", "gemini-2.5-pro"),        ("anthropic", "claude-opus-4-6")],
+    "jarvis_fast":     [("openai", "gpt-4o-mini"),            ("anthropic", "claude-sonnet-4-6"), ("xai", "grok-4"),                  ("google", "gemini-2.5-pro"),        ("openai", "gpt-4o")],
     "reasoning":       [("anthropic", "claude-sonnet-4-6"),   ("openai", "gpt-4o")],
     "persona":         [("anthropic", "claude-sonnet-4-6"),   ("openai", "gpt-4o")],
     "proposal":        [("anthropic", "claude-sonnet-4-6"),   ("openai", "gpt-4o")],
@@ -81,11 +84,12 @@ _DEFAULT_TASK = "reasoning"
 
 
 def _silent_fallback() -> bool:
-    return os.getenv("LLM_FALLBACK_SILENT", "1") != "0"
+    raw = _cfg.get("LLM_FALLBACK_SILENT")
+    return (raw or "1") != "0"
 
 
 def _jarvis_cap() -> str:
-    return os.getenv("JARVIS_MAX_TIER", "opus").lower()
+    return (_cfg.get("JARVIS_MAX_TIER") or "opus").lower()
 
 
 # ── Public dataclass ─────────────────────────────────────────────────────────
@@ -113,7 +117,7 @@ def _get_openai() -> Any:
     global _openai_client
     if _openai_client is not None:
         return _openai_client
-    key = os.getenv("OPENAI_API_KEY", "")
+    key = _cfg.get("OPENAI_API_KEY")
     if not key:
         return None
     try:
@@ -129,7 +133,7 @@ def _get_anthropic() -> Any:
     global _anthropic_client
     if _anthropic_client is not None:
         return _anthropic_client
-    key = os.getenv("ANTHROPIC_API_KEY", "")
+    key = _cfg.get("ANTHROPIC_API_KEY")
     if not key:
         return None
     try:
@@ -143,7 +147,7 @@ def _get_anthropic() -> Any:
 
 def _google_key() -> str:
     # Backward-compatible key resolution: support both naming conventions.
-    return os.getenv("GOOGLE_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip()
+    return _cfg.get("GOOGLE_API_KEY").strip() or _cfg.get("GEMINI_API_KEY").strip()
 
 
 def _get_google() -> Any:
@@ -167,7 +171,7 @@ def _get_perplexity() -> Any:
     global _perplexity_client
     if _perplexity_client is not None:
         return _perplexity_client
-    key = os.getenv("PERPLEXITY_API_KEY", "")
+    key = _cfg.get("PERPLEXITY_API_KEY")
     if not key:
         return None
     try:
@@ -184,7 +188,7 @@ def _get_xai() -> Any:
     global _xai_client
     if _xai_client is not None:
         return _xai_client
-    key = os.getenv("XAI_API_KEY", "")
+    key = _cfg.get("XAI_API_KEY")
     if not key:
         return None
     try:
@@ -405,9 +409,9 @@ def chat(
 def provider_status() -> dict[str, bool]:
     """Lightweight health check — which providers have an API key configured."""
     return {
-        "openai":     bool(os.getenv("OPENAI_API_KEY")),
-        "anthropic":  bool(os.getenv("ANTHROPIC_API_KEY")),
+        "openai":     bool(_cfg.get("OPENAI_API_KEY")),
+        "anthropic":  bool(_cfg.get("ANTHROPIC_API_KEY")),
         "google":     bool(_google_key()),
-        "perplexity": bool(os.getenv("PERPLEXITY_API_KEY")),
-        "xai":        bool(os.getenv("XAI_API_KEY")),
+        "perplexity": bool(_cfg.get("PERPLEXITY_API_KEY")),
+        "xai":        bool(_cfg.get("XAI_API_KEY")),
     }

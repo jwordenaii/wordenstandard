@@ -265,12 +265,46 @@ const AuthenticatedApp = () => {
         {internalAIPages.map(({ path, Component }) => (
           <Route key={path} path={path} element={<RequireAuth><Component /></RequireAuth>} />
         ))}
-        <Route path="/command-center" element={<RequireAuth><CommandCenter /></RequireAuth>} />
+        <Route
+          path="/command-center"
+          element={
+            <RequireAuth>
+              <ErrorBoundary
+                kicker="Command Center Safe Mode"
+                title="Command Center Recovered"
+                message="The Command Center hit an unexpected runtime issue. Your core owner dashboard and backend controls are still available."
+                homeHref="/dashboard"
+                homeLabel="Open Dashboard"
+                secondaryHref="/command-center"
+                secondaryLabel="Retry Command Center"
+              >
+                <CommandCenter />
+              </ErrorBoundary>
+            </RequireAuth>
+          }
+        />
         <Route path="/virginia-statewide" element={<RequireAuth><VirginiaStatewide /></RequireAuth>} />
         <Route path="/autonomy" element={<RequireAuth><AutonomyDashboard /></RequireAuth>} />
         <Route path="/contractor-ai" element={<RequireAuth><ContractorAIPlatform /></RequireAuth>} />
         <Route path="/consultant" element={<RequireAuth><LeadConsultant /></RequireAuth>} />
-        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <ErrorBoundary
+                kicker="Dashboard Safe Mode"
+                title="Owner Dashboard Recovered"
+                message="The owner dashboard hit an unexpected issue. You can still operate from Command Center while this page reloads."
+                homeHref="/command-center"
+                homeLabel="Open Command Center"
+                secondaryHref="/dashboard"
+                secondaryLabel="Retry Dashboard"
+              >
+                <Dashboard />
+              </ErrorBoundary>
+            </RequireAuth>
+          }
+        />
         <Route path="/job" element={<RequireAuth><JobDetail /></RequireAuth>} />
         <Route path="/crew-reporting" element={<RequireAuth><CrewReporting /></RequireAuth>} />
         <Route path="/dns-migration" element={<RequireAuth><DnsMigration /></RequireAuth>} />

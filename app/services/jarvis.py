@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging
 import os
 import asyncio
+import re
 from typing import Dict, Any, List, Optional
 from app.services.quantum_orchestrator import global_quantum_orchestrator
 from app.services import autonomy_state
@@ -9,6 +10,7 @@ from app.services import web_search as _web_search
 from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
 from app.services import runtime_config as _cfg
+from app.services import llm_client as _llm
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,61 @@ JARVIS_TOOLS = [
     },
 ]
 
+_ACTION_HINT_RE = re.compile(
+    r"\b(call|dial|phone|text|sms|email|send|book|schedule|reserve|pay|order|quote|estimate|create|update|delete|cancel|approve|publish|post|run|launch)\b",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_tool_action(query: str) -> bool:
+    q = (query or "").strip()
+    return bool(_ACTION_HINT_RE.search(q))
+
+
+async def _ask_fast_ops_brain(query: str, persona: str, autonomy: dict, *, confirmed: bool = False) -> Optional[dict]:
+    """
+    Fast no-tool reasoning lane using the unified multi-model router.
+    Keeps responses snappy for daily operations Q&A.
+    """
+    persona_note = (
+        "Adopt the 'Mr. Worden Sales' persona: warm, energetic, closing-oriented, Richmond paving expert."
+        if persona == "MR_WORDEN_SALES"
+        else "Maintain the JARVIS persona with concise executive operations tone."
+    )
+    ops_snapshot = (
+        f"Autonomy master={autonomy.get('master')} frozen={autonomy.get('frozen')} operator_confirmed={confirmed}. "
+        f"Tools status: web_search={_web_search.is_available()} call={_vapi.is_available()} email={bool(_cfg.get('SENDGRID_API_KEY').strip())}."
+    )
+    system = (
+        f"{JARVIS_SYSTEM_PROMPT}\n\n"
+        f"{persona_note}\n"
+        f"{ops_snapshot}\n"
+        "Answer in practical daily-operations format: Situation, Recommendation, Next Action. "
+        "Keep default answers under 6 lines unless asked for a deep dive."
+    )
+
+    try:
+        resp = await asyncio.to_thread(
+            _llm.chat,
+            task="jarvis_fast",
+            system=system,
+            user=query,
+            max_tokens=420,
+            temperature=0.25,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[JARVIS] Fast ops brain failed: %s", exc)
+        return None
+
+    if resp.error or not (resp.text or "").strip():
+        return None
+    return {
+        "text": resp.text.strip(),
+        "provider": resp.provider,
+        "model": resp.model,
+        "fallback_used": bool(resp.fallback_used),
+    }
+
 
 async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
     if name == "web_search":
@@ -158,15 +215,23 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
 
     # Two-round max: initial → optional tool use → final.
     for _round in range(2):
+        try:
+            max_tokens = int((_cfg.get("JARVIS_CLAUDE_MAX_TOKENS") or "700").strip())
+        except Exception:  # noqa: BLE001
+            max_tokens = 700
         payload = {
             "model":      _anthropic_model(),
-            "max_tokens": 800,
+            "max_tokens": max_tokens,
             "system":     system,
             "tools":      JARVIS_TOOLS,
             "messages":   messages,
         }
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                timeout_s = float((_cfg.get("JARVIS_CLAUDE_TIMEOUT_SECONDS") or "14").strip())
+            except Exception:  # noqa: BLE001
+                timeout_s = 14.0
+            async with httpx.AsyncClient(timeout=timeout_s) as client:
                 r = await client.post(_ANTHROPIC_URL, json=payload, headers=headers)
             if r.status_code != 200:
                 logger.warning("[JARVIS] Anthropic non-200: %s %s", r.status_code, r.text[:300])
@@ -260,6 +325,7 @@ class JarvisAI:
         context = context or {}
         persona = context.get("persona", "JARVIS")
         confirmed = bool(context.get("confirmed", False))
+        query_lower = (query or "").lower()
 
         # ── Defense-in-depth: backend kill switch ─────────────────────────────
         state = autonomy_state.get_state()
@@ -276,6 +342,22 @@ class JarvisAI:
                 "intel_tier": "Safety-Override",
             }
 
+        # ── Fast lane: everyday operations reasoning without tool overhead ──
+        action_intent = _looks_like_tool_action(query)
+        if not action_intent:
+            fast = await _ask_fast_ops_brain(query, persona, state, confirmed=confirmed)
+            if fast:
+                return {
+                    "source":          self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
+                    "message":         fast["text"],
+                    "action_required": False,
+                    "engine":          f"{fast['provider']}-stark-fast",
+                    "model":           fast["model"],
+                    "fallback_used":   fast["fallback_used"],
+                    "tool_calls":      [],
+                    "autonomy":        {"master": state.get("master"), "frozen": False},
+                }
+
         # ── Brain: Anthropic Claude (when configured) ─────────────────────────
         claude = await _ask_claude(query, persona, state, confirmed=confirmed)
         if claude:
@@ -290,7 +372,6 @@ class JarvisAI:
             }
 
         # ── Fallback: legacy heuristic responses ──────────────────────────────
-        query_lower = query.lower()
         if persona == "MR_WORDEN_SALES":
             return await self._converse_mr_worden_sales(query_lower, context)
 
