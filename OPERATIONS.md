@@ -359,3 +359,8 @@ During maintenance, all requests will receive a `502 Bad Gateway` from Railway's
 | `DB_POOL_RECYCLE` | API | Connection recycle interval in seconds (default: 1800) |
 | `DB_POOL_TIMEOUT` | API | Connection acquisition timeout in seconds (default: 30) |
 | `CELERY_RESULT_BACKEND` | Worker, Beat | Celery result backend URL (defaults to `REDIS_URL`) |
+
+## May 7, 2026 - Operations and CI Update
+- SEO: Added dynamic SEO protection to noindex thewordenstandard.com operations domain to prevent duplicate content.
+- CI/CD: Fixed GitHub Actions pipeline failures by removing malformed cjs scripts and clearing lint warnings.
+- Analytics: Updated Google Ads tracking logic in analytics.js to use Vite env vars for conversion labels.
