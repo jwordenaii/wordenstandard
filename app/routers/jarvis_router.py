@@ -6,6 +6,7 @@ from app.services import autonomy_state
 from app.services import web_search as _web_search
 from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
+from app.services import runtime_config as _cfg
 import asyncio
 from pydantic import BaseModel, Field
 
@@ -86,17 +87,18 @@ async def jarvis_status():
     and the current autonomy state.
     """
     state = autonomy_state.get_state()
-    has_brain = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
+    has_brain = bool(_cfg.get("ANTHROPIC_API_KEY").strip())
+    has_email = bool(_cfg.get("SENDGRID_API_KEY").strip() and _cfg.get("SENDGRID_FROM_EMAIL").strip())
     return {
         "identity":   jarvis.identity,
         "status":     "FROZEN" if state.get("frozen") else jarvis.status,
         "monitoring": jarvis.master_project,
         "engine":     "anthropic-claude" if has_brain else "heuristic-fallback",
-        "model":      os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest") if has_brain else None,
+        "model":      (_cfg.get("ANTHROPIC_MODEL") or "claude-sonnet-4-5") if has_brain else None,
         "tools": {
             "web_search":       _web_search.is_available(),
             "make_phone_call":  _vapi.is_available(),
-            "send_email":       bool(os.environ.get("SENDGRID_API_KEY", "").strip() and os.environ.get("SENDGRID_FROM_EMAIL", "").strip()),
+            "send_email":       has_email,
         },
         "autonomy": {
             "master":   state.get("master"),

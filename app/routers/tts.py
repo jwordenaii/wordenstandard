@@ -90,6 +90,7 @@ async def status() -> dict:
             "OPENAI_API_KEY":     _seen("OPENAI_API_KEY"),
             "ANTHROPIC_API_KEY":  _seen("ANTHROPIC_API_KEY"),
             "GOOGLE_API_KEY":     _seen("GOOGLE_API_KEY"),
+            "GEMINI_API_KEY":     _seen("GEMINI_API_KEY"),
             "PERPLEXITY_API_KEY": _seen("PERPLEXITY_API_KEY"),
             "XAI_API_KEY":        _seen("XAI_API_KEY"),
             "ELEVENLABS_API_KEY": _seen("ELEVENLABS_API_KEY"),
@@ -132,9 +133,9 @@ async def gemini_ping() -> dict:
     """One-shot Gemini smoke test."""
     import os as _os
     import httpx
-    key = _os.environ.get("GOOGLE_API_KEY", "").strip()
+    key = (_os.environ.get("GOOGLE_API_KEY", "") or _os.environ.get("GEMINI_API_KEY", "")).strip()
     if not key:
-        return {"ok": False, "error": "GOOGLE_API_KEY not set on container"}
+        return {"ok": False, "error": "GOOGLE_API_KEY or GEMINI_API_KEY not set on container"}
     model = _os.environ.get("GOOGLE_MODEL") or "gemini-2.5-flash"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
     try:

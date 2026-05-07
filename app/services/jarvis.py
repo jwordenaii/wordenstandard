@@ -293,97 +293,11 @@ class JarvisAI:
         query_lower = query.lower()
         if persona == "MR_WORDEN_SALES":
             return await self._converse_mr_worden_sales(query_lower, context)
-    """
-    JARVIS: Just A Rather Very Intelligent System for JWORDENAI.
-    The primary interface for the Command Center.
-    Capable of voice-commanded logistics, autonomous paving arbitration, and project funding status.
-    """
-    
-    def __init__(self):
-        self.identity = "JARVIS"
-        self.master_project = "JWORDENAI PROJECT"
-        self.status = "ONLINE"
-        self.intel_sources = [
-            "Federal Highway Administration (FHWA)",
-            "AASHTO Engineering Standards",
-            "State DOT Regulatory Guides",
-            "University Civil Engineering Research Lab",
-            "Global Infrastructure Council",
-            "Supreme Court Construction Precedents",
-            "50-State + DC Mechanic's Lien & Prompt Pay Codes",
-            "National GC Compliance Matrix",
-            "Universal Construction Supply Chain Index (Concrete/Steel/Wood/Shingles)",
-            "Asphalt & Bitumen Global Resource Monitor",
-            "Raw Land & Aggregate Availability Matrix",
-            "Carbon-Neutral & LEED v5 Paving Standards",
-            "International Trade & Maritime Construction Law",
-            "51-State Licensing & Prequalification Databank",
-            "OCIP/CCIP Insurance Compliance Protocols",
-            "DBE/SWaM/SDVOSB Regulatory Guardrails",
-            "Global Banking & Treasury Management APIs",
-            "Currency Hedging & Cross-Border Settlement Protocols",
-            "Construction Commodities Market (Liquid Asphalt/Crude Oil) Index",
-            "Venture Debt & Equity Financing Logic for PF Nodes",
-            "Virginia SEO Domination & Local SEM Metrics",
-            "JWORDENAI Page Factory Conversion Evidence",
-            "Case Study Asset Tracker (Richmond/Midlothian/Virginia Beach)"
-        ]
-        self.personas = {
-            "JARVIS": {
-                "greeting": "At your service, Sir.",
-                "style": "Sophisticated, helpful, technical, and lifestyle-oriented."
-            },
-            "MR_WORDEN_SALES": {
-                "greeting": "Hey there! Ready to get some paving done?",
-                "style": "Energetic, persuasive, industry-expert salesman. Focused on value, durability, and closing deals."
-            }
-        }
-
-    async def converse(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """
-        The main interaction point for the Command Center.
-        A unified intelligence engine combining Lifestyle, Business Events, 
-        Global Education, Federal Standards, and Supreme Court Legal Logic.
-        """
-        context = context or {}
-        persona = context.get("persona", "JARVIS")
-
-        # ── Defense-in-depth: backend kill switch ─────────────────────────────
-        state = autonomy_state.get_state()
-        if state.get("frozen"):
-            return {
-                "source": self.identity,
-                "message": (
-                    "Sir, autonomy is currently FROZEN by the Command Center kill switch. "
-                    "I can answer questions, but I will not take any autonomous action "
-                    f"until you unfreeze me. (Frozen since {state.get('frozenAt')})"
-                ),
-                "action_required": False,
-                "frozen": True,
-                "intel_tier": "Safety-Override",
-            }
-
-        # ── Brain: Anthropic Claude (when configured) ─────────────────────────
-        claude_text = await _ask_claude(query, persona, state)
-        if claude_text:
-            return {
-                "source": self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
-                "message": claude_text,
-                "action_required": False,
-                "engine": "anthropic-claude",
-                "model": _anthropic_model(),
-                "autonomy": {"master": state.get("master"), "frozen": False},
-            }
-
-        # ── Fallback: legacy heuristic responses ──────────────────────────────
-        query_lower = query.lower()
-        if persona == "MR_WORDEN_SALES":
-            return await self._converse_mr_worden_sales(query_lower, context)
 
         # ── Unified Intelligence Harmonization ─────────────────────────────────
-        # This catch-all block synthesizes all available logic layers
+        # This catch-all block synthesizes all available logic layers.
         intel_report = f"Sir, I have synthesized the current request against our integrated nodes: {', '.join(self.intel_sources)}. "
-        
+
         # weather / news / financial trends / supply chain / SEO
         if any(w in query_lower for w in ["weather", "forecast", "news", "trend", "market", "finance", "bank", "money", "capital", "revenue", "income", "commodity", "material", "supply", "concrete", "shingle", "asphalt", "aggregate", "stone", "seo", "rank", "google", "search", "virginia", "marketing", "sealcoat", "sealcoating"]):
             return {
@@ -401,15 +315,15 @@ class JarvisAI:
                 "intel_tier": "Global-Financial-Supreme"
             }
 
-        # Business Events Context
+        # Business events context
         if any(w in query_lower for w in ["update", "status", "recent", "happen", "estimate", "payment"]):
-             return {
+            return {
                 "source": self.identity,
                 "message": f"{intel_report}\n\nUpdate: We have a new estimate in Richmond and a $4,500 cleared payment in Midlothian. All 51-state GC compliance checks passed successfully for these transactions.",
-                "action_required": False
+                "action_required": False,
             }
 
-        # Legal & Education Context
+        # Legal & education context
         if any(w in query_lower for w in ["education", "learn", "legal", "law", "supreme", "compliance", "standard", "research", "carbon", "green", "maritime", "guardrail", "license", "insurance", "bond"]):
             return {
                 "source": self.identity,
@@ -426,11 +340,11 @@ class JarvisAI:
                 "intel_tier": "Supreme-Unified-Global"
             }
 
-        # Catch-all Synthesis
+        # Catch-all synthesis
         return {
             "source": self.identity,
             "message": f"Understood, Sir. {intel_report}\n\nI am monitoring all lifestyle, business, and legal systems. How would you like to scale the world today?",
-            "action_required": False
+            "action_required": False,
         }
 
     async def _converse_mr_worden_sales(self, query: str, context: Dict[str, Any]) -> Dict[str, Any]:

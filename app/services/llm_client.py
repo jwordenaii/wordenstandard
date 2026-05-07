@@ -141,11 +141,16 @@ def _get_anthropic() -> Any:
         return None
 
 
+def _google_key() -> str:
+    # Backward-compatible key resolution: support both naming conventions.
+    return os.getenv("GOOGLE_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip()
+
+
 def _get_google() -> Any:
     global _google_client
     if _google_client is not None:
         return _google_client
-    key = os.getenv("GOOGLE_API_KEY", "")
+    key = _google_key()
     if not key:
         return None
     try:
@@ -304,7 +309,7 @@ def _try_provider(
         if provider == "google":
             client = _get_google()
             if client is None:
-                return "", "GOOGLE_API_KEY missing"
+                return "", "GOOGLE_API_KEY or GEMINI_API_KEY missing"
             return _call_google(client, model, system, user, history, max_tokens, temperature), None
         if provider == "perplexity":
             client = _get_perplexity()
@@ -402,7 +407,7 @@ def provider_status() -> dict[str, bool]:
     return {
         "openai":     bool(os.getenv("OPENAI_API_KEY")),
         "anthropic":  bool(os.getenv("ANTHROPIC_API_KEY")),
-        "google":     bool(os.getenv("GOOGLE_API_KEY")),
+        "google":     bool(_google_key()),
         "perplexity": bool(os.getenv("PERPLEXITY_API_KEY")),
         "xai":        bool(os.getenv("XAI_API_KEY")),
     }
