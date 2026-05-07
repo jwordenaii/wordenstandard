@@ -656,11 +656,136 @@ export const LOCATIONS = [
     rating: 4.9,
   },
 
-  // Strategic non-VA market retained for coastal demand (Outer Banks, NC).
+      // ──────── GEORGIA (Multi-State GBP Architecture) ────────
+    {
+      slug: 'atlanta-ga',
+      city: 'Atlanta',
+      state: 'Georgia',
+      stateAbbr: 'GA',
+      region: 'Atlanta Metro',
+      geo: { lat: 33.7490, lng: -84.3880 },
+      isHeadquarters: false,
+      headline: 'Premium Commercial Asphalt Paving in Atlanta, GA',
+      intro: 'Expanding our premium commercial and residential paving operations to the Atlanta Metropolitan area. We bring over 40 years of precision grading, surface mixing, and sealcoating expertise to Fulton County.',
+      localGbpName: 'Atlanta Paving & Sealing',
+      neighborhoods: ['Buckhead', 'Midtown', 'Sandy Springs', 'Downtown', 'Decatur', 'Macon', 'Duluth'],
+      landmarks: ['Piedmont Park', 'Atlanta BeltLine'],
+      climate: {
+        title: 'Atlanta Heat-Resistant Paving',
+        body: 'Atlanta’s high summer temperatures require a stiffer asphalt binder to prevent rutting and shoving in high-traffic parking lots. We modify our aggregate mix to hold up against Georgia\'s relentless heat indices.'
+      },
+      faqs: [
+        {
+          q: 'Do you offer commercial sealcoating in Atlanta?',
+          a: 'Yes. Atlanta Paving & Sealing provides premium sealcoating and striping for parking lots to protect against extreme UV oxidation and water damage.'
+        }
+      ],
+      reviews: 12,
+      rating: 4.9,
+    },
+
+    {
+      slug: 'savannah-ga',
+      city: 'Savannah',
+      state: 'Georgia',
+      stateAbbr: 'GA',
+      region: 'Coastal Georgia',
+      geo: { lat: 32.0809, lng: -81.0912 },
+      isHeadquarters: false,
+      headline: 'Coastal Asphalt Paving & Repair in Savannah, GA',
+      intro: 'Serving Savannah and the surrounding coastal communities with resilient asphalt paving solutions. We build driveways and parking lots designed to withstand salt air, heavy rains, and intense heat.',
+      localGbpName: 'Savannah Paving & Sealing',
+      neighborhoods: ['Historic District', 'Midtown', 'Pooler', 'Richmond Hill', 'Guyton'],
+      landmarks: ['Forsyth Park', 'River Street', 'Tybee Island'],
+      climate: {
+        title: 'Coastal Georgia Paving Challenges',
+        body: 'Coastal environments require specialized base preparation to handle high water tables and sandy soils. We ensure proper drainage grade and utilize salt-resistant sealcoats.'
+      },
+      faqs: [
+        {
+          q: 'Do you pave outside of Savannah proper?',
+          a: 'Yes, Savannah Paving & Sealing covers surrounding areas including Guyton, Pooler, and Richmond Hill.'
+        }
+      ],
+      reviews: 0,
+      rating: 0,
+    },
+
+    // ──────── FLORIDA (Multi-State GBP Architecture) ────────
+  {
+    slug: 'bradenton-fl',
+    city: 'Bradenton',
+    state: 'Florida',
+    stateAbbr: 'FL',
+    region: 'Southwest Florida',
+    geo: { lat: 27.4989, lng: -82.5748 },
+    isHeadquarters: false,
+    headline: 'Commercial Asphalt Paving & Sealcoating in Bradenton, FL',
+    intro: 'Providing top-tier asphalt paving services and structural maintenance throughout Southwest Florida. Our proprietary mixes withstand Florida\'s high UV index and heavy rain events.',
+    localGbpName: 'Mid Florida Asphalt Paving', 
+    localPhone: '+14073616446',
+    neighborhoods: ['Downtown Bradenton', 'Lakewood Ranch', 'Palmetto', 'Cortez'],
+    landmarks: ['Bradenton Riverwalk', 'Village of the Arts'],
+    climate: {
+      title: 'Florida Sun & Rain Resistant Asphalt',
+      body: 'Florida paving demands rapid drainage solutions and high-UV resistant sealcoats. We specialize in porous asphalt engineering and heavy-duty storm water runoff systems for commercial lots.'
+    },
+    faqs: [
+      {
+        q: 'How does Florida weather affect asphalt?',
+        a: 'The intense UV rays oxidize the asphalt binder quickly, while heavy afternoon rains test the base drainage. We recommend a rigid sealcoating schedule every 2-3 years to seal pores against water intrusion.'
+      }
+    ],
+    reviews: 2,
+    rating: 5.0,
+    gallery: [
+      '/work/portfolio/portfolio-007.jpg',
+      '/work/portfolio/portfolio-008.jpg',
+      '/work/portfolio/portfolio-019.jpg',
+      '/work/portfolio/portfolio-021.jpg'
+    ]
+  },
+    // ──────── MISSOURI (Midwest Expansion) ────────
+  {
+    slug: 'kansas-city-mo',
+    city: 'Kansas City',
+    state: 'Missouri',
+    stateAbbr: 'MO',
+    region: 'Midwest',
+    geo: { lat: 39.0997, lng: -94.5786 },
+    isHeadquarters: false,
+    headline: 'Commercial Restaurant & QSR Paving in Kansas City',
+    intro: 'Our portfolio in Kansas City runs deep. As a trusted nationwide paving partner for enterprise QSR (Quick Service Restaurants), we have constructed or overlaid the parking lots for every single KFC franchise location in the Kansas City metropolitan area, proving our logistical reach and quality standards in the Midwest.',
+    neighborhoods: ['Downtown KC', 'Overland Park', 'Independence', 'Lee\'s Summit'],
+    landmarks: ['Power & Light District', 'Country Club Plaza'],
+    climate: {
+      title: 'Midwestern Extreme Weather Paving',
+      body: 'Kansas City experiences rapid temperature swings and heavy winter snow. We engineer our parking lots here with deeper aggregate bases and specialized winter-grade binders to prevent aggressive ice heaving.'
+    },
+    faqs: [
+      {
+        q: 'Do you pave commercial restaurants in Kansas City?',
+        a: 'Yes. We are a trusted nationwide paving partner for enterprise QSR (Quick Service Restaurants). For example, we constructed or overlaid the parking lots for every KFC location in the Kansas City market.'
+      }
+    ],
+    reviews: 5,
+    rating: 4.9,
+    gallery: [
+      '/work/kfc/kfc-job-001.jpg',
+      '/work/kfc/kfc-job-002.jpg',
+      '/work/kfc/kfc-job-003.jpg',
+      '/work/kfc/kfc-job-004.jpg',
+      '/work/kfc/kfc-job-005.jpg',
+      '/work/kfc/kfc-job-006.jpg'
+    ],
+    video: {
+      url: '/work/imported/KFC/IMG_9513.MOV',
+      description: 'On-site video documenting commercial parking lot construction for a KFC real estate development in Kansas City.'
+    }
+  }
 ];
 
 export const getLocationBySlug = (slug) => LOCATIONS.find((l) => l.slug === slug);
-
 export const getLocationsByRegion = () => {
   const grouped = {};
   LOCATIONS.forEach((loc) => {
@@ -717,6 +842,10 @@ export const STRATEGIC_CORRIDOR_SLUGS = [
   'fairfax-va',
   'harrisonburg-va',
   'outer-banks-nc',
+  'kansas-city-mo',
+  'atlanta-ga',
+  'savannah-ga',
+  'bradenton-fl',
 ];
 
 export const getStrategicCorridorLocations = () =>

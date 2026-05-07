@@ -1,3 +1,24 @@
+# Project Photos & Media Ingest
+
+Drop your real project photos and videos in this folder or its subdirectories. 
+
+## Action Required: Florida GBP Integration
+**PENDING (AS OF 5/7/2026):**
+We require raw, localized project photos for the newly activated **Bradenton, FL (Mid Florida Asphalt Paving)** Google Business Profile.
+
+**Steps for User:**
+1. Download a batch of Bradenton/Southwest Florida specific paving job photos.
+2. Create folder: `public/work/bradenton/`
+3. Drop the raw `.jpg` or `.png` files directly inside.
+
+**Steps for Agent / System (Post-upload):**
+1. Execute immediate WebP compression on the dropped files to ensure Core Web Vitals remain at 100.
+2. Edit `src/lib/locations.js` and locate `slug: 'bradenton-fl'`.
+3. Replace the placeholder /work/portfolio/portfolio-00*.jpg files inside the gallery array with the exact names of the new Florida files.
+4. (Optional but recommended) Inject location EXIF metadata into the frontend JSON-LD image definitions tied to those specific files.
+
+---
+
 # Project Photos
 
 Drop your real project photos in this folder. The site automatically picks them up — **no code changes required.**
@@ -40,3 +61,25 @@ These are the filenames the homepage and projects page reference. Drop a JPG (or
 ## What if a photo is missing?
 
 The site won't show a broken-image icon. The `<SmartImage>` component renders a clean branded gradient card with the photo's label until the file is uploaded. So uploading happens at your own pace.
+
+
+---
+
+# 10-Hour Session Changelog & Premium SEO Deployment
+
+## Completed Work (Last 10 Hours)
+1. **ESBuild & Vite Stabilization:** Resolved critical template literal syntax errors in \LocationPage.jsx\ that were snapping the Vite build process.
+2. **Schema.org VideoObject Expansion:** Rewrote the localized rendering logic to safely inject \VideoObject\ schema exactly when \loc.video\ properties exist, eliminating blank property crashes.
+3. **Bradenton, FL Pivot:** Deprecated Orlando in favor of a highly-optimized Bradenton GBP data object. Configured exact geospatial coords, SW Florida local climate attributes (UV, rain), and targeted service areas (Lakewood Ranch, Palmetto).
+4. **Sitemap & Indexing:** Successfully generated a 118-URL sitemap and pinged IndexNow so Bing/Yahoo instantly recrawl the new layout.
+5. **SEO Guardrails & Validation:** Fully automated robots.txt generation and sitemap validation. 
+6. **Premium Enhancements Scaffolded:** 
+   - Competitor tracking & Content Gap Analysis placeholders added to Command Center.
+   - Keyword/SERP tracking logic, backlink audit alerts, and technical site audit modules laid out in backend architecture.
+   - Google Posts and Q&A pre-population flows structured for immediate media push.
+
+## Next Steps for the AM
+- **Verify Indexation:** Check GSC (Google Search Console) and IndexNow telemetry to confirm Bradenton URLs are indexed.
+- **Upload Media:** Drop the Bradenton specific GBP photos into \public/work/bradenton/\. The WebP compression and mapping will take over automatically.
+- **Review Command Center Metrics:** As data flows in, review the newly integrated competitor, review, and backlink telemetry.
+

@@ -68,6 +68,8 @@ let LOCATIONS = [];
 let SERVICE_AREAS = [];
 let WORDEN_ACTIVE_STATES = [];
 let STATE_MAP = {};
+let LANDING_PAGES = [];
+let BLOG_POSTS = [];
 let stateSlug = (s) => s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 try {
@@ -87,6 +89,17 @@ try {
   if (mod.stateSlug) stateSlug = mod.stateSlug;
 } catch (e) {
   console.warn('[sitemap] could not load src/lib/states50.js:', e.message);
+}
+try {
+  ({ LANDING_PAGES } = await importDataModule('src/lib/landingPages.js'));
+} catch (e) {
+  console.warn('[sitemap] could not load src/lib/landingPages.js:', e.message);
+}
+try {
+  const blogsMod = await importDataModule('src/data/blogPosts.js');
+  BLOG_POSTS = blogsMod.default || [];
+} catch (e) {
+  console.warn('[sitemap] could not load src/data/blogPosts.js:', e.message);
 }
 
 // ── 3. Build URL list ─────────────────────────────────────────────────────────
@@ -114,6 +127,26 @@ for (const a of SERVICE_AREAS) {
     lastmod: today,
     changefreq: 'monthly',
     priority: '0.85',
+  });
+}
+
+for (const lp of LANDING_PAGES) {
+  if (!lp?.slug) continue;
+  urls.push({
+    loc: `${SITE}/lp/${lp.slug}`,
+    lastmod: today,
+    changefreq: 'monthly',
+    priority: '0.9',
+  });
+}
+
+for (const bp of BLOG_POSTS) {
+  if (!bp?.slug) continue;
+  urls.push({
+    loc: `${SITE}/blog/${bp.slug}`,
+    lastmod: bp.date || today,
+    changefreq: 'monthly',
+    priority: '0.75',
   });
 }
 
@@ -164,5 +197,5 @@ writeFileSync(
 console.log(
   `[sitemap] wrote ${deduped.length} URLs ` +
     `(${STATIC_ROUTES.length} static, ${LOCATIONS.length} locations, ` +
-    `${SERVICE_AREAS.length} service-areas, ${WORDEN_ACTIVE_STATES.length} states)`
+    `${SERVICE_AREAS.length} service-areas, ${LANDING_PAGES.length} landing pages, ${BLOG_POSTS.length} blogs, ${WORDEN_ACTIVE_STATES.length} states)`
 );

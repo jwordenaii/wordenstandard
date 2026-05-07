@@ -174,8 +174,11 @@ const RequireInternalAdvisory = ({ children }) => (
   </RequireAuth>
 );
 
+import SchemaMarkup, { LOCAL_BUSINESS_SCHEMA } from './components/SchemaMarkup';
+
 const PublicLayout = ({ children }) => (
   <div className="min-h-screen bg-background font-body text-foreground pb-20 md:pb-0">
+    <SchemaMarkup schema={LOCAL_BUSINESS_SCHEMA} />
     <Navbar />
     {children}
     <Footer />

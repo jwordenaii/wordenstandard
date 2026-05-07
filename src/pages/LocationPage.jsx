@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { getLocationBySlug, PRIMARY_DOMAIN } from '@/lib/locations';
@@ -20,51 +20,73 @@ export default function LocationPage() {
 
   const canonicalPath = `/locations/${loc.slug}`;
   const title = `Asphalt Paving in ${loc.city}, ${loc.stateAbbr} | J. Worden & Sons`;
-  const description = `Professional asphalt paving in ${loc.city}, ${loc.state}. ${loc.region} specialists with 40+ years of family-owned experience. Driveways, parking lots, sealcoating. Call (804) 446-1296.`;
+  const description = `Professional asphalt paving in ${loc.city}, ${loc.state}. ${loc.region} specialists with 40+ years of family-owned experience. Driveways, parking lots, sealcoating. Call ${loc.localPhone || '(804) 446-1296'}.`;
 
   // LocalBusiness + FAQPage JSON-LD combined
+  const businessSchema = {
+    '@type': 'GeneralContractor',
+    '@id': `${PRIMARY_DOMAIN}${canonicalPath}#business`,
+    name: loc.localGbpName || `J. Worden & Sons Asphalt Paving — ${loc.city}`,
+      image: loc.gallery && loc.gallery.length > 0 
+        ? loc.gallery.map(img => `${PRIMARY_DOMAIN}${img}`) 
+        : `${PRIMARY_DOMAIN}/hero-paving.jpg`,
+    url: `${PRIMARY_DOMAIN}${canonicalPath}`,
+    telephone: loc.localPhone ? `+1-${loc.localPhone.replace(/\D/g, '')}` : '+1-804-446-1296',
+    email: 'j.wordenandsonspaving@gmail.com',
+    priceRange: '$$',
+    areaServed: {
+      '@type': 'City',
+      name: loc.city,
+      address: {
+        '@type': 'PostalAddress',
+        addressRegion: loc.stateAbbr,
+      },
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: loc.geo.lat,
+      longitude: loc.geo.lng,
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: loc.rating,
+      reviewCount: loc.reviews,
+    },
+    description: loc.intro,
+  };
+
+  // Only bind the Virginia Headquarters address if this location is in VA and does not have a distinct GBP address. 
+  // Otherwise, Google will suspend the out-of-state GBPs for pointing to a VA address.
+      if (loc.isHeadquarters || loc.stateAbbr === 'VA') {
+      businessSchema.address = {
+        '@type': 'PostalAddress',
+        streetAddress: '1601 Ware Bottom Springs Rd, Suite 214',
+        addressLocality: 'Chester',
+        addressRegion: 'VA',
+        postalCode: '23836',
+        addressCountry: 'US',
+      };
+    } else if (loc.localAddress) {
+      businessSchema.address = {
+        '@type': 'PostalAddress',
+        ...loc.localAddress,
+      };
+    }
+
+    if (loc.video) {
+        businessSchema.subjectOf = {
+            '@type': 'VideoObject',
+            name: `${loc.city} Commercial Asphalt Paving by J. Worden & Sons`,
+            description: loc.video.description || `Watch our high-performance paving teams execute precision commercial asphalt overlays and sealcoating in ${loc.city}.`,
+            thumbnailUrl: loc.video.thumbnailUrl || `${PRIMARY_DOMAIN}/hero-paving.jpg`,
+            uploadDate: loc.video.uploadDate || '2026-05-01',
+            contentUrl: `${PRIMARY_DOMAIN}${loc.video.url}`
+        };
+    }
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'GeneralContractor',
-        '@id': `${PRIMARY_DOMAIN}${canonicalPath}#business`,
-        name: `J. Worden & Sons Asphalt Paving — ${loc.city}`,
-        image: '/hero-paving.jpg',
-        url: `${PRIMARY_DOMAIN}${canonicalPath}`,
-        telephone: '+1-804-446-1296',
-        email: 'j.wordenandsonspaving@gmail.com',
-        priceRange: '$$',
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: '1601 Ware Bottom Springs Rd, Suite 214',
-          addressLocality: 'Chester',
-          addressRegion: 'VA',
-          postalCode: '23836',
-          addressCountry: 'US',
-        },
-        areaServed: {
-          '@type': 'City',
-          name: loc.city,
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: loc.city,
-            addressRegion: loc.stateAbbr,
-            addressCountry: 'US',
-          },
-        },
-        geo: {
-          '@type': 'GeoCoordinates',
-          latitude: loc.geo.lat,
-          longitude: loc.geo.lng,
-        },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: loc.rating,
-          reviewCount: loc.reviews,
-        },
-        description: loc.intro,
-      },
+      businessSchema,
       {
         '@type': 'FAQPage',
         mainEntity: loc.faqs.map((f) => ({
@@ -103,8 +125,64 @@ export default function LocationPage() {
         headline={loc.headline}
         intro={loc.intro}
       />
-      <div id="market-content">
-        <MarketCityList
+              <div id="market-content">
+          {loc.gallery && loc.gallery.length > 0 && (
+            <section className="bg-muted/30 border-b border-border py-12 md:py-16">
+              <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                <div className="text-left w-full border-b border-border pb-4 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <p className="font-display font-bold text-primary text-xs uppercase tracking-[0.2em] mb-1">
+                      Our Work
+                    </p>
+                    <h2 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight">
+                      {loc.city} Projects
+                    </h2>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                  {loc.gallery.map((img, idx) => (
+                    <div key={idx} className="aspect-square relative overflow-hidden rounded-md border border-border group bg-muted">
+                      <img 
+                        src={img} 
+                        alt={`${loc.city} Paving Project ${idx + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading={idx > 3 ? "lazy" : "eager"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+                  {loc.video && (
+            <section className="bg-background border-b border-border py-12 md:py-16">
+              <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                <div className="text-left w-full border-b border-border pb-4 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <p className="font-display font-bold text-primary text-xs uppercase tracking-[0.2em] mb-1">
+                      On-Site Video
+                    </p>
+                    <h2 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight">
+                      {loc.city} Project Footage
+                    </h2>
+                  </div>
+                </div>
+                <div className="relative aspect-video rounded-lg overflow-hidden border border-border bg-black mt-6">
+                  <video 
+                    controls 
+                    preload="metadata" 
+                    className="w-full h-full object-cover"
+                    poster={loc.video.thumbnailUrl || '/hero-paving.jpg'}
+                  >
+                    <source src={loc.video.url} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <MarketCityList
           city={loc.city}
           state={loc.state}
           neighborhoods={loc.neighborhoods}

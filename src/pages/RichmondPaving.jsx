@@ -1,19 +1,17 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Construction, MapPin, Trophy, Star, Phone } from 'lucide-react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import SEO from '@/components/SEO'
-import { trackPhoneClick } from '@/lib/analytics'
-import { legacyPortfolioImages } from '@/data/legacyPortfolio'
+import { Construction, MapPin, Trophy, Star, Phone, Camera, ShieldCheck } from 'lucide-react'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import SEO from '../components/SEO'
+import { trackPhoneClick } from '../lib/analytics'
 
-// Richmond's real geography — this is what ranks locally.
 const RICHMOND_ZONES = [
-  { area: 'The Fan & Museum District', detail: 'Residential driveways and alley paving in Richmond City\'s historic neighborhoods — tight access, precision work, no margin for error.' },
-  { area: 'Scott\'s Addition', detail: 'Brewery districts, mixed-use commercial courtyards, and rapidly developing urban lots. We work nights to keep the district moving.' },
-  { area: 'Shockoe Bottom & Slip', detail: 'Urban commercial and restaurant row parking. We\'ve maintained lots serving Richmond\'s restaurant corridor for decades.' },
+  { area: 'The Fan & Museum District', detail: "Residential driveways and alley paving in Richmond City's historic neighborhoods — tight access, precision work, no margin for error." },
+  { area: "Scott's Addition", detail: 'Brewery districts, mixed-use commercial courtyards, and rapidly developing urban lots. We work nights to keep the district moving.' },
+  { area: 'Shockoe Bottom & Slip', detail: "Urban commercial and restaurant row parking. We've maintained lots serving Richmond's restaurant corridor for decades." },
   { area: 'Manchester / South Richmond', detail: 'Heavy industrial and logistics yards along the James River corridor — full-depth concrete and asphalt for high-axle-load surfaces.' },
-  { area: 'West End / Short Pump', detail: 'Suburban retail, HOA communities, and commercial strip paving in Henrico\'s fastest-growing commercial corridor.' },
+  { area: 'West End / Short Pump', detail: "Suburban retail, HOA communities, and commercial strip paving in Henrico's fastest-growing commercial corridor." },
   { area: 'Midlothian / Chesterfield', detail: 'Our home base. We know every subdivision, every commercial strip, and every drainage problem on Route 360 and Midlothian Turnpike.' },
 ]
 
@@ -27,82 +25,75 @@ const SERVICES = [
 ]
 
 const FAQS = [
-  {
-    q: 'How much does asphalt paving cost in Richmond, VA?',
-    a: 'Residential driveways in Richmond typically run $4–$8 per square foot depending on base conditions, access, and scope. Commercial lots range $3–$6/sqft at scale. Virginia clay soil often requires additional base work — we assess that upfront and include it in our written scope.',
-  },
-  {
-    q: 'How long does asphalt paving last in Richmond\'s climate?',
-    a: 'Richmond\'s climate is aggressive — hot humid summers accelerate oxidation and winter freeze-thaw cycles crack neglected pavement. A properly installed driveway or parking lot lasts 20–25 years with a sealcoating program every 3–5 years.',
-  },
-  {
-    q: 'Are you licensed and insured to pave in Virginia?',
-    a: 'Yes. We carry full Virginia contractor licensing, general liability, and workers\' compensation. We are VDOT-prequalified and carry all required insurance for both residential and commercial work.',
-  },
-  {
-    q: 'Do you pave in Richmond City, Chesterfield, and Henrico?',
-    a: 'Yes. Our primary service area covers Richmond City, Chesterfield County, Henrico County, Colonial Heights, Petersburg, Hopewell, and all surrounding areas within the Richmond metro.',
-  },
+  { q: 'Do you need a permit to pave a driveway in Richmond?', a: "In the City of Richmond, you generally need a right-of-way permit if tying into a city street or alleyway. In Chesterfield and Henrico, basic resurfacing doesn't typically require a permit, but new cut-ins do. We handle all zoning and utility checks." },
+  { q: 'How does clay soil in Central Virginia affect paving?', a: "Richmond sits on heavy red clay which expands and contracts aggressively with moisture. If your base course isn't properly excavated and compacted with CR-6 stone, the asphalt will fail prematurely. We dig deep." },
+  { q: "Are you insured for commercial paving in Scott's Addition?", a: "Yes. We carry comprehensive commercial general liability, auto, and workers' comp exceeding minimum requirements for Class A contractors in VA. COIs are provided with all commercial bids." },
 ]
 
+const LOCAL_IMAGES = [
+  '/work/imported/KFC/IMG_9496.JPG',
+  '/work/imported/KFC/IMG_9499-COLLAGE.jpg',
+  '/work/imported/KFC/IMG_9499.JPG',
+  '/work/imported/KFC/IMG_9500.JPG',
+  '/work/imported/KFC/IMG_9507.JPG',
+  '/work/imported/KFC/IMG_9509.JPG'
+];
+
 export default function RichmondPaving() {
-  const heroImg = legacyPortfolioImages[4]
-
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'LocalBusiness',
-        name: 'J. Worden & Sons Asphalt Paving',
-        url: 'https://www.jwordenasphaltpaving.com/',
-        telephone: '+18044461296',
-        priceRange: '$$',
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'Chester',
-          addressRegion: 'VA',
-          postalCode: '23831',
-          addressCountry: 'US',
-        },
-        geo: { '@type': 'GeoCoordinates', latitude: 37.3550, longitude: -77.4410 },
-        areaServed: [
-          'Richmond, VA', 'Chesterfield, VA', 'Henrico, VA',
-          'Midlothian, VA', 'Colonial Heights, VA', 'Petersburg, VA', 'Hopewell, VA',
-        ],
-        hasOfferCatalog: {
-          '@type': 'OfferCatalog',
-          name: 'Asphalt Paving Services',
-          itemListElement: SERVICES.map(s => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: s.title } })),
-        },
-        aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', reviewCount: '178' },
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: FAQS.map(faq => ({
-          '@type': 'Question',
-          name: faq.q,
-          acceptedAnswer: { '@type': 'Answer', text: faq.a },
-        })),
-      },
-    ],
-  }
-
   return (
-    <div className="min-h-screen bg-brand-navy">
-      <SEO
-        title="Asphalt Paving Richmond VA | Driveways, Parking Lots & Roads"
-        description="J. Worden & Sons — Richmond VA's most trusted asphalt paving contractor since 1984. Driveways, parking lots, roads, and emergency repairs. Serving Chesterfield, Henrico, Midlothian, and all Richmond metro areas."
-        canonicalPath="/richmond-paving"
-        jsonLd={jsonLd}
+    <div className="min-h-screen bg-black overflow-x-hidden selection:bg-brand-amber selection:text-black">
+      <SEO 
+        title="Leading Richmond Asphalt Paving Contractor | Mid-Atlantic Asphalt"
+        description="40+ years paving Richmond. Residential driveways, commercial parking lots, & VDOT approved road building in Chesterfield, Henrico & Richmond City."
+        type="LocalBusiness"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "PavingContractor",
+          "name": "Mid-Atlantic Asphalt Support",
+          "image": "https://midatlanticasphalt.com/work/imported/KFC/IMG_9500.JPG",
+          "@id": "https://midatlanticasphalt.com/richmond",
+          "url": "https://midatlanticasphalt.com/richmond",
+          "telephone": "+18044461296",
+          "priceRange": "$$",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Regional HQ",
+            "addressLocality": "Richmond",
+            "addressRegion": "VA",
+            "postalCode": "23219",
+            "addressCountry": "US"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 37.5407,
+            "longitude": -77.4360
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+            ],
+            "opens": "07:00",
+            "closes": "19:00"
+          },
+          "areaServed": [
+            "Richmond", "Chesterfield", "Henrico", "Midlothian", "Petersburg"
+          ],
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "58"
+          }
+        }}
       />
       <Navbar />
-
-      {/* HERO */}
+      
+      {/* HERO SECTION */}
       <section className="relative pt-32 pb-24 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-navy via-brand-navy to-black opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-navy via-brand-navy to-black opacity-95" />
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url(${heroImg?.url || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80'})` }}
+          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay"
+          style={{ backgroundImage: `url('/work/imported/KFC/IMG_9509.JPG')`, filter: 'grayscale(100%)' }}
         />
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="max-w-3xl">
@@ -128,13 +119,13 @@ export default function RichmondPaving() {
               >
                 <Phone className="w-5 h-5" /> (804) 446-1296
               </a>
-              <Link to="/quote" className="btn-outline py-5 px-10 text-white text-lg font-black">
+              <Link to="/quote" className="btn-outline py-5 px-10 text-white text-lg font-black bg-white/5 backdrop-blur-sm border-white/20">
                 Free Estimate
               </Link>
             </div>
 
             {/* Stat bar */}
-            <div className="grid grid-cols-4 gap-8 mt-16 pt-8 border-t border-white/10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-8 border-t border-white/10">
               {[
                 { val: '40+', label: 'Years in VA' },
                 { val: '4.9★', label: 'Google Rating' },
@@ -142,38 +133,82 @@ export default function RichmondPaving() {
                 { val: 'VDOT', label: 'Prequalified' },
               ].map(stat => (
                 <div key={stat.label}>
-                  <p className="text-brand-amber font-black text-3xl">{stat.val}</p>
-                  <p className="text-white/30 text-xs uppercase tracking-widest mt-1">{stat.label}</p>
+                  <p className="text-brand-amber font-black text-3xl md:text-4xl">{stat.val}</p>
+                  <p className="text-white/30 text-xs uppercase tracking-widest mt-1 font-bold">{stat.label}</p>
                 </div>
               ))}
-            </div>
-            {/* Awards */}
-            <div className="flex flex-wrap items-center gap-2 mt-6 pt-6 border-t border-white/10">
-              <span className="text-white/30 text-xs uppercase tracking-widest font-bold">Awards:</span>
-              <span className="bg-brand-amber/10 text-brand-amber text-xs font-bold px-3 py-1.5 rounded-full">🏆 Pavement Mag Top 75</span>
-              <span className="bg-white/10 text-white/80 text-xs font-bold px-3 py-1.5 rounded-full">⭐ Best of Houzz</span>
-              <span className="bg-white/10 text-white/80 text-xs font-bold px-3 py-1.5 rounded-full">🎖 2026 Top Contractor Nominee</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* LOCAL RICHMOND ZONES */}
-      <section className="py-24 bg-white/5 border-y border-white/10 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block bg-brand-amber/10 text-brand-amber text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">Local Expertise</span>
-            <h2 className="text-white font-black text-3xl md:text-5xl tracking-tight">We've Paved Every Part of Richmond.</h2>
+      {/* MAP & TRUST SIGNS */}
+      <section className="py-16 bg-black border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <ShieldCheck className="w-8 h-8 text-brand-amber" />
+                <h2 className="text-3xl font-black text-white tracking-tight">Licensed Class A VA Contractor</h2>
+              </div>
+              <p className="text-white/60 text-lg leading-relaxed mb-6">
+                We're fully licensed and insured for both residential and heavy commercial scope throughout the Commonwealth of Virginia.
+                When you hire Mid-Atlantic Asphalt, you're getting heavy iron and full liability protection.
+              </p>
+              <ul className="space-y-4">
+                {[
+                  "Class A Heavy Highway Qualified",
+                  "Full General Liability Insurance",
+                  "Workers Compensation Current",
+                  "City Right-of-Way Permit Experts"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-3 text-white/80 font-medium">
+                    <div className="w-2 h-2 rounded-full bg-brand-amber" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d101185.34185794695!2d-77.53325603719714!3d37.524673648439366!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89b111095799c9ed%3A0xbfd83e6de062e742!2sRichmond%2C%20VA!5e0!3m2!1sen!2sus!4v1700684728956!5m2!1sen!2sus" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen="" 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Richmond Map Coverage"
+                className="absolute inset-0"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {RICHMOND_ZONES.map((zone, i) => (
-              <div key={i} className="bg-brand-navy border border-white/10 p-7 rounded-2xl hover:border-brand-amber/40 transition-all">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-brand-amber flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="text-white font-black text-base mb-2">{zone.area}</h3>
-                    <p className="text-white/40 text-sm leading-relaxed">{zone.detail}</p>
-                  </div>
+        </div>
+      </section>
+
+      {/* LOCAL OPTIMIZED GALLERY INTEGRATION */}
+      <section className="py-24 bg-brand-navy border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-black/40 text-brand-amber rounded-full text-xs font-bold uppercase tracking-widest mb-4 border border-white/5">
+               <Camera className="w-4 h-4" /> Live Project Intel
+            </div>
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">
+              Recent Paving Work
+            </h2>
+            <p className="text-white/60 text-lg">
+              We document our work. View our latest commercial lot replacements and high-end residential driveway installations across the Richmond region.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {LOCAL_IMAGES.map((imgSrc, idx) => (
+              <div key={idx} 
+                   className="group relative aspect-square md:aspect-video bg-black overflow-hidden rounded-2xl bg-cover bg-center cursor-pointer border border-white/5"
+                   style={{ backgroundImage: `url('${imgSrc}')` }}>
+                <div className="absolute inset-0 bg-brand-navy/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0">
+                   <p className="text-brand-amber font-bold uppercase tracking-widest text-xs mb-1">Richmond Job</p>
+                   <p className="text-white font-bold text-lg leading-tight md:text-xl">Completed Paving</p>
                 </div>
               </div>
             ))}
@@ -181,16 +216,37 @@ export default function RichmondPaving() {
         </div>
       </section>
 
+      {/* GEOGRAPHY GRID */}
+      <section className="py-24 px-4 bg-black">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-white font-black text-3xl md:text-5xl tracking-tight mb-4">Richmond Service Areas.</h2>
+            <p className="text-white/50 text-lg max-w-2xl mx-auto">
+              From historic downtown alleys to massive industrial parks south of the river. We have the logistics and the local knowledge to handle it anywhere in RVA.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {RICHMOND_ZONES.map((zone, i) => (
+              <div key={i} className="bg-brand-navy border border-white/5 rounded-3xl p-8 hover:border-brand-amber/30 transition-all">
+                <MapPin className="w-6 h-6 text-brand-amber mb-4" />
+                <h3 className="text-white font-bold text-xl mb-2">{zone.area}</h3>
+                <p className="text-white/40 text-sm leading-relaxed">{zone.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* SERVICES */}
-      <section className="py-24 px-4">
+      <section className="py-24 px-4 bg-brand-navy border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-white font-black text-3xl md:text-5xl tracking-tight mb-4">Everything Asphalt.</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {SERVICES.map((svc, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:border-brand-amber/30 transition-all group">
-                <Construction className="w-8 h-8 text-brand-amber mb-5 group-hover:scale-110 transition-transform" />
+              <div key={i} className="bg-black/50 border border-white/5 rounded-3xl p-8 hover:border-brand-amber/30 hover:bg-black transition-all group">
+                <Construction className="w-8 h-8 text-brand-amber mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform" />
                 <h3 className="text-white font-black text-xl mb-3 tracking-tight">{svc.title}</h3>
                 <p className="text-white/50 text-sm leading-relaxed">{svc.desc}</p>
               </div>
@@ -199,15 +255,20 @@ export default function RichmondPaving() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 bg-white/5 border-t border-white/10 px-4">
+      {/* FAQ inline schema */}
+      <section className="py-24 px-4 bg-black border-t border-white/5">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-white font-black text-3xl md:text-5xl tracking-tight text-center mb-14">Richmond Paving FAQs.</h2>
-          <div className="space-y-6">
+          <div className="text-center mb-16">
+            <h2 className="text-white font-black text-3xl md:text-5xl tracking-tight mb-4">Richmond Paving FAQs</h2>
+            <p className="text-white/50 text-lg">Straight answers to common Central Virginia asphalt questions.</p>
+          </div>
+          <div className="space-y-6" itemScope itemType="https://schema.org/FAQPage">
             {FAQS.map((faq, i) => (
-              <div key={i} className="bg-brand-navy border border-white/10 rounded-2xl p-8">
-                <h3 className="text-white font-bold text-lg mb-3">{faq.q}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{faq.a}</p>
+              <div key={i} className="bg-brand-navy border border-white/5 rounded-2xl p-8 transition-colors hover:border-white/10" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                <h3 className="text-white font-bold text-xl mb-4 pr-12" itemProp="name">{faq.q}</h3>
+                <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                  <p className="text-white/60 text-base leading-relaxed" itemProp="text">{faq.a}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -215,26 +276,28 @@ export default function RichmondPaving() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto bg-brand-amber rounded-[2.5rem] p-12 md:p-16 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10"><Star size={140} /></div>
-          <p className="text-brand-navy/60 font-bold uppercase tracking-widest text-sm mb-4">The Richmond Standard</p>
-          <h2 className="text-brand-navy font-black text-3xl md:text-5xl leading-tight mb-6">
-            40 Years. One Standard. No Shortcuts.
+      <section className="py-24 px-4 bg-black">
+        <div className="max-w-5xl mx-auto bg-brand-amber rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 p-8 opacity-10 blur-sm mix-blend-overlay pointer-events-none transform rotate-12 scale-150">
+            <Trophy size={400} />
+          </div>
+          <p className="text-brand-navy/60 font-black uppercase tracking-widest text-sm mb-4">The Richmond Standard</p>
+          <h2 className="text-brand-navy font-black text-4xl md:text-6xl leading-tight mb-6 tracking-tighter">
+            40 Years. One Standard.<br />No Shortcuts.
           </h2>
-          <p className="text-brand-navy/60 text-lg mb-8 max-w-2xl mx-auto">
-            Call the crew that Chesterfield, Henrico, and Richmond City have trusted since 1984.
+          <p className="text-brand-navy/70 text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-medium">
+            Call the paving crew that Chesterfield, Henrico, and Richmond City have trusted since 1984.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center relative z-10">
             <a
               href="tel:+18044461296"
-              onClick={() => trackPhoneClick('richmond-paving-cta')}
-              className="bg-brand-navy text-white font-black py-4 px-8 rounded-full hover:bg-brand-navy/80 transition-colors"
+              onClick={() => trackPhoneClick('richmond-cta')}
+              className="bg-brand-navy hover:bg-black text-brand-amber py-5 px-10 rounded-full text-xl font-black flex items-center justify-center gap-3 transition-colors shadow-2xl shadow-brand-navy/20 active:scale-95"
             >
-              Call (804) 446-1296
+              <Phone className="w-6 h-6" /> (804) 446-1296
             </a>
-            <Link to="/quote" className="bg-white/20 text-brand-navy font-black py-4 px-8 rounded-full hover:bg-white/30 transition-colors">
-              Get Free Estimate
+            <Link to="/quote" className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-brand-navy/10 text-brand-navy py-5 px-10 rounded-full text-xl font-black transition-all active:scale-95 text-center flex items-center justify-center">
+              Request Your Free Quote
             </Link>
           </div>
         </div>

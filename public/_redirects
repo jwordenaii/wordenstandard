@@ -25,6 +25,12 @@ https://www.jwordensons.com/*   https://www.jwordenasphaltpaving.com/:splat     
 https://jwordenpaving.com/*     https://www.jwordenasphaltpaving.com/:splat       301!
 https://www.jwordenpaving.com/* https://www.jwordenasphaltpaving.com/:splat       301!
 
+# Added: jwordenandsonspaving.com canonicalization
+https://jwordenandsonspaving.com/*       https://www.jwordenasphaltpaving.com/:splat       301!
+https://www.jwordenandsonspaving.com/*   https://www.jwordenasphaltpaving.com/:splat       301!
+http://jwordenandsonspaving.com/*        https://www.jwordenasphaltpaving.com/:splat       301!
+http://www.jwordenandsonspaving.com/*    https://www.jwordenasphaltpaving.com/:splat       301!
+
 # ============================================================
 # VIRGINIA GEO DOMAINS → specific location pages
 # ============================================================
@@ -77,6 +83,56 @@ https://www.kansascitypavingpros.com/* https://www.jwordenasphaltpaving.com/loca
 # NOTE: /contact MUST resolve to the SPA Contact page (used by Google Ads).
 # Do NOT add a redirect here for /contact.
 /fredericksburg-va-paving   /locations  301!
+
+# === AUTO-GENERATED: Canonicalize new location/service/state URLs ===
+/states/virginia              /states/virginia              301!
+/states/north-carolina        /states/north-carolina        301!
+/states/georgia               /states/georgia               301!
+/states/florida               /states/florida               301!
+/states/michigan              /states/michigan              301!
+/states/texas                 /states/texas                 301!
+/states/kansas                /states/kansas                301!
+/states/missouri              /states/missouri              301!
+/states/iowa                  /states/iowa                  301!
+/states/minnesota             /states/minnesota             301!
+/states/new-york              /states/new-york              301!
+/states/new-jersey            /states/new-jersey            301!
+/service-areas/chester-va         /service-areas/chester-va         301!
+/service-areas/richmond-va        /service-areas/richmond-va        301!
+/service-areas/chesterfield-va    /service-areas/chesterfield-va    301!
+/service-areas/colonial-heights-va /service-areas/colonial-heights-va 301!
+/service-areas/hopewell-va        /service-areas/hopewell-va        301!
+/service-areas/petersburg-va      /service-areas/petersburg-va      301!
+/service-areas/henrico-va         /service-areas/henrico-va         301!
+/service-areas/midlothian-va      /service-areas/midlothian-va      301!
+/service-areas/mechanicsville-va  /service-areas/mechanicsville-va  301!
+/service-areas/glen-allen-va      /service-areas/glen-allen-va      301!
+/service-areas/ashland-va         /service-areas/ashland-va         301!
+/service-areas/powhatan-va        /service-areas/powhatan-va        301!
+/service-areas/prince-george-va   /service-areas/prince-george-va   301!
+/service-areas/dinwiddie-va       /service-areas/dinwiddie-va       301!
+/service-areas/fredericksburg-va  /service-areas/fredericksburg-va  301!
+/service-areas/williamsburg-va    /service-areas/williamsburg-va    301!
+/service-areas/suffolk-va         /service-areas/suffolk-va         301!
+/service-areas/virginia-beach-va  /service-areas/virginia-beach-va  301!
+/service-areas/norfolk-va         /service-areas/norfolk-va         301!
+/service-areas/charlottesville-va /service-areas/charlottesville-va 301!
+/locations/chester-va             /locations/chester-va             301!
+/locations/richmond-va            /locations/richmond-va            301!
+/locations/midlothian-va          /locations/midlothian-va          301!
+/locations/short-pump-va          /locations/short-pump-va          301!
+/locations/henrico-va             /locations/henrico-va             301!
+/locations/chesapeake-va          /locations/chesapeake-va          301!
+/locations/williamsburg-va        /locations/williamsburg-va        301!
+/locations/new-kent-va            /locations/new-kent-va            301!
+/locations/roanoke-va             /locations/roanoke-va             301!
+/locations/harrisonburg-va        /locations/harrisonburg-va        301!
+/locations/winchester-va          /locations/winchester-va          301!
+/locations/virginia-beach-va      /locations/virginia-beach-va      301!
+/locations/fredericksburg-va      /locations/fredericksburg-va      301!
+/locations/dinwiddie-va           /locations/dinwiddie-va           301!
+/locations/fairfax-va             /locations/fairfax-va             301!
+/locations/outer-banks-nc         /locations/outer-banks-nc         301!
 
 # ============================================================
 # AD LANDING ALIASES — common Google Ads URL variants that

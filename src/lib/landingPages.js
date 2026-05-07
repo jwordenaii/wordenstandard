@@ -1,4 +1,4 @@
-﻿import { PRIMARY_DOMAIN } from '@/lib/locations'
+﻿import { PRIMARY_DOMAIN } from './locations.js'
 
 const AUTHORITY_CITATIONS = [
   {
@@ -370,6 +370,118 @@ export const LANDING_PAGES = [
         '<a href="https://www.jwordenasphaltpaving.com/lp/fredericksburg-church-parking-lot-paving" rel="noopener">Fredericksburg Church Safety Checklist — J. Worden & Sons</a>',
     },
   },
+  {
+    slug: 'midlothian-driveway-paving',
+    title: 'Midlothian Driveway Paving & Replacement',
+    headline: 'Precision Driveway Paving in Midlothian, VA',
+    subheadline:
+      'Machine-laid asphalt driveways built with 6-inch structural stone bases to withstand Virginia clay soil and freeze-thaw cycles without rutting.',
+    metaDescription:
+      'Midlothian VA driveway paving contractor. New construction, replacement, and resurfacing by J. Worden & Sons. Engineered for durability on Virginia clay.',
+    canonicalPath: '/lp/midlothian-driveway-paving',
+    ogImage: '/work/imported/Gallery/IMG_7781.jpg',
+    serviceArea: 'Midlothian, VA',
+    primaryKeyword: 'midlothian driveway paving',
+    adIntent: 'high_residential_replacement',
+    adGroup: 'VA | Midlothian | Driveway Paving',
+    keywordCluster: [
+      'midlothian driveway paving',
+      'asphalt driveway contractors midlothian va',
+      'driveway replacement midlothian',
+      'pave driveway chesterfield county',
+      'blacktop driveway installation',
+    ],
+    trustPoints: [
+      'Built specifically to perform on expansive Virginia clay soils',
+      'Engineered cross-slope drainage to eliminate pooling and edge scour',
+      'Heavy-duty residential mix (PG 64-22 surface over solid base)',
+    ],
+    outcomes: [
+      'Boost curb appeal with a crisp, machine-laid finish',
+      'Stop recurring pothole and webbing failures through proper base reinforcement',
+      'Secure long-term value with a 20-30 year pavement lifespan',
+    ],
+    cta: {
+      label: 'Get Your Driveway Estimate',
+      href: '/#quote',
+    },
+    faq: [
+      {
+        q: 'Why do driveways fail so often in Midlothian?',
+        a: 'Most fail because they are built directly on Virginia clay with a base that is too thin. We build with a 6-inch structural stone base to isolate the pavement from soil expansion.',
+      },
+      {
+        q: 'Do you handle the permit process if required?',
+        a: 'Yes, if the driveway ties into a VDOT right-of-way, we handle the required permitting and ensure the apron meets specification.',
+      },
+      {
+        q: 'Can you pave my driveway if it has drainage problems?',
+        a: 'We shoot laser grades to identify and correct drainage BEFORE we lay asphalt. We will never pave over a standing water issue.',
+      },
+    ],
+    citations: AUTHORITY_CITATIONS,
+    backlinkAsset: {
+      title: 'Virginia Clay Driveway Base Guide (Free)',
+      description: 'Why driveway bases matter on clay soils and how to tell if you need an upgrade.',
+      embedSnippet: '<a href="https://www.jwordenasphaltpaving.com/lp/midlothian-driveway-paving" rel="noopener">Clay Soil Driveway Guide — J. Worden & Sons</a>',
+    },
+  },
+  {
+    slug: 'virginia-beach-sealcoating',
+    title: 'Virginia Beach Commercial Sealcoating & Maintenance',
+    headline: 'Coastal-Grade Sealcoating For Virginia Beach Properties',
+    subheadline:
+      'High-solids commercial sealcoating formulated to protect asphalt from coastal salt aerosol, UV oxidation, and heavy traffic wear.',
+    metaDescription:
+      'Commercial sealcoating in Virginia Beach. J. Worden & Sons uses premium, coastal-spec materials to extend pavement life and protect against salt and sun damage.',
+    canonicalPath: '/lp/virginia-beach-sealcoating',
+    ogImage: '/work/imported/Gallery/IMG_6045.jpg',
+    serviceArea: 'Virginia Beach, VA',
+    primaryKeyword: 'virginia beach sealcoating',
+    adIntent: 'high_commercial_maintenance',
+    adGroup: 'VA | Virginia Beach | Sealcoating',
+    keywordCluster: [
+      'virginia beach sealcoating',
+      'commercial asphalt sealer virginia beach',
+      'parking lot maintenance coastal virginia',
+      'asphalt sealcoating contractor',
+      'crack filling and sealing',
+    ],
+    trustPoints: [
+      'Industrial-grade, high-solids sealants mixed for coastal climates',
+      'Hot-pour rubberized crack sealing to block subgrade moisture intrusion',
+      'Phased application scheduling to minimize tenant downtime',
+    ],
+    outcomes: [
+      'Double the lifespan of your asphalt by blocking oxidation and salt',
+      'Restore the deep black finish and restripe for safety and compliance',
+      'Delay catastrophic base failures and expensive full replacements',
+    ],
+    cta: {
+      label: 'Request Maintenance Plan',
+      href: '/#quote',
+    },
+    faq: [
+      {
+        q: 'How often should a Virginia Beach lot be sealcoated?',
+        a: 'Due to salt air and intense UV exposure, we recommend coastal properties sealcoat every 2 to 2.5 years, compared to every 3 years inland.',
+      },
+      {
+        q: 'Do you fix cracks during sealcoating?',
+        a: 'Yes, we perform hot-rubberized crack filling as the critical first step before sealcoating to block water from reaching the base.',
+      },
+      {
+        q: 'How long does the sealer take to dry?',
+        a: 'In typical coastal summer conditions, the lot can bear foot traffic in 2-4 hours and vehicle traffic in 24 hours. We phase work so you never fully close.',
+      },
+    ],
+    citations: AUTHORITY_CITATIONS,
+    backlinkAsset: {
+      title: 'Coastal Pavement Preservation Checklist (Free)',
+      description: 'A maintenance checklist tailored for properties exposed to salt aerosol and high UV.',
+      embedSnippet: '<a href="https://www.jwordenasphaltpaving.com/lp/virginia-beach-sealcoating" rel="noopener">Coastal Preservation Guide — J. Worden & Sons</a>',
+    },
+  }
 ]
 
 export const LANDING_ADS_MAP = LANDING_PAGES.map((page) => ({
