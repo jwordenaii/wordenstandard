@@ -26,9 +26,12 @@ import {
 //
 // After creating each, Google gives you a "Conversion label" (e.g. "AbC-D_efGhIjKl")
 // Paste them below — replace PASTE_LEAD_LABEL and PASTE_PHONE_LABEL.
-const GADS_ID = 'AW-18031160509';
-const GADS_LEAD_CONVERSION = `${GADS_ID}/PASTE_LEAD_LABEL`;
-const GADS_PHONE_CONVERSION = `${GADS_ID}/PASTE_PHONE_LABEL`;
+const GADS_ID = import.meta.env.VITE_GADS_ID || 'AW-1410045668';
+const LEAD_LABEL = import.meta.env.VITE_GADS_LABEL_LEAD_FORM || 'PASTE_LEAD_LABEL';
+const PHONE_LABEL = import.meta.env.VITE_GADS_LABEL_PHONE_CLICK || 'PASTE_PHONE_LABEL';
+
+const GADS_LEAD_CONVERSION = `${GADS_ID}/${LEAD_LABEL}`;
+const GADS_PHONE_CONVERSION = `${GADS_ID}/${PHONE_LABEL}`;
 
 const hasGtag = () => typeof window !== 'undefined' && typeof window.gtag === 'function';
 

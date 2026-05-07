@@ -2,6 +2,7 @@ import React from 'react';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { trackPhoneClick } from '@/lib/analytics';
 import { PRIMARY_LOGO_URL } from '@/lib/branding';
+import SocialLinks from './SocialLinks';
 
 export default function Footer() {
   const scrollTo = (href) => {
@@ -33,9 +34,10 @@ export default function Footer() {
                 </p>
               </div>
             </div>
-            <p className="font-body text-muted-foreground text-sm leading-relaxed">
+            <p className="font-body text-muted-foreground text-sm leading-relaxed mb-6">
               Family-owned and operated. 40+ years paving Virginia — from Hampton Roads to the Blue Ridge.
             </p>
+            <SocialLinks size="sm" className="opacity-80 hover:opacity-100 transition-opacity" />
           </div>
 
           {/* Quick links */}
