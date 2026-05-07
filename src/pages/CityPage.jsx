@@ -323,6 +323,69 @@ export default function CityPage() {
         </section>
       )}
 
+      {/* ── SEO Depth / Local Content ── */}
+      <section className="py-12 bg-slate-50 border-t border-brand-navy/10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div className="prose prose-brand max-w-none">
+              <h2 className="text-2xl font-bold text-brand-navy mb-4">
+                Local Paving Experts in {area.city}, {area.stateCode}
+              </h2>
+              <p className="text-brand-navy/80">
+                When you search for reliable asphalt paving in <strong>{area.city}, {area.stateCode}</strong>, 
+                you need a contractor who understands the local climate and zoning requirements 
+                of {area.county || 'the area'}. At J. Worden & Sons, we don't just pour asphalt — 
+                we engineer surfaces designed to withstand the freeze-thaw cycles and intense 
+                summer heat characteristic of {area.state}.
+              </p>
+              
+              <h3 className="text-xl font-semibold text-brand-navy mt-6 mb-3">
+                Serving {area.city} Neighborhoods & Landmarks
+              </h3>
+              <p className="text-brand-navy/80 mb-4">
+                Our crews frequently work near {(area.nearbyLandmarks || []).join(', ')} 
+                and surrounding communities. Whether it's a sprawling commercial lot near the highway 
+                or a quiet residential driveway, we know how to get equipment in and out efficiently 
+                without disrupting the neighborhood.
+              </p>
+
+              {(area.neighborhoods && area.neighborhoods.length > 0) && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-brand-navy">Neighborhoods We Serve:</h4>
+                  <p className="text-sm text-brand-navy/70 mt-1">
+                    {area.neighborhoods.join(', ')}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-brand-navy/80 mt-4">
+                Proper drainage, a compacted sub-base, and high-grade asphalt mix are 
+                non-negotiable for long-lasting results. We handle the entire process — from 
+                excavation and grading to laying the final wear course. If you reside in or 
+                operate a business in {area.city}, our team is ready to deliver an investment 
+                that boosts curb appeal and property value.
+              </p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-brand-navy/10">
+              <h3 className="text-lg font-bold text-brand-navy mb-4">Service Area Map</h3>
+              <div className="aspect-[4/3] rounded-lg overflow-hidden relative bg-slate-200">
+                <iframe
+                  title={`Map showing ${area.city}, ${area.stateCode}`}
+                  src={`https://www.google.com/maps?q=${area.city},${area.stateCode}&t=m&z=11&output=embed&iwloc=near`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Nearby service areas ── */}
       <section className="py-16 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">

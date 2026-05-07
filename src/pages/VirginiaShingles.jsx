@@ -4,6 +4,7 @@ import { ShieldCheck, Zap, Construction, Trash2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
+import SmartImage from '@/components/SmartImage'
 import { trackPhoneClick } from '@/lib/analytics'
 import { legacyPortfolioImages } from '@/data/legacyPortfolio'
 
@@ -61,13 +62,11 @@ export default function VirginiaShingles() {
             </div>
           </div>
           <div className="lg:w-1/2">
-             <img 
+             <SmartImage 
                src={roofImages[0]?.url || 'https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80'} 
                className="rounded-3xl w-full h-[500px] object-cover border border-white/10 shadow-2xl" 
                alt="Roofing Project" 
                loading="eager"
-               fetchPriority="high"
-               decoding="async"
              />
           </div>
         </div>

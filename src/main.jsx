@@ -45,8 +45,18 @@ if (typeof document !== 'undefined') {
   }, { capture: true, passive: true })
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <HelmetProvider>
-    <App />
-  </HelmetProvider>
-)
+const rootElement = document.getElementById('root');
+if (rootElement.hasChildNodes()) {
+  ReactDOM.hydrateRoot(
+    rootElement,
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
+  );
+} else {
+  ReactDOM.createRoot(rootElement).render(
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
+  );
+}

@@ -115,7 +115,7 @@ function architectureJson(blueprint) {
 function strategyDoc(blueprint) {
   const proof = uniqueList(blueprint.proofStack)
   const pillars = uniqueList(blueprint.contentPillars)
-  const regions = uniqueList(blueprint.regions)
+  const keywords = uniqueList(blueprint.targetKeywords)
   const qualityScore = scoreBlueprint(blueprint)
 
   return `# ${blueprint.brandName} - Site Strategy Blueprint
@@ -146,6 +146,10 @@ function strategyDoc(blueprint) {
 ## Trust Stack
 
 ${proof.length ? proof.map((item) => `- ${item}`).join('\n') : '- Add at least 3 proof signals for stronger conversion confidence.'}
+
+## Target Keywords
+
+${keywords.length ? keywords.map((item) => `- ${item}`).join('\n') : '- Define key local targets to build programmatic SEO foundation.'}
 
 ## Content Pillars
 

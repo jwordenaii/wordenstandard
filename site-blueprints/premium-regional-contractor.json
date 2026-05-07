@@ -1,6 +1,7 @@
 {
   "enabled": false,
   "slug": "premium-regional-contractor",
+  "domain": "https://www.jwordenasphaltpaving.com",
   "brandName": "J. Worden & Sons",
   "market": "Virginia paving and surface infrastructure",
   "positioning": "Precision-first asphalt partner for high-accountability owners",
@@ -23,6 +24,13 @@
     "pavement lifecycle strategy",
     "drainage and failure diagnostics",
     "capital planning and phased execution"
+  ],
+  "targetKeywords": [
+    "commercial asphalt paving",
+    "industrial parking lot repair",
+    "asphalt milling and resurfacing",
+    "heavy duty concrete flatwork",
+    "ADA compliance paving"
   ],
   "colorSystem": {
     "background": "#0e1116",

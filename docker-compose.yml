@@ -103,7 +103,7 @@ services:
     command: >
       celery -A app.celery_app worker
       --loglevel=info
-      --concurrency=4
+      --concurrency=1
       --queues=celery
     depends_on:
       db:

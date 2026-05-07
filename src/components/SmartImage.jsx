@@ -94,19 +94,22 @@ export default function SmartImage({
 
   return (
     <div className={`image-presentation-premium image-reveal-obsidian ${className}`} style={presentationStyle}>
-      <img
-        src={activeSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
-        decoding="async"
-        onLoad={() => setFailed(false)}
-        onError={handleError}
-        className="w-full h-full object-cover"
-        sizes={sizes}
-      />
+      <picture>
+        {webpSrc && <source type="image/webp" srcSet={webpSrc} sizes={sizes} />}
+        <img
+          src={activeSrc}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding="async"
+          onLoad={() => setFailed(false)}
+          onError={handleError}
+          className="w-full h-full object-cover"
+          sizes={sizes}
+        />
+      </picture>
       {/* Editorial Title Overlay for Real Images */}
       {label && (
         <div className="absolute bottom-10 left-10 z-20 pointer-events-none opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 delay-100">

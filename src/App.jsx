@@ -18,6 +18,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileCallBar from '@/components/MobileCallBar';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
+// Add programmatic SEO blog routes
+import { aiBlogRegistry } from '@/generated/aiBlogRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
 import Home from './pages/Home';
@@ -46,9 +48,11 @@ const GeneralContracting = lazy(() => import('./pages/GeneralContracting'));
 const VirginiaStatewide = lazy(() => import('./pages/VirginiaStatewide'));
 const AutonomyDashboard = lazy(() => import('./pages/AutonomyDashboard'));
 const TarAndChip = lazy(() => import('./pages/TarAndChip'));
+const CandidatePortal = lazy(() => import('./pages/CandidatePortal'));
 const ContractorAIPlatform = lazy(() => import('./pages/ContractorAIPlatform'));
 const CommandCenter = lazy(() => import('./pages/CommandCenter'));
 const JwordenAI = lazy(() => import('./pages/JwordenAI'));
+const Visualizer = lazy(() => import('./pages/Visualizer'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const DnsMigration = lazy(() => import('./pages/DnsMigration'));
 const Blog = lazy(() => import('./pages/Blog'));
@@ -86,6 +90,9 @@ const AdvisoryUtilitiesHub = lazy(() => import('./pages/advisory/UtilitiesHub'))
 const AdvisoryLegalStrategy = lazy(() => import('./pages/advisory/LegalStrategyAdvisor'));
 const AdvisoryContractorRanker = lazy(() => import('./pages/advisory/ContractorRanker'));
 const AdvisoryTaxCompliance = lazy(() => import('./pages/advisory/TaxComplianceAdvisory'));
+// Worden Standard Internal / Operational
+const PrintableOnboardingPacket = lazy(() => import('./components/PrintableOnboardingPacket'));
+const AiPublicRelationsDept = lazy(() => import('./pages/AiPublicRelationsDept'));
 // Add page imports here
 
 // Initialise GA4 once — silently skipped when the measurement ID is not set.
@@ -237,8 +244,9 @@ const AuthenticatedApp = () => {
         <Route path="/commercial/richmond-va" element={<RichmondCommercial />} />
         <Route path="/jwordenai" element={<JwordenAI />} />
         <Route path="/general-contracting" element={<GeneralContracting />} />
-        <Route path="/visualizer" element={<Navigate to="/jwordenai" replace />} />
+        <Route path="/visualizer" element={<Visualizer />} />
         <Route path="/floor-plan-studio" element={<FloorPlanStudio />} />
+        <Route path="/cdl-application" element={<CandidatePortal />} />
         <Route path="/plans-inbox" element={<PlansInbox />} />
         <Route path="/lp/:slug" element={<LandingPage />} />
         <Route path="/blog" element={<Blog />} />
@@ -246,6 +254,10 @@ const AuthenticatedApp = () => {
         <Route path="/crew-eta" element={<RequireAuth><CrewEta /></RequireAuth>} />
         <Route path="/crew-mode" element={<RequireAuth><CrewFieldApp /></RequireAuth>} />
         {publicAIPages.map(({ path, Component }) => (
+          <Route key={path} path={path} element={<Component />} />
+        ))}
+        {/* Dynamic Programmatic SEO Keyword Blogs */}
+        {aiBlogRegistry.map(({ path, Component }) => (
           <Route key={path} path={path} element={<Component />} />
         ))}
 
@@ -276,6 +288,9 @@ const AuthenticatedApp = () => {
         <Route path="/advisory/tax-compliance" element={<RequireInternalAdvisory><AdvisoryTaxCompliance /></RequireInternalAdvisory>} />
         <Route path="/advisory/state/:stateCode" element={<RequireInternalAdvisory><AdvisoryStateDetail /></RequireInternalAdvisory>} />
         <Route path="/advisory/:category" element={<RequireInternalAdvisory><AdvisoryCategoryHub /></RequireInternalAdvisory>} />
+
+        <Route path="/wet-ink-onboarding-packet" element={<RequireAuth><PrintableOnboardingPacket /></RequireAuth>} />
+        <Route path="/ai-public-relations" element={<RequireAuth><AiPublicRelationsDept /></RequireAuth>} />
 
         <Route path="/staff" element={<StaffPortal />} />
         <Route path="*" element={<PageNotFound />} />

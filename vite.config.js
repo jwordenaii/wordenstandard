@@ -12,6 +12,15 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: "dist",
-    sourcemap: false
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom", "react-helmet-async"],
+          ui: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
+          three: ["three", "@react-three/fiber", "@react-three/drei"]
+        }
+      }
+    }
   }
 });

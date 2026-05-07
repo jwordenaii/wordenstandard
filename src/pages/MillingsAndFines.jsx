@@ -3,6 +3,7 @@ import { CheckCircle2, Construction, Layers, Droplets } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
+import SmartImage from '@/components/SmartImage'
 import { trackPhoneClick } from '@/lib/analytics'
 
 const MILLING_USE_CASES = [
@@ -75,12 +76,10 @@ export default function MillingsAndFines() {
               </div>
             </div>
             <div className="premium-panel p-2 rounded-3xl overflow-hidden shadow-2xl">
-              <img 
+              <SmartImage 
                 src="/work/imported/KFC/IMG_9514.JPG" 
                 className="w-full h-[500px] object-cover rounded-2xl"
                 alt="Quality Asphalt Millings"
-                loading="lazy"
-                decoding="async"
               />
             </div>
           </div>

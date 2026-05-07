@@ -79,9 +79,11 @@ function pageComponentSource(page) {
   const canonicalPath = page.path
   const ctaText = escapeSingleQuotes(page.ctaText || 'Request a Consultation')
   const ctaHref = escapeSingleQuotes(page.ctaHref || '/#quote')
+  const domainUrl = page.domain || process.env.VITE_URL || 'https://www.jwordenasphaltpaving.com'
 
   return `import React from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SEO from '@/components/SEO'
@@ -94,11 +96,34 @@ export default function ${page.componentName}() {
     '@type': 'WebPage',
     name: '${title}',
     description: '${description}',
-    url: '${DOMAIN}${canonicalPath}',
+    url: '${domainUrl}${canonicalPath}',
+  }
+
+  // Liquid Motion Variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+    }
+  }
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.98 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { type: "spring", stiffness: 100, damping: 20 }
+    }
   }
 
   return (
-    <div className="min-h-screen bg-background font-body">
+    <div className="min-h-screen bg-background font-body relative overflow-hidden">
+      {/* High-end ambient background mesh */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120vw] h-[50vh] bg-primary/5 blur-[120px] pointer-events-none" />
+
       <SEO
         title={'${title}'}
         description={'${description}'}
@@ -107,40 +132,74 @@ export default function ${page.componentName}() {
       />
       <Navbar />
 
-      <section className="relative border-b border-border pt-32 pb-16 md:pb-20 overflow-hidden">
-        <div className="absolute -top-16 right-0 w-72 h-72 rounded-full bg-primary/12 blur-3xl pointer-events-none" />
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          <p className="font-display text-primary text-xs tracking-[0.3em] uppercase mb-4">AI Page Factory</p>
-          <h1 className="font-display font-black text-foreground text-4xl md:text-6xl uppercase tracking-tight leading-[0.95]">
+      <motion.section 
+        className="relative pt-40 pb-20 md:pb-32 overflow-hidden z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center md:text-left">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-display tracking-[0.2em] uppercase mb-8"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            AI SYNDICATE
+          </motion.div>
+          <h1 className="font-display font-black text-foreground text-5xl md:text-7xl lg:text-8xl uppercase tracking-tight leading-[0.9] flex flex-col gap-2">
             ${h1}
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg mt-6 max-w-3xl leading-relaxed">
+          <p className="text-muted-foreground text-lg md:text-xl mt-8 max-w-3xl leading-relaxed">
             ${intro}
           </p>
-          <div className="mt-8">
+          <div className="mt-12 flex flex-wrap items-center gap-4 justify-center md:justify-start">
             <Link
               to={'${ctaHref}'}
-              className="premium-cta inline-flex items-center gap-2 px-6 py-4 font-display font-bold text-sm tracking-[0.14em] uppercase text-primary-foreground"
+              className="group relative inline-flex items-center justify-center px-8 py-5 font-display font-bold text-sm tracking-[0.2em] uppercase text-primary-foreground bg-primary overflow-hidden transition-all hover:scale-[1.02] active:scale-95"
             >
-              ${ctaText}
+              <span className="absolute inset-0 w-full h-full -mt-1 opacity-20 bg-gradient-to-b from-transparent via-transparent to-black" />
+              <span className="relative flex items-center gap-2">
+                ${ctaText}
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </span>
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="py-14 md:py-18">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8 space-y-6">
-          {PAGE_SECTIONS.map((section) => (
-            <article key={section.heading} className="border border-border bg-card p-6 md:p-8">
-              <h2 className="font-display font-black text-foreground text-2xl md:text-3xl uppercase tracking-tight">
-                {section.heading}
-              </h2>
-              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mt-4">
-                {section.body}
-              </p>
-            </article>
+      <section className="py-20 md:py-32 relative z-10">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="max-w-5xl mx-auto px-6 lg:px-8 space-y-8"
+        >
+          {PAGE_SECTIONS.map((section, index) => (
+            <motion.article 
+              key={section.heading} 
+              variants={itemVariants}
+              className="group relative bg-card/60 backdrop-blur-xl border border-border/50 p-8 md:p-12 hover:bg-card hover:border-primary/30 transition-all overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-colors duration-500" />
+              <div className="flex flex-col md:flex-row items-start gap-6 md:gap-10">
+                <span className="font-display text-5xl md:text-6xl text-primary/10 group-hover:text-primary/20 transition-colors font-black hidden md:block">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h2 className="font-display font-black text-foreground text-2xl md:text-4xl uppercase tracking-tight mb-4">
+                    {section.heading}
+                  </h2>
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    {section.body}
+                  </p>
+                </div>
+              </div>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       <Footer />
@@ -187,7 +246,7 @@ function sitemapEntries(pages) {
   return pages
     .filter((page) => page.public && page.includeInSitemap)
     .map(
-      (page) => `  <url>\n    <loc>${DOMAIN}${page.path}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>${page.changefreq}</changefreq>\n    <priority>${page.priority}</priority>\n  </url>`
+      (page) => `  <url>\n    <loc>${page.domain || process.env.VITE_URL || 'https://www.jwordenasphaltpaving.com'}${page.path}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>${page.changefreq}</changefreq>\n    <priority>${page.priority}</priority>\n  </url>`
     )
     .join('\n')
 }
@@ -214,9 +273,23 @@ async function ensureDirs() {
   await fs.mkdir(path.dirname(REGISTRY_FILE), { recursive: true })
 }
 
-async function loadBlueprints() {
+async function loadBlueprints(tenantSlug) {
+  let baseDomain = process.env.VITE_URL || 'https://www.jwordenasphaltpaving.com'
+  if (tenantSlug) {
+    try {
+      const siteBpPath = path.join(ROOT, 'site-blueprints', `${tenantSlug}.json`)
+      const siteBpRaw = await fs.readFile(siteBpPath, 'utf8')
+      const siteBp = JSON.parse(siteBpRaw)
+      if (siteBp.domain) baseDomain = siteBp.domain
+    } catch (e) {}
+  }
+
   const entries = await fs.readdir(BLUEPRINT_DIR, { withFileTypes: true })
-  const files = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+  let files = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+
+  if (tenantSlug) {
+    files = files.filter(f => f.name === `${tenantSlug}.json` || f.name.startsWith(`${tenantSlug}-`))
+  }
 
   const pages = []
 
@@ -237,6 +310,7 @@ async function loadBlueprints() {
       ...blueprint,
       path: pagePath,
       componentName,
+      domain: baseDomain,
       public: blueprint.public === true,
       includeInSitemap: blueprint.includeInSitemap !== false,
       changefreq: blueprint.changefreq || 'monthly',
@@ -264,7 +338,13 @@ async function writePages(pages) {
 
 async function run() {
   await ensureDirs()
-  const pages = await loadBlueprints()
+  const tenantSlugArg = process.argv[2]
+  
+  if (tenantSlugArg) {
+    console.log(`Generating AI Pages for tenant: ${tenantSlugArg}`)
+  }
+
+  const pages = await loadBlueprints(tenantSlugArg)
   await writePages(pages)
   await fs.writeFile(REGISTRY_FILE, registrySource(pages), 'utf8')
   await updateSitemap(pages)

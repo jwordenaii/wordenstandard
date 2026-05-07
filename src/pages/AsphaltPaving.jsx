@@ -61,16 +61,18 @@ export default function AsphaltPaving() {
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-black">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
-          <img 
-            src="/hero-paving.jpg" 
-            className="w-full h-full object-cover opacity-60 scale-105"
-            alt="Paving Excellence"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
+            <picture>
+              <source type="image/webp" srcSet="/hero-paving.webp" />
+              <img 
+                src="/hero-paving.jpg" 
+                className="w-full h-full object-cover opacity-60 scale-105"
+                alt="Paving Excellence"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
         </div>
-        
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-20">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
