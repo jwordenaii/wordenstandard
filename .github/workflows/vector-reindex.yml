@@ -1,0 +1,17 @@
+name: Pinecone Reindex On Push
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  reindex:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.PINECONE_API_KEY && secrets.JWORDEN_API_BASE_URL && secrets.JWORDEN_MASTER_KEY }}
+    steps:
+      - name: Trigger Pinecone Reindex
+        run: |
+          curl -s -X POST "${{ secrets.JWORDEN_API_BASE_URL }}/api/v1/admin/search/vector-reindex" \
+            -H "Authorization: Bearer ${{ secrets.JWORDEN_MASTER_KEY }}" \
+            -H "Content-Type: application/json" -d '{}' -o /tmp/reindex.out || true
+          echo "Response:" && cat /tmp/reindex.out
