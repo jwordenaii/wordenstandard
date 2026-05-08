@@ -12,16 +12,26 @@ logger = logging.getLogger(__name__)
 
 
 def index_repo(path: str = ".", namespace: str = "jarvis-repo-v1") -> Dict[str, Any]:
-    """Placeholder: walk `path`, chunk files, create embeddings, and upsert to a vector DB.
-    Returns a summary dict with counts and status.
+    """Index repo using Pinecone when configured, otherwise a no-op stub.
     """
-    logger.info("Stub: index_repo called path=%s namespace=%s", path, namespace)
-    # Real implementation: chunk -> embed -> upsert
+    if os.environ.get('PINECONE_API_KEY'):
+        try:
+            from app.services import pinecone_client
+            return pinecone_client.index_repo(path=path, namespace=namespace)
+        except Exception as e:
+            logger.exception('pinecone index_repo failed: %s', e)
+            return {"ok": False, "error": str(e)}
+    logger.info("RAG stub: index_repo called path=%s namespace=%s (pinecone not configured)", path, namespace)
     return {"ok": True, "indexed": 0, "namespace": namespace}
 
 
 def query(query_text: str, namespace: str = "jarvis-repo-v1", top_k: int = 5) -> List[Dict[str, Any]]:
-    """Placeholder retrieval returning empty results. Replace with vector DB query.
-    """
-    logger.debug("Stub: query text=%s namespace=%s top_k=%d", query_text, namespace, top_k)
+    if os.environ.get('PINECONE_API_KEY'):
+        try:
+            from app.services import pinecone_client
+            return pinecone_client.query(query_text=query_text, namespace=namespace, top_k=top_k)
+        except Exception as e:
+            logger.exception('pinecone query failed: %s', e)
+            return []
+    logger.debug("RAG stub: query text=%s namespace=%s top_k=%d (pinecone not configured)", query_text, namespace, top_k)
     return []
