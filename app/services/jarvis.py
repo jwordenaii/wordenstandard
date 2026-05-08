@@ -432,6 +432,50 @@ class JarvisAI:
             }
 
         # ── Fast lane: everyday operations reasoning without tool overhead ──
+        # First, see if this user intent maps to a multi-step plan.
+        plan = _planner.plan(query, {"run_npm": True, "code_search": True, "open_file": True})
+        if plan and plan.get("intent") == "execute":
+            # If operator has not confirmed, return the proposed plan for approval.
+            if not confirmed:
+                return {
+                    "source": self.identity,
+                    "message": "I have prepared an action plan. Confirm to execute.",
+                    "requires_confirmation": True,
+                    "plan": plan,
+                    "action_required": True,
+                }
+            # Operator confirmed — execute sequentially and return results.
+            exec_results = []
+            for step in plan.get("steps", []):
+                name = step.get("action")
+                args = step.get("args") or {}
+                # determine whether this action requires confirmation (destructive/real-world)
+                must_confirm = name in ("run_npm", "make_phone_call", "send_email")
+                if must_confirm and not confirmed:
+                    exec_results.append({"action": name, "ok": False, "error": "requires confirmation"})
+                    continue
+                try:
+                    res = await _run_tool(name, args, confirmed=confirmed)
+                except Exception as exc:
+                    res = {"ok": False, "error": str(exc)}
+                exec_results.append({"action": name, "result": res})
+
+            # Synthesize a response summarizing execution
+            summary_lines = []
+            for r in exec_results:
+                act = r.get("action")
+                out = r.get("result") or r.get("error") or r
+                ok = out.get("ok") if isinstance(out, dict) else False
+                summary_lines.append(f"{act}: {'OK' if ok else 'FAILED'}")
+
+            return {
+                "source": self.identity,
+                "message": "Execution complete.\n" + "\n".join(summary_lines),
+                "action_required": False,
+                "plan_executed": True,
+                "exec_results": exec_results,
+            }
+
         action_intent = _looks_like_tool_action(query)
         if not action_intent:
             fast = await _ask_fast_ops_brain(query, persona, state, confirmed=confirmed)
