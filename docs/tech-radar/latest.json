@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-05-08T21:54:06.245Z",
+  "startedAt": "2026-05-08T21:54:00.116Z",
+  "durationMs": 6129,
+  "sourceCount": 6,
+  "sourcesHealthy": 6,
+  "totalItems": 150,
+  "newItemCount": 0,
+  "changedItemCount": 6,
+  "capabilitiesAll": {
+    "models-reasoning": 75,
+    "agents-autonomy": 48,
+    "developer-platforms": 39,
+    "search-retrieval": 25,
+    "security-governance": 22,
+    "memory-state-personalization": 14,
+    "multimodal-voice-vision": 13,
+    "infra-inference-edge": 11
+  },
+  "capabilitiesNew": {},
+  "newItems": [],
+  "changedItems": [
+    {
+      "title": "Next Js May 2026 Security Release",
+      "url": "https://vercel.com/changelog/next-js-may-2026-security-release",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-07T13:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [
+        "security-governance"
+      ],
+      "fingerprint": "e02ae58f70513d8898c861c9e88c2875b8eabc0519faf48fe583b0ae4ab2c852",
+      "previousTitle": "Next.js May 2026 security release",
+      "previousPublishedAt": "2026-05-07T13:00:00.000Z"
+    },
+    {
+      "title": "Secure Marketplace Credentials With Production Only Access",
+      "url": "https://vercel.com/changelog/secure-marketplace-credentials-with-production-only-access",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "443d8b30c239c5a0bfab41a819e4bf43b050a5fb88a9a7547794d69f4bfabf14",
+      "previousTitle": "Secure Marketplace credentials with Production-only access",
+      "previousPublishedAt": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "title": "Anthropic and NEC collaborate to build Japan’s largest AI workforce",
+      "url": "https://www.anthropic.com/news/anthropic-nec",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-24T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "07bde09f552eb93a61cab0348ccd9c39af33e41c2c04070022f463da939facc7",
+      "previousTitle": "Anthropic and NEC collaborate to build Japan’s largest AI engineering workforce",
+      "previousPublishedAt": "2026-04-24T04:00:00.000Z"
+    },
+    {
+      "title": "Claude Design Anthropic Labs",
+      "url": "https://www.anthropic.com/news/claude-design-anthropic-labs",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-17T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "033d40ff0c7d24ec33ad1955cd8be23c0f01eec676d8d07d03258dfa35045198",
+      "previousTitle": "Apr 17, 2026 Introducing Claude Design by Anthropic Labs Today, we’re launching Claude Design, a new Anthropic Labs product that lets you collaborate with Claude to create polished visual work like designs, prototypes, slides, one-pagers, and more.",
+      "previousPublishedAt": "2026-04-17T04:00:00.000Z"
+    },
+    {
+      "title": "Claude Opus 4 7",
+      "url": "https://www.anthropic.com/news/claude-opus-4-7",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-16T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "6de79103200747f26a9f9cce1464b28c241db5ea6d2bf75777a65f41cf4d12d6",
+      "previousTitle": "Introducing Claude Opus 4.7 Product Apr 16, 2026 Our latest Opus model brings stronger performance across coding, agents, vision, and multi-step tasks, with greater thoroughness and consistency on the work that matters most.",
+      "previousPublishedAt": "2026-04-16T04:00:00.000Z"
+    },
+    {
+      "title": "Claude Is A Space To Think",
+      "url": "https://www.anthropic.com/news/claude-is-a-space-to-think",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-02-04T05:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "142218c4d025f1da45aaf5c74d8619f67ec6ec93f3d059ef97da16c9e79aea60",
+      "previousTitle": "Feb 4, 2026 Claude is a space to think We’ve made a choice: Claude will remain ad-free. We explain why advertising incentives are incompatible with a genuinely helpful AI assistant, and how we plan to expand access without compromising user trust.",
+      "previousPublishedAt": "2026-02-04T05:00:00.000Z"
+    }
+  ]
+}

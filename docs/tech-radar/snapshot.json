@@ -1,0 +1,2507 @@
+{
+  "generatedAt": "2026-05-08T21:54:06.245Z",
+  "totalItems": 150,
+  "items": [
+    {
+      "title": "See what happens when creative legends use AI to make ads for small businesses.",
+      "url": "https://blog.google/company-news/inside-google/company-announcements/the-small-brief",
+      "summary": "Today we're launching The Small Brief, an initiative bringing together three ad industry icons to champion a local businesses they love. Their mission is to build breakt…",
+      "categories": [
+        "AI"
+      ],
+      "publishedAt": "2026-05-08T15:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [],
+      "fingerprint": "d2ae8abe62291ccb3f3260f21b297c8daa4ba6f7ae6e39bc705a4a2350328e24"
+    },
+    {
+      "title": "Running Codex safely at OpenAI",
+      "url": "https://openai.com/index/running-codex-safely",
+      "summary": "How OpenAI runs Codex securely with sandboxing, approvals, network policies, and agent-native telemetry to support safe and compliant coding agent adoption.",
+      "categories": [
+        "Security"
+      ],
+      "publishedAt": "2026-05-08T12:30:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "security-governance"
+      ],
+      "fingerprint": "4034fe605e9da96a941aa151b6bc7774d51409be26ba02117a6f119782407d09"
+    },
+    {
+      "title": "Chat SDK adds Messenger adapter support",
+      "url": "https://vercel.com/changelog/chat-sdk-adds-messenger-adapter",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-08T04:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [
+        "developer-platforms"
+      ],
+      "fingerprint": "499b4fed2cae6a9ef2bf9318dfd35fa43910b1335148eb813deed9cac73e8b4c"
+    },
+    {
+      "title": "Chat SDK adds web adapter support",
+      "url": "https://vercel.com/changelog/chat-sdk-adds-web-adapter-support",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-08T00:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [
+        "developer-platforms"
+      ],
+      "fingerprint": "2e6951cc775d0c18761427fa83eb1e9de301586543bf7bf9af43d73e8e5e6c94"
+    },
+    {
+      "title": "Chat SDK now supports conversation history",
+      "url": "https://vercel.com/changelog/chat-sdk-conversation-history",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-08T00:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [
+        "developer-platforms",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "1f1f1e045fe39cc10e4b4ec841ab75ae3240c3fd089c057028f88f33d1e10ddb"
+    },
+    {
+      "title": "Next Js May 2026 Security Release",
+      "url": "https://vercel.com/changelog/next-js-may-2026-security-release",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-07T13:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [
+        "security-governance"
+      ],
+      "fingerprint": "e02ae58f70513d8898c861c9e88c2875b8eabc0519faf48fe583b0ae4ab2c852"
+    },
+    {
+      "title": "Scaling Trusted Access for Cyber with GPT-5.5 and GPT-5.5-Cyber",
+      "url": "https://openai.com/index/gpt-5-5-with-trusted-access-for-cyber",
+      "summary": "OpenAI expands Trusted Access for Cyber with GPT-5.5 and GPT-5.5-Cyber, helping verified defenders accelerate vulnerability research and protect critical infrastructure.",
+      "categories": [
+        "Security"
+      ],
+      "publishedAt": "2026-05-07T13:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance",
+        "search-retrieval"
+      ],
+      "fingerprint": "d384edb649a99c4318a0775381e79707e8f8d5cbb9a1bb901d6519b3115d0b89"
+    },
+    {
+      "title": "Parloa builds service agents customers want to talk to",
+      "url": "https://openai.com/index/parloa",
+      "summary": "Parloa leverages OpenAI models to power scalable, voice-driven AI customer service agents, enabling enterprises to design, simulate, and deploy reliable, real-time interactions.",
+      "categories": [
+        "B2B Story"
+      ],
+      "publishedAt": "2026-05-07T11:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "multimodal-voice-vision",
+        "search-retrieval"
+      ],
+      "fingerprint": "28ea424d4f21a30e1010ef226cc4eb902dfc48806f1b6844354c18dcd407e0e3"
+    },
+    {
+      "title": "Advancing voice intelligence with new models in the API",
+      "url": "https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api",
+      "summary": "Explore new realtime voice models in the OpenAI API that can reason, translate, and transcribe speech, enabling more natural and intelligent voice experiences.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-05-07T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "multimodal-voice-vision",
+        "developer-platforms"
+      ],
+      "fingerprint": "9001ab88bde3157558662310fe790c6cd3fb10593d7a53f931db1ec699bdf2d4"
+    },
+    {
+      "title": "Vercel Flags now supports JSON values",
+      "url": "https://vercel.com/changelog/vercel-flags-now-supports-json-values",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-07T09:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "98dc4c4d1ca0e8225bf002ff4e4d0d83979999810d0147d7342887bbdf09497c"
+    },
+    {
+      "title": "Introducing Trusted Contact in ChatGPT",
+      "url": "https://openai.com/index/introducing-trusted-contact-in-chatgpt",
+      "summary": "Introducing Trusted Contact in ChatGPT, an optional safety feature that notifies someone you trust if serious self-harm concerns are detected.",
+      "categories": [
+        "Safety"
+      ],
+      "publishedAt": "2026-05-07T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "e011f712aa9c86f81dcfe1342153f5e4cdab5a9cc1e5bd3bb7c47513509e3bde"
+    },
+    {
+      "title": "Simplex rethinks software development with Codex",
+      "url": "https://openai.com/index/simplex",
+      "summary": "Simplex boosts software development with ChatGPT Enterprise and Codex, reducing design, build, and testing time while scaling AI-driven workflows.",
+      "categories": [
+        "B2B Story"
+      ],
+      "publishedAt": "2026-05-07T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "013e94d5b7ca376a7b337c3c8c9e78f4df6960eadc521320100078b339408ec1"
+    },
+    {
+      "title": "Testing ads in ChatGPT",
+      "url": "https://openai.com/index/testing-ads-in-chatgpt",
+      "summary": "OpenAI begins testing ads in ChatGPT to support free access, with clear labeling, answer independence, strong privacy protections, and user control.",
+      "categories": [
+        "Company"
+      ],
+      "publishedAt": "2026-05-07T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "9444d95348c799c2623a3585bbf35f6c843a2e615125ec944fec3bae8cd2685e"
+    },
+    {
+      "title": "5 gardening tips you can try right in Search",
+      "url": "https://blog.google/products-and-platforms/products/search/gardening-tips",
+      "summary": "We’ve rounded up the top ways you can use Google’s AI Mode, Search Live and Shopping to help your plants thrive.",
+      "categories": [
+        "Search",
+        "Shopping",
+        "AI"
+      ],
+      "publishedAt": "2026-05-06T16:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "search-retrieval"
+      ],
+      "fingerprint": "68aebd41dec3eb621d7660a2102227f2b2b7b5f27065ff05bbdb9851d1d91675"
+    },
+    {
+      "title": "How ChatGPT learns about the world while protecting privacy",
+      "url": "https://openai.com/index/how-chatgpt-protects-privacy",
+      "summary": "Learn how ChatGPT safeguards your privacy, reduces personal data in training, and gives you control over whether your conversations improve AI models.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-05-06T08:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "99908fb9070ac3bd25fe8f286facf65b4270b6b52d77d8f92f5f979a4132db76"
+    },
+    {
+      "title": "Agents for financial services",
+      "url": "https://www.anthropic.com/news/finance-agents",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-06T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "2b63e8b607f0cfdfadf4db9e4f5f076804de51e1c21a1191b107ddb5e072b7b3"
+    },
+    {
+      "title": "Higher usage limits for Claude and a compute deal with SpaceX",
+      "url": "https://www.anthropic.com/news/higher-limits-spacex",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-06T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "2e1fa2f1ebcc9f6544ccbc86d5ba4d47665ac6d5b7546b95d8c6acb93d4eb7fe"
+    },
+    {
+      "title": "Auto-add Git committers to your team",
+      "url": "https://vercel.com/changelog/auto-add-git-committers-to-your-team",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "d8057fde698ad9abbbb52407e74c2d153f58de527eabb7e397c86ff6ec4e4ba7"
+    },
+    {
+      "title": "How frontier firms are pulling ahead",
+      "url": "https://openai.com/index/introducing-b2b-signals",
+      "summary": "OpenAI’s B2B Signals research shows how frontier enterprises deepen AI adoption, scale Codex-powered agentic workflows, and build durable competitive advantage.",
+      "categories": [
+        "Company"
+      ],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "745cd2d1d59c6085530074ef391b1af96ec1160cd1ee5090da5784a8a152552d"
+    },
+    {
+      "title": "Introducing ChatGPT Futures: Class of 2026",
+      "url": "https://openai.com/index/introducing-chatgpt-futures-class-of-2026",
+      "summary": "Meet the ChatGPT Futures Class of 2026—26 student innovators using AI to build, research, and drive real-world impact. Discover how this generation is redefining learning, creativity, and opportunity with ChatGPT.",
+      "categories": [
+        "Company"
+      ],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "3923fa89d4a832183c7c3eda5a574189d39c0cb4440522b67e1bdf5a9e37778f"
+    },
+    {
+      "title": "Secure Marketplace Credentials With Production Only Access",
+      "url": "https://vercel.com/changelog/secure-marketplace-credentials-with-production-only-access",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "443d8b30c239c5a0bfab41a819e4bf43b050a5fb88a9a7547794d69f4bfabf14"
+    },
+    {
+      "title": "Singular Bank helps bankers move fast with ChatGPT and Codex",
+      "url": "https://openai.com/index/singular-bank",
+      "summary": "Singular Bank built Singularity, an internal assistant using ChatGPT and Codex to help bankers save 60–90 minutes daily on meeting prep, portfolio analysis, and follow-up.",
+      "categories": [
+        "B2B Story"
+      ],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "eef0fe26854a5e4143e8b4500d13a2966570bf8466267a72304cda35f3a4b860"
+    },
+    {
+      "title": "Uber uses OpenAI to help people earn smarter and book faster",
+      "url": "https://openai.com/index/uber",
+      "summary": "Uber uses OpenAI to power AI assistants and voice features that help drivers earn smarter and riders book faster across a global real-time marketplace.",
+      "categories": [
+        "B2B Story"
+      ],
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "multimodal-voice-vision"
+      ],
+      "fingerprint": "c2f990f65ae117a905b97a25fb4a417cf96795bd71185a2a18f40f560f28e684"
+    },
+    {
+      "title": "Google is partnering with XPRIZE and Range Media Partners on the $3.5 million Future Vision film competition.",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/future-vision-film-competition-xprize",
+      "summary": "Google is partnering with XPRIZE and Range Media Partners on the $3.5 million Future Vision film competition.",
+      "categories": [
+        "AI"
+      ],
+      "publishedAt": "2026-05-05T16:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "multimodal-voice-vision"
+      ],
+      "fingerprint": "33581eb564d8da27a5f56ce8a922ac97394fabc875699eb5e38ae85ab10a7cb2"
+    },
+    {
+      "title": "GPT-5.5 Instant System Card",
+      "url": "https://openai.com/index/gpt-5-5-instant-system-card",
+      "summary": "",
+      "categories": [
+        "Safety"
+      ],
+      "publishedAt": "2026-05-05T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "6dca87376522a69c77949ed24fc38ed9c3e36a606dea688fb12d8798193c4926"
+    },
+    {
+      "title": "GPT-5.5 Instant: smarter, clearer, and more personalized",
+      "url": "https://openai.com/index/gpt-5-5-instant",
+      "summary": "GPT-5.5 Instant updates ChatGPT’s default model with smarter, more accurate answers, reduced hallucinations, and improved personalization controls.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-05-05T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "9b848177ca68fe7d9d1a21a056336af987ef7a5b879dc102e5553a509b14bedb"
+    },
+    {
+      "title": "Unlocking large scale AI training networks with MRC (Multipath Reliable Connection)",
+      "url": "https://openai.com/index/mrc-supercomputer-networking",
+      "summary": "OpenAI introduces MRC (Multipath Reliable Connection), a new supercomputer networking protocol released via OCP to improve resilience and performance in large-scale AI training clusters.",
+      "categories": [
+        "Engineering"
+      ],
+      "publishedAt": "2026-05-05T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "577dac66ac037e8909ef89a78fc2cf222f6232601b7df42eb63dabbf62ca4bf0"
+    },
+    {
+      "title": "Query observability metrics using the Vercel CLI",
+      "url": "https://vercel.com/changelog/vercel-metrics-in-cli",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-05T08:00:00.000Z",
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "capabilityTags": [
+        "developer-platforms"
+      ],
+      "fingerprint": "d1708933eb1623f34204e965820565f83d2e8e7845da37ddf64175e4e0f07322"
+    },
+    {
+      "title": "Building a new enterprise AI services company with Blackstone, Hellman & Friedman, and Goldman Sachs",
+      "url": "https://www.anthropic.com/news/enterprise-ai-services-company",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-05-05T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "2c0dfbdd0a9e8cf281b66562d084f8e871747bdf9855d2b4290d11b966f2524e"
+    },
+    {
+      "title": "Advancing youth safety and wellbeing in EMEA",
+      "url": "https://openai.com/index/advancing-youth-safety-in-emea",
+      "summary": "Explore OpenAI’s European Youth Safety Blueprint and EMEA Youth & Wellbeing Grants, advancing safe, responsible AI for teens, families, and educators.",
+      "categories": [
+        "Safety"
+      ],
+      "publishedAt": "2026-05-05T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "security-governance"
+      ],
+      "fingerprint": "9a1f63c176779b8f11cfdb8c546412cd23688acd54f9dded7ead39bfc19f3fe0"
+    },
+    {
+      "title": "New ways to buy ChatGPT ads",
+      "url": "https://openai.com/index/new-ways-to-buy-chatgpt-ads",
+      "summary": "OpenAI expands ChatGPT ads with a beta self-serve Ads Manager, CPC bidding, and enhanced measurement tools—built to protect privacy and keep conversations separate from ads.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-05-05T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "998187fc30452841058f9f44d88a3d3bf24bef5e324786ee90960922079a8596"
+    },
+    {
+      "title": "OpenAI and PwC collaborate to reimagine the office of the CFO",
+      "url": "https://openai.com/index/openai-pwc-finance-collaboration",
+      "summary": "OpenAI and PwC are partnering to help enterprises use AI agents to automate finance workflows, improve forecasting, strengthen controls, and modernize the CFO function.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-05-04T21:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "08a7cfadad7591ab23a0edd07373fb6b2b638bedc6bdacc3114dac77265e2e4e"
+    },
+    {
+      "title": "The latest AI news we announced in April 2026",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026",
+      "summary": "Here are Google’s latest AI updates from April 2026",
+      "categories": [
+        "Translate",
+        "Google Labs",
+        "Developer tools",
+        "Google Workspace",
+        "Google.org",
+        "Google Cloud",
+        "AI",
+        "Gemini models",
+        "Fitbit"
+      ],
+      "publishedAt": "2026-05-04T17:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "8ce90333870262d9e998be2c9f48f95db13f28d5d0dbd203c416e6465a296fe3"
+    },
+    {
+      "title": "Reduce friction and latency for long-running jobs with Webhooks in Gemini API",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/event-driven-webhooks",
+      "summary": "Event-Driven Webhooks are a push-based notification system that eliminates the need for inefficient polling.",
+      "categories": [
+        "Developer tools",
+        "AI"
+      ],
+      "publishedAt": "2026-05-04T15:30:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "4724aa5affc27d60836bd1dc2f2a51f2c20fe4debd74f8b3145897ce30efe4b1"
+    },
+    {
+      "title": "How OpenAI delivers low-latency voice AI at scale",
+      "url": "https://openai.com/index/delivering-low-latency-voice-ai-at-scale",
+      "summary": "How OpenAI rebuilt its WebRTC stack to power real-time Voice AI with low latency, global scale, and seamless conversational turn-taking.",
+      "categories": [
+        "Engineering"
+      ],
+      "publishedAt": "2026-05-04T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "multimodal-voice-vision",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "3ccf72543c27ce98f1fd7fcc199b5db381d9e5e6905fd5cbce22e3c7df0cc66e"
+    },
+    {
+      "title": "Agents can now create Cloudflare accounts, buy domains, and deploy",
+      "url": "https://blog.cloudflare.com/agents-stripe-projects",
+      "summary": "Starting today, agents can now be Cloudflare customers. They can create a Cloudflare account, start a paid subscription, register a domain, and get back an API token to deploy code right away. Humans can be in the loop to grant permission, but there’s no need to go to the dashboard, copy and paste API tokens, or enter credit card details.",
+      "categories": [
+        "Cloudflare Workers",
+        "Developer Platform",
+        "Agents",
+        "Registrar",
+        "AI"
+      ],
+      "publishedAt": "2026-04-30T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "defefabb998b70de17c0c9af1a214ead6fd3261dad9014c4372348fc13624670"
+    },
+    {
+      "title": "Introducing Advanced Account Security",
+      "url": "https://openai.com/index/advanced-account-security",
+      "summary": "Introducing Advanced Account Security: phishing-resistant login, stronger recovery, and enhanced protections to safeguard sensitive data and prevent account takeover.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-30T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "security-governance"
+      ],
+      "fingerprint": "d66d4504f4cdac327d0fd0bc4e0d60f710a733de0b71a2129981909eba670bdb"
+    },
+    {
+      "title": "Where the goblins came from",
+      "url": "https://openai.com/index/where-the-goblins-came-from",
+      "summary": "How goblin outputs spread in AI models: timeline, root cause, and fixes behind personality-driven quirks in GPT-5 behavior.",
+      "categories": [
+        "Publication"
+      ],
+      "publishedAt": "2026-04-29T20:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "c49f68c689c4bdfa057f472354bec93f7b5dee13d1892c657e2dcff6dc2f5d74"
+    },
+    {
+      "title": "Building the compute infrastructure for the Intelligence Age",
+      "url": "https://openai.com/index/building-the-compute-infrastructure-for-the-intelligence-age",
+      "summary": "OpenAI scales Stargate to build the compute infrastructure powering AGI, adding new data center capacity to meet growing AI demand.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-04-29T15:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "cd68b7c8aa4e64e255cad3e34ded9e06483597fef1a1c73199b2274629f8b154"
+    },
+    {
+      "title": "Cybersecurity in the Intelligence Age",
+      "url": "https://openai.com/index/cybersecurity-in-the-intelligence-age",
+      "summary": "OpenAI outlines a five-part action plan for strengthening cybersecurity in the Intelligence Age, focused on democratizing AI-powered cyber defense and protecting critical systems.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-04-29T04:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "security-governance"
+      ],
+      "fingerprint": "665e0c31645568bf1cf8cceae323859eccc265649881bb1007323d9c22b292a3"
+    },
+    {
+      "title": "Celebrating 20 years of Google Translate: Fun facts, tips and new features to try",
+      "url": "https://blog.google/products-and-platforms/products/translate/fun-facts-google-translate-20-years",
+      "summary": "Google’s sharing 20 fun facts to celebrate Google Translate turning 20, from its roots as a 2006 AI experiment to supporting almost 250 languages today.",
+      "categories": [
+        "Search",
+        "Translate",
+        "AI"
+      ],
+      "publishedAt": "2026-04-28T16:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "search-retrieval"
+      ],
+      "fingerprint": "8c748d9fc78a9f1ea6eaec094a68059e366e2b8f54042ebce42f17cd02383cba"
+    },
+    {
+      "title": "Anthropic names Theo Hourmouzis General Manager of Australia & New Zealand and officially opens Sydney office",
+      "url": "https://www.anthropic.com/news/theo-hourmouzis-general-manager-australia-new-zealand",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-28T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "65320cca019937a0fdd078b0d64f062178284a678da62d9d62b516f41e228ea3"
+    },
+    {
+      "title": "Claude for Creative Work",
+      "url": "https://www.anthropic.com/news/claude-for-creative-work",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-28T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "627b34d745f7e988a8563db2a7037980675341f357b9aa70b5ee4541b1b892eb"
+    },
+    {
+      "title": "OpenAI models, Codex, and Managed Agents come to AWS",
+      "url": "https://openai.com/index/openai-on-aws",
+      "summary": "OpenAI GPT models, Codex, and Managed Agents are now available on AWS, enabling enterprises to build secure AI in their AWS environments.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-28T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "a837d424615225fa1e8fad7cfc63a80cd1e585b95a572c781cf3f1eee706af0d"
+    },
+    {
+      "title": "Our commitment to community safety",
+      "url": "https://openai.com/index/our-commitment-to-community-safety",
+      "summary": "Learn how OpenAI protects community safety in ChatGPT through model safeguards, misuse detection, policy enforcement, and collaboration with safety experts.",
+      "categories": [
+        "Safety"
+      ],
+      "publishedAt": "2026-04-28T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "078af2ab0138a13c1fa85c8bba620c11fc5a7bf81001977faaabb42b14a8091a"
+    },
+    {
+      "title": "OpenAI available at FedRAMP Moderate",
+      "url": "https://openai.com/index/openai-available-at-fedramp-moderate",
+      "summary": "OpenAI is available at FedRAMP Moderate authorization for ChatGPT Enterprise and the OpenAI API, enabling secure AI adoption for U.S. federal agencies.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-04-27T14:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "cdc591ebd847adc0ab4bb27ec3cda9604f1e36f525a51bde02f68dcc40aac6c7"
+    },
+    {
+      "title": "The next phase of the Microsoft-OpenAI partnership",
+      "url": "https://blogs.microsoft.com/blog/2026/04/27/the-next-phase-of-the-microsoft-openai-partnership",
+      "summary": "Amended Agreement Provides Long-Term Clarity The rapid pace of innovation requires us to continue to evolve our partnership to benefit our customers and both companies. Today, we are announcing an amended agreement to simplify our partnership and the way we work together, grounded in flexibility, certainty and a focus on delivering the benefits of AI... The post The next phase of the Microsoft-OpenAI partnership appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI"
+      ],
+      "publishedAt": "2026-04-27T13:00:02.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "developer-platforms"
+      ],
+      "fingerprint": "097142631d0926bc63bfef364f3daa83d67fba709dcba2e74683e7bbba9211c0"
+    },
+    {
+      "title": "Join the new AI Agents Vibe Coding Course from Google and Kaggle",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/kaggle-genai-intensive-course-vibe-coding-june-2026",
+      "summary": "Google is bringing back its 5-Day AI Agents Intensive Course with Kaggle and registration is open.",
+      "categories": [
+        "Google DeepMind",
+        "Developer tools",
+        "Google Cloud",
+        "AI",
+        "Gemini models"
+      ],
+      "publishedAt": "2026-04-27T13:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "26eedc512cb55fffa7a6fb8ad67ca6d57726483500e84a367fb86ab444190551"
+    },
+    {
+      "title": "The next phase of the Microsoft OpenAI partnership",
+      "url": "https://openai.com/index/next-phase-of-microsoft-partnership",
+      "summary": "OpenAI and Microsoft announce an amended agreement that simplifies the partnership, adds long-term clarity, and supports continued AI innovation at scale.",
+      "categories": [
+        "Company"
+      ],
+      "publishedAt": "2026-04-27T06:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "f615f2b2872fabc01ac10e3d29e4d21d51f265762a7d00957282e4e035f71aab"
+    },
+    {
+      "title": "An open-source spec for orchestration: Symphony",
+      "url": "https://openai.com/index/open-source-codex-orchestration-symphony",
+      "summary": "Learn how Symphony, an open-source spec for Codex orchestration, turns issue trackers into always-on agent systems—boosting engineering output and reducing context switching.",
+      "categories": [
+        "Engineering"
+      ],
+      "publishedAt": "2026-04-27T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "7a48f0caaa7ea75b7b300c8115cd3836c8ed82c0d4aa8d4dda2389b7c7b56ca5"
+    },
+    {
+      "title": "Choco automates food distribution with AI agents",
+      "url": "https://openai.com/index/choco",
+      "summary": "How Choco used OpenAI APIs to streamline food distribution, boost productivity, and unlock growth—an in-depth customer story on real-world AI impact.",
+      "categories": [
+        "B2B Story"
+      ],
+      "publishedAt": "2026-04-27T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "5d37b357e5bdae03974d3e06ac1400bd86deee841a26a9d5ff5da32854b10b75"
+    },
+    {
+      "title": "Our principles",
+      "url": "https://openai.com/index/our-principles",
+      "summary": "Our mission is to ensure that AGI benefits all of humanity. Sam Altman shares five principles that guide our work.",
+      "categories": [
+        "Company"
+      ],
+      "publishedAt": "2026-04-26T16:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "0aa48be0052ea119c4095a7b9839fdaa3816904935874e981bfe2f57f1fc95ec"
+    },
+    {
+      "title": "8 Gemini tips for organizing your space (and life)",
+      "url": "https://blog.google/products-and-platforms/products/gemini/gemini-spring-cleaning-tips",
+      "summary": "Organize your home and digital space with Gemini. Use AI-powered tips for cleaning schedules, inbox decluttering, seasonal chores.",
+      "categories": [
+        "Gemini",
+        "AI"
+      ],
+      "publishedAt": "2026-04-24T19:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "06be0ccb0255022f7fb859de4e05faac137e40098a49e17a6d879fb0dd3e6067"
+    },
+    {
+      "title": "An update on our election safeguards",
+      "url": "https://www.anthropic.com/news/election-safeguards-update",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-24T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "313a86085abc80770d52ba016b959185f83f88549d96bc4371a319f67c61c72e"
+    },
+    {
+      "title": "Anthropic and NEC collaborate to build Japan’s largest AI workforce",
+      "url": "https://www.anthropic.com/news/anthropic-nec",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-24T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "07bde09f552eb93a61cab0348ccd9c39af33e41c2c04070022f463da939facc7"
+    },
+    {
+      "title": "Here’s how our TPUs power increasingly demanding AI workloads.",
+      "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/what-is-a-tpu",
+      "summary": "Learn how Google’s TPUs power increasingly demanding AI workloads with this new video.",
+      "categories": [
+        "Google Cloud",
+        "AI"
+      ],
+      "publishedAt": "2026-04-23T12:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "multimodal-voice-vision"
+      ],
+      "fingerprint": "af80ae19ab875a9ad26cb50c186c0d85d9fda3bd45252bbfe1ef8b2791ffd043"
+    },
+    {
+      "title": "GPT-5.5 System Card",
+      "url": "https://openai.com/index/gpt-5-5-system-card",
+      "summary": "",
+      "categories": [
+        "Safety"
+      ],
+      "publishedAt": "2026-04-23T11:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "1c03ae3e5004a4d5b15c2f5667dfeb20e7a5c701e62f158f84403b0bcd3258a8"
+    },
+    {
+      "title": "Introducing GPT-5.5",
+      "url": "https://openai.com/index/introducing-gpt-5-5",
+      "summary": "Introducing GPT-5.5, our smartest model yet—faster, more capable, and built for complex tasks like coding, research, and data analysis across tools.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-23T11:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "e8dcbe3cd9bcd547dcf964be19f3975993dbbe78d055115b8bd6b1ae5113b208"
+    },
+    {
+      "title": "Automations",
+      "url": "https://openai.com/academy/codex-automations",
+      "summary": "Learn how to automate tasks in Codex using schedules and triggers to create reports, summaries, and recurring workflows without manual effort.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "a9e33f6a982c5378be8092d75dedf3a0343acb42c67fd1a5b6a959b0d9f2d5c6"
+    },
+    {
+      "title": "Codex settings",
+      "url": "https://openai.com/academy/codex-settings",
+      "summary": "Learn how to configure Codex settings, including personalization, detail level, and permissions, to run tasks smoothly and customize your workflow.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "memory-state-personalization"
+      ],
+      "fingerprint": "c19521bb63165a243f55aea39e2b9cd12690e461469d20dd0afd7b53bd3787b8"
+    },
+    {
+      "title": "How to get started with Codex",
+      "url": "https://openai.com/academy/codex-how-to-start",
+      "summary": "Learn how to get started with Codex by setting up projects, creating threads, and completing your first tasks with step-by-step guidance.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "c48c01f41872d869f0a88b5a9d6943266cc43025e37692ac83aa245dba6ccb48"
+    },
+    {
+      "title": "Plugins and skills",
+      "url": "https://openai.com/academy/codex-plugins-and-skills",
+      "summary": "Learn how to use Codex plugins and skills to connect tools, access data, and follow repeatable workflows to automate tasks and improve results.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "a23c9fae7c4e5d33086f7210def922d3e91ab7d414c9d7a7712a242225282f2c"
+    },
+    {
+      "title": "Top 10 uses for Codex at work",
+      "url": "https://openai.com/academy/top-10-use-cases-codex-for-work",
+      "summary": "Explore 10 practical Codex use cases to automate tasks, create deliverables, and turn real inputs into outputs across tools, files, and workflows.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "73a993b8dfe26a775ebbc414bf395412c9d1a5d69579343b552c9ea7911256da"
+    },
+    {
+      "title": "What is Codex?",
+      "url": "https://openai.com/academy/what-is-codex",
+      "summary": "Learn how Codex helps you go beyond chat by automating tasks, connecting tools, and producing real outputs like docs and dashboards.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "4e74f6c531b88efc197a0b46fc018332e9eeee70dfce8c23801a30ca4fa7748c"
+    },
+    {
+      "title": "Working with Codex",
+      "url": "https://openai.com/academy/working-with-codex",
+      "summary": "Learn how to set up your Codex workspace, create threads and projects, manage files, and start completing tasks with step-by-step guidance.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-23T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "23f99b1c1b52f670cf9166dc0963e7334779bc4e464bce97d7e1aa7153aaecec"
+    },
+    {
+      "title": "Elevating Austria: Google invests in its first data center in the Alps.",
+      "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/global-network/google-data-center-austria",
+      "summary": "Google has been a proud part of Austria’s landscape for years, and today, we’re announcing our first data center in Kronstorf, generating 100 direct jobs. This facility …",
+      "categories": [
+        "Global Network",
+        "Sustainability",
+        "Grow with Google",
+        "AI"
+      ],
+      "publishedAt": "2026-04-23T09:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [],
+      "fingerprint": "5d1eaefebd1c98ad3ed86a6b43cce963d3c8cb47706f9e1c97c842cb4b493692"
+    },
+    {
+      "title": "GPT-5.5 Bio Bug Bounty",
+      "url": "https://openai.com/index/gpt-5-5-bio-bug-bounty",
+      "summary": "Explore the GPT-5.5 Bio Bug Bounty: a red-teaming challenge to find universal jailbreaks for bio safety risks, with rewards up to $25,000.",
+      "categories": [
+        "Safety"
+      ],
+      "publishedAt": "2026-04-23T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "c6b49ad6a8306132b303b4f63204397b45f355824bf16b1227edbcbfe0e2d206"
+    },
+    {
+      "title": "Making ChatGPT better for clinicians",
+      "url": "https://openai.com/index/making-chatgpt-better-for-clinicians",
+      "summary": "OpenAI makes ChatGPT for Clinicians free for verified U.S. physicians, nurse practitioners, and pharmacists, supporting clinical care, documentation, and research.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-22T15:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms",
+        "search-retrieval"
+      ],
+      "fingerprint": "3c5ea5a458b543f805ad7e82417d5f85ee905d60afe4f77df3b487432d6fef3a"
+    },
+    {
+      "title": "We're launching two specialized TPUs for the agentic era.",
+      "url": "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/tpus-8t-8i-cloud-next",
+      "summary": "The eighth generation of Google’s TPU includes two specialized chips that will power the future of AI.",
+      "categories": [
+        "Google Cloud",
+        "AI"
+      ],
+      "publishedAt": "2026-04-22T12:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "56faf66b6d9b374cf3a8241184fe184e9225cf89512e88c1402de32cb7d446c6"
+    },
+    {
+      "title": "Introducing workspace agents in ChatGPT",
+      "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt",
+      "summary": "Workspace agents in ChatGPT are Codex-powered agents that automate complex workflows, run in the cloud, and help teams scale work across tools securely.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-22T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "1b1dea071ea18bb21fe92c1a31a6abe13f32e0e1d959bdc34850b24df3fcfce0"
+    },
+    {
+      "title": "Speeding up agentic workflows with WebSockets in the Responses API",
+      "url": "https://openai.com/index/speeding-up-agentic-workflows-with-websockets",
+      "summary": "A deep dive into the Codex agent loop, showing how WebSockets and connection-scoped caching reduced API overhead and improved model latency.",
+      "categories": [
+        "Engineering"
+      ],
+      "publishedAt": "2026-04-22T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "67edeef5a2f9a2a85a36e7dd04f4c153ebbf3d8ff768a6325a4e2d5757f3fa3c"
+    },
+    {
+      "title": "Workspace agents",
+      "url": "https://openai.com/academy/workspace-agents",
+      "summary": "Learn how to build, use, and scale workspace agents in ChatGPT to automate repeatable workflows, connect tools, and streamline team operations.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-22T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "cf0c3e7b712b0eff813a6f090f3f7e655bd215302a4721a644fc9ade08f55ffe"
+    },
+    {
+      "title": "Introducing OpenAI Privacy Filter",
+      "url": "https://openai.com/index/introducing-openai-privacy-filter",
+      "summary": "OpenAI Privacy Filter is an open-weight model for detecting and redacting personally identifiable information (PII) in text with state-of-the-art accuracy",
+      "categories": [
+        "Research"
+      ],
+      "publishedAt": "2026-04-22T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "memory-state-personalization",
+        "search-retrieval"
+      ],
+      "fingerprint": "7ae577d4b5d62c88a6f810d744502bc3c900b9b2e96b9176831fc5ffc79327a9"
+    },
+    {
+      "title": "3 new ways Ads Advisor is making Google Ads safer and faster",
+      "url": "https://blog.google/products/ads-commerce/ads-advisor-google-ads",
+      "summary": "Three new agentic safety and policy features integrated into Ads Advisor will help protect and streamline your Google Ads account.",
+      "categories": [
+        "Google Ads",
+        "Safety & Security",
+        "AI"
+      ],
+      "publishedAt": "2026-04-21T14:30:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "security-governance"
+      ],
+      "fingerprint": "c9a51a3dfc00098b31bd8c9444a5b2c6636fd00c579302cef74366b7f89c8255"
+    },
+    {
+      "title": "Moving past bots vs. humans",
+      "url": "https://blog.cloudflare.com/past-bots-and-humans",
+      "summary": "As AI assistants and privacy proxies challenge the capabilities of traditional bot detection, the Web needs new models for accountability. We believe that control should remain with the client, and that an open ecosystem of anonymous credentials is key to preserving user privacy while protecting origins from abuse.",
+      "categories": [
+        "Research",
+        "Bots",
+        "Privacy",
+        "Standards",
+        "Better Internet",
+        "AI"
+      ],
+      "publishedAt": "2026-04-21T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms",
+        "search-retrieval"
+      ],
+      "fingerprint": "40dca15f1b22c9f99b562112e066116862e43353c554a24d82251cb2f54e5537"
+    },
+    {
+      "title": "Introducing ChatGPT Images 2.0",
+      "url": "https://openai.com/index/introducing-chatgpt-images-2-0",
+      "summary": "ChatGPT Images 2.0 introduces a state-of-the-art image generation model with improved text rendering, multilingual support, and advanced visual reasoning.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-21T12:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "multimodal-voice-vision",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "7e404b8fcec4a6623fc837b57acd68d8dd0466f6b3823daed9ea88f17ab6e9ff"
+    },
+    {
+      "title": "Scaling Codex to enterprises worldwide",
+      "url": "https://openai.com/index/scaling-codex-to-enterprises-worldwide",
+      "summary": "OpenAI launches Codex Labs, partners with with Accenture, PwC, Infosys, and others to help enterprises deploy and scale Codex across the software development lifecycle, and hits 4M Codex WAU.",
+      "categories": [
+        "Company"
+      ],
+      "publishedAt": "2026-04-21T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [],
+      "fingerprint": "6fb86cc732c579596619c170f4d2c271d67447e2ab6814255380d18a040ce632"
+    },
+    {
+      "title": "Building the agentic cloud: everything we launched during Agents Week 2026",
+      "url": "https://blog.cloudflare.com/agents-week-in-review",
+      "summary": "Agents Week 2026 is a wrap. Let’s take a look at everything we announced, from compute and security to the agent toolbox, platform tools, and the emerging agentic web. Everything we shipped for the agentic cloud.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "Durable Objects",
+        "Cloudflare Workers",
+        "SDK",
+        "Browser Run",
+        "Cloudflare Access",
+        "Browser Rendering",
+        "MCP",
+        "Developer Platform",
+        "Developers",
+        "Sandbox",
+        "LLM",
+        "Cloudflare Gateway",
+        "Workers AI",
+        "Product News",
+        "API"
+      ],
+      "publishedAt": "2026-04-20T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms",
+        "security-governance"
+      ],
+      "fingerprint": "edcfd200a8b273d689bc762c7c26fdff2330dea628097b37192c9b82d26574ed"
+    },
+    {
+      "title": "Orchestrating AI Code Review at scale",
+      "url": "https://blog.cloudflare.com/ai-code-review",
+      "summary": "Learn about how we built a CI-native AI code reviewer using OpenCode that helps our engineers ship better, safer code.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "Developer Platform",
+        "Developers",
+        "LLM",
+        "AI Gateway"
+      ],
+      "publishedAt": "2026-04-20T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "a076d894433de2d1236992c2c35f5ed6962d5db295db024132b053b12ed06ab0"
+    },
+    {
+      "title": "The AI engineering stack we built internally — on the platform we ship",
+      "url": "https://blog.cloudflare.com/internal-ai-engineering-stack",
+      "summary": "We built our internal AI engineering stack on the same products we ship. That means 20 million requests routed through AI Gateway, 241 billion tokens processed, and inference running on Workers AI, serving more than 3,683 internal users. Here's how we did it.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "Cloudflare Workers",
+        "SASE",
+        "MCP",
+        "Developer Platform",
+        "Developers",
+        "Cloudflare Gateway",
+        "Product News",
+        "Workers AI"
+      ],
+      "publishedAt": "2026-04-20T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "7832a1de9d7d0da859d58dd7559c6ea0ab0f974d3a4c31c02ac6b15b0a72a0ea"
+    },
+    {
+      "title": "Anthropic and Amazon expand collaboration for up to 5 gigawatts of new compute",
+      "url": "https://www.anthropic.com/news/anthropic-amazon-compute",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-20T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [],
+      "fingerprint": "63aa352bd5f305f82d3b7bef07cd1815c6c59cd8930830a2c599ee6886aa7d80"
+    },
+    {
+      "title": "OpenAI helps Hyatt advance AI among colleagues",
+      "url": "https://openai.com/index/hyatt-advances-ai-with-chatgpt-enterprise",
+      "summary": "Hyatt deploys ChatGPT Enterprise across its global workforce, using GPT-5.4 and Codex to improve productivity, operations, and guest experiences.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-04-20T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "517574efa8bdc17241e693ccf094ee53e21e81725e4e8fb5f8332459b832f37e"
+    },
+    {
+      "title": "7 ways to travel smarter this summer, with help from Google",
+      "url": "https://blog.google/products-and-platforms/products/search/summer-travel-tips-google-search-ai",
+      "summary": "The latest tools from Google can help you plan trips, find a great deal and explore your next destination.",
+      "categories": [
+        "Search",
+        "Translate",
+        "Shopping",
+        "AI",
+        "Maps"
+      ],
+      "publishedAt": "2026-04-17T14:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "search-retrieval"
+      ],
+      "fingerprint": "5f2032fa6d9bcd0cd5b197d3b0b840171d6e88c4705f379511e29e79af1b3ba0"
+    },
+    {
+      "title": "Introducing the Agent Readiness score. Is your site agent-ready?",
+      "url": "https://blog.cloudflare.com/agent-readiness",
+      "summary": "The Agent Readiness score can help site owners understand how well their websites support AI agents. Here we explore new standards, share Radar data, and detail how we made Cloudflare’s docs the most agent-friendly on the web.",
+      "categories": [
+        "Agents Week",
+        "Radar",
+        "Developer Documentation",
+        "AI",
+        "Agents",
+        "Agent Readiness"
+      ],
+      "publishedAt": "2026-04-17T13:05:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "2d7a2ee4eeebb42f1c2735deecb86fa06b3f096f5e82e11051db6fe854bdb06e"
+    },
+    {
+      "title": "Shared Dictionaries: compression that keeps up with the agentic web",
+      "url": "https://blog.cloudflare.com/shared-dictionaries",
+      "summary": "Today, we’re excited to give you a sneak peek of our support for shared compression dictionaries, show you how it improves page load times, and reveal when you’ll be able to try the beta yourself.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "Compression",
+        "Pingora",
+        "Speed",
+        "AI"
+      ],
+      "publishedAt": "2026-04-17T13:02:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "d056936c5c8a3abcbdfcab4fc08548500878c06a575732e456fdbd15e84648b7"
+    },
+    {
+      "title": "Agents that remember: introducing Agent Memory",
+      "url": "https://blog.cloudflare.com/introducing-agent-memory",
+      "summary": "Cloudflare Agent Memory is a managed service that gives AI agents persistent memory, allowing them to recall what matters, forget what doesn't, and get smarter over time.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "Storage"
+      ],
+      "publishedAt": "2026-04-17T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "memory-state-personalization",
+        "search-retrieval"
+      ],
+      "fingerprint": "8a2ad465c238f332177e985ead804cea4b4da78ac13fc719baaa12f884a3178f"
+    },
+    {
+      "title": "Introducing Flagship: feature flags built for the age of AI",
+      "url": "https://blog.cloudflare.com/flagship",
+      "summary": "We are launching Flagship, a native feature flag service built on Cloudflare’s global network to eliminate the latency of third-party providers. By using KV and Durable Objects, Flagship allows for sub-millisecond flag evaluation.",
+      "categories": [
+        "Agents Week",
+        "Cloudflare Workers",
+        "Developer Platform",
+        "AI",
+        "Durable Objects",
+        "Performance",
+        "Feature Flags"
+      ],
+      "publishedAt": "2026-04-17T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "f1aff53515180b49514f878224780c96590b6bc186e496aabe671099fbfa2a7d"
+    },
+    {
+      "title": "Redirects for AI Training enforces canonical content",
+      "url": "https://blog.cloudflare.com/ai-redirects",
+      "summary": "Soft directives don’t stop crawlers from ingesting deprecated content. Redirects for AI Training allows anybody on Cloudflare to redirect verified crawlers to canonical pages with one toggle and no origin changes.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "Radar",
+        "Bot Management",
+        "Developer Platform",
+        "Developers"
+      ],
+      "publishedAt": "2026-04-17T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "fab1c598a7b9825eca06261b45c9bbb2ffb6b07b4a5e24e7828296ff3e2ff598"
+    },
+    {
+      "title": "Unweight: how we compressed an LLM 22% without sacrificing quality",
+      "url": "https://blog.cloudflare.com/unweight-tensor-compression",
+      "summary": "Running LLMs across Cloudflare’s network requires us to be smarter and more efficient about GPU memory bandwidth. That’s why we developed Unweight, a lossless inference-time compression system that achieves up to a 22% model footprint reduction, so that we can deliver faster and cheaper inference than ever before.",
+      "categories": [
+        "Agents Week",
+        "Research",
+        "AI"
+      ],
+      "publishedAt": "2026-04-17T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "infra-inference-edge",
+        "memory-state-personalization",
+        "search-retrieval"
+      ],
+      "fingerprint": "09fafea3d01f05b90ee6344c3b34332f669778ef4a7fb3d45353648ede14b3e1"
+    },
+    {
+      "title": "Claude Design Anthropic Labs",
+      "url": "https://www.anthropic.com/news/claude-design-anthropic-labs",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-17T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "033d40ff0c7d24ec33ad1955cd8be23c0f01eec676d8d07d03258dfa35045198"
+    },
+    {
+      "title": "A new way to explore the web with AI Mode in Chrome",
+      "url": "https://blog.google/products-and-platforms/products/search/ai-mode-chrome",
+      "summary": "Today’s upgrades for AI Mode in Chrome transform how you interact with the web",
+      "categories": [
+        "Search",
+        "AI",
+        "Chrome"
+      ],
+      "publishedAt": "2026-04-16T17:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "search-retrieval"
+      ],
+      "fingerprint": "35582cc0d8a01708183edec3531bd2fd8f076dccf73129b53997f911c5952d94"
+    },
+    {
+      "title": "New ways to create personalized images in the Gemini app",
+      "url": "https://blog.google/innovation-and-ai/products/gemini-app/personal-intelligence-nano-banana",
+      "summary": "Nano Banana 2 now uses your personal context and Google Photos to create images that reflect your unique life.",
+      "categories": [
+        "Gemini App",
+        "Google One",
+        "Photos",
+        "AI"
+      ],
+      "publishedAt": "2026-04-16T16:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "multimodal-voice-vision",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "c439dae075aa1cf80b31e7bda54de0fb6b999ef2c550ad1404d9c442393b782c"
+    },
+    {
+      "title": "Cloudflare’s AI Platform: an inference layer designed for agents",
+      "url": "https://blog.cloudflare.com/ai-platform",
+      "summary": "We're building AI Gateway into a unified inference layer for AI, letting developers call models from 14+ providers. New features include Workers AI binding integration and an expanded catalog with multimodal models.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "AI Gateway",
+        "Workers AI",
+        "Developers",
+        "Developer Platform",
+        "LLM"
+      ],
+      "publishedAt": "2026-04-16T14:05:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "multimodal-voice-vision",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "ba62e49c2551df1025a25db248d4433169ec21d4a45a7b107657617dcdc1d02d"
+    },
+    {
+      "title": "Building the foundation for running extra-large language models",
+      "url": "https://blog.cloudflare.com/high-performance-llms",
+      "summary": "We built a custom technology stack to run fast large language models on Cloudflare’s infrastructure. This post explores the engineering trade-offs and technical optimizations required to make high-performance AI inference accessible.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI",
+        "Developer Platform",
+        "Developers",
+        "Infrastructure",
+        "Workers AI"
+      ],
+      "publishedAt": "2026-04-16T14:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "7e51cccc064aed8e40a3e41946f721678e33154b563f42ddf36cf518f3b1d8f4"
+    },
+    {
+      "title": "AI Search: the search primitive for your agents",
+      "url": "https://blog.cloudflare.com/ai-search-agent-primitive",
+      "summary": "AI Search is the search primitive for your agents. Create instances dynamically, upload files, and search across instances with hybrid retrieval and relevance boosting. Just create a search instance, upload, and search.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "AI Search",
+        "AI"
+      ],
+      "publishedAt": "2026-04-16T13:00:22.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "search-retrieval"
+      ],
+      "fingerprint": "eb34d27aeed65711972f49396c9fe586dca1fe148b28ae49bb695f51cd4ea1af"
+    },
+    {
+      "title": "Codex for (almost) everything",
+      "url": "https://openai.com/index/codex-for-almost-everything",
+      "summary": "The updated Codex app for macOS and Windows adds computer use, in-app browsing, image generation, memory, and plugins to accelerate developer workflows.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-16T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "multimodal-voice-vision",
+        "developer-platforms",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "6daf7d829abcf6f63033531f43c7452b54028994d9344b4111000c4d0fbcb53f"
+    },
+    {
+      "title": "Cloudflare Email Service: now in public beta. Ready for your agents",
+      "url": "https://blog.cloudflare.com/email-for-agents",
+      "summary": "Agents are becoming multi-channel. That means making them available wherever your users already are — including the inbox. Today, Cloudflare Email Service enters public beta with the infrastructure layer to make that easy: send, receive, and process email natively from your agents.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "Developers",
+        "Developer Platform",
+        "AI",
+        "Workers AI",
+        "Email"
+      ],
+      "publishedAt": "2026-04-16T06:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "d27d387e2dbe8bddcf49cec785d8fafdb3cb464bc70f5a6db5e859532e3ed097"
+    },
+    {
+      "title": "Claude Opus 4 7",
+      "url": "https://www.anthropic.com/news/claude-opus-4-7",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-04-16T04:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "6de79103200747f26a9f9cce1464b28c241db5ea6d2bf75777a65f41cf4d12d6"
+    },
+    {
+      "title": "Introducing GPT-Rosalind for life sciences research",
+      "url": "https://openai.com/index/introducing-gpt-rosalind",
+      "summary": "OpenAI introduces GPT-Rosalind, a frontier reasoning model built to accelerate drug discovery, genomics analysis, protein reasoning, and scientific research workflows.",
+      "categories": [
+        "Research"
+      ],
+      "publishedAt": "2026-04-16T01:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "9b5813ccd4d93d9ede6b53277a43f3603195ceca91bfa2bc4e0948d1ce712ccf"
+    },
+    {
+      "title": "Accelerating the cyber defense ecosystem that protects us all",
+      "url": "https://openai.com/index/accelerating-cyber-defense-ecosystem",
+      "summary": "Leading security firms and enterprises join OpenAI’s Trusted Access for Cyber, using GPT-5.4-Cyber and $10M in API grants to strengthen global cyber defense.",
+      "categories": [
+        "Security"
+      ],
+      "publishedAt": "2026-04-16T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms",
+        "security-governance"
+      ],
+      "fingerprint": "5d42a6c2ca58bb794741e7b0c4d3f26505ea985c7021da37456ce72e6a027034"
+    },
+    {
+      "title": "Gemini 3.1 Flash TTS: the next generation of expressive AI speech",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-1-flash-tts",
+      "summary": "Gemini 3.1 Flash TTS is now available across Google products.",
+      "categories": [
+        "Gemini models",
+        "AI"
+      ],
+      "publishedAt": "2026-04-15T15:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "935ba12b7c99de6ac6df1f1b512b3cf996762ab28272b2b62a85f0b04e5acb6a"
+    },
+    {
+      "title": "Project Think: building the next generation of AI agents on Cloudflare",
+      "url": "https://blog.cloudflare.com/project-think",
+      "summary": "Announcing a preview of the next edition of the Agents SDK — from lightweight primitives to a batteries-included platform for AI agents that think, act, and persist.",
+      "categories": [
+        "Agents Week",
+        "Agents",
+        "Storage",
+        "Developer Platform",
+        "Developers",
+        "Cloudflare Workers",
+        "Durable Objects",
+        "AI"
+      ],
+      "publishedAt": "2026-04-15T13:01:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms",
+        "search-retrieval"
+      ],
+      "fingerprint": "c56c2b69aae1198033f7de050777868ac26fa30d7017be94dd125a309c09ddac"
+    },
+    {
+      "title": "Add voice to your agent",
+      "url": "https://blog.cloudflare.com/voice-agents",
+      "summary": "An experimental voice pipeline for the Agents SDK enables real-time voice interactions over WebSockets. Developers can now build agents with continuous STT and TTS in just ~30 lines of server-side code.",
+      "categories": [
+        "Cloudflare Workers",
+        "AI",
+        "Agents Week",
+        "Developers",
+        "Agents",
+        "Durable Objects"
+      ],
+      "publishedAt": "2026-04-15T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "multimodal-voice-vision",
+        "developer-platforms"
+      ],
+      "fingerprint": "fc877ba795cbb2ab9fc5d7d2f84f5f4b6e6dfbedea47b93ecf28f4e109279f33"
+    },
+    {
+      "title": "Browser Run: give your agents a browser",
+      "url": "https://blog.cloudflare.com/browser-run-for-ai-agents",
+      "summary": "Browser Rendering is now Browser Run, with Live View, Human in the Loop, CDP access, session recordings, and 4x higher concurrency limits for AI agents.",
+      "categories": [
+        "Agents Week",
+        "Chrome",
+        "Developer Platform",
+        "Developers",
+        "AI",
+        "Cloudflare Workers",
+        "Browser Rendering",
+        "Agents",
+        "Browser Run"
+      ],
+      "publishedAt": "2026-04-15T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "cff64773dcea499b1979e1a0da9576cafacd4364649456f98bb1ac1d75b1148c"
+    },
+    {
+      "title": "Register domains wherever you build: Cloudflare Registrar API now in beta",
+      "url": "https://blog.cloudflare.com/registrar-api-beta",
+      "summary": "The Cloudflare Registrar API is now in beta. Developers and AI agents can search, check availability, and register domains at cost directly from their editor, their terminal, or their agent — without leaving their workflow.",
+      "categories": [
+        "Registrar",
+        "Developers",
+        "AI",
+        "API",
+        "Developer Platform",
+        "Agents",
+        "Agents Week"
+      ],
+      "publishedAt": "2026-04-15T13:00:00.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms",
+        "search-retrieval"
+      ],
+      "fingerprint": "8006eebe56c734f36c7bfa8251719ad30b5e0f05e86ea37f2e0f37e0b34456d0"
+    },
+    {
+      "title": "The next evolution of the Agents SDK",
+      "url": "https://openai.com/index/the-next-evolution-of-the-agents-sdk",
+      "summary": "OpenAI updates the Agents SDK with native sandbox execution and a model-native harness, helping developers build secure, long-running agents across files and tools.",
+      "categories": [
+        "Product"
+      ],
+      "publishedAt": "2026-04-15T10:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "73596356bc3210b6ecdba0b9cf83d0ea27a4716047e2bbaa60e1b3763e676b22"
+    },
+    {
+      "title": "Turn your best AI prompts into one-click tools in Chrome",
+      "url": "https://blog.google/products-and-platforms/products/chrome/skills-in-chrome",
+      "summary": "Skills in Chrome let you discover, save and remix AI workflows — and repeat them instantly.",
+      "categories": [
+        "Chrome",
+        "AI"
+      ],
+      "publishedAt": "2026-04-14T17:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms"
+      ],
+      "fingerprint": "eda078fe4e8b51c259e50d4a7e218edf7fc165997c53fb2d398f95da60d65a09"
+    },
+    {
+      "title": "Scaling MCP adoption: Our reference architecture for simpler, safer and cheaper enterprise deployments of MCP",
+      "url": "https://blog.cloudflare.com/enterprise-mcp",
+      "summary": "We share Cloudflare's internal strategy for governing MCP using Access, AI Gateway, and MCP server portals. We also launch Code Mode to slash token costs and recommend new rules for detecting Shadow MCP in Cloudflare Gateway.",
+      "categories": [
+        "AI",
+        "Security",
+        "Cloudflare One",
+        "Cloudflare Workers",
+        "Developers",
+        "Developer Platform",
+        "MCP",
+        "Cloudflare Access",
+        "Cloudflare Gateway",
+        "Agents Week"
+      ],
+      "publishedAt": "2026-04-14T13:00:10.000Z",
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "capabilityTags": [
+        "agents-autonomy",
+        "developer-platforms",
+        "security-governance"
+      ],
+      "fingerprint": "28045664159b524e605d944b7dee7916221ba2286967f6b1464c6036c506a95f"
+    },
+    {
+      "title": "Bringing people together at AI for the Economy Forum",
+      "url": "https://blog.google/company-news/outreach-and-initiatives/creating-opportunity/ai-economy-forum",
+      "summary": "Google is bringing people together in Washington D.C. at our AI for the Economy Forum.",
+      "categories": [
+        "Google.org",
+        "Creating opportunity",
+        "AI"
+      ],
+      "publishedAt": "2026-04-14T09:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [],
+      "fingerprint": "4f0e649f31b01abe8aca7997b00b10939fa97f1e4056318bb186c91ada77f2d2"
+    },
+    {
+      "title": "Trusted access for the next era of cyber defense",
+      "url": "https://openai.com/index/scaling-trusted-access-for-cyber-defense",
+      "summary": "OpenAI expands its Trusted Access for Cyber program, introducing GPT-5.4-Cyber to vetted defenders and strengthening safeguards as AI cybersecurity capabilities advance.",
+      "categories": [
+        "Security"
+      ],
+      "publishedAt": "2026-04-14T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "967d4d4bf25f49b77fc34c60a17c347121588ae346381d0aa6b2bdb88bf33550"
+    },
+    {
+      "title": "Enterprises power agentic workflows in Cloudflare Agent Cloud with OpenAI",
+      "url": "https://openai.com/index/cloudflare-openai-agent-cloud",
+      "summary": "Cloudflare brings OpenAI’s GPT-5.4 and Codex to Agent Cloud, enabling enterprises to build, deploy, and scale AI agents for real-world tasks with speed and security.",
+      "categories": [
+        "Global Affairs"
+      ],
+      "publishedAt": "2026-04-13T06:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "03105cb57e50bf97746be90b1b7097cfee7e58176b6f1bb0a1dc5e0ddebd7b61"
+    },
+    {
+      "title": "AI fundamentals",
+      "url": "https://openai.com/academy/what-is-ai",
+      "summary": "Learn what AI is, how it works, and how tools like ChatGPT use large language models. A clear, beginner-friendly guide to understanding artificial intelligence.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "7d9705c0c7da726cf27639cc899130dc5f8fb0cc1267f95b1d4df2e2b65dec03"
+    },
+    {
+      "title": "Analyzing data with ChatGPT",
+      "url": "https://openai.com/academy/data-analysis",
+      "summary": "Learn how to analyze data with ChatGPT by exploring datasets, generating insights, creating visualizations, and turning findings into actionable decisions.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "0b892394bd2b16f19d1ae2a790c95b6d6b01faac965a0f09675258b415be27e4"
+    },
+    {
+      "title": "Applications of AI at OpenAI",
+      "url": "https://openai.com/academy/applications-of-ai",
+      "summary": "Explore how OpenAI products like ChatGPT, Codex, and APIs bring AI into real-world use for work, development, and everyday tasks.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "72eecbe868a94983b3eaf3ca1e9a8b3766924fc0558d3e63bbcd5c3df6cad236"
+    },
+    {
+      "title": "Brainstorming with ChatGPT",
+      "url": "https://openai.com/academy/brainstorming",
+      "summary": "Learn how to use ChatGPT to brainstorm ideas, organize thinking, and turn rough concepts into structured, actionable plans.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "19249c4f9d0d8daf8374e58726e3b274374270cf594afb2d0b9374395f3dc829"
+    },
+    {
+      "title": "ChatGPT for customer success teams",
+      "url": "https://openai.com/academy/customer-success",
+      "summary": "Learn how customer success teams use ChatGPT to manage accounts, improve communication, reduce churn, and drive adoption and renewals.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "02a21b978c805ea068ca549702cd7ea0102b4799db7d35f0e72e65de9271dc42"
+    },
+    {
+      "title": "ChatGPT for finance teams",
+      "url": "https://openai.com/academy/finance",
+      "summary": "Learn how finance teams use ChatGPT to streamline reporting, analyze data, improve forecasts, and communicate insights more clearly.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "f5abfde839918fa2bd9d1f9dd52f6cbea3f4dab3ed5e131b61b571e93998c08b"
+    },
+    {
+      "title": "ChatGPT for managers",
+      "url": "https://openai.com/academy/managers",
+      "summary": "Learn how managers use ChatGPT to prepare for conversations, write clear feedback, stay organized, and improve team effectiveness.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "3a7b7a7371ebb4540594242457dff6cf232d6111c72efb1d8a41e965d538d614"
+    },
+    {
+      "title": "ChatGPT for marketing teams",
+      "url": "https://openai.com/academy/marketing",
+      "summary": "Learn how marketing teams use ChatGPT to plan campaigns, generate content, analyze performance, and move from ideas to execution faster.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "b0aa70b24165c78bf62e9b05ec232ad36206f01118f27cc91a6bed4744b7b49e"
+    },
+    {
+      "title": "ChatGPT for operations teams",
+      "url": "https://openai.com/academy/operations",
+      "summary": "Learn how operations teams use ChatGPT to streamline workflows, improve coordination, standardize processes, and drive faster execution.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "f69ee10666e8dfab2ecfa0b94cb401a00790373d0348ad6d15be9d5976c646dc"
+    },
+    {
+      "title": "ChatGPT for research",
+      "url": "https://openai.com/academy/research",
+      "summary": "Learn how to use ChatGPT for research to gather sources, analyze information, and create structured, citation-backed insights.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "405f169cf1dad10623abb63c8ff7e5949ecc5353b4d80b56ed594e2bb13bee8c"
+    },
+    {
+      "title": "ChatGPT for sales teams",
+      "url": "https://openai.com/academy/sales",
+      "summary": "Learn how sales teams use ChatGPT to research accounts, personalize outreach, manage deals, and improve pipeline and conversion.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "47c7f29ad39b372793fbf133104ccabb9da6f23b5f5eaccab5a89968371b5cd7"
+    },
+    {
+      "title": "Creating images with ChatGPT",
+      "url": "https://openai.com/academy/image-generation",
+      "summary": "Learn how to create and refine images with ChatGPT using clear prompts, iterate on designs, and generate high-quality visuals in minutes.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "multimodal-voice-vision"
+      ],
+      "fingerprint": "f6a25bd2e1cf58945c9c70c7e5e408dff2fa1ccd0bf68a23cd596ec05a6219fa"
+    },
+    {
+      "title": "Financial services",
+      "url": "https://openai.com/academy/financial-services",
+      "summary": "Explore AI resources for financial services, including prompt packs, GPTs, guides, and tools to help institutions deploy and scale AI securely.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "9ba773f73ac7b1fec7dd569f37099c9727f831a443c9e54adab6ce456f11a063"
+    },
+    {
+      "title": "Getting started with ChatGPT",
+      "url": "https://openai.com/academy/getting-started",
+      "summary": "Learn how to use ChatGPT, start your first conversation, and discover simple ways to write, brainstorm, and solve problems with AI.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "4e56ab672b318eb7e7b37ed768a032c3e97e8205168e645cae73c19caaf01428"
+    },
+    {
+      "title": "Healthcare",
+      "url": "https://openai.com/academy/healthcare",
+      "summary": "Explore how clinicians use ChatGPT to support diagnosis, documentation, and patient care with secure, HIPAA-compliant AI tools.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "6aad2406a0063039e6375ba1bb108f9e1b673d7ea3cdc910eb158ea65d3a203e"
+    },
+    {
+      "title": "Our response to the Axios developer tool compromise",
+      "url": "https://openai.com/index/axios-developer-tool-compromise",
+      "summary": "OpenAI responds to the Axios supply chain attack by rotating macOS code signing certificates, updating apps, and confirming no user data was compromised.",
+      "categories": [
+        "Security"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "developer-platforms",
+        "security-governance"
+      ],
+      "fingerprint": "f254b5e3163939814dffaac273bd07067ef5bdb4cde7685cadf5ac6a11f15796"
+    },
+    {
+      "title": "Personalizing ChatGPT",
+      "url": "https://openai.com/academy/personalization",
+      "summary": "Learn how to personalize ChatGPT using custom instructions and memory to get more relevant, consistent, and tailored responses.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "27e7dc5a31fb5912bc99c7086390404ea6bf6fdb4c19200eb5ab49b9d9ec62ac"
+    },
+    {
+      "title": "Prompting fundamentals",
+      "url": "https://openai.com/academy/prompting",
+      "summary": "Learn prompting fundamentals and how to write clear, effective prompts to get better, more useful responses from ChatGPT.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "02c3518f7371dd8d5feb44d3e66b695eebc5765b96bbde8f9df9a2145dd9d930"
+    },
+    {
+      "title": "Research with ChatGPT",
+      "url": "https://openai.com/academy/search-and-deep-research",
+      "summary": "Learn how to research with ChatGPT using search and deep research to find up-to-date information, analyze sources, and generate structured insights.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "8c6e910f80de22a89a410d110cd4e2282ddfbb3d743bc4ecf62fde03e396f1aa"
+    },
+    {
+      "title": "Responsible and safe use of AI",
+      "url": "https://openai.com/academy/responsible-and-safe-use",
+      "summary": "Learn how to use AI responsibly with best practices for safety, accuracy, and transparency when using tools like ChatGPT.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "6c32e3e84d79b29c702da17664b2f6cb0bb37a3de7ad62d38c269f73b748b1eb"
+    },
+    {
+      "title": "Using custom GPTs",
+      "url": "https://openai.com/academy/custom-gpts",
+      "summary": "Learn how to build and use custom GPTs to automate workflows, maintain consistent outputs, and create purpose-built AI assistants.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "310820dcfb42d71b3aee27ea8f8d0c8423a8d51f6438a53642039695f7453703"
+    },
+    {
+      "title": "Using projects in ChatGPT",
+      "url": "https://openai.com/academy/projects",
+      "summary": "Learn how to use projects in ChatGPT to organize chats, files, and instructions, manage ongoing work, and collaborate more effectively.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "d64b7ef3faf6727a7872f8f0a15f1bfb4e9336915be475400ff224289899402f"
+    },
+    {
+      "title": "Using skills",
+      "url": "https://openai.com/academy/skills",
+      "summary": "Learn how to create and use ChatGPT skills to build reusable workflows, automate recurring tasks, and ensure consistent, high-quality outputs.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning"
+      ],
+      "fingerprint": "d5173e063aa5cd65ac78e33ee36e4129387611d52412da23bf4c6ed23501862d"
+    },
+    {
+      "title": "Working with files in ChatGPT",
+      "url": "https://openai.com/academy/working-with-files",
+      "summary": "Learn how to upload and work with files in ChatGPT to analyze data, summarize documents, and generate content from PDFs, spreadsheets, and more.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "c90b3e98a45f21869130d992a3f16e72a673ca50e611ba53a10b406ba713e30b"
+    },
+    {
+      "title": "Writing with ChatGPT",
+      "url": "https://openai.com/academy/writing",
+      "summary": "Learn how to use ChatGPT for writing to draft, revise, and refine content with clear structure, tone, and intent.",
+      "categories": [
+        "OpenAI Academy"
+      ],
+      "publishedAt": "2026-04-10T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "43720352fc3333c58896579ef4cd31579814fa183cad51f59bc2741c3b2d1919"
+    },
+    {
+      "title": "CyberAgent moves faster with ChatGPT Enterprise and Codex",
+      "url": "https://openai.com/index/cyberagent",
+      "summary": "CyberAgent uses ChatGPT Enterprise and Codex to securely scale AI adoption, improve quality, and accelerate decisions across advertising, media, and gaming.",
+      "categories": [
+        "B2B Story"
+      ],
+      "publishedAt": "2026-04-09T00:00:00.000Z",
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "capabilityTags": [
+        "agents-autonomy",
+        "models-reasoning",
+        "search-retrieval"
+      ],
+      "fingerprint": "9a4900f8e51831726daa454083b52ff6a7fc9b67a8d54641a9db7e8e38b7004d"
+    },
+    {
+      "title": "Create, edit and share videos at no cost in Google Vids",
+      "url": "https://blog.google/products-and-platforms/products/workspace/google-vids-updates-lyria-veo",
+      "summary": "New AI capabilities are coming to Google Vids, powered by Lyria 3 and Veo 3.1, like high-quality video generation at no cost and more.",
+      "categories": [
+        "Google Workspace",
+        "Google One",
+        "AI"
+      ],
+      "publishedAt": "2026-04-02T16:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "multimodal-voice-vision"
+      ],
+      "fingerprint": "0af64ab1380f96213a536d70ceef3bf51ea08691ef4a48486f42c6e8a6a57b58"
+    },
+    {
+      "title": "New ways to balance cost and reliability in the Gemini API",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/introducing-flex-and-priority-inference",
+      "summary": "Google is introducing two new inference tiers to the Gemini API, Flex and Priority, to balance cost and latency.",
+      "categories": [
+        "Developer tools",
+        "AI"
+      ],
+      "publishedAt": "2026-04-02T16:00:00.000Z",
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms",
+        "infra-inference-edge"
+      ],
+      "fingerprint": "4596a851cb8d6e34b98a2dc86dddb72dcbc6a96b1746a717efb434fadf532f91"
+    },
+    {
+      "title": "Open to Work: How to Get Ahead in the Age of AI",
+      "url": "https://blogs.microsoft.com/blog/2026/03/31/open-to-work-how-to-get-ahead-in-the-age-of-ai",
+      "summary": "Today is the day. Open to Work: How to Get Ahead in the Age of AI is officially available! At a time when technology dominates the headlines, the conversation I see most often on LinkedIn is deeply human: what does AI mean for my job and my career? And that makes sense. Careers once felt... The post Open to Work: How to Get Ahead in the Age of AI appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "LinkedIn",
+        "Work Trend Index"
+      ],
+      "publishedAt": "2026-03-31T15:08:49.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "search-retrieval"
+      ],
+      "fingerprint": "ba80741c41ace5170a8a027c317a4fcfbd595d728d90e8767b184d718270afb7"
+    },
+    {
+      "title": "Microsoft at NVIDIA GTC: New solutions for Microsoft Foundry, Azure AI infrastructure and Physical AI",
+      "url": "https://blogs.microsoft.com/blog/2026/03/16/microsoft-at-nvidia-gtc-new-solutions-for-microsoft-foundry-azure-ai-infrastructure-and-physical-ai",
+      "summary": "Microsoft combines accelerated computing with cloud scale engineering to bring advanced AI capabilities to our customers. For years, we’ve worked with NVIDIA to integrate hardware, software and infrastructure to power many of today’s most important AI breakthroughs. What’s new at NVIDIA GTC Expanded Microsoft Foundry capabilities to build, deploy and operate production-ready AI agents on... The post Microsoft at NVIDIA GTC: New solutions for Microsoft Foundry, Azure AI infrastructure and Physical AI appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "Azure",
+        "Azure AI",
+        "Azure Arc",
+        "Foundry Agent Service",
+        "Foundry Local",
+        "Microsoft Fabric",
+        "Microsoft Foundry",
+        "Physical AI"
+      ],
+      "publishedAt": "2026-03-16T20:29:56.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "1cce7b005767c2688780a73e1e05a2485001a6384778aedc731d760a311887ea"
+    },
+    {
+      "title": "Microsoft and OpenAI joint statement on continuing partnership",
+      "url": "https://blogs.microsoft.com/blog/2026/02/27/microsoft-and-openai-joint-statement-on-continuing-partnership",
+      "summary": "Since 2019, Microsoft and OpenAI have worked together to advance artificial intelligence responsibly and make its benefits broadly accessible. What began as a research partnership has grown into one of the most consequential collaborations in technology — grounded in mutual trust, deep technical integration, and a long‑term commitment to innovation. As conversations around AI investments and partnerships... The post Microsoft and OpenAI joint statement on continuing partnership appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI"
+      ],
+      "publishedAt": "2026-02-27T13:50:44.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "developer-platforms",
+        "security-governance",
+        "memory-state-personalization",
+        "search-retrieval"
+      ],
+      "fingerprint": "090866068d2833bb163a4022ab3ccfb7f5e9aaa8a636e41db10ddbc83b935ce2"
+    },
+    {
+      "title": "Claude Is A Space To Think",
+      "url": "https://www.anthropic.com/news/claude-is-a-space-to-think",
+      "summary": "",
+      "categories": [],
+      "publishedAt": "2026-02-04T05:00:00.000Z",
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "models-reasoning"
+      ],
+      "fingerprint": "142218c4d025f1da45aaf5c74d8619f67ec6ec93f3d059ef97da16c9e79aea60"
+    },
+    {
+      "title": "How Microsoft is empowering Frontier Transformation with Intelligence + Trust",
+      "url": "https://blogs.microsoft.com/blog/2026/01/27/how-microsoft-is-empowering-frontier-transformation-with-intelligence-trust",
+      "summary": "At Microsoft Ignite in November, we introduced Frontier Transformation — a holistic reimagining of business aligning AI with human ambition to help organizations achieve their highest aspirations and growth potential. While AI Transformation centered on efficiency and productivity, Frontier Transformation challenges us to do more for humanity by democratizing intelligence to unlock creativity and innovation for... The post How Microsoft is empowering Frontier Transformation with Intelligence + Trust appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "AI Transformation",
+        "Frontier Transformation",
+        "Intelligence + Trust"
+      ],
+      "publishedAt": "2026-01-27T23:47:57.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "security-governance"
+      ],
+      "fingerprint": "274656a27a941b3496bf4f1a362e1f40fad7a675b9f0be98252599b77042d493"
+    },
+    {
+      "title": "Maia 200: The AI accelerator built for inference",
+      "url": "https://blogs.microsoft.com/blog/2026/01/26/maia-200-the-ai-accelerator-built-for-inference",
+      "summary": "Today, we’re proud to introduce Maia 200, a breakthrough inference accelerator engineered to dramatically improve the economics of AI token generation. Maia 200 is an AI inference powerhouse: an accelerator built on TSMC’s 3nm process with native FP8/FP4 tensor cores, a redesigned memory system with 216GB HBM3e at 7 TB/s and 272MB of on-chip SRAM, plus... The post Maia 200: The AI accelerator built for inference appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "Azure",
+        "datacenters"
+      ],
+      "publishedAt": "2026-01-26T16:00:30.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "infra-inference-edge",
+        "memory-state-personalization"
+      ],
+      "fingerprint": "1c0a945bd91043ee842fc7bcea1ca26817a941c9f7566bd66e4127d2df69ded5"
+    },
+    {
+      "title": "Announcing Open to Work: How to Get Ahead in the Age of AI",
+      "url": "https://blogs.microsoft.com/blog/2026/01/13/announcing-open-to-work-how-to-get-ahead-in-the-age-of-ai",
+      "summary": "The work we do, and the way we do it, is always changing. Each of us has a memory of how we once did a task regularly, the tools we used and how both the task and the tools have since changed so much they are nearly unrecognizable. Because we are living and working in... The post Announcing Open to Work: How to Get Ahead in the Age of AI appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "LinkedIn",
+        "Microsoft 365 Copilot",
+        "Work Trend Index"
+      ],
+      "publishedAt": "2026-01-13T15:12:16.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "memory-state-personalization",
+        "search-retrieval"
+      ],
+      "fingerprint": "3980bc7ee0ef9154843855803a5c4a0e1fd00265ae04f2ba1975039fa3dbc764"
+    },
+    {
+      "title": "Microsoft announces acquisition of Osmos to accelerate autonomous data engineering in Fabric",
+      "url": "https://blogs.microsoft.com/blog/2026/01/05/microsoft-announces-acquisition-of-osmos-to-accelerate-autonomous-data-engineering-in-fabric",
+      "summary": "Today, Microsoft is announcing the acquisition of Osmos, an agentic AI data engineering platform designed to help simplify complex and time-consuming data workflows. Microsoft + Osmos: Extending Microsoft Fabric with agentic AI for data engineering Organizations today face a common challenge: data is everywhere, but making it actionable is often manual, slow and expensive. Many... The post Microsoft announces acquisition of Osmos to accelerate autonomous data engineering in Fabric appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "Microsoft Fabric",
+        "OneLake"
+      ],
+      "publishedAt": "2026-01-05T17:00:01.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "agents-autonomy"
+      ],
+      "fingerprint": "f4fc213ae5df1f03fe9054ae0d4b38baee0713716b25d2d5d457a4a9142a2ad5"
+    },
+    {
+      "title": "Microsoft, NVIDIA and Anthropic announce strategic partnerships",
+      "url": "https://blogs.microsoft.com/blog/2025/11/18/microsoft-nvidia-and-anthropic-announce-strategic-partnerships",
+      "summary": "Anthropic to scale Claude on Azure Anthropic to adopt NVIDIA architecture NVIDIA and Microsoft to invest in Anthropic Today Microsoft, NVIDIA and Anthropic announced new strategic partnerships. Anthropic is scaling its rapidly-growing Claude AI model on Microsoft Azure, powered by NVIDIA, which will broaden access to Claude and provide Azure enterprise customers with expanded model choice and new capabilities. Anthropic... The post Microsoft, NVIDIA and Anthropic announce strategic partnerships appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "Anthropic",
+        "Microsoft Azure",
+        "NVIDIA"
+      ],
+      "publishedAt": "2025-11-18T15:00:03.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "models-reasoning",
+        "developer-platforms"
+      ],
+      "fingerprint": "38ebd2603ab753e6c72463086c26d30869b1153ce41e68201711aeaa4bc18324"
+    },
+    {
+      "title": "Infinite scale: The architecture behind the Azure AI superfactory",
+      "url": "https://blogs.microsoft.com/blog/2025/11/12/infinite-scale-the-architecture-behind-the-azure-ai-superfactory",
+      "summary": "Today, we are unveiling the next Fairwater site of Azure AI datacenters in Atlanta, Georgia. This purpose-built datacenter is connected to our first Fairwater site in Wisconsin, prior generations of AI supercomputers and the broader Azure global datacenter footprint to create the world’s first planet-scale AI superfactory. By packing computing power more densely than ever... The post Infinite scale: The architecture behind the Azure AI superfactory appeared first on The Official Microsoft Blog .",
+      "categories": [
+        "Featured",
+        "The Official Microsoft Blog",
+        "AI",
+        "Azure",
+        "Azure AI",
+        "Fairwater"
+      ],
+      "publishedAt": "2025-11-12T17:00:05.000Z",
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "capabilityTags": [
+        "infra-inference-edge"
+      ],
+      "fingerprint": "0f1d811b8541ec0b2caa815d3fe91bebfbaa1105f131bf1794c744ffb673c87a"
+    },
+    {
+      "title": "Responsible Scaling Policy",
+      "url": "https://www.anthropic.com/news/announcing-our-updated-responsible-scaling-policy",
+      "summary": "",
+      "categories": [],
+      "publishedAt": null,
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "capabilityTags": [
+        "security-governance"
+      ],
+      "fingerprint": "e98dd48b2a7f59f797a7e440be1ae0782279e205e676cb7125058bde2e730491"
+    }
+  ]
+}

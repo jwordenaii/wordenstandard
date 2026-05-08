@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-05-08T21:54:06.245Z",
+  "sources": [
+    {
+      "sourceId": "openai-news",
+      "sourceName": "OpenAI News",
+      "url": "https://openai.com/news/rss.xml",
+      "mode": "rss",
+      "status": "ok",
+      "itemCount": 80,
+      "durationMs": 530,
+      "error": null,
+      "fetchedAt": "2026-05-08T21:54:00.116Z"
+    },
+    {
+      "sourceId": "google-ai-blog",
+      "sourceName": "Google AI Blog",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/rss/",
+      "mode": "rss",
+      "status": "ok",
+      "itemCount": 20,
+      "durationMs": 215,
+      "error": null,
+      "fetchedAt": "2026-05-08T21:54:00.165Z"
+    },
+    {
+      "sourceId": "cloudflare-ai-blog",
+      "sourceName": "Cloudflare AI Blog",
+      "url": "https://blog.cloudflare.com/tag/ai/rss/",
+      "mode": "rss",
+      "status": "ok",
+      "itemCount": 20,
+      "durationMs": 422,
+      "error": null,
+      "fetchedAt": "2026-05-08T21:54:00.166Z"
+    },
+    {
+      "sourceId": "microsoft-ai-blog",
+      "sourceName": "Microsoft AI Blog",
+      "url": "https://blogs.microsoft.com/blog/tag/ai/feed/",
+      "mode": "rss",
+      "status": "ok",
+      "itemCount": 10,
+      "durationMs": 303,
+      "error": null,
+      "fetchedAt": "2026-05-08T21:54:00.167Z"
+    },
+    {
+      "sourceId": "anthropic-news",
+      "sourceName": "Anthropic News (HTML fallback)",
+      "url": "https://www.anthropic.com/news",
+      "mode": "html-links",
+      "status": "ok",
+      "itemCount": 12,
+      "durationMs": 6071,
+      "error": null,
+      "fetchedAt": "2026-05-08T21:54:00.168Z"
+    },
+    {
+      "sourceId": "vercel-changelog",
+      "sourceName": "Vercel Changelog (HTML fallback)",
+      "url": "https://vercel.com/changelog",
+      "mode": "html-links",
+      "status": "ok",
+      "itemCount": 8,
+      "durationMs": 264,
+      "error": null,
+      "fetchedAt": "2026-05-08T21:54:00.169Z"
+    }
+  ]
+}

@@ -122,6 +122,8 @@ Full checklist: see [`DEPLOYMENT.md`](DEPLOYMENT.md)
 | `npm run ai:build-pages` | AI page factory (generates pages from blueprints) |
 | `npm run ops:preflight` | Pre-deploy repo health check |
 | `npm run ops:live-check` | Verify live deployment is healthy |
+| `npm run ops:tech-radar` | Run AI capability/tech radar snapshot + report |
+| `npm run ops:tech-radar:diff` | Show only new items since last radar snapshot |
 | `npm run mrworden:cli` | Mr. Worden admin CLI (lead management) |
 | `npm run media:ingest` | Media ingest CLI (Dropbox / Google Photos) |
 
@@ -160,6 +162,7 @@ scripts/        — Ops, SEO, and deploy scripts
 | [`SECURITY.md`](SECURITY.md) | Auth flows, secrets management, OWASP notes |
 | [`TESTING.md`](TESTING.md) | cURL endpoint tests, Playwright setup |
 | [`MONITORING.md`](MONITORING.md) | Sentry + uptime monitoring setup |
+| [`docs/AI_TECH_RADAR.md`](docs/AI_TECH_RADAR.md) | Automated AI capability monitoring workflow |
 | [`BACKEND_LOGIC_INVENTORY.md`](BACKEND_LOGIC_INVENTORY.md) | All API endpoint inventory |
 | [`WEBSOCKET_CHAT.md`](WEBSOCKET_CHAT.md) | Real-time chat / WebSocket setup |
 | [`VECTOR_SEARCH.md`](VECTOR_SEARCH.md) | Semantic search / vector store setup |
