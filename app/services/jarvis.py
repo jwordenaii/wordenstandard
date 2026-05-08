@@ -12,6 +12,8 @@ from app.services import email_service as _email
 from app.services import runtime_config as _cfg
 from app.services import llm_client as _llm
 from app.services import code_reader as _code
+from app.services import action_planner as _planner
+from app.services import safe_runner as _runner
 from app.services import short_memory
 
 logger = logging.getLogger(__name__)
@@ -85,6 +87,26 @@ JARVIS_TOOLS = [
                 "path": {"type": "string", "description": "Relative path, e.g. src/pages/Dashboard.jsx"},
             },
             "required": ["path"],
+        },
+    },
+    {
+        "name": "run_npm",
+        "description": "Run a whitelisted npm script from package.json (lint/build/test).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "script": {"type": "string", "description": "npm script name to run"},
+            },
+            "required": ["script"],
+        },
+    },
+    {
+        "name": "plan_actions",
+        "description": "Create a small action plan from natural language (non-destructive).",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string"}},
+            "required": ["query"],
         },
     },
     {
@@ -235,6 +257,15 @@ async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
             return {"ok": True, "result": res}
         except Exception as exc:
             return {"ok": False, "error": str(exc)}
+    if name == "run_npm":
+        script = (args.get("script") or "").strip()
+        if not script:
+            return {"ok": False, "error": "no script provided"}
+        return _runner.run_npm_script(script)
+    if name == "plan_actions":
+        q = args.get("query") or ""
+        plan = _planner.plan(q, {"run_npm": True, "code_search": True, "open_file": True})
+        return {"ok": True, "plan": plan}
     return {"ok": False, "error": f"Unknown tool: {name}"}
 
 
