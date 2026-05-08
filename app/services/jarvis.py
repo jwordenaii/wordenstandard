@@ -216,6 +216,51 @@ async def _ask_fast_ops_brain(query: str, persona: str, autonomy: dict, *, confi
     }
 
 
+async def _ask_chat_brain(query: str, persona: str, autonomy: dict, session_id: Optional[str] = None, *, confirmed: bool = False) -> Optional[dict]:
+    """
+    Human-like conversational lane. Uses the multi-provider router via _llm.chat
+    with a persona-focused system prompt and recent short-term memory.
+    """
+    persona_note = (
+        "You are Jarvis: warm, conversational, helpful, concise but friendly. Ask clarifying questions when unsure."
+        if persona == "JARVIS"
+        else f"Adopt persona: {persona}. Be helpful and conversational."
+    )
+
+    mem_snippet = ""
+    try:
+        sid = session_id or (autonomy.get("session_id") if isinstance(autonomy, dict) else None)
+    except Exception:
+        sid = session_id
+    if sid:
+        recent = short_memory.get(sid)
+        if recent:
+            mem_snippet = "Recent conversation: " + " | ".join(recent[-8:]) + "\n"
+
+    system = (
+        f"You are JARVIS, a conversational AI assistant for Jeremy Worden. {persona_note}\n"
+        "Be natural, human, and helpful. Keep answers clear and friendly. If the user asks for facts that may be out-of-date, offer to search the web."
+        "\n" + mem_snippet
+    )
+
+    try:
+        resp = await asyncio.to_thread(
+            _llm.chat,
+            task="persona",
+            system=system,
+            user=query,
+            max_tokens=512,
+            temperature=0.6,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[JARVIS] Chat brain failed: %s", exc)
+        return None
+
+    if resp.error or not (resp.text or "").strip():
+        return None
+    return {"text": resp.text.strip(), "provider": resp.provider, "model": resp.model, "fallback_used": bool(resp.fallback_used)}
+
+
 async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
     if name == "web_search":
         return await _web_search.search(
@@ -431,7 +476,7 @@ class JarvisAI:
                 "intel_tier": "Safety-Override",
             }
 
-        # ── Fast lane: everyday operations reasoning without tool overhead ──
+        # ── Fast lane: human-like conversational responses without tool overhead ──
         # First, see if this user intent maps to a multi-step plan.
         plan = _planner.plan(query, {"run_npm": True, "code_search": True, "open_file": True})
         if plan and plan.get("intent") == "execute":
@@ -478,17 +523,31 @@ class JarvisAI:
 
         action_intent = _looks_like_tool_action(query)
         if not action_intent:
+            # Prefer the human-like chat brain for conversational queries.
+            chat = await _ask_chat_brain(query, persona, state, session_id=context.get("session_id"), confirmed=confirmed)
+            if chat:
+                return {
+                    "source": self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
+                    "message": chat["text"],
+                    "action_required": False,
+                    "engine": f"{chat['provider']}-chat",
+                    "model": chat["model"],
+                    "fallback_used": chat.get("fallback_used", False),
+                    "tool_calls": [],
+                    "autonomy": {"master": state.get("master"), "frozen": False},
+                }
+            # fallback to a faster ops-focused lane if chat brain did not return
             fast = await _ask_fast_ops_brain(query, persona, state, confirmed=confirmed)
             if fast:
                 return {
-                    "source":          self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
-                    "message":         fast["text"],
+                    "source": self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
+                    "message": fast["text"],
                     "action_required": False,
-                    "engine":          f"{fast['provider']}-stark-fast",
-                    "model":           fast["model"],
-                    "fallback_used":   fast["fallback_used"],
-                    "tool_calls":      [],
-                    "autonomy":        {"master": state.get("master"), "frozen": False},
+                    "engine": f"{fast['provider']}-stark-fast",
+                    "model": fast["model"],
+                    "fallback_used": fast["fallback_used"],
+                    "tool_calls": [],
+                    "autonomy": {"master": state.get("master"), "frozen": False},
                 }
 
         # ── Brain: Anthropic Claude (when configured) ─────────────────────────
