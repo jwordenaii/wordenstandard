@@ -1,7 +1,7 @@
 # Uncommitted Workstreams
 
-Generated: 2026-05-08T19:43:08.7407329-04:00
-Total files: 73
+Generated: 2026-05-08T19:50:54.4498709-04:00
+Total files: 68
 
 ## backend (16)
 
@@ -28,15 +28,12 @@ Total files: 73
 - [??] .github/workflows/legal-advisory-monitor.yml
 - [M] .github/workflows/vector-reindex.yml
 
-## docs (8)
+## docs (5)
 
 - [??] docs/CLEAN_HOUSE_PHASE2.md
-- [??] docs/clean-house/latest-report.md
-- [??] docs/clean-house/latest.json
 - [??] docs/LEGAL_ADVISORY_LAUNCH.md
 - [??] docs/legal-advisory/
 - [??] docs/logic-preservation/
-- [??] docs/reliability/
 - [??] docs/WEBSITE_BUILDER_WORLD_CLASS_ROADMAP.md
 
 ## frontend (8)
@@ -63,19 +60,14 @@ Total files: 73
 - [M] src/data/legal/utilityDepthClearances.js
 - [M] src/data/legal/workersSafety.js
 
-## local-runtime-data (3)
-
-- [??] .cc_head.txt
-- [??] .runtime/
-- [??] jworden_leads.db
-
 ## public-generated (2)
 
 - [M] public/sitemap.txt
 - [M] public/sitemap.xml
 
-## root-config-docs (3)
+## root-config-docs (4)
 
+- [M] .gitignore
 - [M] DOMAINS_INVENTORY.md
 - [M] requirements.txt
 - [??] WEBSITE_FACTORY_BRAIN.md

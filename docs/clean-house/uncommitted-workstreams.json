@@ -11,6 +11,11 @@
   },
   {
     "status": "M",
+    "path": ".gitignore",
+    "category": "root-config-docs"
+  },
+  {
+    "status": "M",
     "path": "DOMAINS_INVENTORY.md",
     "category": "root-config-docs"
   },
@@ -191,18 +196,8 @@
   },
   {
     "status": "??",
-    "path": ".cc_head.txt",
-    "category": "local-runtime-data"
-  },
-  {
-    "status": "??",
     "path": ".github/workflows/legal-advisory-monitor.yml",
     "category": "ci-workflows"
-  },
-  {
-    "status": "??",
-    "path": ".runtime/",
-    "category": "local-runtime-data"
   },
   {
     "status": "??",
@@ -236,16 +231,6 @@
   },
   {
     "status": "??",
-    "path": "docs/clean-house/latest-report.md",
-    "category": "docs"
-  },
-  {
-    "status": "??",
-    "path": "docs/clean-house/latest.json",
-    "category": "docs"
-  },
-  {
-    "status": "??",
     "path": "docs/legal-advisory/",
     "category": "docs"
   },
@@ -253,16 +238,6 @@
     "status": "??",
     "path": "docs/logic-preservation/",
     "category": "docs"
-  },
-  {
-    "status": "??",
-    "path": "docs/reliability/",
-    "category": "docs"
-  },
-  {
-    "status": "??",
-    "path": "jworden_leads.db",
-    "category": "local-runtime-data"
   },
   {
     "status": "??",
