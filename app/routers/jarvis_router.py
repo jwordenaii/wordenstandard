@@ -40,26 +40,39 @@ class EmailRequest(BaseModel):
 logger = logging.getLogger(__name__)
 
 
-def _verify_owner(x_owner_token: Optional[str], confirmed: bool) -> bool:
+from app.services import session_store
+
+
+def _verify_owner(x_owner_token: Optional[str], confirmed: bool, x_session_token: Optional[str] = None) -> bool:
     """Return True when the caller is an operator (owner) or when request already confirmed.
     Owner tokens are provided via env `OWNER_TOKEN` or comma-separated `OWNER_TOKENS`.
     """
     if confirmed:
         return True
-    if not x_owner_token:
-        return False
-    allowed = os.environ.get("OWNER_TOKENS", os.environ.get("OWNER_TOKEN", "")).split(",")
-    allowed = [t.strip() for t in allowed if t and t.strip()]
-    return x_owner_token.strip() in allowed
+    if x_owner_token:
+        allowed = os.environ.get("OWNER_TOKENS", os.environ.get("OWNER_TOKEN", "")).split(",")
+        allowed = [t.strip() for t in allowed if t and t.strip()]
+        if x_owner_token.strip() in allowed:
+            return True
+    # allow session tokens
+    if x_session_token:
+        data = session_store.validate_session(x_session_token)
+        if data:
+            # verify stored owner_token is still allowed
+            allowed = os.environ.get("OWNER_TOKENS", os.environ.get("OWNER_TOKEN", "")).split(",")
+            allowed = [t.strip() for t in allowed if t and t.strip()]
+            if data.get('owner_token') in allowed:
+                return True
+    return False
 
 @router.post("/command")
-async def jarvis_command(payload: JarvisQuery, x_owner_token: Optional[str] = Header(None)):
+async def jarvis_command(payload: JarvisQuery, x_owner_token: Optional[str] = Header(None), x_session_token: Optional[str] = Header(None)):
     """
     The direct line to JARVIS from the Command Center.
     Supports persona switching via the 'persona' field and tool use (web search, phone calls).
     """
     # enforce owner token for any command that may trigger tool calls
-    if not _verify_owner(x_owner_token, payload.confirmed):
+    if not _verify_owner(x_owner_token, payload.confirmed, x_session_token):
         raise HTTPException(status_code=403, detail="Operator confirmation required: set `confirmed=true` or provide a valid X-OWNER-TOKEN header.")
 
     context = {"user_id": payload.user_id, "persona": payload.persona, "confirmed": True}
@@ -68,7 +81,7 @@ async def jarvis_command(payload: JarvisQuery, x_owner_token: Optional[str] = He
 
 
 @router.post("/chat", summary="Conversational chat with short-term memory")
-async def jarvis_chat(payload: JarvisQuery, x_owner_token: Optional[str] = Header(None)):
+async def jarvis_chat(payload: JarvisQuery, x_owner_token: Optional[str] = Header(None), x_session_token: Optional[str] = Header(None)):
     """Chat endpoint: stores recent messages under `session_id` and includes them in context.
     Use this for interactive voice/web sessions so Jarvis remembers recent turn history.
     """
@@ -79,7 +92,7 @@ async def jarvis_chat(payload: JarvisQuery, x_owner_token: Optional[str] = Heade
     short_memory.append(session, f"user: {payload.query}")
 
     # Chat is primarily conversational; preserve caller-provided confirmation if owner token matches
-    confirmed = payload.confirmed or _verify_owner(x_owner_token, payload.confirmed)
+    confirmed = payload.confirmed or _verify_owner(x_owner_token, payload.confirmed, x_session_token)
     context = {"user_id": payload.user_id, "persona": payload.persona, "confirmed": bool(confirmed), "session_id": session}
     response = await jarvis.converse(payload.query, context=context)
 
@@ -94,13 +107,13 @@ async def jarvis_search(req: WebSearchRequest):
     return await _web_search.search(req.query, deep=req.deep)
 
 @router.post("/call", summary="Direct outbound call (Vapi) — operator-initiated")
-async def jarvis_call(req: CallRequest):
+async def jarvis_call(req: CallRequest, x_session_token: Optional[str] = Header(None), x_owner_token: Optional[str] = Header(None)):
     """
     Operator-initiated outbound call. Requires Vapi configured.
     Refused when autonomy is FROZEN. Logs every attempt.
     """
     # require explicit operator confirmation or header for outbound calls
-    if not _verify_owner(None, req.confirmed):
+    if not _verify_owner(x_owner_token, req.confirmed, x_session_token):
         raise HTTPException(status_code=403, detail="Operator confirmation required for outbound calls.")
 
     result = await _vapi.place_call(
