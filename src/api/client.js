@@ -130,6 +130,15 @@ export async function request(method, path, body) {
   const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
 
   const headers = { 'Content-Type': 'application/json' }
+  // Attach owner token when present in sessionStorage so frontend can prove operator consent
+  try {
+    if (typeof window !== 'undefined') {
+      const owner = window.sessionStorage.getItem('OWNER_TOKEN') || window.localStorage.getItem('OWNER_TOKEN')
+      if (owner) headers['X-OWNER-TOKEN'] = owner
+    }
+  } catch {
+    // ignore storage errors
+  }
 
   const opts = {
     method,

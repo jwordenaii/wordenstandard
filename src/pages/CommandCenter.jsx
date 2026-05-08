@@ -632,6 +632,8 @@ function CrmTable() {
   }, [reload])
 
   const callLead = useCallback(async (lead) => {
+    // require a UI confirmation to proceed (defense-in-depth)
+    if (!window.confirm(`Confirm: have Jarvis call ${lead.name || lead.phone}? This action requires operator approval.`)) return
     if (!lead?.phone) { setErrorNote(`No phone on file for ${lead.name || 'lead'}`); return }
     setActingId(lead.id); setActionKind('call'); setNote(''); setErrorNote('')
     try {
@@ -653,6 +655,8 @@ function CrmTable() {
   }, [])
 
   const emailLead = useCallback(async (lead) => {
+    // require a UI confirmation to proceed (defense-in-depth)
+    if (!window.confirm(`Confirm: send an email to ${lead.email || lead.name}? This action requires operator approval.`)) return
     if (!lead?.email) { setErrorNote(`No email on file for ${lead.name || 'lead'}`); return }
     setActingId(lead.id); setActionKind('email'); setNote(''); setErrorNote('')
     try {
@@ -3539,6 +3543,22 @@ function JarvisChat({ compact = false }) {
             ].join(' ')} />
             {statusOk == null ? 'Checking…' : statusOk ? 'ONLINE' : 'OFFLINE'}
           </span>
+          {/* Owner token input — used by operator to authorize actions */}
+          <div className="ml-3 flex items-center gap-2">
+            <input
+              type="password"
+              id="owner_token_input"
+              placeholder="Owner token"
+              defaultValue={typeof window !== 'undefined' ? window.sessionStorage.getItem('OWNER_TOKEN') || '' : ''}
+              onBlur={(e) => { try { window.sessionStorage.setItem('OWNER_TOKEN', e.target.value || '') } catch { /* noop */ } }}
+              className="text-xs px-2 py-1 rounded border border-white/10 bg-white/5 text-white/80"
+            />
+            <button
+              type="button"
+              onClick={() => { try { const v = (document.getElementById('owner_token_input')||{}).value || ''; window.sessionStorage.setItem('OWNER_TOKEN', v); alert('Owner token saved for this session.'); } catch { alert('Could not save token.'); } }}
+              className="text-xs px-2 py-1 rounded bg-white/[0.06] border border-white/10 text-white/70 hover:text-white"
+            >Set</button>
+          </div>
         </div>
       </div>
 
