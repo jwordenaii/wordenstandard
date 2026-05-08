@@ -737,6 +737,7 @@ function CrmTable() {
               className="text-xs px-2 py-1.5 rounded bg-white/[0.03] border border-white/10 text-white/70 hover:text-white"
             >Lock</button>
           </div>
+          <table className="w-full">
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-[0.14em] text-white/45 border-b border-white/10">
               <th className="px-4 md:px-5 py-3">Lead</th>
