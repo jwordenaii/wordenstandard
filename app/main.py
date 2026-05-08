@@ -250,7 +250,6 @@ from .routers import search as search_router
 from .routers import public_chat as public_chat_router
 from .routers import operations as operations_router
 from .routers import audit_admin as audit_admin_router
-from .routers import owner_session as owner_session_router
 from .routers import global_platform as global_router
 from .routers import scaling as scaling_router
 from .routers import revenue as revenue_router
@@ -557,7 +556,6 @@ app.include_router(search_router.router)
 app.include_router(public_chat_router.router)
 app.include_router(operations_router.router)
 app.include_router(audit_admin_router.router)
-app.include_router(owner_session_router.router)
 
 
 # ── Resolve Pydantic forward references ──────────────────────────────────────
