@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, Power, Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { api, trackEvent } from '@/api/client'
+import OwnerConfirmModal from '../components/OwnerConfirmModal'
 import { voiceService } from '../lib/ElevenLabsService'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
@@ -257,6 +258,11 @@ function HubLinkPanel() {
   )
 }
 
+// Owner confirmation modal mounted for CRM actions
+// Uses local state `pendingOwnerAction` and `performPendingOwnerAction` defined above
+{/** placeholder for OwnerConfirmModal mount - injected in component scope via JSX below */}
+
+
 function statusTone(score) {
   if (score >= 85) return 'text-emerald-300 border-emerald-300/50 bg-emerald-300/10'
   if (score >= 70) return 'text-amber-300 border-amber-300/50 bg-amber-300/10'
@@ -278,6 +284,14 @@ function KpiCard({ label, value, delta, tone, icon: Icon }) {
           <Icon className="w-5 h-5 text-brand-amber" />
         </div>
       </div>
+      <OwnerConfirmModal
+        open={Boolean(pendingOwnerAction)}
+        title={pendingOwnerAction ? (pendingOwnerAction.kind === 'call' ? 'Confirm Call' : 'Confirm Email') : ''}
+        message={pendingOwnerAction ? `Authorize Jarvis to ${pendingOwnerAction.kind} ${pendingOwnerAction.lead?.name || pendingOwnerAction.lead?.phone || pendingOwnerAction.lead?.email}? This requires operator approval.` : ''}
+        defaultToken={typeof window !== 'undefined' ? window.sessionStorage.getItem('OWNER_TOKEN') || '' : ''}
+        onCancel={() => setPendingOwnerAction(null)}
+        onConfirm={(opts) => performPendingOwnerAction(opts)}
+      />
     </div>
   )
 }
@@ -632,48 +646,52 @@ function CrmTable() {
   }, [reload])
 
   const callLead = useCallback(async (lead) => {
-    // require a UI confirmation to proceed (defense-in-depth)
-    if (!window.confirm(`Confirm: have Jarvis call ${lead.name || lead.phone}? This action requires operator approval.`)) return
+    // open confirm modal
     if (!lead?.phone) { setErrorNote(`No phone on file for ${lead.name || 'lead'}`); return }
-    setActingId(lead.id); setActionKind('call'); setNote(''); setErrorNote('')
-    try {
-      const res = await api.jarvisCall(
-        lead.phone,
-        `Reach ${lead.name || 'lead'} about ${lead.service_type || lead.surface_type || 'their estimate'}`,
-        `Hi this is Jarvis calling on behalf of J. Worden & Sons about your ${lead.service_type || 'paving'} request. Is now a good time?`
-      )
-      const ok = res?.status === 'queued' || res?.status === 'success' || res?.call_id
-      setNote(ok ? `☎️ Jarvis is calling ${lead.name || lead.phone}…` : (res?.message || 'Call request sent.'))
-      appendJarvisActivity({ kind: 'call', leadId: lead.id, leadName: lead.name, phone: lead.phone, status: ok ? 'queued' : 'unknown', detail: res?.message || '' })
-      try { trackEvent('jarvis_call_lead', { lead_id: lead.id, source: 'crm_table' }) } catch { /* noop */ }
-    } catch (err) {
-      setErrorNote(err?.message || 'Could not start the call.')
-      appendJarvisActivity({ kind: 'call', leadId: lead.id, leadName: lead.name, phone: lead.phone, status: 'failed', detail: err?.message || '' })
-    } finally {
-      setActingId(null); setActionKind(null)
-    }
+    setPendingOwnerAction({ kind: 'call', lead })
   }, [])
 
   const emailLead = useCallback(async (lead) => {
-    // require a UI confirmation to proceed (defense-in-depth)
-    if (!window.confirm(`Confirm: send an email to ${lead.email || lead.name}? This action requires operator approval.`)) return
     if (!lead?.email) { setErrorNote(`No email on file for ${lead.name || 'lead'}`); return }
-    setActingId(lead.id); setActionKind('email'); setNote(''); setErrorNote('')
-    try {
-      const subject = `Following up on your ${lead.service_type || 'paving'} request — J. Worden & Sons`
-      const body = `Hi ${lead.name || 'there'},\n\nThanks for reaching out to J. Worden & Sons about your ${lead.service_type || 'project'}${lead.address ? ` at ${lead.address}` : ''}. We'd love to put together a free estimate. What's the best time for a quick call this week?\n\nWe're a 3rd-generation family business and every estimate is reviewed by Jeremy personally.\n\nReply to this email or text us at 804-446-1296.\n\n— J. Worden & Sons`
-      const res = await api.jarvisEmail(subject, body, lead.email)
-      const ok = res?.status === 'sent' || res?.status === 'queued' || res?.message_id
-      setNote(ok ? `✉️ Email sent to ${lead.email}` : (res?.message || 'Email request sent.'))
-      appendJarvisActivity({ kind: 'email', leadId: lead.id, leadName: lead.name, email: lead.email, status: ok ? 'sent' : 'unknown', detail: res?.message || '' })
-      try { trackEvent('jarvis_email_lead', { lead_id: lead.id, source: 'crm_table' }) } catch { /* noop */ }
-    } catch (err) {
-      setErrorNote(err?.message || 'Could not send email.')
-      appendJarvisActivity({ kind: 'email', leadId: lead.id, leadName: lead.name, email: lead.email, status: 'failed', detail: err?.message || '' })
-    } finally {
-      setActingId(null); setActionKind(null)
-    }
+    setPendingOwnerAction({ kind: 'email', lead })
   }, [])
+
+  // pending owner modal state
+  const [pendingOwnerAction, setPendingOwnerAction] = useState(null)
+
+  const performPendingOwnerAction = useCallback(async ({ token = null } = {}) => {
+    if (!pendingOwnerAction) return
+    const { kind, lead } = pendingOwnerAction
+    // persist token to session if provided
+    try { if (token) window.sessionStorage.setItem('OWNER_TOKEN', token) } catch { /* noop */ }
+    setActingId(lead.id); setActionKind(kind); setErrorNote(''); setNote('')
+    try {
+      if (kind === 'call') {
+        const res = await api.jarvisCall(
+          lead.phone,
+          `Reach ${lead.name || 'lead'} about ${lead.service_type || lead.surface_type || 'their estimate'}`,
+          `Hi this is Jarvis calling on behalf of J. Worden & Sons about your ${lead.service_type || 'paving'} request. Is now a good time?`
+        )
+        const ok = res?.status === 'queued' || res?.status === 'success' || res?.call_id
+        setNote(ok ? `☎️ Jarvis is calling ${lead.name || lead.phone}…` : (res?.message || 'Call request sent.'))
+        appendJarvisActivity({ kind: 'call', leadId: lead.id, leadName: lead.name, phone: lead.phone, status: ok ? 'queued' : 'unknown', detail: res?.message || '' })
+        try { trackEvent('jarvis_call_lead', { lead_id: lead.id, source: 'crm_table' }) } catch { /* noop */ }
+      } else if (kind === 'email') {
+        const subject = `Following up on your ${lead.service_type || 'paving'} request — J. Worden & Sons`
+        const body = `Hi ${lead.name || 'there'},\n\nThanks for reaching out to J. Worden & Sons about your ${lead.service_type || 'project'}${lead.address ? ` at ${lead.address}` : ''}. We'd love to put together a free estimate. What's the best time for a quick call this week?\n\nWe're a 3rd-generation family business and every estimate is reviewed by Jeremy personally.\n\nReply to this email or text us at 804-446-1296.\n\n— J. Worden & Sons`
+        const res = await api.jarvisEmail(subject, body, lead.email)
+        const ok = res?.status === 'sent' || res?.status === 'queued' || res?.message_id
+        setNote(ok ? `✉️ Email sent to ${lead.email}` : (res?.message || 'Email request sent.'))
+        appendJarvisActivity({ kind: 'email', leadId: lead.id, leadName: lead.name, email: lead.email, status: ok ? 'sent' : 'unknown', detail: res?.message || '' })
+        try { trackEvent('jarvis_email_lead', { lead_id: lead.id, source: 'crm_table' }) } catch { /* noop */ }
+      }
+    } catch (err) {
+      setErrorNote(err?.message || `Could not perform ${pendingOwnerAction.kind}.`)
+      appendJarvisActivity({ kind: pendingOwnerAction.kind, leadId: lead.id, leadName: lead.name, status: 'failed', detail: err?.message || '' })
+    } finally {
+      setActingId(null); setActionKind(null); setPendingOwnerAction(null)
+    }
+  }, [pendingOwnerAction])
 
   const askJarvisDraft = useCallback((lead) => {
     if (typeof window === 'undefined') return
