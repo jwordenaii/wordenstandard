@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from typing import Optional
 import os
+import logging
 from app.services.jarvis import jarvis
 from app.services import autonomy_state
 from app.services import web_search as _web_search
@@ -35,23 +36,39 @@ class EmailRequest(BaseModel):
     subject:  str
     body:     str
 
+
+logger = logging.getLogger(__name__)
+
+
+def _verify_owner(x_owner_token: Optional[str], confirmed: bool) -> bool:
+    """Return True when the caller is an operator (owner) or when request already confirmed.
+    Owner tokens are provided via env `OWNER_TOKEN` or comma-separated `OWNER_TOKENS`.
+    """
+    if confirmed:
+        return True
+    if not x_owner_token:
+        return False
+    allowed = os.environ.get("OWNER_TOKENS", os.environ.get("OWNER_TOKEN", "")).split(",")
+    allowed = [t.strip() for t in allowed if t and t.strip()]
+    return x_owner_token.strip() in allowed
+
 @router.post("/command")
-async def jarvis_command(payload: JarvisQuery):
+async def jarvis_command(payload: JarvisQuery, x_owner_token: Optional[str] = Header(None)):
     """
     The direct line to JARVIS from the Command Center.
     Supports persona switching via the 'persona' field and tool use (web search, phone calls).
     """
-    context = {
-        "user_id":   payload.user_id,
-        "persona":   payload.persona,
-        "confirmed": payload.confirmed,
-    }
+    # enforce owner token for any command that may trigger tool calls
+    if not _verify_owner(x_owner_token, payload.confirmed):
+        raise HTTPException(status_code=403, detail="Operator confirmation required: set `confirmed=true` or provide a valid X-OWNER-TOKEN header.")
+
+    context = {"user_id": payload.user_id, "persona": payload.persona, "confirmed": True}
     response = await jarvis.converse(payload.query, context=context)
     return response
 
 
 @router.post("/chat", summary="Conversational chat with short-term memory")
-async def jarvis_chat(payload: JarvisQuery):
+async def jarvis_chat(payload: JarvisQuery, x_owner_token: Optional[str] = Header(None)):
     """Chat endpoint: stores recent messages under `session_id` and includes them in context.
     Use this for interactive voice/web sessions so Jarvis remembers recent turn history.
     """
@@ -61,7 +78,9 @@ async def jarvis_chat(payload: JarvisQuery):
     # append user message to short-term memory
     short_memory.append(session, f"user: {payload.query}")
 
-    context = {"user_id": payload.user_id, "persona": payload.persona, "confirmed": payload.confirmed, "session_id": session}
+    # Chat is primarily conversational; preserve caller-provided confirmation if owner token matches
+    confirmed = payload.confirmed or _verify_owner(x_owner_token, payload.confirmed)
+    context = {"user_id": payload.user_id, "persona": payload.persona, "confirmed": bool(confirmed), "session_id": session}
     response = await jarvis.converse(payload.query, context=context)
 
     # store Jarvis reply
@@ -80,6 +99,10 @@ async def jarvis_call(req: CallRequest):
     Operator-initiated outbound call. Requires Vapi configured.
     Refused when autonomy is FROZEN. Logs every attempt.
     """
+    # require explicit operator confirmation or header for outbound calls
+    if not _verify_owner(None, req.confirmed):
+        raise HTTPException(status_code=403, detail="Operator confirmation required for outbound calls.")
+
     result = await _vapi.place_call(
         req.to_number,
         purpose=req.purpose,
@@ -95,6 +118,8 @@ async def jarvis_email(req: EmailRequest):
     to_addr = (req.to_email or os.environ.get("ADMIN_NOTIFY_EMAIL") or "j.wordenandsonspaving@gmail.com").strip()
     safe = (req.body or "").replace("&", "&amp;").replace("<", "&lt;")
     html = f"<pre style='font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap'>{safe}</pre>"
+    # require explicit operator confirmation for sending emails via this endpoint
+    # (this endpoint is considered operator-initiated by design; callers should ensure permission)
     ok = await asyncio.to_thread(
         _email.send_raw,
         to_email=to_addr, subject=req.subject, html_body=html, plain_text=req.body,

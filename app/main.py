@@ -363,10 +363,16 @@ async def log_requests(request, call_next):
     a Slack alert so J is notified immediately when the API breaks.
     """
     start = time.monotonic()
+    # simple request trace id for correlating logs
+    import uuid
+    trace_id = uuid.uuid4().hex
     response = None
     unhandled_exc: Exception | None = None
     try:
         response = await call_next(request)
+        # attach trace id for observability
+        if hasattr(response, "headers"):
+            response.headers["X-Trace-Id"] = trace_id
         return response
     except Exception as exc:  # noqa: BLE001
         unhandled_exc = exc
@@ -383,7 +389,8 @@ async def log_requests(request, call_next):
         status = response.status_code if response is not None else 500
         log_fn = logger.error if status >= 500 else logger.info
         log_fn(
-            "request: method=%s path=%s status=%d latency_ms=%.2f",
+            "request: trace=%s method=%s path=%s status=%d latency_ms=%.2f",
+            trace_id,
             request.method,
             request.url.path,
             status,
