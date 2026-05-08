@@ -158,6 +158,38 @@ Datadog → **Events** → **Explorer** → filter by `service:jworden-api` to s
 
 ---
 
+## Synthetic Reliability Monitor (24/7)
+
+The repo now includes a lightweight synthetic monitor script and scheduled workflow:
+
+- Script: `npm run ops:reliability-synthetic`
+- Workflow: `.github/workflows/reliability-synthetic-monitor.yml` (every 15 minutes)
+- Artifacts: `docs/reliability/latest-synthetic.json` and `docs/reliability/latest-synthetic.md`
+
+### Required Secrets for Production Probing
+
+| Secret | Purpose |
+|---|---|
+| `RELIABILITY_BASE_URL` | Base URL of the production API (for example `https://api.example.com`) |
+| `RELIABILITY_ADMIN_TOKEN` | Optional bearer token to probe `/api/v1/ops/self-heal/status` |
+
+If `RELIABILITY_BASE_URL` is not set, the workflow records a skipped run (so CI stays green) until production URL configuration is complete.
+
+### Self-Heal Status Endpoint
+
+```bash
+curl -s "$BASE/api/v1/ops/self-heal/status" \
+  -H "Authorization: Bearer $MASTER_KEY"
+```
+
+Use this endpoint to verify:
+1. Self-heal enabled/disabled state
+2. Last self-heal run status and timestamps
+3. Consecutive failure counters and recovery actions
+4. Whether autonomy was auto-frozen during sustained infra degradation
+
+---
+
 ## Health Check Endpoints
 
 ### Primary Health Check

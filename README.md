@@ -124,6 +124,12 @@ Full checklist: see [`DEPLOYMENT.md`](DEPLOYMENT.md)
 | `npm run ops:live-check` | Verify live deployment is healthy |
 | `npm run ops:tech-radar` | Run AI capability/tech radar snapshot + report |
 | `npm run ops:tech-radar:diff` | Show only new items since last radar snapshot |
+| `npm run ops:logic-snapshot` | Capture full logic snapshot with old/new catalog |
+| `npm run ops:clean-house` | Generate non-destructive repo cleanup report |
+| `npm run ops:legal-advisory` | Generate legal advisory change + impact report |
+| `npm run ops:legal-advisory:update-baseline` | Generate report and advance legal advisory baseline |
+| `npm run ops:reliability-synthetic` | Run synthetic uptime + latency monitor and write reliability artifacts |
+| `npm run ops:phase2` | Run logic snapshot + clean-house report together |
 | `npm run mrworden:cli` | Mr. Worden admin CLI (lead management) |
 | `npm run media:ingest` | Media ingest CLI (Dropbox / Google Photos) |
 
@@ -162,7 +168,10 @@ scripts/        — Ops, SEO, and deploy scripts
 | [`SECURITY.md`](SECURITY.md) | Auth flows, secrets management, OWASP notes |
 | [`TESTING.md`](TESTING.md) | cURL endpoint tests, Playwright setup |
 | [`MONITORING.md`](MONITORING.md) | Sentry + uptime monitoring setup |
+| [`docs/RELIABILITY_SLO.md`](docs/RELIABILITY_SLO.md) | SLO targets, error budget, and self-heal incident playbooks |
 | [`docs/AI_TECH_RADAR.md`](docs/AI_TECH_RADAR.md) | Automated AI capability monitoring workflow |
+| [`docs/CLEAN_HOUSE_PHASE2.md`](docs/CLEAN_HOUSE_PHASE2.md) | Logic preservation + cleanup batch workflow |
+| [`docs/LEGAL_ADVISORY_LAUNCH.md`](docs/LEGAL_ADVISORY_LAUNCH.md) | Launch + compliance advisory packaging and rollout |
 | [`BACKEND_LOGIC_INVENTORY.md`](BACKEND_LOGIC_INVENTORY.md) | All API endpoint inventory |
 | [`WEBSOCKET_CHAT.md`](WEBSOCKET_CHAT.md) | Real-time chat / WebSocket setup |
 | [`VECTOR_SEARCH.md`](VECTOR_SEARCH.md) | Semantic search / vector store setup |

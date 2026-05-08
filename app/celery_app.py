@@ -36,6 +36,7 @@ celery_app = Celery(
         "app.tasks.anomaly_beat",
         "app.tasks.vdot_scraper",
         "app.tasks.autonomy_tasks",
+        "app.tasks.self_heal_beat",
     ],
 )
 
@@ -73,6 +74,12 @@ celery_app.conf.update(
         # request after a TTL expiry is served from Redis, not the database.
         "warm-cache-every-5m": {
             "task": "app.tasks.cache_warmer.warm_cache_task",
+            "schedule": crontab(minute="*/5"),
+        },
+        # Self-heal monitor loop — checks DB/Redis health and runs safe
+        # recovery actions (cache warm, table verify, freeze on sustained failure).
+        "self-heal-cycle-every-5m": {
+            "task": "app.tasks.self_heal_beat.run_self_heal_cycle_task",
             "schedule": crontab(minute="*/5"),
         },
         # Continuous anomaly detection — scans lead volume, HOT rate, COOL surge,

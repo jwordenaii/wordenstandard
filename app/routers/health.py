@@ -13,9 +13,10 @@ Returns HTTP 200 when healthy, HTTP 503 when any critical dependency is down.
 import logging
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
+from ..core.security import verify_premium_security
 from ..services.celery_health import (
     check_celery_workers,
     check_queue_depth,
@@ -26,6 +27,11 @@ from ..services import web_search as _web_search
 from ..services import vapi_caller as _vapi
 from ..services import tts_service as _tts
 from ..services import runtime_config as _cfg
+from ..services.state_data import (
+    STATE_MAP,
+    TOTAL_US_JURISDICTIONS,
+    WORDEN_ACTIVE_STATES,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -191,3 +197,67 @@ def dashboard_preflight():
         },
         "elapsed_ms": elapsed_ms,
     }
+
+
+@router.get("/api/v1/ops/state-reach", summary="State rollout coverage snapshot")
+def state_reach_snapshot():
+    """
+    Returns operational visibility for staged state expansion.
+
+    This endpoint is read-only and safe for dashboard polling.
+    """
+    all_codes = sorted(STATE_MAP.keys())
+    active_codes = [abbr for abbr in WORDEN_ACTIVE_STATES if abbr in STATE_MAP]
+    active_set = set(active_codes)
+    inactive_codes = [abbr for abbr in all_codes if abbr not in active_set]
+
+    total_jurisdictions = TOTAL_US_JURISDICTIONS or len(all_codes)
+    active_count = len(active_set)
+    inactive_count = max(total_jurisdictions - active_count, 0)
+    coverage_pct = round((active_count / total_jurisdictions) * 100, 2) if total_jurisdictions else 0.0
+
+    density_rank = {"high": 3, "medium": 2, "low": 1}
+    priority_candidates = sorted(
+        [
+            {
+                "abbr": abbr,
+                "name": STATE_MAP[abbr].get("name"),
+                "region": STATE_MAP[abbr].get("region"),
+                "qsrDensity": STATE_MAP[abbr].get("qsrDensity"),
+                "laborIndex": STATE_MAP[abbr].get("laborIndex"),
+                "materialPremium": STATE_MAP[abbr].get("materialPremium"),
+            }
+            for abbr in inactive_codes
+        ],
+        key=lambda row: (
+            -(density_rank.get(str(row.get("qsrDensity", "")).lower(), 0)),
+            -(row.get("laborIndex") or 0),
+            row.get("abbr") or "",
+        ),
+    )[:12]
+
+    return {
+        "total_jurisdictions": total_jurisdictions,
+        "active_count": active_count,
+        "inactive_count": inactive_count,
+        "coverage_pct": coverage_pct,
+        "active_states": active_codes,
+        "inactive_states": inactive_codes,
+        "priority_candidates": priority_candidates,
+        "dataset_integrity": {
+            "state_map_count": len(all_codes),
+            "expected_count": TOTAL_US_JURISDICTIONS,
+            "ok": len(all_codes) == TOTAL_US_JURISDICTIONS,
+        },
+    }
+
+
+@router.get(
+    "/api/v1/ops/self-heal/status",
+    summary="Self-heal monitor status (admin only)",
+)
+def self_heal_status(_: dict = Depends(verify_premium_security)):
+    """Returns config + last execution state for the continuous self-heal loop."""
+    from ..services.self_heal import get_self_heal_status  # noqa: PLC0415
+
+    return get_self_heal_status()
