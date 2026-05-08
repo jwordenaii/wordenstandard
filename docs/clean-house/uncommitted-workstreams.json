@@ -236,7 +236,12 @@
   },
   {
     "status": "??",
-    "path": "docs/clean-house/",
+    "path": "docs/clean-house/latest-report.md",
+    "category": "docs"
+  },
+  {
+    "status": "??",
+    "path": "docs/clean-house/latest.json",
     "category": "docs"
   },
   {

@@ -1,7 +1,7 @@
 # Uncommitted Workstreams
 
-Generated: 2026-05-08T19:42:14.8930426-04:00
-Total files: 72
+Generated: 2026-05-08T19:43:08.7407329-04:00
+Total files: 73
 
 ## backend (16)
 
@@ -28,10 +28,11 @@ Total files: 72
 - [??] .github/workflows/legal-advisory-monitor.yml
 - [M] .github/workflows/vector-reindex.yml
 
-## docs (7)
+## docs (8)
 
 - [??] docs/CLEAN_HOUSE_PHASE2.md
-- [??] docs/clean-house/
+- [??] docs/clean-house/latest-report.md
+- [??] docs/clean-house/latest.json
 - [??] docs/LEGAL_ADVISORY_LAUNCH.md
 - [??] docs/legal-advisory/
 - [??] docs/logic-preservation/
