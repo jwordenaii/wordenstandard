@@ -135,6 +135,8 @@ export async function request(method, path, body) {
     if (typeof window !== 'undefined') {
       const owner = window.sessionStorage.getItem('OWNER_TOKEN') || window.localStorage.getItem('OWNER_TOKEN')
       if (owner) headers['X-OWNER-TOKEN'] = owner
+      const sess = window.sessionStorage.getItem('OWNER_SESSION_ID') || null
+      if (sess) headers['X-SESSION-TOKEN'] = sess
     }
   } catch {
     // ignore storage errors
