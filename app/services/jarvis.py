@@ -11,6 +11,7 @@ from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
 from app.services import runtime_config as _cfg
 from app.services import llm_client as _llm
+from app.services import code_reader as _code
 from app.services import short_memory
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,33 @@ JARVIS_TOOLS = [
                 "deep":  {"type": "boolean", "description": "Use advanced/deep search (slower, richer). Default false."},
             },
             "required": ["query"],
+        },
+    },
+    {
+        "name": "code_search",
+        "description": (
+            "Search the repository for files or lines matching a query. Returns up to 12 matches with file paths and snippets."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search term"},
+                "max_results": {"type": "integer", "description": "Max results to return"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "open_file",
+        "description": (
+            "Return full contents of a repository file. Use relative path from repo root. Read-only."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "Relative path, e.g. src/pages/Dashboard.jsx"},
+            },
+            "required": ["path"],
         },
     },
     {
@@ -190,6 +218,21 @@ async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
                 to_email=to_addr, subject=subject, html_body=html, plain_text=body,
             )
             return {"ok": bool(ok), "to": to_addr, "subject": subject}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+    if name == "code_search":
+        q = args.get("query") or ""
+        maxr = int(args.get("max_results") or 12)
+        try:
+            matches = _code.search(q, max_results=maxr)
+            return {"ok": True, "matches": matches}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+    if name == "open_file":
+        path = args.get("path") or ""
+        try:
+            res = _code.open_file(path)
+            return {"ok": True, "result": res}
         except Exception as exc:
             return {"ok": False, "error": str(exc)}
     return {"ok": False, "error": f"Unknown tool: {name}"}
