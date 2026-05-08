@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useCallback, useEffect, useMemo, useRef } fro
 import { Activity, AlertTriangle, CalendarDays, CircleCheckBig, Gauge, Loader2, Mail, Phone, ShieldCheck, UserRound, Upload, Bot, Sparkles, RefreshCw, Layers, Globe, Box, Layout, ArrowRight, FileText, Scale, HardHat, Power, Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react'
 import { api, trackEvent } from '@/api/client'
 import OwnerConfirmModal from '../components/OwnerConfirmModal'
+import SessionUnlockModal from '../components/SessionUnlockModal'
 import { voiceService } from '../lib/ElevenLabsService'
 import { Link } from 'react-router-dom'
 import states from '../data/legal/states'
@@ -292,6 +293,7 @@ function KpiCard({ label, value, delta, tone, icon: Icon }) {
         onCancel={() => setPendingOwnerAction(null)}
         onConfirm={(opts) => performPendingOwnerAction(opts)}
       />
+      <SessionUnlockModal open={showUnlockModal} defaultPin="" defaultToken={typeof window !== 'undefined' ? sessionStorage.getItem('OWNER_TOKEN') || '' : ''} onCancel={() => setShowUnlockModal(false)} onUnlock={handleUnlock} />
     </div>
   )
 }
@@ -658,6 +660,14 @@ function CrmTable() {
 
   // pending owner modal state
   const [pendingOwnerAction, setPendingOwnerAction] = useState(null)
+  const [showUnlockModal, setShowUnlockModal] = useState(false)
+  const [sessionUnlocked, setSessionUnlocked] = useState(() => {
+    try {
+      return Boolean(sessionStorage.getItem('OWNER_PIN_HASH'))
+    } catch {
+      return false
+    }
+  })
 
   const performPendingOwnerAction = useCallback(async ({ token = null } = {}) => {
     if (!pendingOwnerAction) return
@@ -693,6 +703,13 @@ function CrmTable() {
     }
   }, [pendingOwnerAction])
 
+  const handleUnlock = useCallback(({ pin, token }) => {
+    setShowUnlockModal(false)
+    setSessionUnlocked(true)
+    try { if (token) sessionStorage.setItem('OWNER_TOKEN', token) } catch { /* noop */ }
+    alert('Session unlocked for this tab.')
+  }, [])
+
   const askJarvisDraft = useCallback((lead) => {
     if (typeof window === 'undefined') return
     const prompt = `Draft a reply for lead #${lead.id} — ${lead.name || 'unknown'} — about ${lead.service_type || 'their request'}. Then summarize next 3 steps to close them.`
@@ -708,21 +725,18 @@ function CrmTable() {
           <h3 className="font-display font-bold text-white text-sm uppercase tracking-[0.12em]">Active Leads Queue</h3>
           <p className="text-white/45 text-xs mt-0.5">Tap Call or Email and Jarvis takes the action immediately.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={reload} className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-2.5 py-1.5 text-[11px] font-semibold text-white/70 hover:text-white hover:border-white/30">
-            <RefreshCw className="w-3 h-3" /> Refresh
-          </button>
-          <Link to="/leads" className="inline-flex items-center gap-1 rounded-lg border border-brand-amber/40 px-2.5 py-1.5 text-[11px] font-semibold text-brand-amber hover:bg-brand-amber/10">
-            Open Lead Inbox <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-      </div>
-
-      {note ? <div className="mx-4 md:mx-5 mt-3 rounded-lg border border-emerald-300/30 bg-emerald-300/10 px-3 py-2 text-xs text-emerald-200">{note}</div> : null}
-      {errorNote ? <div className="mx-4 md:mx-5 mt-3 rounded-lg border border-red-300/30 bg-red-300/10 px-3 py-2 text-xs text-red-200">{errorNote}</div> : null}
-
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px]">
+          <div className="ml-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowUnlockModal(true)}
+              className="text-xs px-2 py-1.5 rounded bg-white/[0.06] border border-white/10 text-white/70 hover:text-white"
+            >Unlock</button>
+            <button
+              type="button"
+              onClick={() => { try { sessionStorage.removeItem('OWNER_PIN_HASH'); sessionStorage.removeItem('OWNER_TOKEN'); setSessionUnlocked(false); alert('Session locked.'); } catch { alert('Could not lock session.'); } }}
+              className="text-xs px-2 py-1.5 rounded bg-white/[0.03] border border-white/10 text-white/70 hover:text-white"
+            >Lock</button>
+          </div>
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-[0.14em] text-white/45 border-b border-white/10">
               <th className="px-4 md:px-5 py-3">Lead</th>
