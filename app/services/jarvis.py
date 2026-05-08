@@ -11,6 +11,7 @@ from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
 from app.services import runtime_config as _cfg
 from app.services import llm_client as _llm
+from app.services import short_memory
 
 logger = logging.getLogger(__name__)
 
@@ -120,10 +121,24 @@ async def _ask_fast_ops_brain(query: str, persona: str, autonomy: dict, *, confi
         f"Autonomy master={autonomy.get('master')} frozen={autonomy.get('frozen')} operator_confirmed={confirmed}. "
         f"Tools status: web_search={_web_search.is_available()} call={_vapi.is_available()} email={bool(_cfg.get('SENDGRID_API_KEY').strip())}."
     )
+    # include short-term convo memory when available
+    mem_snippet = ""
+    try:
+        session_id = autonomy.get("session_id") if isinstance(autonomy, dict) else None
+    except Exception:
+        session_id = None
+    if not session_id:
+        session_id = _cfg.get("LAST_JARVIS_SESSION") or None
+    if session_id:
+        recent = short_memory.get(session_id)
+        if recent:
+            mem_snippet = "Recent conversation: " + " | ".join(recent[-6:]) + "\n"
+
     system = (
         f"{JARVIS_SYSTEM_PROMPT}\n\n"
         f"{persona_note}\n"
         f"{ops_snapshot}\n"
+        f"{mem_snippet}"
         "Answer in practical daily-operations format: Situation, Recommendation, Next Action. "
         "Keep default answers under 6 lines unless asked for a deep dive."
     )

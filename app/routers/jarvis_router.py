@@ -18,6 +18,7 @@ class JarvisQuery(BaseModel):
     user_id:   str = "JWORDEN_MASTER"
     persona:   Optional[str] = "JARVIS"
     confirmed: bool = Field(False, description="Operator confirmed this action — allows tool calls when master autonomy is OFF.")
+    session_id: Optional[str] = Field(None, description="Optional session id for short-term conversational memory")
 
 class WebSearchRequest(BaseModel):
     query: str
@@ -46,6 +47,27 @@ async def jarvis_command(payload: JarvisQuery):
         "confirmed": payload.confirmed,
     }
     response = await jarvis.converse(payload.query, context=context)
+    return response
+
+
+@router.post("/chat", summary="Conversational chat with short-term memory")
+async def jarvis_chat(payload: JarvisQuery):
+    """Chat endpoint: stores recent messages under `session_id` and includes them in context.
+    Use this for interactive voice/web sessions so Jarvis remembers recent turn history.
+    """
+    from app.services import short_memory
+
+    session = payload.session_id or payload.user_id
+    # append user message to short-term memory
+    short_memory.append(session, f"user: {payload.query}")
+
+    context = {"user_id": payload.user_id, "persona": payload.persona, "confirmed": payload.confirmed, "session_id": session}
+    response = await jarvis.converse(payload.query, context=context)
+
+    # store Jarvis reply
+    if isinstance(response, dict) and response.get("message"):
+        short_memory.append(session, f"jarvis: {response.get('message')}" )
+
     return response
 
 @router.post("/search", summary="Direct web search (Tavily) — bypasses Claude")
