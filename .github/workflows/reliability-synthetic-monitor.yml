@@ -1,4 +1,4 @@
-name: Reliability Synthetic V2
+name: Reliability Synthetic Monitor
 
 on:
   schedule:
@@ -8,6 +8,7 @@ on:
 jobs:
   synthetic:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
