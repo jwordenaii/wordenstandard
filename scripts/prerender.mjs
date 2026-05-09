@@ -56,7 +56,14 @@ async function prerender() {
   const baseUrl = `http://localhost:${server.port}`;
 
   console.log('Launching puppeteer...');
-  const browser = await puppeteer.launch({ headless: 'new' });
+  let browser;
+  try {
+    browser = await puppeteer.launch({ headless: 'new' });
+  } catch (err) {
+    console.warn('[prerender] Skipping prerender — Chrome not available:', err?.message || err);
+    server.close();
+    return;
+  }
 
   for (const route of routes) {
     const page = await browser.newPage();
@@ -87,4 +94,6 @@ async function prerender() {
   console.log('Prerendering complete!');
 }
 
-prerender().catch(console.error);
+prerender().catch((err) => {
+  console.warn('[prerender] Non-fatal error, continuing build:', err?.message || err);
+});
