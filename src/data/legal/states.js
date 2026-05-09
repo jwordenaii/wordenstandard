@@ -56,6 +56,13 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    capital: 'Washington',
+    region: 'Northeast',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     capital: 'Tallahassee',

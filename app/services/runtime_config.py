@@ -30,7 +30,30 @@ from typing import Iterable
 
 logger = logging.getLogger(__name__)
 
-_STATE_PATH = Path(os.environ.get("RUNTIME_CONFIG_PATH", "/tmp/jworden_runtime_config.json"))
+
+def _default_state_path() -> Path:
+    configured = (os.environ.get("RUNTIME_CONFIG_PATH") or "").strip()
+    if configured:
+        return Path(configured)
+
+    railway_mount = (os.environ.get("RAILWAY_VOLUME_MOUNT_PATH") or "").strip()
+    if railway_mount:
+        return Path(railway_mount) / "jworden_runtime_config.json"
+
+    data_dir = Path("/data")
+    try:
+        if data_dir.exists() and os.access(data_dir, os.W_OK):
+            return data_dir / "jworden_runtime_config.json"
+    except Exception:  # noqa: BLE001
+        pass
+
+    if os.name == "nt":
+        return Path.cwd() / ".runtime" / "jworden_runtime_config.json"
+
+    return Path("/tmp/jworden_runtime_config.json")
+
+
+_STATE_PATH = _default_state_path()
 _LOCK = threading.Lock()
 _CACHE: dict[str, str] | None = None
 
@@ -41,6 +64,9 @@ MANAGED_KEYS: tuple[str, ...] = (
     # Jarvis brain
     "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL",
     "OPENAI_API_KEY",
+    "GOOGLE_API_KEY", "GEMINI_API_KEY",
+    "LLM_FALLBACK_SILENT", "JARVIS_MAX_TIER",
+    "JARVIS_MODEL_OVERRIDE", "JARVIS_DISABLE_GEMINI", "LLM_DISABLED_PROVIDERS",
     # Web search
     "TAVILY_API_KEY", "TAVILY_MAX_RESULTS",
     # Voice / phone
@@ -128,6 +154,7 @@ def enabled_features() -> dict[str, bool]:
 # Keys that should NEVER be returned as plaintext on read — only last 4 chars.
 SENSITIVE_KEYS: frozenset[str] = frozenset({
     "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "TAVILY_API_KEY",
+    "GOOGLE_API_KEY", "GEMINI_API_KEY",
     "VAPI_API_KEY", "TWILIO_AUTH_TOKEN",
     "SENDGRID_API_KEY", "GOOGLE_ADS_DEVELOPER_TOKEN", "SERPAPI_KEY",
     "GA4_SERVICE_ACCOUNT_JSON", "GSC_SERVICE_ACCOUNT_JSON",

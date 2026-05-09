@@ -12,6 +12,7 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Body, HTTPException, Request, Response
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..core.limiter import limiter
@@ -68,6 +69,40 @@ async def speak(request: Request, payload: SpeakRequest = Body(...)) -> Response
         media_type=content_type,
         headers={
             "Cache-Control": "public, max-age=86400",
+            "ETag": etag,
+            "X-TTS-Provider": provider,
+        },
+    )
+
+
+@router.post("/stream")
+async def speak_stream(request: Request, payload: SpeakRequest = Body(...)) -> StreamingResponse:
+    """
+    Convert text to speech and stream MP3 chunks directly to the browser.
+
+    This reduces time-to-first-audio for longer utterances and keeps latency low.
+    """
+    try:
+        audio_stream, content_type, provider = tts_service.synthesize_stream(
+            payload.text, voice=payload.voice
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("TTS stream synthesis failed")
+        raise HTTPException(status_code=502, detail=f"TTS stream provider error: {type(exc).__name__}: {exc}") from exc
+
+    etag = hashlib.sha1(
+        f"stream|{provider}|{payload.voice or ''}|{payload.text}".encode("utf-8")
+    ).hexdigest()
+
+    return StreamingResponse(
+        audio_stream,
+        media_type=content_type,
+        headers={
+            "Cache-Control": "no-store",
             "ETag": etag,
             "X-TTS-Provider": provider,
         },

@@ -1,4 +1,5 @@
 import logging
+import os
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
@@ -148,10 +149,14 @@ async def submit_quote(
         task_type = task_type_map.get(label, "cool_7d")
         delay_map = {"hot_1h": 3600, "warm_3d": 3 * 86400, "cool_7d": 7 * 86400}
         countdown = delay_map[task_type]
-        if hasattr(send_follow_up_email, "apply_async"):
+        broker_url = os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL")
+        if not broker_url:
+            logger.info("Celery broker not configured — skipping async follow-up dispatch")
+        elif hasattr(send_follow_up_email, "apply_async"):
             send_follow_up_email.apply_async(
                 kwargs={"lead_id": db_lead.id, "task_type": task_type},
                 countdown=countdown,
+                ignore_result=True,
             )
             logger.info(
                 "Scheduled %s follow-up email for lead #%d (countdown=%ds)",

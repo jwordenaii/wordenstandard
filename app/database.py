@@ -19,6 +19,13 @@ def get_database_url() -> str:
     database_url = os.getenv('DATABASE_URL', 'sqlite:///./jworden_leads.db')
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    # On Python 3.14+, psycopg3 is typically available while psycopg2 may not be.
+    if database_url.startswith('postgresql://'):
+        try:
+            import psycopg  # noqa: PLC0415, F401
+            database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
+        except Exception:  # noqa: BLE001
+            pass
     return database_url
 
 

@@ -30,7 +30,10 @@ $ErrorActionPreference = 'Stop'
 $script:ImageExtensions = @('.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif')
 $script:VideoExtensions = @('.mp4', '.mov', '.m4v')
 
-function Ensure-Directory {
+# Keep explicit reference so ScriptAnalyzer treats this script parameter as used.
+$null = $IncludeVideos
+
+function Initialize-Directory {
   param([string]$Path)
   if (-not (Test-Path -LiteralPath $Path)) {
     New-Item -ItemType Directory -Path $Path -Force | Out-Null
@@ -58,7 +61,7 @@ function Get-SafeToken {
   return (($clean -replace '\s+', '-') -replace '-{2,}', '-').ToLowerInvariant()
 }
 
-function Parse-ExifDate {
+function ConvertFrom-ExifDate {
   param([string]$Value)
   if (-not $Value) { return $null }
 
@@ -70,7 +73,7 @@ function Parse-ExifDate {
     try {
       return [DateTime]::ParseExact($trimmed, $f, [System.Globalization.CultureInfo]::InvariantCulture)
     } catch {
-      # continue
+      Write-Verbose "EXIF date parse format miss for '$f'."
     }
   }
 
@@ -152,7 +155,7 @@ function Get-ImageMeta {
 
       if ($dateItem) {
         $dateText = [System.Text.Encoding]::ASCII.GetString($dateItem.Value)
-        $parsed = Parse-ExifDate -Value $dateText
+        $parsed = ConvertFrom-ExifDate -Value $dateText
         if ($parsed) {
           $meta.timestamp = $parsed
         }
@@ -164,7 +167,7 @@ function Get-ImageMeta {
       $img.Dispose()
     }
   } catch {
-    # Keep fallback timestamp when EXIF is not available.
+    Write-Verbose "EXIF metadata unavailable for '$FilePath'; using file timestamp fallback."
   }
 
   return $meta
@@ -196,7 +199,7 @@ function Resolve-LocationToken {
   return 'unknown-location'
 }
 
-function New-FileHash {
+function Get-FileHashValue {
   param([string]$FilePath)
   try {
     return (Get-FileHash -LiteralPath $FilePath -Algorithm SHA256).Hash
@@ -207,8 +210,7 @@ function New-FileHash {
 
 function Build-ProjectImportItem {
   param(
-    [hashtable]$Record,
-    [string]$PublicRoot
+    [hashtable]$Record
   )
 
   $category = 'commercial'
@@ -227,7 +229,7 @@ function Build-ProjectImportItem {
   }
 }
 
-function Organize-Files {
+function Invoke-FileOrganization {
   param(
     [System.IO.FileInfo[]]$Files,
     [string]$Provider,
@@ -236,7 +238,7 @@ function Organize-Files {
     [switch]$DryRunMode
   )
 
-  Ensure-Directory -Path $OutputPath
+  Initialize-Directory -Path $OutputPath
 
   $records = @()
   foreach ($file in $Files) {
@@ -253,15 +255,15 @@ function Organize-Files {
 
     $locationToken = Resolve-LocationToken -FilePath $file.FullName -Gps $meta.gps -KeywordList $KeywordList
     $dateFolder = Join-Path -Path $OutputPath -ChildPath (Join-Path -Path $ts.ToString('yyyy/MM/dd') -ChildPath $locationToken)
-    Ensure-Directory -Path $dateFolder
+    Initialize-Directory -Path $dateFolder
 
     $baseName = Get-SafeToken -Value ([IO.Path]::GetFileNameWithoutExtension($file.Name))
     $destName = "{0}_{1}_{2}{3}" -f $ts.ToString('yyyyMMdd_HHmmss'), (Get-SafeToken -Value $Provider), $baseName, $ext
     $destPath = Join-Path -Path $dateFolder -ChildPath $destName
 
     if ((Test-Path -LiteralPath $destPath) -and -not $DryRunMode) {
-      $existingHash = New-FileHash -FilePath $destPath
-      $incomingHash = New-FileHash -FilePath $file.FullName
+      $existingHash = Get-FileHashValue -FilePath $destPath
+      $incomingHash = Get-FileHashValue -FilePath $file.FullName
       if ($existingHash -eq $incomingHash) {
         continue
       }
@@ -294,7 +296,7 @@ function Organize-Files {
   return ,$records
 }
 
-function Get-DropboxFiles {
+function Get-DropboxItem {
   param(
     [string]$Token,
     [string]$Path,
@@ -306,7 +308,7 @@ function Get-DropboxFiles {
     throw 'Dropbox token is required for pull-dropbox action.'
   }
 
-  Ensure-Directory -Path $StagingDir
+  Initialize-Directory -Path $StagingDir
   $headers = @{ Authorization = "Bearer $Token"; 'Content-Type' = 'application/json' }
   $listBody = @{ path = $Path; recursive = $true; include_non_downloadable_files = $false } | ConvertTo-Json
 
@@ -339,7 +341,7 @@ function Get-DropboxFiles {
   return ,$downloaded
 }
 
-function Get-GooglePhotosFiles {
+function Get-GooglePhotosItem {
   param(
     [string]$Token,
     [string]$AlbumId,
@@ -351,7 +353,7 @@ function Get-GooglePhotosFiles {
     throw 'Google Photos token is required for pull-google-photos action.'
   }
 
-  Ensure-Directory -Path $StagingDir
+  Initialize-Directory -Path $StagingDir
   $headers = @{ Authorization = "Bearer $Token"; 'Content-Type' = 'application/json' }
 
   $items = @()
@@ -396,7 +398,7 @@ function Get-GooglePhotosFiles {
         $created = [DateTime]::Parse($item.mediaMetadata.creationTime)
         (Get-Item -LiteralPath $target).LastWriteTime = $created
       } catch {
-        # Ignore timestamp parse issues.
+        Write-Verbose "Unable to parse Google Photos creationTime for '$($item.filename)'."
       }
     }
 
@@ -406,7 +408,7 @@ function Get-GooglePhotosFiles {
   return ,$downloaded
 }
 
-function Get-GoogleDriveFiles {
+function Get-GoogleDriveItem {
   param(
     [string]$Token,
     [string]$FolderId,
@@ -418,7 +420,7 @@ function Get-GoogleDriveFiles {
     throw 'Google Drive token is required for pull-google-drive action.'
   }
 
-  Ensure-Directory -Path $StagingDir
+  Initialize-Directory -Path $StagingDir
   $headers = @{ Authorization = "Bearer $Token" }
 
   $mimeQuery = if ($IncludeVideos) {
@@ -471,7 +473,7 @@ function Get-GoogleDriveFiles {
         $created = [DateTime]::Parse($timestamp)
         (Get-Item -LiteralPath $target).LastWriteTime = $created
       } catch {
-        # Ignore timestamp parse issues.
+        Write-Verbose "Unable to parse Google Drive timestamp for '$($item.name)'."
       }
     }
 
@@ -492,7 +494,7 @@ function Build-Result {
   $projects = @()
   $locations = @()
   foreach ($rec in $sorted) {
-    $projects += Build-ProjectImportItem -Record $rec -PublicRoot $OutputPath
+    $projects += Build-ProjectImportItem -Record $rec
     if ($rec.location_token) {
       $locations += $rec.location_token
     }
@@ -524,13 +526,13 @@ $ResolvedGoogleDriveToken = Get-ConfigValue -Explicit $GoogleDriveToken -EnvName
 $ResolvedGoogleDriveFolderId = Get-ConfigValue -Explicit $GoogleDriveFolderId -EnvName 'GOOGLE_DRIVE_FOLDER_ID'
 
 $keywords = @($LocationKeywords -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-Ensure-Directory -Path $OutputRoot
+Initialize-Directory -Path $OutputRoot
 
 $stagingRoot = Join-Path -Path 'scripts' -ChildPath '.tmp-media-ingest'
 if (Test-Path -LiteralPath $stagingRoot) {
   Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 }
-Ensure-Directory -Path $stagingRoot
+Initialize-Directory -Path $stagingRoot
 
 try {
   if ($Action -eq 'check-setup') {
@@ -597,19 +599,19 @@ try {
     }
     'pull-dropbox' {
       $provider = 'dropbox'
-      $files = Get-DropboxFiles -Token $ResolvedDropboxToken -Path $ResolvedDropboxPath -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'dropbox')
+      $files = Get-DropboxItem -Token $ResolvedDropboxToken -Path $ResolvedDropboxPath -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'dropbox')
     }
     'pull-google-photos' {
       $provider = 'google-photos'
-      $files = Get-GooglePhotosFiles -Token $ResolvedGooglePhotosToken -AlbumId $ResolvedGoogleAlbumId -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'googlephotos')
+      $files = Get-GooglePhotosItem -Token $ResolvedGooglePhotosToken -AlbumId $ResolvedGoogleAlbumId -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'googlephotos')
     }
     'pull-google-drive' {
       $provider = 'google-drive'
-      $files = Get-GoogleDriveFiles -Token $ResolvedGoogleDriveToken -FolderId $ResolvedGoogleDriveFolderId -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'googledrive')
+      $files = Get-GoogleDriveItem -Token $ResolvedGoogleDriveToken -FolderId $ResolvedGoogleDriveFolderId -Limit $MaxItems -StagingDir (Join-Path -Path $stagingRoot -ChildPath 'googledrive')
     }
   }
 
-  $records = Organize-Files -Files $files -Provider $provider -OutputPath $OutputRoot -KeywordList $keywords -DryRunMode:$DryRun
+  $records = Invoke-FileOrganization -Files $files -Provider $provider -OutputPath $OutputRoot -KeywordList $keywords -DryRunMode:$DryRun
   $result = Build-Result -ActionName $Action -OutputPath $OutputRoot -Records $records
 
   if (-not $DryRun) {

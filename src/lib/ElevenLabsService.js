@@ -23,6 +23,7 @@ class ElevenLabsService {
   constructor() {
     this.audioContext = null
     this.currentAudio = null
+    this.currentObjectUrl = null
     this.cache = new Map()
     this.queue = []
     this.isPlaying = false
@@ -75,13 +76,30 @@ class ElevenLabsService {
       // ── Path B: Backend neural TTS (OpenAI onyx / ElevenLabs server-side) ─
       if (!blob) {
         const apiBase = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
-        const resp = await fetch(`${apiBase}/api/v1/tts/speak`, {
+
+        // Preferred: direct provider streaming for lower time-to-first-audio.
+        const streamResp = await fetch(`${apiBase}/api/v1/tts/stream`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text }),
         })
-        if (!resp.ok) throw new Error(`backend TTS ${resp.status}`)
-        blob = await resp.blob()
+
+        if (streamResp.ok) {
+          const streamed = await this._playStreamResponse(streamResp)
+          if (streamed) return
+
+          // Older browsers: same endpoint, buffered fallback.
+          blob = await streamResp.blob()
+        } else {
+          // Final fallback endpoint if stream route fails.
+          const resp = await fetch(`${apiBase}/api/v1/tts/speak`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+          })
+          if (!resp.ok) throw new Error(`backend TTS ${resp.status}`)
+          blob = await resp.blob()
+        }
       }
 
       this.cache.set(text, blob)
@@ -91,8 +109,104 @@ class ElevenLabsService {
     }
   }
 
+  async _playStreamResponse(response) {
+    if (!response?.body) return false
+    if (typeof window === 'undefined' || typeof MediaSource === 'undefined') return false
+    if (!MediaSource.isTypeSupported('audio/mpeg')) return false
+
+    const mediaSource = new MediaSource()
+    const objectUrl = URL.createObjectURL(mediaSource)
+    const audio = new Audio(objectUrl)
+
+    this.currentObjectUrl = objectUrl
+    this.currentAudio = audio
+
+    const chunks = []
+    let sourceBuffer = null
+    let streamEnded = false
+
+    const flush = () => {
+      if (!sourceBuffer || sourceBuffer.updating) return
+      if (chunks.length > 0) {
+        const next = chunks.shift()
+        try {
+          sourceBuffer.appendBuffer(next)
+        } catch (err) {
+          console.warn('[voiceService] stream append failed:', err)
+        }
+        return
+      }
+      if (streamEnded && mediaSource.readyState === 'open') {
+        try {
+          mediaSource.endOfStream()
+        } catch {
+          // Ignore EOS races.
+        }
+      }
+    }
+
+    mediaSource.addEventListener('sourceopen', () => {
+      try {
+        sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg')
+        sourceBuffer.mode = 'sequence'
+      } catch {
+        streamEnded = true
+        return
+      }
+
+      sourceBuffer.addEventListener('updateend', flush)
+      const reader = response.body.getReader()
+
+      ;(async () => {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          if (!value || !value.byteLength) continue
+
+          const copy = value.byteOffset === 0 && value.byteLength === value.buffer.byteLength
+            ? value.buffer
+            : value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength)
+          chunks.push(copy)
+          flush()
+        }
+        streamEnded = true
+        flush()
+      })().catch((err) => {
+        console.warn('[voiceService] stream reader failed:', err)
+        streamEnded = true
+        flush()
+      })
+    }, { once: true })
+
+    audio.addEventListener('play', () => {
+      window.dispatchEvent(new CustomEvent('mrworden:audio-start'))
+    })
+
+    audio.addEventListener('ended', () => {
+      window.dispatchEvent(new CustomEvent('mrworden:audio-end'))
+      this._teardownAudio()
+    })
+
+    audio.addEventListener('error', () => {
+      window.dispatchEvent(new CustomEvent('mrworden:audio-end'))
+      this._teardownAudio()
+    })
+
+    await audio.play()
+    return true
+  }
+
+  _teardownAudio() {
+    if (this.currentObjectUrl) {
+      URL.revokeObjectURL(this.currentObjectUrl)
+      this.currentObjectUrl = null
+    }
+    this.currentAudio = null
+  }
+
   _playBlob(blob) {
     const url = URL.createObjectURL(blob)
+    this.currentObjectUrl = url
     this.currentAudio = new Audio(url)
     
     // Dispatch event for UI synchronization (visualizer sparks)
@@ -102,7 +216,7 @@ class ElevenLabsService {
 
     this.currentAudio.addEventListener('ended', () => {
       window.dispatchEvent(new CustomEvent('mrworden:audio-end'))
-      this.currentAudio = null
+      this._teardownAudio()
     })
 
     this.currentAudio.play().catch(err => {
@@ -115,7 +229,7 @@ class ElevenLabsService {
       this.currentAudio.pause()
       this.currentAudio.currentTime = 0
       window.dispatchEvent(new CustomEvent('mrworden:audio-end'))
-      this.currentAudio = null
+      this._teardownAudio()
     }
   }
 }

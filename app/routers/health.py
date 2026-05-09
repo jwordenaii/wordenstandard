@@ -38,6 +38,77 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["ops"])
 
 
+def _background_stack_configured() -> bool:
+    """
+    Returns True when Redis/Celery broker settings are explicitly configured.
+
+    In local dev, these env vars are often intentionally unset. In that case
+    readiness should not hard-fail on localhost Redis probes.
+    """
+    return any(
+        (
+            _cfg.get("REDIS_URL").strip(),
+            _cfg.get("CELERY_BROKER_URL").strip(),
+            _cfg.get("CELERY_RESULT_BACKEND").strip(),
+        )
+    )
+
+
+def _background_stack_health() -> tuple[dict, dict, dict, bool]:
+    """
+    Returns redis/celery/queue health plus whether the stack is configured.
+    """
+    configured = _background_stack_configured()
+    if not configured:
+        skipped = {
+            "ok": True,
+            "status": "skipped",
+            "reason": "REDIS_URL / CELERY_BROKER_URL not configured",
+        }
+        return skipped, skipped.copy(), skipped.copy(), configured
+
+    redis_status = check_redis_connection()
+    celery_status = check_celery_workers()
+    queue_status = check_queue_depth()
+    return redis_status, celery_status, queue_status, configured
+
+
+def _elasticsearch_configured() -> bool:
+    """
+    Returns True when Elasticsearch is explicitly configured.
+
+    Avoid localhost timeouts in local dev where search infra is intentionally
+    absent and no ELASTICSEARCH_* variables are provided.
+    """
+    return any(
+        (
+            _cfg.get("ELASTICSEARCH_HOST").strip(),
+            _cfg.get("ELASTICSEARCH_URL").strip(),
+            _cfg.get("ELASTICSEARCH_CLOUD_ID").strip(),
+        )
+    )
+
+
+def _elasticsearch_health() -> dict:
+    """
+    Returns Elasticsearch health status, or skipped when not configured.
+    """
+    if not _elasticsearch_configured():
+        return {
+            "ok": True,
+            "status": "skipped",
+            "reason": "ELASTICSEARCH_HOST not configured",
+        }
+
+    try:
+        from ..services import search_service  # noqa: PLC0415
+
+        return search_service.health()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("ES readiness check failed: %s", exc)
+        return {"ok": False, "error": str(exc)}
+
+
 @router.get("/health/live", summary="Liveness probe — is the process running?")
 def health_live():
     """
@@ -61,11 +132,7 @@ def health_ready():
     """
     start = time.monotonic()
 
-    redis_status = check_redis_connection()
-    celery_status = check_celery_workers()
-    queue_status = check_queue_depth()
-
-    elapsed_ms = round((time.monotonic() - start) * 1000, 2)
+    redis_status, celery_status, queue_status, background_configured = _background_stack_health()
 
     # Database connectivity — quick SELECT 1
     db_status: dict = {"ok": False, "error": "not checked"}
@@ -82,20 +149,16 @@ def health_ready():
         db_status = {"ok": False, "error": str(exc)}
 
     # Elasticsearch connectivity — optional, does not affect readiness
-    es_status: dict = {"ok": False, "status": "not checked"}
-    try:
-        from ..services import search_service  # noqa: PLC0415
-        es_status = search_service.health()
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("ES readiness check failed: %s", exc)
-        es_status = {"ok": False, "error": str(exc)}
+    es_status = _elasticsearch_health()
 
     all_ok = redis_status["ok"] and db_status["ok"]
     # Celery workers are optional — warn but don't fail readiness if no workers
     # are running (e.g. during initial deploy before worker pod starts).
     celery_ok = celery_status.get("ok", False)
-    if not celery_ok:
+    if background_configured and not celery_ok:
         logger.warning("Celery workers unavailable during readiness check")
+
+    elapsed_ms = round((time.monotonic() - start) * 1000, 2)
 
     payload = {
         "status": "ready" if all_ok else "degraded",
@@ -124,9 +187,7 @@ def dashboard_preflight():
     """
     start = time.monotonic()
 
-    redis_status = check_redis_connection()
-    celery_status = check_celery_workers()
-    queue_status = check_queue_depth()
+    redis_status, celery_status, queue_status, _ = _background_stack_health()
 
     db_status: dict = {"ok": False, "error": "not checked"}
     try:

@@ -30,6 +30,7 @@ from ..services.celery_health import (
     check_queue_depth,
     check_redis_connection,
 )
+from ..services import jarvis_observability as _jarvis_observability
 
 logger = logging.getLogger(__name__)
 
@@ -305,6 +306,26 @@ async def cache_metrics(
     stats = get_cache_stats()
     return {
         **stats,
+        "note": "Counters are per-process and reset on worker restart.",
+    }
+
+
+@router.get("/jarvis", summary="Jarvis SLO metrics: latency percentiles, fallback, and tool failure rates")
+@limiter.limit(HEALTH_LIMIT)
+async def jarvis_metrics(
+    request: Request,
+    _: dict = Depends(verify_premium_security),
+):
+    """
+    Return in-process Jarvis observability counters.
+
+    Includes p50/p95/p99 latency, provider fallback rate, per-role breakdown,
+    per-tenant usage counts, and tool failure percentages.
+    """
+    return {
+        "status": "ok",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "jarvis": _jarvis_observability.snapshot(),
         "note": "Counters are per-process and reset on worker restart.",
     }
 

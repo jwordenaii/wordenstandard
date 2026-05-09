@@ -157,6 +157,7 @@ async def _test_anthropic() -> dict:
     key = runtime_config.get("ANTHROPIC_API_KEY")
     if not key:
         return {"ok": False, "error": "ANTHROPIC_API_KEY not set"}
+    model = (runtime_config.get("ANTHROPIC_MODEL") or "").strip() or "claude-sonnet-4-5"
     try:
         async with httpx.AsyncClient(timeout=10) as c:
             # 1-token ping
@@ -168,7 +169,7 @@ async def _test_anthropic() -> dict:
                     "content-type":      "application/json",
                 },
                 json={
-                    "model":      runtime_config.get("ANTHROPIC_MODEL") or "claude-3-5-sonnet-latest",
+                    "model":      model,
                     "max_tokens": 1,
                     "messages":   [{"role": "user", "content": "hi"}],
                 },

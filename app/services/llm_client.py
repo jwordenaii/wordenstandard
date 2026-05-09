@@ -41,6 +41,11 @@ Environment variables (set in Railway → Variables)
   LLM_FALLBACK_SILENT   — "1" (default): silently fall through on error.
                            "0": raise on primary failure.
   JARVIS_MAX_TIER       — "opus" (default) | "sonnet". Caps Jarvis spend.
+    JARVIS_MODEL_OVERRIDE — Optional model name for jarvis/persona/jarvis_fast,
+                                                     e.g. "claude-opus-4-7" or "gpt-4o".
+    JARVIS_DISABLE_GEMINI — "1" disables Google/Gemini in jarvis lanes only.
+    LLM_DISABLED_PROVIDERS — Comma-separated global provider denylist,
+                                                     e.g. "google,xai".
 
 Missing keys are tolerated — the router falls through to the next
 configured provider, then finally returns ("", error=True). Callers MUST
@@ -90,6 +95,80 @@ def _silent_fallback() -> bool:
 
 def _jarvis_cap() -> str:
     return (_cfg.get("JARVIS_MAX_TIER") or "opus").lower()
+
+
+def _env_flag(name: str, *, default: bool = False) -> bool:
+    raw = (_cfg.get(name) or "").strip().lower()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "on"}
+
+
+def _disabled_providers() -> set[str]:
+    raw = (_cfg.get("LLM_DISABLED_PROVIDERS") or "").strip().lower()
+    if not raw:
+        return set()
+    return {p.strip() for p in raw.split(",") if p.strip()}
+
+
+def _jarvis_model_override() -> str:
+    return (_cfg.get("JARVIS_MODEL_OVERRIDE") or "").strip()
+
+
+def _jarvis_disable_gemini() -> bool:
+    # Keep backward compatibility in case older deployments used GOOGLE wording.
+    return _env_flag("JARVIS_DISABLE_GEMINI") or _env_flag("JARVIS_DISABLE_GOOGLE")
+
+
+def _provider_for_model(model: str) -> Optional[str]:
+    m = (model or "").strip().lower()
+    if not m:
+        return None
+    if m.startswith("claude"):
+        return "anthropic"
+    if m.startswith("gpt") or m.startswith("o1") or m.startswith("o3"):
+        return "openai"
+    if m.startswith("gemini"):
+        return "google"
+    if m.startswith("grok"):
+        return "xai"
+    if m.startswith("sonar"):
+        return "perplexity"
+    return None
+
+
+def _resolved_chain(task: str) -> list[tuple[str, str]]:
+    chain = list(_ROUTES.get(task) or _ROUTES[_DEFAULT_TASK])
+
+    # Jarvis spend cap: optionally downgrade Opus → Sonnet.
+    if task == "jarvis" and _jarvis_cap() == "sonnet":
+        chain = [(p, m.replace("claude-opus-4-6", "claude-sonnet-4-6")) for p, m in chain]
+
+    if task in {"jarvis", "jarvis_fast", "persona"}:
+        if _jarvis_disable_gemini():
+            chain = [(p, m) for p, m in chain if p != "google"]
+
+        model = _jarvis_model_override()
+        if model:
+            provider = _provider_for_model(model)
+            if provider:
+                chain = [(provider, model)] + chain
+            else:
+                logger.warning("Ignoring JARVIS_MODEL_OVERRIDE with unknown provider: %s", model)
+
+    disabled = _disabled_providers()
+    if disabled:
+        chain = [(p, m) for p, m in chain if p not in disabled]
+
+    # Deduplicate exact entries while preserving order.
+    deduped: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for pair in chain:
+        if pair in seen:
+            continue
+        seen.add(pair)
+        deduped.append(pair)
+    return deduped
 
 
 # ── Public dataclass ─────────────────────────────────────────────────────────
@@ -373,11 +452,17 @@ def chat(
             error_detail=err,
         )
 
-    chain = _ROUTES.get(task) or _ROUTES[_DEFAULT_TASK]
+    chain = _resolved_chain(task)
 
-    # Jarvis spend cap: optionally downgrade Opus → Sonnet.
-    if task == "jarvis" and _jarvis_cap() == "sonnet":
-        chain = [(p, m.replace("claude-opus-4-6", "claude-sonnet-4-6")) for p, m in chain]
+    if not chain:
+        return LLMResponse(
+            text="",
+            provider="none",
+            model="",
+            error=True,
+            fallback_used=False,
+            error_detail=f"No providers enabled for task '{task}'",
+        )
 
     last_err: Optional[str] = None
     for idx, (provider, model) in enumerate(chain):

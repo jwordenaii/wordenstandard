@@ -36,7 +36,7 @@ function Get-SourceText {
   throw "Provide -Text or -InputFile."
 }
 
-function Split-Sentences {
+function Split-Sentence {
   param([string]$Content)
 
   if (-not $Content) { return @() }
@@ -66,7 +66,7 @@ function Get-Urgency {
   return 'flexible'
 }
 
-function Extract-LeadSignals {
+function Get-LeadSignal {
   param([string]$Content)
 
   $email = [regex]::Match($Content, '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', 'IgnoreCase').Value
@@ -91,7 +91,7 @@ function Extract-LeadSignals {
   }
 }
 
-function Score-Intent {
+function Get-IntentScore {
   param(
     [string]$Content,
     [hashtable]$Signals
@@ -130,7 +130,7 @@ function Score-Intent {
 function Format-FounderResponse {
   param([string]$Content)
 
-  $sentences = Split-Sentences -Content $Content
+  $sentences = Split-Sentence -Content $Content
 
   $recommendation = if ($sentences.Count -gt 0) { $sentences[0] } else { 'Start with a free on-site inspection so we solve root issues first.' }
   $why = if ($sentences.Count -gt 1) { $sentences[1] } else { 'That protects your budget by matching the fix to real pavement conditions.' }
@@ -169,8 +169,8 @@ function Invoke-Qualification {
     [string]$Source = 'inline'
   )
 
-  $signals = Extract-LeadSignals -Content $Content
-  $intent = Score-Intent -Content $Content -Signals $signals
+  $signals = Get-LeadSignal -Content $Content
+  $intent = Get-IntentScore -Content $Content -Signals $signals
   $statusTarget = if ($intent.tier -in @('hot', 'warm')) { 'contacted' } else { 'new' }
   $nextAction = if ($intent.tier -eq 'hot') {
     'Call in under 5 minutes and send quote intake link immediately.'
@@ -266,8 +266,8 @@ if ($Action -eq 'batch-qualify') {
   $result = Invoke-BatchQualification -Directory $InputDir -ExportPath $OutputFile -TopCount $Top
 } else {
   $content = Get-SourceText -DirectText $Text -FilePath $InputFile
-  $signals = Extract-LeadSignals -Content $content
-  $intent = Score-Intent -Content $content -Signals $signals
+  $signals = Get-LeadSignal -Content $content
+  $intent = Get-IntentScore -Content $content -Signals $signals
 
   switch ($Action) {
     'format-response' {

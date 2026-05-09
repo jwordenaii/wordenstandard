@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/react";
 import App from '@/App.jsx'
 import '@/index.css'
 import { trackEvent } from '@/api/client'
+import { resolveSiteProfile } from '@/lib/siteProfiles'
 
 // Only initialize Sentry when a real DSN is configured.
 // Sentry DSNs always start with "https://" and contain "@" + ".ingest." to
@@ -27,6 +28,16 @@ if (_isValidSentryDsn) {
     replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
     replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
   });
+}
+
+// Resolve site profile at startup so one repo can safely support multiple
+// branded domains without changing app bootstrap behavior.
+const _siteProfile = resolveSiteProfile()
+if (typeof window !== 'undefined') {
+  window.__JWORDEN_SITE_PROFILE__ = _siteProfile
+}
+if (typeof document !== 'undefined' && document.documentElement) {
+  document.documentElement.setAttribute('data-site-profile', _siteProfile.key)
 }
 
 // ── Global conversion tracking for tel: / mailto: clicks ──────────────────

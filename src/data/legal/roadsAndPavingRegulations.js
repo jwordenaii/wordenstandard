@@ -204,6 +204,32 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    roadAuthority: 'District Department of Transportation (DDOT)',
+    roadUrl: 'https://ddot.dc.gov',
+    utilityPermitRequired: true,
+    utilityPermitNote:
+      'Public Space permit and DDOT coordination are required for utility work in District right-of-way',
+    overweightPermitRequired: true,
+    overweightThresholdLbs: 80000,
+    overweightUrl: 'https://ddot.dc.gov/service/public-space-permits',
+    roadBondRequired: true,
+    roadBondNote: 'Performance and restoration security may be required for right-of-way work',
+    restorationBondRequired: true,
+    restorationBondNote:
+      'Roadway restoration must follow DDOT standards; trench restoration obligations apply',
+    pavingSpecification: 'DDOT Design and Engineering Manual; District standard details and permit conditions',
+    haulRoutePermitRequired: true,
+    haulRouteNote: 'Oversize/overweight travel requires District route and permit review',
+    localRoadAuthority: 'DDOT Public Space Regulation Administration',
+    encroachmentPermitRequired: true,
+    citation: 'D.C. Municipal Regulations, Public Space and transportation permit requirements',
+    notes:
+      'District right-of-way and public-space controls are centralized under DDOT with permit-based utility and roadway access management.',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     roadAuthority: 'Florida Department of Transportation (FDOT)',

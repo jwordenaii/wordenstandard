@@ -147,6 +147,25 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    preliminaryNoticeRequired: false,
+    preliminaryNoticeDeadline: null,
+    preliminaryNoticeWho: [],
+    lienFilingDeadlineDays: 90,
+    lienFilingDeadlineNote:
+      'Advisory baseline: file promptly after last furnishing; verify claimant-specific statutory timing before filing',
+    lienForeClosureDeadlineDays: 365,
+    noticeOfIntentRequired: false,
+    noticeOfIntentDeadlineDays: null,
+    claimantTypes: ['GC', 'Subcontractor', 'Supplier'],
+    residentialOwnerOccupiedExceptions: false,
+    citation: 'District of Columbia mechanics lien statutes and Superior Court filing procedures',
+    notes:
+      'Public property is generally not lienable; verify notice and filing prerequisites against current District statute before action.',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     preliminaryNoticeRequired: true,

@@ -7,12 +7,12 @@ Push-Location (Split-Path $PSScriptRoot -Parent)
 git config core.hooksPath .githooks
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "OK: git hooks enabled. .githooks/pre-commit and .githooks/pre-push will now run automatically." -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Verify with:  git config --get core.hooksPath"
-    Write-Host "Disable with: git config --unset core.hooksPath"
+    Write-Output "OK: git hooks enabled. .githooks/pre-commit and .githooks/pre-push will now run automatically."
+    Write-Output ""
+    Write-Output "Verify with:  git config --get core.hooksPath"
+    Write-Output "Disable with: git config --unset core.hooksPath"
 } else {
-    Write-Host "FAILED to set core.hooksPath" -ForegroundColor Red
+    Write-Output "FAILED to set core.hooksPath"
     exit 1
 }
 

@@ -90,10 +90,10 @@ VITE_BUILD_DATE=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
 
     # 6. Execute Edge Deployment via Netlify CLI
     Write-Information "-> Pushing to Edge CDN ($NetlifySiteId)..."
-    
+
     $DeployCmd = "npx"
     $DeployArgs = @("netlify-cli", "deploy", "--dir=dist", "--site=$NetlifySiteId")
-    
+
     if (-not $Preview) {
         Write-Information "-> PRODUCTION DEPLOYMENT ACTIVE."
         $DeployArgs += "--prod"

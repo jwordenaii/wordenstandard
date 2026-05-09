@@ -302,6 +302,43 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    gas: {
+      minBurialDepthIn: 24,
+      trenchBeddingNote: 'Granular bedding and utility-owner standards apply',
+      roadCrossingDepthIn: 36,
+      waterwayCrossingNote: 'Coordinate with DDOT and utility owner requirements',
+    },
+    electric: {
+      minBurialDepthIn: 24,
+      roadCrossingDepthIn: 36,
+      highVoltageNote: '600V+ typically requires deeper burial and/or engineered conduit',
+    },
+    water: {
+      minBurialDepthIn: 48,
+      frostLineDepthIn: 36,
+      roadCrossingDepthIn: 54,
+    },
+    sewer: {
+      minBurialDepthIn: 36,
+      roadCrossingDepthIn: 48,
+    },
+    telecom: {
+      minBurialDepthIn: 24,
+      directBuriedDepthIn: 24,
+      conduitDepthIn: 18,
+    },
+    fiber: {
+      minBurialDepthIn: 24,
+      directBuriedDepthIn: 24,
+      conduitDepthIn: 18,
+    },
+    federalOverlayNote: 'PHMSA 49 CFR § 192.327; NEC Article 300; local DDOT public-space requirements',
+    citation: 'DDOT public-space utility standards and District utility permit requirements',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     gas: {

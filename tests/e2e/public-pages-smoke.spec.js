@@ -155,6 +155,20 @@ test('jwordenai page renders scan workflow', async ({ page }) => {
   await expect(page.getByText(/iPhone/i).first()).toBeVisible()
 })
 
+test('command center route remains auth gated', async ({ page }) => {
+  await page.route('**/api/v1/auth/status', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ auth_required: true, is_authenticated: false }),
+    })
+  })
+
+  await page.goto('/command-center')
+  await expect(page.getByText(/Admin Access/i).first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Enter PIN/i })).toBeVisible()
+})
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 test('404 page renders for unknown route', async ({ page }) => {
   const response = await page.goto('/this-does-not-exist-at-all-xyz')

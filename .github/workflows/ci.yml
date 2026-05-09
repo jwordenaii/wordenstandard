@@ -35,6 +35,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Guard public/core route boundary
+        run: npm run guard:public-core
+
+      - name: Guard multi-site isolation
+        run: npm run guard:site-isolation
+
       - name: Build
         run: npm run build
         env:
@@ -42,6 +48,9 @@ jobs:
           VITE_GA4_ID: G-XXXXXXXXXX
           # CI placeholder — production deploys use the VITE_SITE_URL secret
           VITE_SITE_URL: https://www.jwordenasphaltpaving.com
+
+      - name: Guard SEO readiness
+        run: npm run guard:seo-readiness
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

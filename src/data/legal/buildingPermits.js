@@ -228,6 +228,39 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    permittingAuthority: 'District of Columbia Department of Buildings (DOB)',
+    statewideBuildingCode:
+      'Yes - District Construction Codes (with local amendments) apply district-wide',
+    adoptedCodes: [
+      'IBC 2021 (DC amendments)',
+      'IRC 2021 (DC amendments)',
+      'IFC 2021 (DC amendments)',
+      'NEC 2020',
+      'IECC 2021 (DC Energy Conservation Code)',
+    ],
+    residentialThreshold:
+      'All new residential construction requires permit; structural, electrical, plumbing, and mechanical alterations require permit',
+    commercialThreshold: 'All commercial construction requires permit',
+    exemptions: 'Minor cosmetic work not affecting structure, life safety, or MEP systems',
+    permitFeeStructure:
+      'District fee schedules are based on project valuation, permit category, and trade scope',
+    inspectionsRequired: [
+      'Footing/Foundation',
+      'Structural/Framing',
+      'Rough MEP',
+      'Fire/Life Safety as applicable',
+      'Final',
+    ],
+    stateBuildingOffice: 'District of Columbia Department of Buildings (DOB)',
+    stateBuildingUrl: 'https://dob.dc.gov',
+    citation: 'District of Columbia Construction Codes and DOB permitting regulations',
+    notes:
+      'District permitting is centralized through DOB e-permitting workflows with discipline-specific review and inspections.',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     permittingAuthority: 'Local jurisdiction (county or city building department)',

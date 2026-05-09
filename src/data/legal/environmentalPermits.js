@@ -172,6 +172,28 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    npdesAuthority: 'District Department of Energy and Environment (DOEE)',
+    npdesUrl: 'https://doee.dc.gov',
+    landDisturbanceThresholdAcres: 1,
+    swpppRequired: true,
+    swpppNote:
+      'SWPPP and erosion/sediment controls are required for qualifying land disturbance under District stormwater rules',
+    erosionControlStandard:
+      'District erosion and sediment control requirements with DOEE stormwater management criteria',
+    wetlandSetbackFt: 25,
+    wetlandSetbackNote:
+      'Wetland and water-resource impacts are reviewed by DOEE with federal Section 404/401 coordination when applicable',
+    stateWetlandProgram: true,
+    stateEnvAgency: 'District Department of Energy and Environment (DOEE)',
+    stateEnvUrl: 'https://doee.dc.gov',
+    citation: 'District stormwater and erosion/sediment control regulations under DOEE authority',
+    notes:
+      'District projects typically require coordinated ESC/SWPPP and stormwater retention compliance through DOEE permitting workflows.',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     npdesAuthority: 'Florida Department of Environmental Protection (FDEP)',

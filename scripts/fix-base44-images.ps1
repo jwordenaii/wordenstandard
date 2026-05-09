@@ -11,7 +11,7 @@ $urls = (Get-ChildItem -Recurse src,public -File |
   Select-String -Pattern 'https://media\.api\.com[^"''`\s\)]+' -AllMatches
 ).Matches.Value | Sort-Object -Unique
 
-Write-Host ("Found {0} unique media.api.com URLs" -f $urls.Count)
+Write-Output ("Found {0} unique media.api.com URLs" -f $urls.Count)
 
 # 2. Pools of available local images (from Google Takeout extraction)
 $kfcDir  = '/work/imported/KFC'
@@ -36,14 +36,14 @@ foreach ($u in $urls) {
 }
 
 $map | ConvertTo-Json | Set-Content -Path .\.media-url-map.json -Encoding UTF8
-Write-Host "Wrote .media-url-map.json"
+Write-Output "Wrote .media-url-map.json"
 
 # 4. Apply replacements
 $targetFiles = Get-ChildItem -Recurse src,public -File |
   Where-Object { $_.Extension -match '\.(js|jsx|ts|tsx|json|html|xml|md|css)$' } |
   Where-Object { (Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue) -match 'media\.api\.com' }
 
-Write-Host ("Files to update: {0}" -f $targetFiles.Count)
+Write-Output ("Files to update: {0}" -f $targetFiles.Count)
 $totalReplacements = 0
 foreach ($f in $targetFiles) {
   $content = Get-Content $f.FullName -Raw -Encoding UTF8
@@ -59,8 +59,8 @@ foreach ($f in $targetFiles) {
   if ($content -ne $orig) {
     if (-not $DryRun) { Set-Content -Path $f.FullName -Value $content -Encoding UTF8 -NoNewline }
     $totalReplacements += $fileReps
-    Write-Host ("  {0,-60} {1} replacements" -f ($f.FullName.Replace($root + '\','')), $fileReps)
+    Write-Output ("  {0,-60} {1} replacements" -f ($f.FullName.Replace($root + '\\','')), $fileReps)
   }
 }
-Write-Host ("Total replacements: {0}" -f $totalReplacements)
-if ($DryRun) { Write-Host "[DRY RUN - no files written]" -ForegroundColor Yellow }
+Write-Output ("Total replacements: {0}" -f $totalReplacements)
+if ($DryRun) { Write-Output "[DRY RUN - no files written]" }

@@ -213,6 +213,34 @@ class UtilityCheckRequest(BaseModel):
     has_pool:                bool
 
 
+class LaunchCompliancePlanRequest(BaseModel):
+    avg_deal_size_usd: float = Field(
+        default=12000,
+        gt=0,
+        description="Average signed deal value in USD",
+    )
+    monthly_qualified_leads: int = Field(
+        default=40,
+        ge=1,
+        description="Qualified inbound leads expected each month",
+    )
+    close_rate_percent: float = Field(
+        default=22,
+        ge=0,
+        le=100,
+        description="Expected close rate percentage",
+    )
+    team_capacity_jobs_per_month: int = Field(
+        default=18,
+        ge=1,
+        description="Maximum jobs your team can execute monthly",
+    )
+    include_compliance_advisory: bool = Field(
+        default=True,
+        description="Include compliance advisory offer lane in output",
+    )
+
+
 @router.post(
     "/utility-risk",
     summary="Virginia 811 private-utility risk advisory",
@@ -254,4 +282,108 @@ def evaluate_utility_risk(req: UtilityCheckRequest):
             "Every \u2018person\u2019 must provide their own notice of excavation. "
             "Subcontractors cannot work under another\u2019s ticket."
         ),
+    }
+
+
+@router.post(
+    "/launch-compliance-plan",
+    summary="Launch advisory plan for monetization + compliance rollout",
+)
+def launch_compliance_plan(req: LaunchCompliancePlanRequest):
+    """
+    Build a realistic, operations-first launch plan from current assumptions.
+
+    This is an advisory planning endpoint for launch sequencing and revenue
+    lanes. It is not legal, tax, or investment advice.
+    """
+    close_rate = req.close_rate_percent / 100.0
+    projected_wins = int(round(req.monthly_qualified_leads * close_rate))
+    executable_wins = min(projected_wins, req.team_capacity_jobs_per_month)
+
+    # Base construction revenue forecast band using capacity-capped wins.
+    monthly_floor = round(executable_wins * req.avg_deal_size_usd * 0.85, 2)
+    monthly_mid = round(executable_wins * req.avg_deal_size_usd, 2)
+    monthly_ceiling = round(executable_wins * req.avg_deal_size_usd * 1.15, 2)
+
+    lanes = [
+        {
+            "lane": "core-operations",
+            "description": "Lead intake + quote + close + deposit flow",
+            "monthly_revenue_range_usd": {
+                "low": monthly_floor,
+                "mid": monthly_mid,
+                "high": monthly_ceiling,
+            },
+            "dependencies": [
+                "lead capture",
+                "crm pipeline",
+                "math-ai cost estimate",
+                "payments checkout-session",
+            ],
+        },
+        {
+            "lane": "ads-intelligence-managed-service",
+            "description": "URL exclusions + CRM export + anomaly monitoring for paid media",
+            "monthly_revenue_range_usd": {"low": 4500, "mid": 12000, "high": 30000},
+            "dependencies": [
+                "ads/status",
+                "ads/url-exclusions",
+                "ads/crm-export",
+                "ads/anomaly-scan",
+            ],
+        },
+        {
+            "lane": "maintenance-plan-recurring",
+            "description": "Recurring maintenance packages using forecast-based follow-ups",
+            "monthly_revenue_range_usd": {"low": 3000, "mid": 8500, "high": 20000},
+            "dependencies": [
+                "math-ai maintenance-forecast",
+                "follow-up automation",
+                "customer history",
+            ],
+        },
+    ]
+
+    if req.include_compliance_advisory:
+        lanes.append(
+            {
+                "lane": "compliance-advisory",
+                "description": "51-jurisdiction compliance verification + advisory retainers",
+                "monthly_revenue_range_usd": {"low": 1000, "mid": 5000, "high": 12000},
+                "dependencies": [
+                    "compliance/matrix",
+                    "compliance/verify-batch",
+                    "advisor/legal-strategy",
+                    "advisor/license-optimizer",
+                ],
+                "notice": "Advisory operations guidance only; not legal advice.",
+            }
+        )
+
+    launch_sequence = [
+        "Stabilize core funnel: quote -> proposal -> deposit conversion.",
+        "Turn on weekly ads anomaly scans and CRM export loops.",
+        "Launch compliance advisory package with batch verification deliverables.",
+        "Expand recurring maintenance plans once execution capacity is stable.",
+    ]
+
+    return {
+        "status": "success",
+        "inputs": req.model_dump(),
+        "forecast": {
+            "projected_wins_per_month": projected_wins,
+            "capacity_capped_wins_per_month": executable_wins,
+            "capacity_utilization_percent": round(
+                min(100.0, (executable_wins / req.team_capacity_jobs_per_month) * 100.0),
+                1,
+            ),
+        },
+        "revenue_lanes": lanes,
+        "launch_sequence": launch_sequence,
+        "compliance_checklist": [
+            "Confirm 51-jurisdiction matrix parity before publishing advisory outputs.",
+            "Record verification history for every compliance run.",
+            "Include advisory-only notice in every compliance client deliverable.",
+        ],
+        "advisory_notice": "Planning guidance only. Confirm legal and tax implications with licensed professionals.",
     }

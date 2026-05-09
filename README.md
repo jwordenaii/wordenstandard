@@ -32,7 +32,7 @@ Professional asphalt paving and maintenance across Virginia. This repo is the fu
 ```bash
 npm install
 cp .env.example .env.local   # then fill in values
-npm run dev                   # starts on http://localhost:5173
+npm run dev:web                # starts on http://127.0.0.1:5173
 ```
 
 ### Backend
@@ -42,8 +42,11 @@ python -m venv .venv
 .venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 alembic upgrade head
-uvicorn app.main:app --reload  # starts on http://localhost:8000
+npm run dev:backend            # starts on first bindable local port (default 8003)
 ```
+
+If port 8000 is blocked on your machine (common on Windows), the backend launcher
+automatically picks a bindable port and prints the exact URL.
 
 ---
 

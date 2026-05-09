@@ -135,6 +135,7 @@ try:
         max_retries=3,
         default_retry_delay=60,  # 1 minute between retries
         acks_late=True,
+        ignore_result=True,
     )
     def send_follow_up_email(self, lead_id: int, task_type: str) -> dict:
         """

@@ -1,16 +1,20 @@
-fastapi==0.115.12
+fastapi==0.115.12; python_version < "3.14"
+fastapi==0.136.1; python_version >= "3.14"
 datadog==0.50.0
 sendgrid==6.12.5
 python-socketio==5.11.0
 python-engineio==4.9.0
 uvicorn[standard]==0.34.3
-pydantic[email]==2.11.4
+pydantic[email]==2.11.4; python_version < "3.14"
+pydantic[email]==2.13.3; python_version >= "3.14"
 openai==1.78.1
 anthropic==0.39.0
 google-genai==0.3.0
 sentry-sdk[fastapi]==2.22.0
 python-jose[cryptography]==3.3.0
-psycopg2-binary==2.9.9
+# psycopg2 wheels are not available on Python 3.14+ for Windows.
+psycopg2-binary==2.9.9; python_version < "3.14"
+psycopg[binary]==3.2.13; python_version >= "3.14"
 sqlalchemy==2.0.40
 alembic==1.13.3
 twilio==9.4.6
@@ -49,10 +53,14 @@ gunicorn==23.0.0
 elasticsearch==8.13.0
 
 # ── Mathematical AI ──────────────────────────────────────────────────────────
-numpy==1.26.4
-scipy==1.14.0
-scikit-learn==1.5.0
-pandas==2.2.0
+numpy==1.26.4; python_version < "3.14"
+numpy==2.4.4; python_version >= "3.14"
+scipy==1.14.0; python_version < "3.14"
+scipy==1.17.1; python_version >= "3.14"
+scikit-learn==1.5.0; python_version < "3.14"
+scikit-learn==1.8.0; python_version >= "3.14"
+pandas==2.2.0; python_version < "3.14"
+pandas==3.0.2; python_version >= "3.14"
 
 # ── Testing ──────────────────────────────────────────────────────────────────
 pytest==8.3.5

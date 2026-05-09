@@ -31,7 +31,7 @@ foreach ($u in $urlNodes) {
   }
 }
 
-function Ensure-UrlEntry {
+function Invoke-UrlEntrySync {
   param(
     [xml]$Doc,
     [string]$Ns,
@@ -99,7 +99,7 @@ function Ensure-UrlEntry {
 $results = @()
 foreach ($path in $landingCanonicalPaths) {
   $loc = "$primaryDomain$path"
-  $status = Ensure-UrlEntry -Doc $xmlDoc -Ns $ns -Index $indexByLoc -Loc $loc -Lastmod $today -Changefreq 'weekly' -Priority '0.8'
+  $status = Invoke-UrlEntrySync -Doc $xmlDoc -Ns $ns -Index $indexByLoc -Loc $loc -Lastmod $today -Changefreq 'weekly' -Priority '0.8'
   $results += "$status $loc"
 }
 
@@ -113,7 +113,7 @@ if ($UpdateCoreRoutes) {
   )
 
   foreach ($item in $core) {
-    $status = Ensure-UrlEntry -Doc $xmlDoc -Ns $ns -Index $indexByLoc -Loc $item.loc -Lastmod $today -Changefreq $item.changefreq -Priority $item.priority
+    $status = Invoke-UrlEntrySync -Doc $xmlDoc -Ns $ns -Index $indexByLoc -Loc $item.loc -Lastmod $today -Changefreq $item.changefreq -Priority $item.priority
     $results += "$status $($item.loc)"
   }
 }

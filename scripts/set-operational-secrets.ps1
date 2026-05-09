@@ -17,9 +17,12 @@ param(
 $ErrorActionPreference = 'Stop'
 $InputValues = @{}
 
+# Keep explicit references so ScriptAnalyzer treats these script parameters as used.
+$null = $RailwayService, $RailwayEnvironment, $NetlifySiteId, $LocalScope
+
 function Write-Step {
   param([string]$Message)
-  Write-Host "[ops-secrets] $Message"
+  Write-Output "[ops-secrets] $Message"
 }
 
 function Import-InputFile {
@@ -48,12 +51,12 @@ function Import-InputFile {
   Write-Step "Loaded $($InputValues.Count) filled value(s) from $Path. Values will not be printed."
 }
 
-function Should-IncludeGroup {
+function Test-GroupIncluded {
   param([string]$Group)
   return $Target -eq 'all' -or $Target -eq $Group
 }
 
-function Should-SetProvider {
+function Test-ProviderSelected {
   param([string]$Name)
   return $Provider -eq 'all' -or $Provider -eq $Name
 }
@@ -87,8 +90,8 @@ function Read-SecretValue {
     return $null
   }
 
-  Write-Host ""
-  Write-Host "$Name - $Description"
+  Write-Output ""
+  Write-Output "$Name - $Description"
   $secure = Read-Host "Enter value, or leave blank to skip" -AsSecureString
   if ($secure.Length -eq 0) {
     return $null
@@ -113,8 +116,8 @@ function Read-PlainValue {
     return $null
   }
 
-  Write-Host ""
-  Write-Host "$Name - $Description"
+  Write-Output ""
+  Write-Output "$Name - $Description"
   if ($DefaultValue) {
     $value = Read-Host "Enter value, leave blank for '$DefaultValue', or type SKIP"
     if ($value -eq 'SKIP') { return $null }
@@ -134,11 +137,11 @@ function Invoke-RailwaySet {
   )
 
   if ($DryRun) {
-    Write-Step "Would set Railway $Name for service '$RailwayService' in '$RailwayEnvironment'."
+    Write-Step "Would set Railway $Name for service '$script:RailwayService' in '$script:RailwayEnvironment'."
     return
   }
 
-  $Value | & npx -y @railway/cli variable set $Name --stdin --service $RailwayService --environment $RailwayEnvironment | Out-Host
+  $Value | & npx -y @railway/cli variable set $Name --stdin --service $script:RailwayService --environment $script:RailwayEnvironment | Out-Host
   if ($LASTEXITCODE -ne 0) {
     throw "Railway variable set failed for $Name."
   }
@@ -151,32 +154,45 @@ function Invoke-NetlifySet {
   )
 
   if ($DryRun) {
-    Write-Step "Would set Netlify $Name for site '$NetlifySiteId'."
+    Write-Step "Would set Netlify $Name for site '$script:NetlifySiteId'."
     return
   }
 
-  & npx -y netlify env:set $Name $Value --context production --site $NetlifySiteId --secret --force | Out-Host
+  $netlifyArgs = @(
+    '-y',
+    'netlify',
+    'env:set',
+    $Name,
+    $Value,
+    '--context',
+    'production',
+    '--site',
+    $script:NetlifySiteId,
+    '--secret',
+    '--force'
+  )
+  & npx @netlifyArgs | Out-Host
   if ($LASTEXITCODE -ne 0) {
     throw "Netlify variable set failed for $Name."
   }
 }
 
-function Set-LocalEnv {
+function Invoke-LocalEnvironmentSync {
   param(
     [string]$Name,
     [string]$Value
   )
 
   if ($DryRun) {
-    Write-Step "Would set local $LocalScope env $Name."
+    Write-Step "Would set local $script:LocalScope env $Name."
     return
   }
 
   [Environment]::SetEnvironmentVariable($Name, $Value, 'Process')
-  if ($LocalScope -eq 'User') {
+  if ($script:LocalScope -eq 'User') {
     [Environment]::SetEnvironmentVariable($Name, $Value, 'User')
   }
-  Write-Step "Set local $LocalScope env $Name. Open a new terminal for User-scope values to appear automatically."
+  Write-Step "Set local $script:LocalScope env $Name. Open a new terminal for User-scope values to appear automatically."
 }
 
 function Add-SecretEntry {
@@ -187,13 +203,13 @@ function Add-SecretEntry {
     [string[]]$Destinations
   )
 
-  if (-not (Should-IncludeGroup $Group)) { return }
+  if (-not (Test-GroupIncluded $Group)) { return }
   $value = Read-SecretValue -Name $Name -Description $Description
   if ($null -eq $value) {
     Write-Step "Skipped $Name."
     return
   }
-  Set-EntryValue -Name $Name -Value $value -Destinations $Destinations
+  Invoke-EntryDispatch -Name $Name -Value $value -Destinations $Destinations
 }
 
 function Add-PlainEntry {
@@ -205,16 +221,16 @@ function Add-PlainEntry {
     [string]$DefaultValue = ''
   )
 
-  if (-not (Should-IncludeGroup $Group)) { return }
+  if (-not (Test-GroupIncluded $Group)) { return }
   $value = Read-PlainValue -Name $Name -Description $Description -DefaultValue $DefaultValue
   if ($null -eq $value) {
     Write-Step "Skipped $Name."
     return
   }
-  Set-EntryValue -Name $Name -Value $value -Destinations $Destinations
+  Invoke-EntryDispatch -Name $Name -Value $value -Destinations $Destinations
 }
 
-function Set-EntryValue {
+function Invoke-EntryDispatch {
   param(
     [string]$Name,
     [string]$Value,
@@ -223,9 +239,9 @@ function Set-EntryValue {
 
   foreach ($destination in $Destinations) {
     switch ($destination) {
-      'railway' { if (Should-SetProvider 'railway') { Invoke-RailwaySet -Name $Name -Value $Value } }
-      'netlify' { if (Should-SetProvider 'netlify') { Invoke-NetlifySet -Name $Name -Value $Value } }
-      'local' { if (Should-SetProvider 'local') { Set-LocalEnv -Name $Name -Value $Value } }
+      'railway' { if (Test-ProviderSelected 'railway') { Invoke-RailwaySet -Name $Name -Value $Value } }
+      'netlify' { if (Test-ProviderSelected 'netlify') { Invoke-NetlifySet -Name $Name -Value $Value } }
+      'local' { if (Test-ProviderSelected 'local') { Invoke-LocalEnvironmentSync -Name $Name -Value $Value } }
       default { throw "Unknown destination '$destination' for $Name." }
     }
   }
@@ -245,12 +261,25 @@ Add-SecretEntry -Group 'core' -Name 'JWORDEN_MASTER_KEY' -Description 'Backend m
 Add-SecretEntry -Group 'core' -Name 'JWT_SECRET_KEY' -Description 'JWT signing secret. Set in Railway; Netlify only needs it if USE_BACKEND_TOKEN_ENDPOINT=false.' -Destinations @('railway')
 Add-PlainEntry -Group 'core' -Name 'ADMIN_USERNAME' -Description 'Admin dashboard username.' -Destinations @('railway') -DefaultValue 'admin'
 Add-SecretEntry -Group 'core' -Name 'ADMIN_PASSWORD' -Description 'Admin dashboard password.' -Destinations @('railway')
-Add-SecretEntry -Group 'ai' -Name 'OPENAI_API_KEY' -Description 'OpenAI key for chat, photo inspection, document intelligence, blog drafts, and analytics AI.' -Destinations @('railway')
-Add-SecretEntry -Group 'ai' -Name 'GEMINI_API_KEY' -Description 'Optional Gemini provider key for planned multi-provider AI routing.' -Destinations @('railway')
-Add-SecretEntry -Group 'ai' -Name 'ANTHROPIC_API_KEY' -Description 'Optional Anthropic provider key for planned multi-provider AI routing.' -Destinations @('railway')
-Add-SecretEntry -Group 'ai' -Name 'PERPLEXITY_API_KEY' -Description 'Optional Perplexity provider key for web-grounded research.' -Destinations @('railway')
-Add-SecretEntry -Group 'ai' -Name 'GOOGLE_API_KEY' -Description 'Google Maps/Places/geocoding key. Restrict browser variants by domain in Google Cloud.' -Destinations @('railway')
+Add-SecretEntry -Group 'ai' -Name 'OPENAI_API_KEY' -Description 'OpenAI key for chat, photo inspection, document intelligence, blog drafts, and analytics AI.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'GEMINI_API_KEY' -Description 'Optional Gemini provider key for planned multi-provider AI routing.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'ANTHROPIC_API_KEY' -Description 'Optional Anthropic provider key for planned multi-provider AI routing.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'PERPLEXITY_API_KEY' -Description 'Optional Perplexity provider key for web-grounded research.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'XAI_API_KEY' -Description 'Optional xAI provider key for Grok routing.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'TAVILY_API_KEY' -Description 'Tavily key for Jarvis web_search tool and readiness checks.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'ELEVENLABS_API_KEY' -Description 'Optional ElevenLabs voice synthesis key for premium Jarvis TTS.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'GOOGLE_API_KEY' -Description 'Google Maps/Places/geocoding key. Restrict browser variants by domain in Google Cloud.' -Destinations @('railway', 'local')
 Add-SecretEntry -Group 'ai' -Name 'VITE_GOOGLE_MAPS_API_KEY' -Description 'Browser-safe Google Maps key for frontend maps. Must be domain-restricted.' -Destinations @('netlify')
+Add-SecretEntry -Group 'ai' -Name 'VAPI_API_KEY' -Description 'Vapi key for Jarvis outbound phone calls.' -Destinations @('railway', 'local')
+Add-PlainEntry -Group 'ai' -Name 'VAPI_ASSISTANT_ID' -Description 'Vapi assistant id used for outbound calls.' -Destinations @('railway', 'local')
+Add-PlainEntry -Group 'ai' -Name 'VAPI_PHONE_NUMBER_ID' -Description 'Vapi phone number id used for outbound calls.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'SENDGRID_API_KEY' -Description 'SendGrid key for Jarvis and lead transactional emails.' -Destinations @('railway', 'local')
+Add-PlainEntry -Group 'ai' -Name 'SENDGRID_FROM_EMAIL' -Description 'Verified SendGrid from address for outbound emails.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'TWILIO_ACCOUNT_SID' -Description 'Twilio account SID for SMS + Verify workflows.' -Destinations @('railway', 'local')
+Add-SecretEntry -Group 'ai' -Name 'TWILIO_AUTH_TOKEN' -Description 'Twilio auth token for SMS + Verify workflows.' -Destinations @('railway', 'local')
+Add-PlainEntry -Group 'ai' -Name 'TWILIO_VERIFY_SERVICE_SID' -Description 'Twilio Verify service SID (required for /api/v1/twilio/verify).' -Destinations @('railway', 'local')
+Add-PlainEntry -Group 'ai' -Name 'TWILIO_FROM_NUMBER' -Description 'Twilio sender number in E.164 format (for direct SMS notifications).' -Destinations @('railway', 'local')
+Add-PlainEntry -Group 'ai' -Name 'ADMIN_2FA_PHONE' -Description 'Admin phone in E.164 for Twilio Verify admin OTP endpoint.' -Destinations @('railway', 'local')
 Add-SecretEntry -Group 'observability' -Name 'SENTRY_DSN' -Description 'Backend Sentry DSN.' -Destinations @('railway')
 Add-SecretEntry -Group 'observability' -Name 'VITE_SENTRY_DSN' -Description 'Frontend Sentry DSN.' -Destinations @('netlify')
 Add-SecretEntry -Group 'observability' -Name 'DATADOG_API_KEY' -Description 'Datadog metrics API key.' -Destinations @('railway')

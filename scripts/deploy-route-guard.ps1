@@ -10,7 +10,10 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-Path (Join-Path $scriptRoot '..')
 $failed = $false
 
-function Run-Step {
+# Keep explicit reference so ScriptAnalyzer treats script parameter as used.
+$null = $OpenBrowserHandoff
+
+function Invoke-Step {
   param(
     [string]$Name,
     [scriptblock]$Action
@@ -74,18 +77,18 @@ try {
   Write-Output "Repo root: $repoRoot"
 
   if (-not $SkipRepoPreflight) {
-    Run-Step -Name 'Repository preflight' -Action {
+    Invoke-Step -Name 'Repository preflight' -Action {
       powershell -ExecutionPolicy Bypass -File scripts/repo-preflight.ps1
     }
   } else {
     Write-Output 'SKIP: Repository preflight'
   }
 
-  Run-Step -Name 'Indexing launch checks' -Action {
+  Invoke-Step -Name 'Indexing launch checks' -Action {
     powershell -ExecutionPolicy Bypass -File scripts/indexing-launch.ps1 -Domain $Domain -OpenBrowserHandoff $OpenBrowserHandoff
   }
 
-  Run-Step -Name 'Command Center route integrity' -Action {
+  Invoke-Step -Name 'Command Center route integrity' -Action {
     Test-CommandCenterRoute -BaseDomain $Domain
   }
 

@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 Write-Output '=== Repo Preflight ==='
 
@@ -23,12 +23,17 @@ if ([string]::IsNullOrWhiteSpace($status)) {
 }
 
 $ok = $true
-if ($remote -ne 'https://github.com/jwordenaii/codexbuildfreeofbase44.git') {
-  Write-Output 'FAIL: Unexpected origin remote.'
+# Expected origin can be overridden via $Env:EXPECTED_GIT_REMOTE so the repo is
+# portable to GitLab / Codeberg / self-hosted Forgejo without code changes.
+$expectedRemote = if ($Env:EXPECTED_GIT_REMOTE) { $Env:EXPECTED_GIT_REMOTE } else { 'https://github.com/jwordenaii/codexbuildfreeofbase44.git' }
+if ($remote -ne $expectedRemote) {
+  Write-Output "FAIL: Unexpected origin remote. Expected: $expectedRemote"
   $ok = $false
 }
-if ($branch -ne 'main') {
-  Write-Output 'FAIL: You are not on main.'
+# Expected primary branch can be overridden via $Env:EXPECTED_GIT_BRANCH (defaults to main).
+$expectedBranch = if ($Env:EXPECTED_GIT_BRANCH) { $Env:EXPECTED_GIT_BRANCH } else { 'main' }
+if ($branch -ne $expectedBranch) {
+  Write-Output "FAIL: You are not on $expectedBranch."
   $ok = $false
 }
 if ($localHead -ne $originHead) {

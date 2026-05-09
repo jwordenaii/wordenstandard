@@ -18,11 +18,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileCallBar from '@/components/MobileCallBar';
 import { publicAIPages, internalAIPages } from '@/generated/aiPageRegistry';
+import { resolveSiteProfile, SITE_ROUTE_MODES } from '@/lib/siteProfiles';
 // Add programmatic SEO blog routes
 import { aiBlogRegistry } from '@/generated/aiBlogRegistry';
 
 // Home is eagerly loaded (it's the landing page — we want zero TTI delay).
 import Home from './pages/Home';
+import MarketLanding from './pages/MarketLanding';
 
 // All other pages are code-split so the initial bundle stays small.
 const LeadConsultant = lazy(() => import('./pages/LeadConsultant'));
@@ -100,6 +102,21 @@ const GA4_ID = import.meta.env.VITE_GA4_ID
 if (GA4_ID) {
   ReactGA.initialize(GA4_ID)
 }
+
+const WORDEN_STANDARD_PUBLIC_PATHS = new Set([
+  '/background-checks',
+  '/hiring-onboarding',
+  '/legal-master',
+  '/payroll-compliance',
+  '/va-compliance',
+]);
+
+const WORDEN_STANDARD_INTERNAL_PATHS = new Set([
+  '/employee-handbook',
+  '/training-videos',
+  '/wet-ink-onboarding-packet',
+  '/ai-public-relations',
+]);
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -195,6 +212,24 @@ const PublicLayout = ({ children }) => (
 
 const AuthenticatedApp = () => {
   const { isLoadingPublicSettings } = useAuth();
+  const siteProfile = resolveSiteProfile();
+  const routeMode = siteProfile.routeMode || SITE_ROUTE_MODES.FULL_SITE;
+  const isMarketLandingSite = routeMode === SITE_ROUTE_MODES.MARKET_LANDING;
+  const isOperationsSite = routeMode === SITE_ROUTE_MODES.OPERATIONS;
+
+  const operationsHomeEntry = publicAIPages.find(({ path }) => path === '/');
+  const OperationsHome = operationsHomeEntry?.Component || Home;
+
+  const filteredPublicAIPages = publicAIPages.filter(({ path }) => {
+    if (path === '/') return false;
+    const isWordenStandardPath = WORDEN_STANDARD_PUBLIC_PATHS.has(path);
+    return isOperationsSite ? isWordenStandardPath : !isWordenStandardPath;
+  });
+
+  const filteredInternalAIPages = internalAIPages.filter(({ path }) => {
+    const isWordenStandardPath = WORDEN_STANDARD_INTERNAL_PATHS.has(path);
+    return isOperationsSite ? true : !isWordenStandardPath;
+  });
 
   // Fire a GA4 pageview on every navigation when GA4 is configured.
   useEffect(() => {
@@ -206,11 +241,24 @@ const AuthenticatedApp = () => {
     return <LoadingSpinner />;
   }
 
+  // Market landing mode intentionally serves a limited route tree so
+  // customer-facing rollout cannot impact other sites in this monorepo.
+  if (isMarketLandingSite) {
+    return (
+      <Suspense fallback={<RouteLoader />}>
+        <Routes>
+          <Route path="/" element={<MarketLanding />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   return (
     <Suspense fallback={<RouteLoader />}>
       <Routes>
         {/* Public */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={isOperationsSite ? <OperationsHome /> : <Home />} />
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
         <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
         <Route path="/quote" element={<PublicLayout><Quote /></PublicLayout>} />
@@ -253,7 +301,7 @@ const AuthenticatedApp = () => {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/crew-eta" element={<RequireAuth><CrewEta /></RequireAuth>} />
         <Route path="/crew-mode" element={<RequireAuth><CrewFieldApp /></RequireAuth>} />
-        {publicAIPages.map(({ path, Component }) => (
+        {filteredPublicAIPages.map(({ path, Component }) => (
           <Route key={path} path={path} element={<Component />} />
         ))}
         {/* Dynamic Programmatic SEO Keyword Blogs */}
@@ -262,7 +310,7 @@ const AuthenticatedApp = () => {
         ))}
 
         {/* Back-office (auth required) */}
-        {internalAIPages.map(({ path, Component }) => (
+        {filteredInternalAIPages.map(({ path, Component }) => (
           <Route key={path} path={path} element={<RequireAuth><Component /></RequireAuth>} />
         ))}
         <Route
@@ -323,8 +371,22 @@ const AuthenticatedApp = () => {
         <Route path="/advisory/state/:stateCode" element={<RequireInternalAdvisory><AdvisoryStateDetail /></RequireInternalAdvisory>} />
         <Route path="/advisory/:category" element={<RequireInternalAdvisory><AdvisoryCategoryHub /></RequireInternalAdvisory>} />
 
-        <Route path="/wet-ink-onboarding-packet" element={<RequireAuth><PrintableOnboardingPacket /></RequireAuth>} />
-        <Route path="/ai-public-relations" element={<RequireAuth><AiPublicRelationsDept /></RequireAuth>} />
+        <Route
+          path="/wet-ink-onboarding-packet"
+          element={
+            isOperationsSite
+              ? <RequireAuth><PrintableOnboardingPacket /></RequireAuth>
+              : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/ai-public-relations"
+          element={
+            isOperationsSite
+              ? <RequireAuth><AiPublicRelationsDept /></RequireAuth>
+              : <Navigate to="/" replace />
+          }
+        />
 
         <Route path="/staff" element={<StaffPortal />} />
         <Route path="*" element={<PageNotFound />} />
@@ -335,6 +397,8 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  const siteProfile = resolveSiteProfile();
+  const shouldRenderChatWidget = Boolean(siteProfile.enableChatWidget);
 
   return (
     <ErrorBoundary>
@@ -343,7 +407,7 @@ function App() {
           <Router>
             <SplashScreen />
             <AuthenticatedApp />
-            <ChatWidget />
+            {shouldRenderChatWidget ? <ChatWidget /> : null}
           </Router>
           <Toaster />
         </QueryClientProvider>

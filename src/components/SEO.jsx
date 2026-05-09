@@ -1,5 +1,6 @@
 ﻿import { useEffect } from 'react';
 import { PRIMARY_DOMAIN } from '@/lib/locations';
+import { resolveSiteProfile } from '@/lib/siteProfiles';
 
 /**
  * SEO — comprehensive document head manager implementing Google's 2026 best practices.
@@ -16,6 +17,7 @@ export default function SEO({
   noindex = false,
   publishedTime,
   modifiedTime,
+  geo,
 }) {
   useEffect(() => {
     if (title) document.title = title;
@@ -33,10 +35,22 @@ export default function SEO({
     };
 
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+    const currentHostname =
+      typeof window !== 'undefined' ? String(window.location.hostname || '').toLowerCase() : '';
+    const siteProfile = resolveSiteProfile(currentHostname);
+    const isOperationsDomain =
+      currentHostname.includes('thewordenstandard.com') ||
+      currentHostname.includes('thewrodenstandard.com');
+
     const rawPath = canonicalPath || currentPath || '/';
     const pathOnly = String(rawPath).split('?')[0].split('#')[0] || '/';
     const normalizedPath = pathOnly !== '/' ? pathOnly.replace(/\/+$/, '') : '/';
-    const canonicalUrl = `${PRIMARY_DOMAIN}${normalizedPath}`;
+    const canonicalBase =
+      isOperationsDomain && typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}`
+        : siteProfile?.canonicalUrl || PRIMARY_DOMAIN;
+    const canonicalUrl = `${canonicalBase}${normalizedPath}`;
+    const siteName = siteProfile?.label || 'J. Worden & Sons Asphalt Paving';
 
     const isInternalRoute = [
       '/command-center',
@@ -57,7 +71,7 @@ export default function SEO({
       '/contractor-ai',
       '/advisory',
     ].some((prefix) => normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`));
-    const shouldNoindex = Boolean(noindex || isInternalRoute);
+    const shouldNoindex = Boolean(noindex || isInternalRoute || isOperationsDomain);
 
     // Description
     if (description) setMeta('meta[name="description"]', 'content', description);
@@ -114,9 +128,9 @@ export default function SEO({
     setMeta('meta[property="og:image"]', 'content', ogImage);
     setMeta('meta[property="og:image:width"]', 'content', '1200');
     setMeta('meta[property="og:image:height"]', 'content', '630');
-    setMeta('meta[property="og:image:alt"]', 'content', title || 'J. Worden & Sons Asphalt Paving');
+    setMeta('meta[property="og:image:alt"]', 'content', title || siteName);
     setMeta('meta[property="og:type"]', 'content', ogType);
-    setMeta('meta[property="og:site_name"]', 'content', 'J. Worden & Sons Asphalt Paving');
+    setMeta('meta[property="og:site_name"]', 'content', siteName);
     setMeta('meta[property="og:locale"]', 'content', 'en_US');
 
     // Article-specific OG tags (for blog posts)
@@ -128,13 +142,23 @@ export default function SEO({
     setMeta('meta[name="twitter:title"]', 'content', title || '');
     setMeta('meta[name="twitter:description"]', 'content', description || '');
     setMeta('meta[name="twitter:image"]', 'content', ogImage);
-    setMeta('meta[name="twitter:image:alt"]', 'content', title || 'J. Worden & Sons Asphalt Paving');
+    setMeta('meta[name="twitter:image:alt"]', 'content', title || siteName);
 
-    // Geo tags — reinforce Virginia local business signal on every page
-    setMeta('meta[name="geo.region"]', 'content', 'US-VA');
-    setMeta('meta[name="geo.placename"]', 'content', 'Chester, Virginia');
-    setMeta('meta[name="geo.position"]', 'content', '37.3563;-77.4411');
-    setMeta('meta[name="ICBM"]', 'content', '37.3563, -77.4411');
+    // Geo tags — defaults to Virginia but can be overridden per-site/page.
+    const geoDefaults = {
+      region: 'US-VA',
+      placename: 'Chester, Virginia',
+      position: '37.3563;-77.4411',
+      icbm: '37.3563, -77.4411',
+    };
+    const geoMeta = {
+      ...geoDefaults,
+      ...(geo || {}),
+    };
+    setMeta('meta[name="geo.region"]', 'content', geoMeta.region);
+    setMeta('meta[name="geo.placename"]', 'content', geoMeta.placename);
+    setMeta('meta[name="geo.position"]', 'content', geoMeta.position);
+    setMeta('meta[name="ICBM"]', 'content', geoMeta.icbm);
 
     // JSON-LD structured data — remove old, add new
     const existingLd = document.head.querySelector('script[data-seo-jsonld="true"]');
@@ -146,7 +170,7 @@ export default function SEO({
       script.text = JSON.stringify(jsonLd);
       document.head.appendChild(script);
     }
-  }, [title, description, canonicalPath, ogImage, ogType, jsonLd, noindex, publishedTime, modifiedTime]);
+  }, [title, description, canonicalPath, ogImage, ogType, jsonLd, noindex, publishedTime, modifiedTime, geo]);
 
   return null;
 }

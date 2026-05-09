@@ -3,6 +3,7 @@ import logging
 import os
 import asyncio
 import re
+import time
 from typing import Dict, Any, List, Optional
 from app.services.quantum_orchestrator import global_quantum_orchestrator
 from app.services import autonomy_state
@@ -11,10 +12,17 @@ from app.services import vapi_caller as _vapi
 from app.services import email_service as _email
 from app.services import runtime_config as _cfg
 from app.services import llm_client as _llm
+from app.services import jarvis_observability as _jarvis_obs
 from app.services import code_reader as _code
 from app.services import action_planner as _planner
 from app.services import safe_runner as _runner
 from app.services import short_memory
+from app.services import state_data as _state_data
+from app.services.jarvis_access import (
+    ROLE_OWNER_ROOT,
+    ROLE_PUBLIC_CONCIERGE,
+    ROLE_STAFF_OPERATOR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +47,8 @@ JARVIS_SYSTEM_PROMPT = (
     "never claim you've called without invoking it. "
     "When the operator asks you to send an email or 'email me X', USE the send_email tool. "
     "Default the recipient to j.wordenandsonspaving@gmail.com unless told otherwise. "
+    "For legal/compliance/licensing/civil/criminal questions, treat outputs as advisory guidance, "
+    "not legal advice, and clearly recommend jurisdiction-specific verification. "
     "Refuse to send, schedule, or modify anything autonomously when the master autonomy switch is OFF — "
     "in that case, propose the action and ask the operator to confirm."
 )
@@ -146,6 +156,20 @@ JARVIS_TOOLS = [
     },
 ]
 
+_SENSITIVE_TOOL_NAMES = {"make_phone_call", "send_email", "run_npm"}
+_ROLE_TOOLS: dict[str, set[str]] = {
+    ROLE_PUBLIC_CONCIERGE: {"web_search"},
+    ROLE_STAFF_OPERATOR: {"web_search", "code_search", "open_file", "plan_actions", "run_npm"},
+    ROLE_OWNER_ROOT: {t["name"] for t in JARVIS_TOOLS},
+}
+
+
+def _toolset_for_session(*, confirmed: bool, role: str) -> list[dict]:
+    allowed = set(_ROLE_TOOLS.get(role, _ROLE_TOOLS[ROLE_PUBLIC_CONCIERGE]))
+    if not confirmed:
+        allowed -= _SENSITIVE_TOOL_NAMES
+    return [t for t in JARVIS_TOOLS if t.get("name") in allowed]
+
 _ACTION_HINT_RE = re.compile(
     r"\b(call|dial|phone|text|sms|email|send|book|schedule|reserve|pay|order|quote|estimate|create|update|delete|cancel|approve|publish|post|run|launch)\b",
     re.IGNORECASE,
@@ -155,6 +179,129 @@ _ACTION_HINT_RE = re.compile(
 def _looks_like_tool_action(query: str) -> bool:
     q = (query or "").strip()
     return bool(_ACTION_HINT_RE.search(q))
+
+
+_LIVE_INFO_KEYWORDS = {
+    "weather", "forecast", "news", "today", "now", "live", "current", "price", "market",
+    "traffic", "stock", "breaking",
+}
+
+_RESPONSE_CACHE: dict[str, tuple[float, dict]] = {}
+_RESPONSE_CACHE_MAX_ITEMS = 200
+
+
+def _cfg_int(key: str, default: int) -> int:
+    raw = (_cfg.get(key) or "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+        return value if value > 0 else default
+    except Exception:  # noqa: BLE001
+        return default
+
+
+def _low_cost_mode() -> bool:
+    raw = (_cfg.get("JARVIS_LOW_COST_MODE") or "1").strip().lower()
+    return raw not in {"0", "false", "off", "no"}
+
+
+def _response_cache_ttl_seconds() -> int:
+    # Short TTL avoids stale guidance while still suppressing repeat token spend.
+    return _cfg_int("JARVIS_RESPONSE_CACHE_TTL_SECONDS", 180)
+
+
+def _is_cacheable_query(query: str, *, action_intent: bool) -> bool:
+    if action_intent:
+        return False
+    q = (query or "").strip().lower()
+    if not q:
+        return False
+    return not any(term in q for term in _LIVE_INFO_KEYWORDS)
+
+
+def _response_cache_key(query: str, persona: str, role: str, confirmed: bool) -> str:
+    normalized_query = " ".join((query or "").strip().lower().split())
+    return f"{persona}|{role}|{int(bool(confirmed))}|{normalized_query}"
+
+
+def _response_cache_get(key: Optional[str]) -> Optional[dict]:
+    if not key:
+        return None
+    entry = _RESPONSE_CACHE.get(key)
+    if not entry:
+        return None
+    created_at, payload = entry
+    if time.time() - created_at > _response_cache_ttl_seconds():
+        _RESPONSE_CACHE.pop(key, None)
+        return None
+    cached_payload = dict(payload)
+    cached_payload["cached"] = True
+    return cached_payload
+
+
+def _response_cache_set(key: Optional[str], payload: dict) -> None:
+    if not key:
+        return
+    _RESPONSE_CACHE[key] = (time.time(), payload)
+    if len(_RESPONSE_CACHE) > _RESPONSE_CACHE_MAX_ITEMS:
+        oldest_key = min(_RESPONSE_CACHE, key=lambda k: _RESPONSE_CACHE[k][0])
+        _RESPONSE_CACHE.pop(oldest_key, None)
+
+
+_LEGAL_ADVISORY_KEYWORDS = {
+    "legal", "law", "laws", "court", "civil", "criminal", "compliance", "regulation",
+    "regulations", "license", "licensing", "permit", "bond", "insurance", "osha",
+    "lien", "prompt payment", "prevailing wage", "utility", "environmental", "state law",
+}
+
+_LEGAL_ADVISORY_SOURCES_SUMMARY = "app/services/state_data.py, app/services/ai_brain.py, src/data/legal/*.js"
+
+_STATE_NAME_TO_ABBR = {
+    str(row.get("name", "")).lower(): abbr
+    for abbr, row in getattr(_state_data, "STATE_MAP", {}).items()
+    if row.get("name")
+}
+
+
+def _is_legal_advisory_query(query: str) -> bool:
+    q = (query or "").lower()
+    return any(term in q for term in _LEGAL_ADVISORY_KEYWORDS)
+
+
+def _infer_state_code_from_query(query: str) -> Optional[str]:
+    text = query or ""
+    # First pass: explicit two-letter abbreviations (e.g., VA, TX, DC)
+    for token in re.findall(r"\b[A-Za-z]{2}\b", text):
+        normalized = _state_data.normalize_state_code(token)
+        if normalized:
+            return normalized
+
+    # Second pass: full state names
+    q_lower = text.lower()
+    for name, abbr in sorted(_STATE_NAME_TO_ABBR.items(), key=lambda item: len(item[0]), reverse=True):
+        if name and name in q_lower:
+            return abbr
+    return None
+
+
+def _build_advisory_context(query: str) -> str:
+    if not _is_legal_advisory_query(query):
+        return ""
+
+    state_code = _infer_state_code_from_query(query)
+    state_fragment = _state_data.get_state_prompt_fragment(state_code) if state_code else ""
+    state_line = f"State focus: {state_code}.\n" if state_code else "State focus: national (no state extracted).\n"
+    state_block = f"{state_fragment}\n" if state_fragment else ""
+
+    return (
+        "LEGAL ADVISORY MODE\n"
+        "This response is advisory operations guidance, not legal advice.\n"
+        f"{state_line}"
+        f"{state_block}"
+        f"Primary source tables: {_LEGAL_ADVISORY_SOURCES_SUMMARY}.\n"
+        "When uncertainty exists, explicitly say what to verify and where."
+    )
 
 
 async def _ask_fast_ops_brain(query: str, persona: str, autonomy: dict, *, confirmed: bool = False) -> Optional[dict]:
@@ -182,25 +329,30 @@ async def _ask_fast_ops_brain(query: str, persona: str, autonomy: dict, *, confi
     if session_id:
         recent = short_memory.get(session_id)
         if recent:
-            mem_snippet = "Recent conversation: " + " | ".join(recent[-6:]) + "\n"
+            mem_snippet = "Recent conversation: " + " | ".join(recent[-3:]) + "\n"
+
+    advisory_context = _build_advisory_context(query)
 
     system = (
         f"{JARVIS_SYSTEM_PROMPT}\n\n"
         f"{persona_note}\n"
         f"{ops_snapshot}\n"
         f"{mem_snippet}"
+        f"{advisory_context}\n"
         "Answer in practical daily-operations format: Situation, Recommendation, Next Action. "
+        "For legal/compliance questions include: Advisory Answer, Impact, Verification Needed. "
         "Keep default answers under 6 lines unless asked for a deep dive."
     )
 
     try:
+        max_tokens = _cfg_int("JARVIS_FAST_MAX_TOKENS", 220 if _low_cost_mode() else 420)
         resp = await asyncio.to_thread(
             _llm.chat,
             task="jarvis_fast",
             system=system,
             user=query,
-            max_tokens=420,
-            temperature=0.25,
+            max_tokens=max_tokens,
+            temperature=0.2 if _low_cost_mode() else 0.25,
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("[JARVIS] Fast ops brain failed: %s", exc)
@@ -235,22 +387,26 @@ async def _ask_chat_brain(query: str, persona: str, autonomy: dict, session_id: 
     if sid:
         recent = short_memory.get(sid)
         if recent:
-            mem_snippet = "Recent conversation: " + " | ".join(recent[-8:]) + "\n"
+            mem_snippet = "Recent conversation: " + " | ".join(recent[-4:]) + "\n"
+
+    advisory_context = _build_advisory_context(query)
 
     system = (
         f"You are JARVIS, a conversational AI assistant for Jeremy Worden. {persona_note}\n"
         "Be natural, human, and helpful. Keep answers clear and friendly. If the user asks for facts that may be out-of-date, offer to search the web."
-        "\n" + mem_snippet
+        "\n" + mem_snippet + advisory_context + "\n"
+        "For legal/compliance questions, answer in advisory form and include likely operational impact and verification steps."
     )
 
     try:
+        max_tokens = _cfg_int("JARVIS_CHAT_MAX_TOKENS", 260 if _low_cost_mode() else 512)
         resp = await asyncio.to_thread(
             _llm.chat,
             task="persona",
             system=system,
             user=query,
-            max_tokens=512,
-            temperature=0.6,
+            max_tokens=max_tokens,
+            temperature=0.45 if _low_cost_mode() else 0.6,
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("[JARVIS] Chat brain failed: %s", exc)
@@ -261,19 +417,41 @@ async def _ask_chat_brain(query: str, persona: str, autonomy: dict, session_id: 
     return {"text": resp.text.strip(), "provider": resp.provider, "model": resp.model, "fallback_used": bool(resp.fallback_used)}
 
 
-async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
+async def _run_tool(
+    name: str,
+    args: dict,
+    *,
+    confirmed: bool = False,
+    role: str = ROLE_PUBLIC_CONCIERGE,
+    tenant_id: str = "default",
+) -> dict:
+    allowed = _ROLE_TOOLS.get(role, _ROLE_TOOLS[ROLE_PUBLIC_CONCIERGE])
+
+    def _finalize(result: dict) -> dict:
+        ok = bool(result.get("ok")) if "ok" in result else ("error" not in result)
+        _jarvis_obs.record_tool_call(tool_name=name, role=role, tenant_id=tenant_id, ok=ok)
+        return result
+
+    if name not in allowed:
+        return _finalize({"ok": False, "error": "Role policy blocked this tool"})
+
+    if name in _SENSITIVE_TOOL_NAMES and not confirmed:
+        return _finalize({"ok": False, "error": "Operator confirmation required for this tool"})
+
     if name == "web_search":
-        return await _web_search.search(
+        result = await _web_search.search(
             args.get("query", ""),
             deep=bool(args.get("deep", False)),
         )
+        return _finalize(result)
     if name == "make_phone_call":
-        return await _vapi.place_call(
+        result = await _vapi.place_call(
             args.get("to_number", ""),
             purpose=args.get("purpose", "Jarvis-initiated call"),
             script_hint=args.get("script_hint"),
             confirmed=confirmed,
         )
+        return _finalize(result)
     if name == "send_email":
         to_addr = (args.get("to_email") or os.environ.get("ADMIN_NOTIFY_EMAIL") or "j.wordenandsonspaving@gmail.com").strip()
         subject = (args.get("subject") or "Message from Jarvis").strip()
@@ -284,37 +462,45 @@ async def _run_tool(name: str, args: dict, *, confirmed: bool = False) -> dict:
                 _email.send_raw,
                 to_email=to_addr, subject=subject, html_body=html, plain_text=body,
             )
-            return {"ok": bool(ok), "to": to_addr, "subject": subject}
+            return _finalize({"ok": bool(ok), "to": to_addr, "subject": subject})
         except Exception as exc:
-            return {"ok": False, "error": str(exc)}
+            return _finalize({"ok": False, "error": str(exc)})
     if name == "code_search":
         q = args.get("query") or ""
         maxr = int(args.get("max_results") or 12)
         try:
             matches = _code.search(q, max_results=maxr)
-            return {"ok": True, "matches": matches}
+            return _finalize({"ok": True, "matches": matches})
         except Exception as exc:
-            return {"ok": False, "error": str(exc)}
+            return _finalize({"ok": False, "error": str(exc)})
     if name == "open_file":
         path = args.get("path") or ""
         try:
             res = _code.open_file(path)
-            return {"ok": True, "result": res}
+            return _finalize({"ok": True, "result": res})
         except Exception as exc:
-            return {"ok": False, "error": str(exc)}
+            return _finalize({"ok": False, "error": str(exc)})
     if name == "run_npm":
         script = (args.get("script") or "").strip()
         if not script:
-            return {"ok": False, "error": "no script provided"}
-        return _runner.run_npm_script(script)
+            return _finalize({"ok": False, "error": "no script provided"})
+        return _finalize(_runner.run_npm_script(script))
     if name == "plan_actions":
         q = args.get("query") or ""
         plan = _planner.plan(q, {"run_npm": True, "code_search": True, "open_file": True})
-        return {"ok": True, "plan": plan}
-    return {"ok": False, "error": f"Unknown tool: {name}"}
+        return _finalize({"ok": True, "plan": plan})
+    return _finalize({"ok": False, "error": f"Unknown tool: {name}"})
 
 
-async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bool = False) -> Optional[dict]:
+async def _ask_claude(
+    query: str,
+    persona: str,
+    autonomy: dict,
+    *,
+    confirmed: bool = False,
+    role: str = ROLE_PUBLIC_CONCIERGE,
+    tenant_id: str = "default",
+) -> Optional[dict]:
     """
     Returns {"text": str, "tool_calls": [{name, args, result}, ...]} or None on failure.
     Single-round tool use: Claude proposes tools, we run them, send results back, get final answer.
@@ -335,9 +521,22 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
     state_note = (
         f"Current autonomy: master={autonomy.get('master')}, "
         f"frozen={autonomy.get('frozen')}, "
-        f"operator_confirmed={confirmed}."
+        f"operator_confirmed={confirmed}, "
+        f"session_role={role}, "
+        f"tenant_id={tenant_id}."
     )
-    system = f"{JARVIS_SYSTEM_PROMPT}\n\n{persona_note}\n{state_note}"
+    advisory_context = _build_advisory_context(query)
+    advisory_note = ""
+    if advisory_context:
+        advisory_note = (
+            "\nLEGAL ADVISORY RESPONSE REQUIREMENTS:\n"
+            "- Treat outputs as advisory guidance only, not legal advice.\n"
+            "- Use code_search/open_file only when user asks for citations, row-level proof, or change diffs.\n"
+            "- Format legal answers with sections: Advisory Answer, Impact, Verification Needed.\n"
+            f"{advisory_context}\n"
+        )
+
+    system = f"{JARVIS_SYSTEM_PROMPT}\n\n{persona_note}\n{state_note}{advisory_note}"
 
     headers = {
         "x-api-key":         _anthropic_key(),
@@ -347,17 +546,20 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
     messages: list[dict] = [{"role": "user", "content": query}]
     tool_calls: list[dict] = []
 
+    tools = _toolset_for_session(confirmed=confirmed, role=role)
+
     # Two-round max: initial → optional tool use → final.
     for _round in range(2):
         try:
-            max_tokens = int((_cfg.get("JARVIS_CLAUDE_MAX_TOKENS") or "700").strip())
+            default_tokens = 320 if _low_cost_mode() else 700
+            max_tokens = int((_cfg.get("JARVIS_CLAUDE_MAX_TOKENS") or str(default_tokens)).strip())
         except Exception:  # noqa: BLE001
-            max_tokens = 700
+            max_tokens = 320 if _low_cost_mode() else 700
         payload = {
             "model":      _anthropic_model(),
             "max_tokens": max_tokens,
             "system":     system,
-            "tools":      JARVIS_TOOLS,
+            "tools":      tools,
             "messages":   messages,
         }
         try:
@@ -386,7 +588,7 @@ async def _ask_claude(query: str, persona: str, autonomy: dict, *, confirmed: bo
                 if isinstance(block, dict) and block.get("type") == "tool_use":
                     name = block.get("name", "")
                     args = block.get("input", {}) or {}
-                    result = await _run_tool(name, args, confirmed=confirmed)
+                    result = await _run_tool(name, args, confirmed=confirmed, role=role, tenant_id=tenant_id)
                     tool_calls.append({"name": name, "args": args, "result": result})
                     tool_results.append({
                         "type":         "tool_result",
@@ -459,6 +661,13 @@ class JarvisAI:
         context = context or {}
         persona = context.get("persona", "JARVIS")
         confirmed = bool(context.get("confirmed", False))
+        role = str(context.get("role") or "").strip()
+        if not role:
+            role = ROLE_OWNER_ROOT if bool(context.get("operator_mode", False)) else ROLE_PUBLIC_CONCIERGE
+        tenant_id = str(context.get("tenant_id") or "default")
+        operator_mode = role in {ROLE_STAFF_OPERATOR, ROLE_OWNER_ROOT}
+        if role == ROLE_PUBLIC_CONCIERGE:
+            confirmed = False
         query_lower = (query or "").lower()
 
         # ── Defense-in-depth: backend kill switch ─────────────────────────────
@@ -480,6 +689,14 @@ class JarvisAI:
         # First, see if this user intent maps to a multi-step plan.
         plan = _planner.plan(query, {"run_npm": True, "code_search": True, "open_file": True})
         if plan and plan.get("intent") == "execute":
+            if not operator_mode:
+                return {
+                    "source": self.identity,
+                    "message": "I can help answer and search, but task execution is available only in Command Center operator sessions.",
+                    "action_required": False,
+                    "requires_operator_mode": True,
+                }
+
             # If operator has not confirmed, return the proposed plan for approval.
             if not confirmed:
                 return {
@@ -500,7 +717,7 @@ class JarvisAI:
                     exec_results.append({"action": name, "ok": False, "error": "requires confirmation"})
                     continue
                 try:
-                    res = await _run_tool(name, args, confirmed=confirmed)
+                    res = await _run_tool(name, args, confirmed=confirmed, role=role, tenant_id=tenant_id)
                 except Exception as exc:
                     res = {"ok": False, "error": str(exc)}
                 exec_results.append({"action": name, "result": res})
@@ -522,11 +739,18 @@ class JarvisAI:
             }
 
         action_intent = _looks_like_tool_action(query)
+        cache_key = None
+        if _is_cacheable_query(query, action_intent=action_intent):
+            cache_key = _response_cache_key(query, persona, role, confirmed)
+            cached = _response_cache_get(cache_key)
+            if cached:
+                return cached
+
         if not action_intent:
             # Prefer the human-like chat brain for conversational queries.
             chat = await _ask_chat_brain(query, persona, state, session_id=context.get("session_id"), confirmed=confirmed)
             if chat:
-                return {
+                response = {
                     "source": self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
                     "message": chat["text"],
                     "action_required": False,
@@ -536,10 +760,12 @@ class JarvisAI:
                     "tool_calls": [],
                     "autonomy": {"master": state.get("master"), "frozen": False},
                 }
+                _response_cache_set(cache_key, response)
+                return response
             # fallback to a faster ops-focused lane if chat brain did not return
             fast = await _ask_fast_ops_brain(query, persona, state, confirmed=confirmed)
             if fast:
-                return {
+                response = {
                     "source": self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
                     "message": fast["text"],
                     "action_required": False,
@@ -549,11 +775,13 @@ class JarvisAI:
                     "tool_calls": [],
                     "autonomy": {"master": state.get("master"), "frozen": False},
                 }
+                _response_cache_set(cache_key, response)
+                return response
 
         # ── Brain: Anthropic Claude (when configured) ─────────────────────────
-        claude = await _ask_claude(query, persona, state, confirmed=confirmed)
+        claude = await _ask_claude(query, persona, state, confirmed=confirmed, role=role, tenant_id=tenant_id)
         if claude:
-            return {
+            response = {
                 "source":          self.identity if persona != "MR_WORDEN_SALES" else "Mr. Worden (Sales)",
                 "message":         claude["text"],
                 "action_required": False,
@@ -562,6 +790,8 @@ class JarvisAI:
                 "tool_calls":      claude["tool_calls"],
                 "autonomy":        {"master": state.get("master"), "frozen": False},
             }
+            _response_cache_set(cache_key, response)
+            return response
 
         # ── Fallback: legacy heuristic responses ──────────────────────────────
         if persona == "MR_WORDEN_SALES":
@@ -602,12 +832,14 @@ class JarvisAI:
                 "source": self.identity,
                 "message": (
                     f"{intel_report}\n\n"
-                    "Our posture is bulletproof. I have cross-referenced the latest Supreme Court construction precedents, FHWA density requirements, and even the new 'Carbon-Neutral Paving' LEED v5 standards.\n\n"
-                    "LOGISTICS & COMPLIANCE GUARDRAILS:\n"
-                    "- 51-State Licensing: Verified. Our 'Expansion Master-License' protocol is mapped against all 50 states + DC.\n"
-                    "- Insurance/OCIP: I've updated our logic to auto-reconcile against Wrap-Up Insurance (OCIP/CCIP) requirements for multi-billion dollar municipal projects.\n"
-                    "- International Maritime: I've verified our legal standing for upcoming coastal infrastructure expansion.\n\n"
-                    "The JWORDENAI PROJECT remains the global benchmark for intellectual, legal, and environmental integrity."
+                    "ADVISORY ANSWER:\n"
+                    "Using our 51-jurisdiction advisory matrix (50 states + DC), I can give an operations-grade legal/compliance answer for licensing, civil risk, and safety posture.\n\n"
+                    "IMPACT:\n"
+                    "- Scope, schedule, and cost shift when licensing, wage, OSHA, lien, or utility constraints differ by jurisdiction.\n"
+                    "- Bid strategy and risk controls should be state-specific before commitment.\n\n"
+                    "VERIFICATION NEEDED:\n"
+                    "- Treat this as advisory guidance, not legal advice.\n"
+                    "- Confirm jurisdiction-specific statutes and permit terms before execution."
                 ),
                 "action_required": False,
                 "intel_tier": "Supreme-Unified-Global"

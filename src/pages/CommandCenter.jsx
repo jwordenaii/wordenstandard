@@ -5251,7 +5251,7 @@ function PulseBar({ onTabChange, onOpenJarvis }) {
   }, [])
 
   return (
-    <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 pb-3 pt-2 flex items-center gap-2 overflow-x-auto">
+    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 pb-3 pt-2 flex items-center gap-2 overflow-x-auto">
       <PulseTile {...pulse.jarvis} icon={Bot}        onClick={onOpenJarvis} />
       <PulseTile {...pulse.leads}  icon={UserRound}  onClick={() => onTabChange('crm')} />
       <PulseTile {...pulse.jobs}   icon={HardHat}    onClick={() => onTabChange('ops')} />
@@ -5491,7 +5491,7 @@ export default function CommandCenter() {
       <FrozenBanner />
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="border-b border-white/10 bg-brand-navy/95 sticky top-0 z-30">
-        <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display font-black text-xl sm:text-2xl text-white leading-tight">
               Tony Stark's Dashboard
@@ -5513,7 +5513,7 @@ export default function CommandCenter() {
         <PulseBar onTabChange={setActiveTab} onOpenJarvis={() => setDrawerOpen(true)} />
 
         {/* ── Tab bar ──────────────────────────────────────────────────────── */}
-        <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 flex gap-1 pb-0 overflow-x-auto">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 flex gap-1 pb-0 overflow-x-auto">
           {TABS.map((tab, i) => (
             <button
               key={tab.id}
@@ -5534,7 +5534,7 @@ export default function CommandCenter() {
       </div>
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
-      <div className="max-w-[1800px] 2xl:max-w-none 2xl:px-8 mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6">
         <>
           {!strategyVisible ? <InternalStrategyNotice /> : null}
           <TabDeepLinkBar activeTab={activeTab} />

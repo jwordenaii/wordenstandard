@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Callable, Iterator
 from typing import Optional
 
 import httpx
@@ -54,6 +55,11 @@ def active_provider() -> str:
     return "none"
 
 
+def _http_timeout() -> httpx.Timeout:
+    # Long reads are normal for larger utterances; keep connect timeout tight.
+    return httpx.Timeout(connect=10.0, read=120.0, write=30.0, pool=30.0)
+
+
 # ── ElevenLabs ───────────────────────────────────────────────────────────────
 
 def _synthesize_elevenlabs(text: str, voice_id: Optional[str] = None) -> bytes:
@@ -78,10 +84,41 @@ def _synthesize_elevenlabs(text: str, voice_id: Optional[str] = None) -> bytes:
             "use_speaker_boost": True,
         },
     }
-    with httpx.Client(timeout=30.0) as client:
+    with httpx.Client(timeout=_http_timeout()) as client:
         resp = client.post(url, headers=headers, json=payload)
         resp.raise_for_status()
         return resp.content
+
+
+def _stream_elevenlabs(text: str, voice_id: Optional[str] = None) -> Iterator[bytes]:
+    api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("ELEVENLABS_API_KEY missing")
+
+    voice = voice_id or DEFAULT_ELEVENLABS_VOICE
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice}"
+    headers = {
+        "xi-api-key": api_key,
+        "accept": "audio/mpeg",
+        "content-type": "application/json",
+    }
+    payload = {
+        "text": text,
+        "model_id": DEFAULT_ELEVENLABS_MODEL,
+        "voice_settings": {
+            "stability": 0.45,
+            "similarity_boost": 0.85,
+            "style": 0.30,
+            "use_speaker_boost": True,
+        },
+    }
+
+    with httpx.Client(timeout=_http_timeout()) as client:
+        with client.stream("POST", url, headers=headers, json=payload) as resp:
+            resp.raise_for_status()
+            for chunk in resp.iter_bytes(chunk_size=8192):
+                if chunk:
+                    yield chunk
 
 
 # ── OpenAI ───────────────────────────────────────────────────────────────────
@@ -108,10 +145,40 @@ def _synthesize_openai(text: str, voice: Optional[str] = None) -> bytes:
         "response_format": "mp3",
         "speed": 1.0,
     }
-    with httpx.Client(timeout=30.0) as client:
+    with httpx.Client(timeout=_http_timeout()) as client:
         resp = client.post(url, headers=headers, json=payload)
         resp.raise_for_status()
         return resp.content
+
+
+def _stream_openai(text: str, voice: Optional[str] = None) -> Iterator[bytes]:
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY missing")
+
+    chosen = (voice or DEFAULT_OPENAI_VOICE).lower()
+    if chosen not in OPENAI_VOICES:
+        chosen = DEFAULT_OPENAI_VOICE
+
+    url = "https://api.openai.com/v1/audio/speech"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": DEFAULT_OPENAI_MODEL,
+        "voice": chosen,
+        "input": text,
+        "response_format": "mp3",
+        "speed": 1.0,
+    }
+
+    with httpx.Client(timeout=_http_timeout()) as client:
+        with client.stream("POST", url, headers=headers, json=payload) as resp:
+            resp.raise_for_status()
+            for chunk in resp.iter_bytes(chunk_size=8192):
+                if chunk:
+                    yield chunk
 
 
 # ── Public API ───────────────────────────────────────────────────────────────
@@ -153,5 +220,52 @@ def synthesize(text: str, voice: Optional[str] = None) -> tuple[bytes, str, str]
 
     raise RuntimeError(
         f"No TTS provider available (last error: {last_err}). "
+        "Set OPENAI_API_KEY (default) or ELEVENLABS_API_KEY."
+    )
+
+
+def synthesize_stream(text: str, voice: Optional[str] = None) -> tuple[Iterator[bytes], str, str]:
+    """
+    Convert text -> streamed MP3 bytes from provider to client.
+
+    The stream is primed with the first chunk so provider fallback can happen
+    before the HTTP response starts.
+    """
+    cleaned = (text or "").strip()
+    if not cleaned:
+        raise ValueError("text is empty")
+    if len(cleaned) > MAX_CHARS:
+        cleaned = cleaned[:MAX_CHARS]
+
+    candidates: list[tuple[str, Callable[[], Iterator[bytes]]]] = []
+    if _has_elevenlabs():
+        candidates.append(("elevenlabs", lambda: _stream_elevenlabs(cleaned, voice_id=voice)))
+    if _has_openai():
+        candidates.append(("openai", lambda: _stream_openai(cleaned, voice=voice)))
+
+    last_err: Optional[Exception] = None
+    for provider, make_stream in candidates:
+        try:
+            stream = make_stream()
+            first = next(stream)
+
+            def _merged() -> Iterator[bytes]:
+                if first:
+                    yield first
+                for chunk in stream:
+                    if chunk:
+                        yield chunk
+
+            return _merged(), "audio/mpeg", provider
+        except StopIteration as exc:
+            last_err = RuntimeError(f"{provider} returned empty audio stream")
+            logger.warning("%s stream returned empty response", provider)
+            continue
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("%s stream failed, trying fallback: %s", provider, exc)
+            last_err = exc
+
+    raise RuntimeError(
+        f"No TTS stream provider available (last error: {last_err}). "
         "Set OPENAI_API_KEY (default) or ELEVENLABS_API_KEY."
     )

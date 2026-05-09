@@ -100,6 +100,19 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    prevailingWageLaw: true,
+    lawScope: 'District public construction contracts',
+    administeredBy: 'District Department of Employment Services (DOES)',
+    thresholdForPublicWorks: 200000,
+    davisBaconApplies: true,
+    citation: 'District public works prevailing wage requirements and related procurement rules',
+    notes:
+      'District public works contracts commonly require wage determinations aligned with District and/or federal standards depending on funding.',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     prevailingWageLaw: false,

@@ -69,13 +69,30 @@ import os
 import time
 import logging
 import logging.config
+from typing import cast
+from pathlib import Path
 from contextlib import asynccontextmanager
 
-from dotenv import load_dotenv  # noqa: E402 — must run before other imports
+from dotenv import dotenv_values, load_dotenv  # noqa: E402 — must run before other imports
 
-# Load .env / .env.local for local development.
-# In production (Railway/Render) env vars are injected directly.
-load_dotenv()
+# Load local env files from repo root in deterministic order.
+# In production (Railway/Render), environment variables are injected directly.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_base_env = _REPO_ROOT / ".env"
+if _base_env.exists():
+    load_dotenv(dotenv_path=_base_env, override=False)
+
+for _name in (".env.local", ".env.ops.local"):
+    _path = _REPO_ROOT / _name
+    if not _path.exists():
+        continue
+    for _key, _raw in dotenv_values(_path).items():
+        if _raw is None:
+            continue
+        _value = str(_raw).strip()
+        if not _value:
+            continue
+        os.environ[_key] = _value
 
 # ── Structured logging ────────────────────────────────────────────────────────
 # Use JSON formatter in production (LOG_FORMAT=json) for log aggregation.
@@ -173,7 +190,7 @@ if _SENTRY_DSN_VALID:
     except Exception as _se:  # noqa: BLE001
         logging.getLogger(__name__).warning("Sentry init failed: %s", _se)
 
-from fastapi import FastAPI, BackgroundTasks, Depends
+from fastapi import FastAPI, BackgroundTasks, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel
@@ -311,8 +328,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+def _rate_limit_exception_handler(request: Request, exc: Exception) -> Response:
+    # FastAPI expects a general Exception handler signature.
+    # This endpoint is registered only for RateLimitExceeded, so this cast is safe.
+    return _rate_limit_exceeded_handler(request, cast(RateLimitExceeded, exc))
+
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exception_handler)
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 _EXTRA_ORIGINS = [

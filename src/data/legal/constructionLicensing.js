@@ -172,6 +172,26 @@ export default [
     lastVerified: '2026-01-01',
   },
   {
+    state: 'District of Columbia',
+    abbr: 'DC',
+    licenseClasses: ['General Contractor (Basic Business License)', 'Home Improvement Contractor'],
+    authority: 'District of Columbia Department of Licensing and Consumer Protection (DLCP)',
+    authorityUrl: 'https://dlcp.dc.gov',
+    examProvider: 'None',
+    bondMinResidential: 25000,
+    bondMinCommercial: 25000,
+    glInsuranceMin: 500000,
+    workersCompRequired: true,
+    reciprocityStates: [],
+    licenseRenewalYears: 2,
+    ceHoursRequired: 0,
+    stateLicenseRequired: true,
+    thresholdAmount: 0,
+    notes:
+      'District business licensing applies citywide. Home Improvement Contractor registration and surety bonding are commonly required for residential work; project-specific permits are coordinated through DC permitting portals.',
+    lastVerified: '2026-01-01',
+  },
+  {
     state: 'Florida',
     abbr: 'FL',
     licenseClasses: [

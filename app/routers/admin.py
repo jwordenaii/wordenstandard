@@ -224,7 +224,12 @@ def _render(request: Request, template: str, db: Session, **ctx) -> HTMLResponse
     ctx.setdefault("flash", None)
     ctx["hot_count"] = _hot_count(db)
     ctx["request"] = request
-    return templates.TemplateResponse(template, ctx)
+    # Starlette changed TemplateResponse signature in newer versions.
+    # Try the modern request-first call, then fall back for older versions.
+    try:
+        return templates.TemplateResponse(request=request, name=template, context=ctx)
+    except TypeError:
+        return templates.TemplateResponse(template, ctx)
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────

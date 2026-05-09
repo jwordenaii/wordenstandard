@@ -17,7 +17,9 @@ const LATEST_PATH = resolve(OUTPUT_DIR, 'latest.json')
 const SOURCE_HEALTH_PATH = resolve(OUTPUT_DIR, 'source-health.json')
 const REPORT_PATH = resolve(OUTPUT_DIR, 'latest-report.md')
 
-const USER_AGENT = 'jworden-ai-tech-radar/1.0 (+https://github.com/jwordenaii/codexbuildfreeofbase44)'
+// Repo URL in UA is informational only; override via REPO_URL env to match new host after migration.
+const REPO_URL = process.env.REPO_URL || 'https://jwordenasphaltpaving.com'
+const USER_AGENT = `jworden-ai-tech-radar/1.0 (+${REPO_URL})`
 
 const SOURCES = [
   {

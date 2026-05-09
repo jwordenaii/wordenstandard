@@ -21,7 +21,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
-const SITE = 'https://www.jwordenasphaltpaving.com';
+const DEFAULT_SITE = 'https://www.jwordenasphaltpaving.com';
+const SITE = String(process.env.SITEMAP_SITE_URL || process.env.VITE_SITE_URL || DEFAULT_SITE)
+  .trim()
+  .replace(/\/$/, '');
+const INCLUDE_ALL_STATES =
+  process.argv.includes('--all-states') ||
+  /^(1|true|yes)$/i.test(String(process.env.SITEMAP_INCLUDE_ALL_STATES || '').trim());
 
 // ── 1. Hand-curated public routes (priority + changefreq tuned for local-pack) ─
 const STATIC_ROUTES = [
@@ -150,7 +156,11 @@ for (const bp of BLOG_POSTS) {
   });
 }
 
-for (const abbr of WORDEN_ACTIVE_STATES) {
+const stateCodesForSitemap = INCLUDE_ALL_STATES
+  ? Object.keys(STATE_MAP).sort()
+  : WORDEN_ACTIVE_STATES;
+
+for (const abbr of stateCodesForSitemap) {
   const st = STATE_MAP[abbr];
   if (!st) continue;
   urls.push({
@@ -197,5 +207,5 @@ writeFileSync(
 console.log(
   `[sitemap] wrote ${deduped.length} URLs ` +
     `(${STATIC_ROUTES.length} static, ${LOCATIONS.length} locations, ` +
-    `${SERVICE_AREAS.length} service-areas, ${LANDING_PAGES.length} landing pages, ${BLOG_POSTS.length} blogs, ${WORDEN_ACTIVE_STATES.length} states)`
+    `${SERVICE_AREAS.length} service-areas, ${LANDING_PAGES.length} landing pages, ${BLOG_POSTS.length} blogs, ${stateCodesForSitemap.length} states, mode=${INCLUDE_ALL_STATES ? 'all_51' : 'active_only'})`
 );
