@@ -1,0 +1,11 @@
+name: Diagnostic Minimal Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping
+        run: echo "GitHub Actions minimal workflow started"
