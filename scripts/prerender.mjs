@@ -12,8 +12,8 @@ const CRITICAL_ROUTES = new Set(['/', '/about', '/services', '/contact', '/revie
 
 const SKIP_ROUTES = new Set(['/command-center', '/dashboard', '/leads', '/portal', '/staff', '/voice-calls', '/revenue', '/candidate', '/dns-migration', '/admin'])
 
-const PAGE_TIMEOUT_MS  = 15_000
-const CONTENT_SELECTOR = '#root > *'
+const PAGE_TIMEOUT_MS  = 25_000
+const CONTENT_SELECTOR = '#root'
 
 function getRoutesFromSitemap() {
   if (!fs.existsSync(SITEMAP)) { console.warn('[prerender] No sitemap — prerendering / only'); return ['/'] }
@@ -38,7 +38,7 @@ async function renderPage(browser, baseUrl, route) {
     if (url.includes('railway.app') || url.includes('/api/') || url.includes('sentry.io') || url.includes('google-analytics') || url.includes('googletagmanager')) { req.abort() } else { req.continue() }
   })
   try {
-    await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded', timeout: PAGE_TIMEOUT_MS })
+    await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle2', timeout: PAGE_TIMEOUT_MS })
     await page.waitForSelector(CONTENT_SELECTOR, { timeout: PAGE_TIMEOUT_MS })
     await new Promise(r => setTimeout(r, 800))
     const html = await page.content()
