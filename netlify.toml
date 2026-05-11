@@ -1,34 +1,15 @@
 [build]
-  base = "."
+  base    = "."
   command = "npm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
-  VITE_API_BASE_URL = "https://codexbuildfreeofbase44-production.up.railway.app"
+  NODE_VERSION  = "20"
   VITE_SITE_URL = "https://www.jwordenasphaltpaving.com"
 
 [functions]
-  directory = "netlify/functions"
+  directory    = "netlify/functions"
   node_bundler = "esbuild"
-
-[[redirects]]
-  from = "https://jwordenasphaltpaving.com/*"
-  to = "https://www.jwordenasphaltpaving.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://jwordenasphaltpaving.com/*"
-  to = "https://www.jwordenasphaltpaving.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://www.jwordenasphaltpaving.com/*"
-  to = "https://www.jwordenasphaltpaving.com/:splat"
-  status = 301
-  force = true
 
 [[redirects]]
   from = "/robots.txt"
@@ -55,13 +36,113 @@
   force = true
 
 [[redirects]]
+  from = "https://jwordenasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://jwordenasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.jwordenasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://jwordensons.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://jwordenpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://jwordenandsonspaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://richmondvapaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/richmond-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.richmondvapaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/richmond-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://chestervapaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/chester-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.chestervapaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/chester-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://midlothianpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/midlothian-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://mechanicsvillepaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/mechanicsville-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://richmondasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/locations/richmond-va"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://savannahpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://carolinaasphaltpaving.com/*"
+  to = "https://www.jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://atlantapavingpros.com/*"
+  to = "https://www.jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://kansascitypavingpros.com/*"
+  to = "https://www.jwordenasphaltpaving.com/"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/api/*"
   to = "https://codexbuildfreeofbase44-production.up.railway.app/api/:splat"
   status = 200
   force = true
 
-# Owner shortcuts — easy-to-remember URLs Gene can type from any device.
-# All land at protected routes that require login (no extra PIN to remember).
 [[redirects]]
   from = "/owner"
   to = "/leads"
@@ -81,6 +162,12 @@
   force = true
 
 [[redirects]]
+  from = "/fredericksburg-va-paving"
+  to = "/locations/fredericksburg-va"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
@@ -88,10 +175,10 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(self), camera=()"
+    X-Frame-Options           = "DENY"
+    X-Content-Type-Options    = "nosniff"
+    Referrer-Policy           = "strict-origin-when-cross-origin"
+    Permissions-Policy        = "geolocation=(), microphone=(self), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
 
 [[headers]]
@@ -100,182 +187,81 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/blog"
+  for = "/*.html"
   [headers.values]
-    Link = "<https://www.jwordenasphaltpaving.com/blog>; rel=\"canonical\""
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type  = "application/xml; charset=utf-8"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type  = "text/plain; charset=utf-8"
 
 [[headers]]
   for = "/command-center"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
+    X-Robots-Tag  = "noindex, nofollow, noarchive"
+    Cache-Control = "no-store, no-cache, must-revalidate"
 
 [[headers]]
   for = "/command-center/*"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/dashboard"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/dashboard/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/consultant"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/consultant/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/job"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/job/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/crew-reporting"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/crew-reporting/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/dns-migration"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/dns-migration/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/portal"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
+    X-Robots-Tag  = "noindex, nofollow, noarchive"
     Cache-Control = "no-store, no-cache, must-revalidate"
-    X-Frame-Options = "DENY"
-    Pragma = "no-cache"
-
-[[headers]]
-  for = "/portal/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
-    X-Frame-Options = "DENY"
-    Pragma = "no-cache"
-
-[[headers]]
-  for = "/admin"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/admin/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
-    X-Frame-Options = "DENY"
-    Pragma = "no-cache"
-
-[[headers]]
-  for = "/staff"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
-    X-Frame-Options = "DENY"
-    Pragma = "no-cache"
-
-[[headers]]
-  for = "/staff/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
-    X-Frame-Options = "DENY"
-    Pragma = "no-cache"
 
 [[headers]]
   for = "/leads"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    X-Robots-Tag    = "noindex, nofollow, noarchive"
+    Cache-Control   = "no-store, no-cache, must-revalidate"
     X-Frame-Options = "DENY"
-    Pragma = "no-cache"
+    Pragma          = "no-cache"
 
 [[headers]]
   for = "/leads/*"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    X-Robots-Tag    = "noindex, nofollow, noarchive"
+    Cache-Control   = "no-store, no-cache, must-revalidate"
     X-Frame-Options = "DENY"
-    Pragma = "no-cache"
+    Pragma          = "no-cache"
 
 [[headers]]
-  for = "/voice-calls"
+  for = "/portal"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    X-Robots-Tag    = "noindex, nofollow, noarchive"
+    Cache-Control   = "no-store, no-cache, must-revalidate"
     X-Frame-Options = "DENY"
-    Pragma = "no-cache"
+    Pragma          = "no-cache"
 
 [[headers]]
-  for = "/voice-calls/*"
+  for = "/portal/*"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    X-Robots-Tag    = "noindex, nofollow, noarchive"
+    Cache-Control   = "no-store, no-cache, must-revalidate"
     X-Frame-Options = "DENY"
-    Pragma = "no-cache"
+    Pragma          = "no-cache"
 
 [[headers]]
-  for = "/revenue"
+  for = "/staff"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    X-Robots-Tag    = "noindex, nofollow, noarchive"
+    Cache-Control   = "no-store, no-cache, must-revalidate"
     X-Frame-Options = "DENY"
-    Pragma = "no-cache"
+    Pragma          = "no-cache"
 
 [[headers]]
-  for = "/revenue/*"
+  for = "/staff/*"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    X-Robots-Tag    = "noindex, nofollow, noarchive"
+    Cache-Control   = "no-store, no-cache, must-revalidate"
     X-Frame-Options = "DENY"
-    Pragma = "no-cache"
-
-[[headers]]
-  for = "/home-services"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/home-services/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/contractor-ai"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
-
-[[headers]]
-  for = "/contractor-ai/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive"
+    Pragma          = "no-cache"
 
 [[headers]]
   for = "/advisory/*"
