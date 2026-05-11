@@ -12,8 +12,7 @@ const CRITICAL_ROUTES = new Set(['/', '/about', '/services', '/contact', '/revie
 
 const SKIP_ROUTES = new Set(['/command-center', '/dashboard', '/leads', '/portal', '/staff', '/voice-calls', '/revenue', '/candidate', '/dns-migration', '/admin'])
 
-const PAGE_TIMEOUT_MS  = 25_000
-const CONTENT_SELECTOR = '#root'
+const PAGE_TIMEOUT_MS = 30_000
 
 function getRoutesFromSitemap() {
   if (!fs.existsSync(SITEMAP)) { console.warn('[prerender] No sitemap — prerendering / only'); return ['/'] }
@@ -32,19 +31,39 @@ function startServer() {
 
 async function renderPage(browser, baseUrl, route) {
   const page = await browser.newPage()
+
+  await page.evaluateOnNewDocument(() => {
+    window.__PRERENDER__ = true
+  })
+
   await page.setRequestInterception(true)
   page.on('request', req => {
     const url = req.url()
-    if (url.includes('railway.app') || url.includes('/api/') || url.includes('sentry.io') || url.includes('google-analytics') || url.includes('googletagmanager')) { req.abort() } else { req.continue() }
+    const blocked = ['railway.app', 'sentry.io', 'google-analytics', 'googletagmanager', 'analytics', 'hotjar', 'intercom', 'facebook.net', 'twitter.com', 'segment.com']
+    if (blocked.some(b => url.includes(b))) { req.abort() } else { req.continue() }
   })
+
   try {
-    await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle2', timeout: PAGE_TIMEOUT_MS })
-    await page.waitForSelector(CONTENT_SELECTOR, { timeout: PAGE_TIMEOUT_MS })
-    await new Promise(r => setTimeout(r, 800))
+    await page.goto(`${baseUrl}${route}`, {
+      waitUntil: 'networkidle0',
+      timeout:   PAGE_TIMEOUT_MS,
+    })
+
+    await page.waitForFunction(
+      () => {
+        const root = document.getElementById('root')
+        if (!root) return false
+        const text = root.innerText || ''
+        return text.trim().length > 50
+      },
+      { timeout: PAGE_TIMEOUT_MS }
+    )
+
     const html = await page.content()
-    if (html.length < 100) throw new Error(`Output too small: ${html.length} bytes`)
     return html
-  } finally { await page.close() }
+  } finally {
+    await page.close()
+  }
 }
 
 function savePage(route, html) {
@@ -56,17 +75,27 @@ function savePage(route, html) {
 }
 
 async function prerender() {
-  if (!fs.existsSync(DIST_DIR)) { console.error('[prerender] dist/ not found. Run npm run build first.'); process.exit(1) }
+  if (!fs.existsSync(DIST_DIR)) { console.error('[prerender] dist/ not found.'); process.exit(1) }
   const routes  = getRoutesFromSitemap()
   console.log(`[prerender] ${routes.length} routes to prerender`)
   const server  = await startServer()
   const baseUrl = `http://localhost:${server.port}`
+
   let browser
   try {
     const puppeteer = await import('puppeteer')
-    browser = await puppeteer.default.launch({ headless: 'new', args: ['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu','--no-first-run','--no-zygote','--single-process'] })
-  } catch (err) { console.warn('[prerender] Chrome not available — skipping:', err?.message); server.close(); return }
+    browser = await puppeteer.default.launch({
+      headless: 'new',
+      args: ['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu','--no-first-run','--no-zygote','--single-process'],
+    })
+  } catch (err) {
+    console.warn('[prerender] Chrome not available — skipping:', err?.message)
+    server.close()
+    return
+  }
+
   const results = { ok: [], failed: [] }
+
   for (const route of routes) {
     process.stdout.write(`  → ${route} ... `)
     try {
@@ -86,12 +115,16 @@ async function prerender() {
       }
     }
   }
+
   await browser.close()
   server.close()
+
   console.log(`\n[prerender] ✓ ${results.ok.length} succeeded · ✗ ${results.failed.length} failed`)
-  if (results.failed.length) { console.log('Failed:', results.failed.join(', ')) }
+  if (results.failed.length) console.log('Failed:', results.failed.join(', '))
+
   const criticalFailures = results.failed.filter(r => CRITICAL_ROUTES.has(r))
   if (criticalFailures.length > 0) { console.error('[prerender] CRITICAL ROUTES FAILED:', criticalFailures.join(', ')); process.exit(1) }
+
   console.log('[prerender] Complete.')
 }
 
