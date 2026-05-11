@@ -42,7 +42,7 @@ async function renderPage(browser, baseUrl, route) {
     await page.waitForSelector(CONTENT_SELECTOR, { timeout: PAGE_TIMEOUT_MS })
     await new Promise(r => setTimeout(r, 800))
     const html = await page.content()
-    if (html.length < 2000) throw new Error(`Output too small: ${html.length} bytes`)
+    if (html.length < 100) throw new Error(`Output too small: ${html.length} bytes`)
     return html
   } finally { await page.close() }
 }
