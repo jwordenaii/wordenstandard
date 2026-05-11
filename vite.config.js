@@ -21,8 +21,7 @@ export default defineConfig({
           if (id.includes('leaflet') || id.includes('react-leaflet')) return 'maps'
           if (id.includes('jspdf') || id.includes('html2canvas')) return 'pdf-tools'
           if (id.includes('recharts') || id.includes('@tremor') || id.includes('d3-')) return 'charts'
-          if (id.includes('@tanstack/react-query') || id.includes('zod') || id.includes('date-fns') || id.includes('lodash')) return 'data-layer'
-          if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('framer-motion') || id.includes('class-variance-authority') || id.includes('clsx') || id.includes('tailwind-merge') || id.includes('cmdk') || id.includes('vaul') || id.includes('sonner') || id.includes('embla-carousel')) return 'ui-core'
+if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('framer-motion') || id.includes('class-variance-authority') || id.includes('clsx') || id.includes('tailwind-merge') || id.includes('cmdk') || id.includes('vaul') || id.includes('sonner') || id.includes('embla-carousel')) return 'ui-core'
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/') || id.includes('react-helmet-async') || id.includes('@sentry/react')) return 'react-core'
           if (id.includes('@stripe')) return 'payments'
           return undefined
