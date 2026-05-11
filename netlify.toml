@@ -1,11 +1,12 @@
 [build]
   base    = "."
-  command = "npm run build"
+  command = "npx puppeteer browsers install chrome && npm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION  = "20"
-  VITE_SITE_URL = "https://www.jwordenasphaltpaving.com"
+  NODE_VERSION        = "20"
+  VITE_SITE_URL       = "https://www.jwordenasphaltpaving.com"
+  PUPPETEER_CACHE_DIR = "/opt/buildhome/.cache/puppeteer"
 
 [functions]
   directory    = "netlify/functions"
