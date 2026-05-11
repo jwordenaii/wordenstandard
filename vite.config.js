@@ -15,10 +15,16 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom", "react-router-dom", "react-helmet-async"],
-          ui: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
-          three: ["three", "@react-three/fiber", "@react-three/drei"]
+        manualChunks(id) {
+          if (id.includes('three') || id.includes('@react-three/fiber') || id.includes('@react-three/drei')) {
+            return 'three-world'
+          }
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/') || id.includes('react-helmet-async')) {
+            return 'react-core'
+          }
+          if (id.includes('lucide-react') || id.includes('framer-motion') || id.includes('clsx') || id.includes('tailwind-merge')) {
+            return 'ui-core'
+          }
         }
       }
     }
