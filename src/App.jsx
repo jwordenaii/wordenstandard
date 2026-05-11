@@ -91,7 +91,7 @@ export default function App(){
   const saveJob=()=>{if(!est)return;setJobs(p=>[{id:est.pid,trade:est.trade,city:est.city,qty:est.q,bid:est.bid,status:"Estimated",ts:new Date().toISOString(),em:est.em},...p]);setV("jobs")};
 
   // Jarvis
-  const sendJ=async()=>{const m=jI.trim();if(!m||jW)return;setJI("");setJL(p=>[...p,{r:"u",t:m}]);setJW(true);try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:`You are Jarvis — AI engine in The Worden Standard. ${Object.keys(T).length} construction trades, 51 US states. Paving: T=(sqft/9×depth×density)/24000. Res 145, Com 148. 35% margin floor. Binder $627.50. Machine health $0.08/ton. Full 51-state compliance: licensing, lien law, worker classification, prevailing wage, OSHA. Jobs: ${jobs.length}. Crew: ${crew.length}. Equipment: ${eqp.length}. Autonomy: ${auto.toUpperCase()}. Be concise. Mission control.`,messages:[{role:"user",content:m}]})});const d=await r.json();setJL(p=>[...p,{r:"j",t:d.content?.map(b=>b.text||"").filter(Boolean).join("\n")||"Error."}])}catch(e){setJL(p=>[...p,{r:"j",t:`Error: ${e.message}`}])}setJW(false)};
+  const sendJ=async()=>{const m=jI.trim();if(!m||jW)return;setJI("");setJL(p=>[...p,{r:"u",t:m}]);setJW(true);try{const r=await fetch("/api/jarvis",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:`You are Jarvis — AI engine in The Worden Standard. ${Object.keys(T).length} construction trades, 51 US states. Paving: T=(sqft/9×depth×density)/24000. Res 145, Com 148. 35% margin floor. Binder $627.50. Machine health $0.08/ton. Full 51-state compliance: licensing, lien law, worker classification, prevailing wage, OSHA. Jobs: ${jobs.length}. Crew: ${crew.length}. Equipment: ${eqp.length}. Autonomy: ${auto.toUpperCase()}. Be concise. Mission control.`,messages:[{role:"user",content:m}]})});const d=await r.json();setJL(p=>[...p,{r:"j",t:d.content?.map(b=>b.text||"").filter(Boolean).join("\n")||"Error."}])}catch(e){setJL(p=>[...p,{r:"j",t:`Error: ${e.message}`}])}setJW(false)};
 
   const cmdX=q=>{setCmd(false);const c=q.replace("/","").toLowerCase();const map={home:"home",jarvis:"jarvis",estimate:"estimate",jobs:"jobs",crew:"crew",equipment:"equipment",weather:"weather",banking:"banking",legal:"legal"};if(map[c]){setV(map[c]);return}setJI(q);setV("jarvis");setTimeout(sendJ,100)};
 
@@ -103,8 +103,8 @@ export default function App(){
   const arJ=jobs.filter(j=>j.status==="Invoiced");
   const ar=arJ.reduce((s,j)=>s+j.bid,0);
 
-  const inp={width:"100%",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,color:"#e0e2e8",fontFamily:"'IBM Plex Mono',monospace",fontSize:13,padding:"8px 12px",outline:"none"};
-  const lb={fontSize:10,fontWeight:500,color:"rgba(255,255,255,0.3)",display:"block",marginBottom:5};
+  const inp={width:"100%",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,color:"#e0e2e8",fontFamily:"'IBM Plex Mono',monospace",fontSize:17,padding:"8px 12px",outline:"none"};
+  const lb={fontSize:14,fontWeight:500,color:"rgba(255,255,255,0.3)",display:"block",marginBottom:5};
 
   const nav=[
     {id:"home",icon:"◉",l:"Home"},{id:"jarvis",icon:"⚡",l:"Jarvis"},{id:"estimate",icon:"◇",l:"Estimate"},
@@ -122,29 +122,29 @@ export default function App(){
       {/* SIDEBAR */}
       <div style={{width:190,minWidth:190,borderRight:"1px solid rgba(255,255,255,0.04)",display:"flex",flexDirection:"column",padding:"10px 6px",gap:0}}>
         <div style={{padding:"8px 10px 14px",borderBottom:"1px solid rgba(255,255,255,0.04)",marginBottom:6}}>
-          <div style={{fontSize:9,fontWeight:700,letterSpacing:"0.14em",color:"#f5a623"}}>WORDEN</div>
-          <div style={{fontSize:8,color:"rgba(255,255,255,0.15)",letterSpacing:"0.08em"}}>STANDARD v4</div>
+          <div style={{fontSize:13,fontWeight:700,letterSpacing:"0.14em",color:"#f5a623"}}>WORDEN</div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.15)",letterSpacing:"0.08em"}}>STANDARD v4</div>
         </div>
-        <button onClick={()=>setCmd(true)} className="wN" style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderRadius:5,border:"1px solid rgba(255,255,255,0.04)",background:"transparent",color:"rgba(255,255,255,0.18)",fontFamily:"inherit",fontSize:10,cursor:"pointer",marginBottom:8,textAlign:"left",width:"100%"}}>
-          <span style={{flex:1}}>Search...</span><span style={{fontSize:7,background:"rgba(255,255,255,0.04)",padding:"1px 4px",borderRadius:2}}>⌘K</span>
+        <button onClick={()=>setCmd(true)} className="wN" style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderRadius:5,border:"1px solid rgba(255,255,255,0.04)",background:"transparent",color:"rgba(255,255,255,0.18)",fontFamily:"inherit",fontSize:14,cursor:"pointer",marginBottom:8,textAlign:"left",width:"100%"}}>
+          <span style={{flex:1}}>Search...</span><span style={{fontSize:11,background:"rgba(255,255,255,0.04)",padding:"1px 4px",borderRadius:2}}>⌘K</span>
         </button>
         {nav.map(n=>(
-          <button key={n.id} onClick={()=>setV(n.id)} className="wN" style={{display:"flex",alignItems:"center",gap:7,padding:"5px 10px",borderRadius:4,border:"none",background:v===n.id?"rgba(255,255,255,0.04)":"transparent",color:v===n.id?"#e0e2e8":"rgba(255,255,255,0.3)",fontFamily:"inherit",fontSize:11,cursor:"pointer",textAlign:"left",width:"100%",marginBottom:1}}>
-            <span style={{fontSize:10,width:14,textAlign:"center",color:v===n.id?"#f5a623":"rgba(255,255,255,0.15)"}}>{n.icon}</span>
+          <button key={n.id} onClick={()=>setV(n.id)} className="wN" style={{display:"flex",alignItems:"center",gap:7,padding:"5px 10px",borderRadius:4,border:"none",background:v===n.id?"rgba(255,255,255,0.04)":"transparent",color:v===n.id?"#e0e2e8":"rgba(255,255,255,0.3)",fontFamily:"inherit",fontSize:15,cursor:"pointer",textAlign:"left",width:"100%",marginBottom:1}}>
+            <span style={{fontSize:14,width:14,textAlign:"center",color:v===n.id?"#f5a623":"rgba(255,255,255,0.15)"}}>{n.icon}</span>
             <span style={{flex:1}}>{n.l}</span>
-            {n.b&&<span style={{fontSize:8,color:"rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.04)",padding:"0 5px",borderRadius:8}}>{n.b}</span>}
+            {n.b&&<span style={{fontSize:12,color:"rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.04)",padding:"0 5px",borderRadius:8}}>{n.b}</span>}
           </button>
         ))}
         <div style={{height:1,background:"rgba(255,255,255,0.03)",margin:"8px 0"}}/>
-        <div style={{fontSize:7,fontWeight:600,letterSpacing:"0.12em",color:"rgba(255,255,255,0.08)",padding:"2px 10px",marginBottom:2}}>PENDING</div>
-        {pending.map((n,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:7,padding:"4px 10px",fontSize:11,color:"rgba(255,255,255,0.1)"}}><span style={{fontSize:10,width:14,textAlign:"center"}}>{n.icon}</span>{n.l}</div>))}
+        <div style={{fontSize:11,fontWeight:600,letterSpacing:"0.12em",color:"rgba(255,255,255,0.08)",padding:"2px 10px",marginBottom:2}}>PENDING</div>
+        {pending.map((n,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:7,padding:"4px 10px",fontSize:15,color:"rgba(255,255,255,0.1)"}}><span style={{fontSize:14,width:14,textAlign:"center"}}>{n.icon}</span>{n.l}</div>))}
         <div style={{marginTop:"auto",padding:"10px 8px",borderTop:"1px solid rgba(255,255,255,0.03)"}}>
           <div style={{display:"flex",background:"rgba(255,255,255,0.02)",borderRadius:4,padding:2}}>
-            {["manual","hybrid","auto"].map(m=>(<button key={m} onClick={()=>setAuto(m)} style={{flex:1,fontFamily:"inherit",fontSize:7,fontWeight:600,padding:"4px 0",borderRadius:3,border:"none",cursor:"pointer",textTransform:"uppercase",letterSpacing:"0.06em",background:auto===m?"rgba(255,255,255,0.05)":"transparent",color:auto===m?acl:"rgba(255,255,255,0.1)"}}>{m}</button>))}
+            {["manual","hybrid","auto"].map(m=>(<button key={m} onClick={()=>setAuto(m)} style={{flex:1,fontFamily:"inherit",fontSize:11,fontWeight:600,padding:"4px 0",borderRadius:3,border:"none",cursor:"pointer",textTransform:"uppercase",letterSpacing:"0.06em",background:auto===m?"rgba(255,255,255,0.05)":"transparent",color:auto===m?acl:"rgba(255,255,255,0.1)"}}>{m}</button>))}
           </div>
           <div style={{display:"flex",alignItems:"center",gap:3,marginTop:5,justifyContent:"center"}}>
             <span style={{width:4,height:4,borderRadius:"50%",background:acl,boxShadow:`0 0 5px ${acl}`,animation:"p 2.5s infinite"}}/>
-            <span style={{fontSize:7,color:acl,fontWeight:600}}>{auto.toUpperCase()}</span>
+            <span style={{fontSize:11,color:acl,fontWeight:600}}>{auto.toUpperCase()}</span>
           </div>
         </div>
       </div>
@@ -152,8 +152,8 @@ export default function App(){
       {/* MAIN */}
       <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
         <div style={{padding:"8px 20px",borderBottom:"1px solid rgba(255,255,255,0.03)",display:"flex",alignItems:"center",justifyContent:"space-between",minHeight:36,flexShrink:0}}>
-          <div style={{fontSize:12,fontWeight:600,color:"#e0e2e8"}}>{viewTitle[v]||v}</div>
-          <div style={{fontSize:8,color:"rgba(255,255,255,0.12)"}}>{now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</div>
+          <div style={{fontSize:16,fontWeight:600,color:"#e0e2e8"}}>{viewTitle[v]||v}</div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.12)"}}>{now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</div>
         </div>
 
         <div style={{flex:1,overflowY:"auto",padding:"16px 20px"}} key={v}>
@@ -162,38 +162,38 @@ export default function App(){
           {v==="home"&&(<div style={{maxWidth:720}}>
             <div style={{marginBottom:28}}>
               <div style={{fontFamily:"'Instrument Serif',Georgia,serif",fontSize:26,color:"#e0e2e8",fontWeight:400}}>Good {now.getHours()<12?"morning":now.getHours()<17?"afternoon":"evening"}</div>
-              <div style={{fontSize:11,color:"rgba(255,255,255,0.2)",marginTop:4}}>{aJ.length} active · {crew.length} crew · {eqp.length} equipment · Pipeline {f$(pipeline)}</div>
+              <div style={{fontSize:15,color:"rgba(255,255,255,0.2)",marginTop:4}}>{aJ.length} active · {crew.length} crew · {eqp.length} equipment · Pipeline {f$(pipeline)}</div>
             </div>
             {/* Telemetry Strip */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:1,background:"rgba(255,255,255,0.02)",borderRadius:8,overflow:"hidden",marginBottom:20}}>
               {[{v:aJ.length,l:"Active",c:aJ.length?"#22c55e":"#333"},{v:f$(revenue),l:"Revenue",c:"#f5a623"},{v:f$(ar),l:"Receivable",c:ar?"#eab308":"#333"},{v:f$(pipeline),l:"Pipeline",c:"#c9cdd8"},{v:"35%",l:"Margin",c:"#22c55e"},{v:auto.toUpperCase(),l:"Autonomy",c:acl}].map((m,i)=>(
                 <div key={i} style={{padding:"12px 10px",background:"#08090e",textAlign:"center"}}>
                   <div style={{fontSize:16,fontWeight:700,color:m.c,fontVariantNumeric:"tabular-nums"}}>{m.v}</div>
-                  <div style={{fontSize:6,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(255,255,255,0.12)",marginTop:3}}>{m.l}</div>
+                  <div style={{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(255,255,255,0.12)",marginTop:3}}>{m.l}</div>
                 </div>
               ))}
             </div>
             {/* Weather Mini */}
             {wx&&wx.daily&&(<div style={{background:"rgba(255,255,255,0.02)",borderRadius:6,padding:"10px 14px",marginBottom:16,display:"flex",gap:12,alignItems:"center",cursor:"pointer"}} onClick={()=>setV("weather")}>
               <span style={{fontSize:20}}>{wxIcon(wx.current?.weather_code)}</span>
-              <div><div style={{fontSize:13,fontWeight:600}}>{Math.round(wx.current?.temperature_2m||0)}°F</div><div style={{fontSize:8,color:"rgba(255,255,255,0.2)"}}>Wind {Math.round(wx.current?.wind_speed_10m||0)} mph</div></div>
+              <div><div style={{fontSize:17,fontWeight:600}}>{Math.round(wx.current?.temperature_2m||0)}°F</div><div style={{fontSize:12,color:"rgba(255,255,255,0.2)"}}>Wind {Math.round(wx.current?.wind_speed_10m||0)} mph</div></div>
               <div style={{marginLeft:"auto",display:"flex",gap:6}}>
-                {wx.daily.time.slice(0,5).map((d,i)=>{const g=paveGo(wx.daily.temperature_2m_max[i],wx.daily.precipitation_probability_max[i],wx.daily.wind_speed_10m_max[i]);return(<div key={i} style={{textAlign:"center"}}><div style={{fontSize:7,color:"rgba(255,255,255,0.15)"}}>{dayName(d)}</div><div style={{width:5,height:5,borderRadius:"50%",background:g.c,margin:"3px auto",boxShadow:`0 0 4px ${g.c}`}}/></div>)})}
+                {wx.daily.time.slice(0,5).map((d,i)=>{const g=paveGo(wx.daily.temperature_2m_max[i],wx.daily.precipitation_probability_max[i],wx.daily.wind_speed_10m_max[i]);return(<div key={i} style={{textAlign:"center"}}><div style={{fontSize:11,color:"rgba(255,255,255,0.15)"}}>{dayName(d)}</div><div style={{width:5,height:5,borderRadius:"50%",background:g.c,margin:"3px auto",boxShadow:`0 0 4px ${g.c}`}}/></div>)})}
               </div>
             </div>)}
             {/* Quick cmd */}
             <div style={{display:"flex",gap:6,marginBottom:20}}>
-              <input value={jI} onChange={e=>setJI(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){setV("jarvis");sendJ()}}} placeholder="Ask Jarvis anything..." className="wI" style={{...inp,flex:1,fontSize:11}}/>
-              <button onClick={()=>{setV("jarvis");sendJ()}} style={{fontFamily:"inherit",fontSize:9,fontWeight:700,padding:"0 14px",background:"#f5a623",color:"#08090e",border:"none",borderRadius:6,cursor:"pointer"}}>Go</button>
+              <input value={jI} onChange={e=>setJI(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){setV("jarvis");sendJ()}}} placeholder="Ask Jarvis anything..." className="wI" style={{...inp,flex:1,fontSize:15}}/>
+              <button onClick={()=>{setV("jarvis");sendJ()}} style={{fontFamily:"inherit",fontSize:13,fontWeight:700,padding:"0 14px",background:"#f5a623",color:"#08090e",border:"none",borderRadius:6,cursor:"pointer"}}>Go</button>
             </div>
             {/* Recent */}
             {jobs.length>0&&(<div>
-              <div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Recent</div>
+              <div style={{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Recent</div>
               {jobs.slice(0,6).map(j=>(<div key={j.id} className="wR" onClick={()=>setV("jobs")} style={{display:"flex",alignItems:"center",padding:"8px 10px",borderRadius:5,cursor:"pointer",gap:10}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:j.status==="Paid"?"#22c55e":j.status==="In Progress"?"#f5a623":"rgba(255,255,255,0.08)",flexShrink:0}}/>
-                <span style={{flex:1,fontSize:11,color:"#c9cdd8",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{j.trade}{j.city?` · ${j.city}`:""}</span>
-                <span style={{fontSize:11,color:"rgba(255,255,255,0.25)",fontVariantNumeric:"tabular-nums"}}>{f$(j.bid)}</span>
-                <span style={{fontSize:8,color:"rgba(255,255,255,0.1)",minWidth:60,textAlign:"right"}}>{j.status}</span>
+                <span style={{flex:1,fontSize:15,color:"#c9cdd8",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{j.trade}{j.city?` · ${j.city}`:""}</span>
+                <span style={{fontSize:15,color:"rgba(255,255,255,0.25)",fontVariantNumeric:"tabular-nums"}}>{f$(j.bid)}</span>
+                <span style={{fontSize:12,color:"rgba(255,255,255,0.1)",minWidth:60,textAlign:"right"}}>{j.status}</span>
               </div>))}
             </div>)}
           </div>)}
@@ -202,15 +202,15 @@ export default function App(){
           {v==="jarvis"&&(<div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 80px)",maxWidth:700}}>
             <div style={{flex:1,overflowY:"auto",paddingBottom:10}}>
               {jL.map((m,i)=>(<div key={i} style={{display:"flex",gap:8,marginBottom:12,justifyContent:m.r==="j"?"flex-start":"flex-end"}}>
-                {m.r==="j"&&<div style={{width:20,height:20,borderRadius:4,background:"rgba(245,166,35,0.06)",border:"1px solid rgba(245,166,35,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,flexShrink:0,marginTop:2}}>⚡</div>}
-                <div style={{maxWidth:"84%",background:m.r==="j"?"rgba(255,255,255,0.02)":"rgba(245,166,35,0.03)",border:`1px solid ${m.r==="j"?"rgba(255,255,255,0.03)":"rgba(245,166,35,0.06)"}`,borderRadius:7,padding:"8px 12px",fontSize:12,lineHeight:1.75,whiteSpace:"pre-wrap"}}>{m.t}</div>
+                {m.r==="j"&&<div style={{width:20,height:20,borderRadius:4,background:"rgba(245,166,35,0.06)",border:"1px solid rgba(245,166,35,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>⚡</div>}
+                <div style={{maxWidth:"84%",background:m.r==="j"?"rgba(255,255,255,0.02)":"rgba(245,166,35,0.03)",border:`1px solid ${m.r==="j"?"rgba(255,255,255,0.03)":"rgba(245,166,35,0.06)"}`,borderRadius:7,padding:"8px 12px",fontSize:16,lineHeight:1.75,whiteSpace:"pre-wrap"}}>{m.t}</div>
               </div>))}
-              {jW&&<div style={{fontSize:10,color:"rgba(255,255,255,0.12)",paddingLeft:28,animation:"p 1s infinite"}}>Processing...</div>}
+              {jW&&<div style={{fontSize:14,color:"rgba(255,255,255,0.12)",paddingLeft:28,animation:"p 1s infinite"}}>Processing...</div>}
               <div ref={jRef}/>
             </div>
             <div style={{display:"flex",gap:6,borderTop:"1px solid rgba(255,255,255,0.03)",paddingTop:10}}>
               <input value={jI} onChange={e=>setJI(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")sendJ()}} placeholder="Command Jarvis..." className="wI" style={{...inp,flex:1}}/>
-              <button onClick={sendJ} disabled={jW} style={{fontFamily:"inherit",fontSize:10,fontWeight:600,padding:"0 18px",background:jW?"rgba(255,255,255,0.02)":"#f5a623",color:jW?"rgba(255,255,255,0.12)":"#08090e",border:"none",borderRadius:6,cursor:jW?"wait":"pointer"}}>{jW?"...":"Send"}</button>
+              <button onClick={sendJ} disabled={jW} style={{fontFamily:"inherit",fontSize:14,fontWeight:600,padding:"0 18px",background:jW?"rgba(255,255,255,0.02)":"#f5a623",color:jW?"rgba(255,255,255,0.12)":"#08090e",border:"none",borderRadius:6,cursor:jW?"wait":"pointer"}}>{jW?"...":"Send"}</button>
             </div>
           </div>)}
 
@@ -226,19 +226,19 @@ export default function App(){
                 <div><label style={lb}>Cost ({T[trade].cl})</label><input type="number" value={cost} onChange={e=>setCost(e.target.value)} placeholder="0" className="wI" style={inp}/></div>
                 <div><label style={lb}>Location</label><input value={city} onChange={e=>setCity(e.target.value)} placeholder="City, State" className="wI" style={inp}/></div>
               </div>
-              <button onClick={calc} style={{width:"100%",padding:"10px",background:"#f5a623",color:"#08090e",fontFamily:"inherit",fontSize:12,fontWeight:600,border:"none",borderRadius:6,cursor:"pointer"}}>Calculate</button>
+              <button onClick={calc} style={{width:"100%",padding:"10px",background:"#f5a623",color:"#08090e",fontFamily:"inherit",fontSize:16,fontWeight:600,border:"none",borderRadius:6,cursor:"pointer"}}>Calculate</button>
             </div>
             {est&&(<div style={{marginTop:20,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.03)"}}>
-              {est.em&&<div style={{padding:"7px 10px",borderRadius:5,background:"rgba(239,68,68,0.05)",border:"1px solid rgba(239,68,68,0.08)",fontSize:10,color:"#ef4444",marginBottom:12}}>⚠ Exceeds 20K — owner review</div>}
+              {est.em&&<div style={{padding:"7px 10px",borderRadius:5,background:"rgba(239,68,68,0.05)",border:"1px solid rgba(239,68,68,0.08)",fontSize:14,color:"#ef4444",marginBottom:12}}>⚠ Exceeds 20K — owner review</div>}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,background:"rgba(255,255,255,0.02)",borderRadius:7,overflow:"hidden",marginBottom:14}}>
-                {est.ton!==null&&<div style={{padding:14,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Tonnage</div><div style={{fontSize:17,fontWeight:700,color:"#f5a623",fontVariantNumeric:"tabular-nums"}}>{Number(est.ton).toFixed(2)}</div></div>}
-                <div style={{padding:14,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Material</div><div style={{fontSize:17,fontWeight:700,color:"#c9cdd8",fontVariantNumeric:"tabular-nums"}}>{f$(est.mat)}</div></div>
-                <div style={{padding:14,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Binder</div><div style={{fontSize:17,fontWeight:700,color:"#c9cdd8",fontVariantNumeric:"tabular-nums"}}>{f$(B)}</div></div>
-                <div style={{padding:14,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Final Bid · 35%</div><div style={{fontSize:20,fontWeight:700,color:"#f5a623",fontVariantNumeric:"tabular-nums"}}>{f$(est.bid)}</div></div>
+                {est.ton!==null&&<div style={{padding:14,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Tonnage</div><div style={{fontSize:17,fontWeight:700,color:"#f5a623",fontVariantNumeric:"tabular-nums"}}>{Number(est.ton).toFixed(2)}</div></div>}
+                <div style={{padding:14,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Material</div><div style={{fontSize:17,fontWeight:700,color:"#c9cdd8",fontVariantNumeric:"tabular-nums"}}>{f$(est.mat)}</div></div>
+                <div style={{padding:14,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Binder</div><div style={{fontSize:17,fontWeight:700,color:"#c9cdd8",fontVariantNumeric:"tabular-nums"}}>{f$(B)}</div></div>
+                <div style={{padding:14,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.15)",marginBottom:3}}>Final Bid · 35%</div><div style={{fontSize:20,fontWeight:700,color:"#f5a623",fontVariantNumeric:"tabular-nums"}}>{f$(est.bid)}</div></div>
               </div>
               <div style={{display:"flex",gap:6}}>
-                <button onClick={saveJob} style={{flex:1,padding:8,borderRadius:5,border:"1px solid rgba(34,197,94,0.1)",background:"rgba(34,197,94,0.03)",color:"#22c55e",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer"}}>Save as Job</button>
-                <button onClick={()=>{navigator.clipboard.writeText(JSON.stringify({id:est.pid,trade:est.trade,qty:est.q,bid:+est.bid.toFixed(2),margin:"35%",city:est.city},null,2));setCpd(true);setTimeout(()=>setCpd(false),1500)}} style={{flex:1,padding:8,borderRadius:5,border:"1px solid rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.01)",color:"rgba(255,255,255,0.3)",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer"}}>{cpd?"Copied ✓":"Copy JSON"}</button>
+                <button onClick={saveJob} style={{flex:1,padding:8,borderRadius:5,border:"1px solid rgba(34,197,94,0.1)",background:"rgba(34,197,94,0.03)",color:"#22c55e",fontFamily:"inherit",fontSize:14,fontWeight:600,cursor:"pointer"}}>Save as Job</button>
+                <button onClick={()=>{navigator.clipboard.writeText(JSON.stringify({id:est.pid,trade:est.trade,qty:est.q,bid:+est.bid.toFixed(2),margin:"35%",city:est.city},null,2));setCpd(true);setTimeout(()=>setCpd(false),1500)}} style={{flex:1,padding:8,borderRadius:5,border:"1px solid rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.01)",color:"rgba(255,255,255,0.3)",fontFamily:"inherit",fontSize:14,fontWeight:600,cursor:"pointer"}}>{cpd?"Copied ✓":"Copy JSON"}</button>
               </div>
             </div>)}
           </div>)}
@@ -246,15 +246,15 @@ export default function App(){
           {/* JOBS */}
           {v==="jobs"&&(<div style={{maxWidth:780}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:14}}>
-              <span style={{fontSize:10,color:"rgba(255,255,255,0.2)"}}>{aJ.length} active · Pipeline {f$(pipeline)}</span>
-              <button onClick={()=>setV("estimate")} style={{fontFamily:"inherit",fontSize:10,padding:"5px 12px",borderRadius:5,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"rgba(255,255,255,0.35)",cursor:"pointer"}}>+ Estimate</button>
+              <span style={{fontSize:14,color:"rgba(255,255,255,0.2)"}}>{aJ.length} active · Pipeline {f$(pipeline)}</span>
+              <button onClick={()=>setV("estimate")} style={{fontFamily:"inherit",fontSize:14,padding:"5px 12px",borderRadius:5,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"rgba(255,255,255,0.35)",cursor:"pointer"}}>+ Estimate</button>
             </div>
-            {jobs.length===0?<div style={{textAlign:"center",padding:50,color:"rgba(255,255,255,0.08)",fontSize:11}}>No jobs yet</div>:
+            {jobs.length===0?<div style={{textAlign:"center",padding:50,color:"rgba(255,255,255,0.08)",fontSize:15}}>No jobs yet</div>:
             jobs.map((j,i)=>(<div key={j.id} className="wR" style={{display:"flex",alignItems:"center",padding:"8px 10px",borderRadius:5,gap:10,borderBottom:"1px solid rgba(255,255,255,0.015)"}}>
               <span style={{width:5,height:5,borderRadius:"50%",flexShrink:0,background:j.status==="Paid"?"#22c55e":j.status==="In Progress"?"#f5a623":j.status==="Complete"?"#3b82f6":"rgba(255,255,255,0.06)"}}/>
-              <div style={{flex:1,minWidth:0}}><div style={{fontSize:11}}>{j.trade}{j.city?` · ${j.city}`:""}</div><div style={{fontSize:8,color:"rgba(255,255,255,0.08)",marginTop:1}}>{j.id}</div></div>
-              <span style={{fontSize:11,color:"rgba(255,255,255,0.3)",fontVariantNumeric:"tabular-nums",minWidth:80,textAlign:"right"}}>{f$(j.bid)}</span>
-              <select value={j.status} onChange={e=>{const s=[...jobs];s[i]={...s[i],status:e.target.value};setJobs(s)}} style={{fontFamily:"inherit",fontSize:9,background:"transparent",color:j.status==="Paid"?"#22c55e":j.status==="In Progress"?"#f5a623":"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:3,padding:"2px 4px",cursor:"pointer",minWidth:80}}>
+              <div style={{flex:1,minWidth:0}}><div style={{fontSize:15}}>{j.trade}{j.city?` · ${j.city}`:""}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.08)",marginTop:1}}>{j.id}</div></div>
+              <span style={{fontSize:15,color:"rgba(255,255,255,0.3)",fontVariantNumeric:"tabular-nums",minWidth:80,textAlign:"right"}}>{f$(j.bid)}</span>
+              <select value={j.status} onChange={e=>{const s=[...jobs];s[i]={...s[i],status:e.target.value};setJobs(s)}} style={{fontFamily:"inherit",fontSize:13,background:"transparent",color:j.status==="Paid"?"#22c55e":j.status==="In Progress"?"#f5a623":"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:3,padding:"2px 4px",cursor:"pointer",minWidth:80}}>
                 {["Estimated","Proposed","Accepted","Scheduled","In Progress","Complete","Invoiced","Paid","Archived"].map(s=><option key={s}>{s}</option>)}
               </select>
             </div>))}
@@ -263,61 +263,61 @@ export default function App(){
           {/* CREW */}
           {v==="crew"&&(<div style={{maxWidth:560}}>
             <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
-              <button onClick={()=>{const n=prompt("Name:");if(!n)return;const r=prompt("Role:")||"Laborer";setCrew(p=>[...p,{id:Date.now(),name:n,role:r,status:"Available"}])}} style={{fontFamily:"inherit",fontSize:10,padding:"5px 12px",borderRadius:5,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"rgba(255,255,255,0.35)",cursor:"pointer"}}>+ Add</button>
+              <button onClick={()=>{const n=prompt("Name:");if(!n)return;const r=prompt("Role:")||"Laborer";setCrew(p=>[...p,{id:Date.now(),name:n,role:r,status:"Available"}])}} style={{fontFamily:"inherit",fontSize:14,padding:"5px 12px",borderRadius:5,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"rgba(255,255,255,0.35)",cursor:"pointer"}}>+ Add</button>
             </div>
-            {crew.length===0?<div style={{textAlign:"center",padding:50,color:"rgba(255,255,255,0.08)",fontSize:11}}>No crew</div>:
+            {crew.length===0?<div style={{textAlign:"center",padding:50,color:"rgba(255,255,255,0.08)",fontSize:15}}>No crew</div>:
             crew.map((c,i)=>(<div key={c.id} className="wR" style={{display:"flex",alignItems:"center",padding:"7px 10px",borderRadius:5,gap:10,borderBottom:"1px solid rgba(255,255,255,0.015)"}}>
               <span style={{width:5,height:5,borderRadius:"50%",background:c.status==="Available"?"#22c55e":c.status==="On Job"?"#f5a623":"rgba(255,255,255,0.08)",flexShrink:0}}/>
-              <div style={{flex:1}}><div style={{fontSize:11}}>{c.name}</div><div style={{fontSize:8,color:"rgba(255,255,255,0.1)"}}>{c.role}</div></div>
-              <select value={c.status} onChange={e=>{const s=[...crew];s[i]={...s[i],status:e.target.value};setCrew(s)}} style={{fontFamily:"inherit",fontSize:9,background:"transparent",color:c.status==="Available"?"#22c55e":c.status==="On Job"?"#f5a623":"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:3,padding:"2px 4px",cursor:"pointer"}}>
+              <div style={{flex:1}}><div style={{fontSize:15}}>{c.name}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.1)"}}>{c.role}</div></div>
+              <select value={c.status} onChange={e=>{const s=[...crew];s[i]={...s[i],status:e.target.value};setCrew(s)}} style={{fontFamily:"inherit",fontSize:13,background:"transparent",color:c.status==="Available"?"#22c55e":c.status==="On Job"?"#f5a623":"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:3,padding:"2px 4px",cursor:"pointer"}}>
                 {["Available","On Job","Off","Vacation","Terminated"].map(s=><option key={s}>{s}</option>)}
               </select>
-              <button onClick={()=>setCrew(p=>p.filter((_,x)=>x!==i))} style={{background:"none",border:"none",color:"rgba(255,255,255,0.08)",cursor:"pointer",fontSize:13}}>×</button>
+              <button onClick={()=>setCrew(p=>p.filter((_,x)=>x!==i))} style={{background:"none",border:"none",color:"rgba(255,255,255,0.08)",cursor:"pointer",fontSize:17}}>×</button>
             </div>))}
           </div>)}
 
           {/* EQUIPMENT */}
           {v==="equipment"&&(<div style={{maxWidth:560}}>
             <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
-              <button onClick={()=>{const n=prompt("Equipment:");if(!n)return;const t=prompt("Type:")||"Other";setEqp(p=>[...p,{id:Date.now(),name:n,type:t,status:"Available"}])}} style={{fontFamily:"inherit",fontSize:10,padding:"5px 12px",borderRadius:5,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"rgba(255,255,255,0.35)",cursor:"pointer"}}>+ Add</button>
+              <button onClick={()=>{const n=prompt("Equipment:");if(!n)return;const t=prompt("Type:")||"Other";setEqp(p=>[...p,{id:Date.now(),name:n,type:t,status:"Available"}])}} style={{fontFamily:"inherit",fontSize:14,padding:"5px 12px",borderRadius:5,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"rgba(255,255,255,0.35)",cursor:"pointer"}}>+ Add</button>
             </div>
-            {eqp.length===0?<div style={{textAlign:"center",padding:50,color:"rgba(255,255,255,0.08)",fontSize:11}}>No equipment</div>:
+            {eqp.length===0?<div style={{textAlign:"center",padding:50,color:"rgba(255,255,255,0.08)",fontSize:15}}>No equipment</div>:
             eqp.map((e,i)=>(<div key={e.id} className="wR" style={{display:"flex",alignItems:"center",padding:"7px 10px",borderRadius:5,gap:10,borderBottom:"1px solid rgba(255,255,255,0.015)"}}>
               <span style={{width:5,height:5,borderRadius:"50%",background:e.status==="Available"?"#22c55e":e.status==="On Job"?"#f5a623":e.status==="Down"?"#ef4444":"rgba(255,255,255,0.08)",flexShrink:0}}/>
-              <div style={{flex:1}}><div style={{fontSize:11}}>{e.name}</div><div style={{fontSize:8,color:"rgba(255,255,255,0.1)"}}>{e.type}</div></div>
-              <select value={e.status} onChange={ev=>{const s=[...eqp];s[i]={...s[i],status:ev.target.value};setEqp(s)}} style={{fontFamily:"inherit",fontSize:9,background:"transparent",color:e.status==="Available"?"#22c55e":e.status==="On Job"?"#f5a623":e.status==="Down"?"#ef4444":"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:3,padding:"2px 4px",cursor:"pointer"}}>
+              <div style={{flex:1}}><div style={{fontSize:15}}>{e.name}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.1)"}}>{e.type}</div></div>
+              <select value={e.status} onChange={ev=>{const s=[...eqp];s[i]={...s[i],status:ev.target.value};setEqp(s)}} style={{fontFamily:"inherit",fontSize:13,background:"transparent",color:e.status==="Available"?"#22c55e":e.status==="On Job"?"#f5a623":e.status==="Down"?"#ef4444":"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:3,padding:"2px 4px",cursor:"pointer"}}>
                 {["Available","On Job","Maintenance","Down","Retired"].map(s=><option key={s}>{s}</option>)}
               </select>
-              <button onClick={()=>setEqp(p=>p.filter((_,x)=>x!==i))} style={{background:"none",border:"none",color:"rgba(255,255,255,0.08)",cursor:"pointer",fontSize:13}}>×</button>
+              <button onClick={()=>setEqp(p=>p.filter((_,x)=>x!==i))} style={{background:"none",border:"none",color:"rgba(255,255,255,0.08)",cursor:"pointer",fontSize:17}}>×</button>
             </div>))}
           </div>)}
 
           {/* WEATHER */}
           {v==="weather"&&(<div style={{maxWidth:700}}>
-            {wxErr?<div style={{color:"rgba(255,255,255,0.2)",fontSize:11}}>{wxErr}</div>:!wx?<div style={{color:"rgba(255,255,255,0.12)",fontSize:11,animation:"p 1.5s infinite"}}>Loading weather...</div>:(
+            {wxErr?<div style={{color:"rgba(255,255,255,0.2)",fontSize:15}}>{wxErr}</div>:!wx?<div style={{color:"rgba(255,255,255,0.12)",fontSize:15,animation:"p 1.5s infinite"}}>Loading weather...</div>:(
               <div>
                 {/* Current */}
                 <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:28}}>
                   <span style={{fontSize:36}}>{wxIcon(wx.current?.weather_code)}</span>
                   <div>
                     <div style={{fontSize:32,fontWeight:700,color:"#e0e2e8",fontVariantNumeric:"tabular-nums"}}>{Math.round(wx.current?.temperature_2m||0)}°F</div>
-                    <div style={{fontSize:10,color:"rgba(255,255,255,0.2)"}}>Wind {Math.round(wx.current?.wind_speed_10m||0)} mph · Humidity {Math.round(wx.current?.relative_humidity_2m||0)}%</div>
+                    <div style={{fontSize:14,color:"rgba(255,255,255,0.2)"}}>Wind {Math.round(wx.current?.wind_speed_10m||0)} mph · Humidity {Math.round(wx.current?.relative_humidity_2m||0)}%</div>
                   </div>
                   <div style={{marginLeft:"auto"}}>
-                    {(()=>{const g=paveGo(wx.daily.temperature_2m_max[0],wx.daily.precipitation_probability_max[0],wx.daily.wind_speed_10m_max[0]);return <div style={{padding:"8px 16px",borderRadius:6,border:`1px solid ${g.c}20`,background:`${g.c}08`,textAlign:"center"}}><div style={{fontSize:14,fontWeight:700,color:g.c}}>{g.s}</div><div style={{fontSize:7,color:"rgba(255,255,255,0.15)",marginTop:2}}>PAVING TODAY</div></div>})()}
+                    {(()=>{const g=paveGo(wx.daily.temperature_2m_max[0],wx.daily.precipitation_probability_max[0],wx.daily.wind_speed_10m_max[0]);return <div style={{padding:"8px 16px",borderRadius:6,border:`1px solid ${g.c}20`,background:`${g.c}08`,textAlign:"center"}}><div style={{fontSize:14,fontWeight:700,color:g.c}}>{g.s}</div><div style={{fontSize:11,color:"rgba(255,255,255,0.15)",marginTop:2}}>PAVING TODAY</div></div>})()}
                   </div>
                 </div>
                 {/* 10-Day */}
-                <div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10}}>10-Day Paving Forecast</div>
+                <div style={{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10}}>10-Day Paving Forecast</div>
                 <div style={{display:"flex",flexDirection:"column",gap:2}}>
                   {wx.daily.time.map((d,i)=>{const g=paveGo(wx.daily.temperature_2m_max[i],wx.daily.precipitation_probability_max[i],wx.daily.wind_speed_10m_max[i]);return(
                     <div key={d} className="wR" style={{display:"flex",alignItems:"center",padding:"8px 10px",borderRadius:5,gap:8}}>
-                      <span style={{fontSize:10,color:"rgba(255,255,255,0.2)",minWidth:32}}>{dayName(d)}</span>
+                      <span style={{fontSize:14,color:"rgba(255,255,255,0.2)",minWidth:32}}>{dayName(d)}</span>
                       <span style={{fontSize:14}}>{wxIcon(wx.daily.weathercode?.[i])}</span>
-                      <span style={{fontSize:11,fontVariantNumeric:"tabular-nums",minWidth:60}}>{Math.round(wx.daily.temperature_2m_min[i])}° / {Math.round(wx.daily.temperature_2m_max[i])}°</span>
-                      <span style={{fontSize:9,color:"rgba(255,255,255,0.15)",minWidth:50}}>💧 {wx.daily.precipitation_probability_max[i]}%</span>
-                      <span style={{fontSize:9,color:"rgba(255,255,255,0.15)",minWidth:50}}>💨 {Math.round(wx.daily.wind_speed_10m_max[i])} mph</span>
-                      <span style={{marginLeft:"auto",fontSize:9,fontWeight:700,color:g.c,background:`${g.c}08`,border:`1px solid ${g.c}15`,padding:"2px 8px",borderRadius:3}}>{g.s}</span>
+                      <span style={{fontSize:15,fontVariantNumeric:"tabular-nums",minWidth:60}}>{Math.round(wx.daily.temperature_2m_min[i])}° / {Math.round(wx.daily.temperature_2m_max[i])}°</span>
+                      <span style={{fontSize:13,color:"rgba(255,255,255,0.15)",minWidth:50}}>💧 {wx.daily.precipitation_probability_max[i]}%</span>
+                      <span style={{fontSize:13,color:"rgba(255,255,255,0.15)",minWidth:50}}>💨 {Math.round(wx.daily.wind_speed_10m_max[i])} mph</span>
+                      <span style={{marginLeft:"auto",fontSize:13,fontWeight:700,color:g.c,background:`${g.c}08`,border:`1px solid ${g.c}15`,padding:"2px 8px",borderRadius:3}}>{g.s}</span>
                     </div>
                   )})}
                 </div>
@@ -328,30 +328,30 @@ export default function App(){
           {/* BANKING */}
           {v==="banking"&&(<div style={{maxWidth:700}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:1,background:"rgba(255,255,255,0.02)",borderRadius:8,overflow:"hidden",marginBottom:24}}>
-              <div style={{padding:20,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.12)",marginBottom:4}}>Revenue (Paid)</div><div style={{fontSize:22,fontWeight:700,color:"#22c55e",fontVariantNumeric:"tabular-nums"}}>{f$(revenue)}</div><div style={{fontSize:8,color:"rgba(255,255,255,0.08)",marginTop:2}}>{paidJ.length} jobs completed</div></div>
-              <div style={{padding:20,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.12)",marginBottom:4}}>Receivable</div><div style={{fontSize:22,fontWeight:700,color:ar?"#eab308":"rgba(255,255,255,0.15)",fontVariantNumeric:"tabular-nums"}}>{f$(ar)}</div><div style={{fontSize:8,color:"rgba(255,255,255,0.08)",marginTop:2}}>{arJ.length} invoices out</div></div>
-              <div style={{padding:20,background:"#08090e"}}><div style={{fontSize:8,color:"rgba(255,255,255,0.12)",marginBottom:4}}>Total Pipeline</div><div style={{fontSize:22,fontWeight:700,color:"#c9cdd8",fontVariantNumeric:"tabular-nums"}}>{f$(pipeline)}</div><div style={{fontSize:8,color:"rgba(255,255,255,0.08)",marginTop:2}}>{jobs.length} total jobs</div></div>
+              <div style={{padding:20,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.12)",marginBottom:4}}>Revenue (Paid)</div><div style={{fontSize:22,fontWeight:700,color:"#22c55e",fontVariantNumeric:"tabular-nums"}}>{f$(revenue)}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.08)",marginTop:2}}>{paidJ.length} jobs completed</div></div>
+              <div style={{padding:20,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.12)",marginBottom:4}}>Receivable</div><div style={{fontSize:22,fontWeight:700,color:ar?"#eab308":"rgba(255,255,255,0.15)",fontVariantNumeric:"tabular-nums"}}>{f$(ar)}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.08)",marginTop:2}}>{arJ.length} invoices out</div></div>
+              <div style={{padding:20,background:"#08090e"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.12)",marginBottom:4}}>Total Pipeline</div><div style={{fontSize:22,fontWeight:700,color:"#c9cdd8",fontVariantNumeric:"tabular-nums"}}>{f$(pipeline)}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.08)",marginTop:2}}>{jobs.length} total jobs</div></div>
             </div>
             {/* Margin */}
-            <div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Margin Protection</div>
+            <div style={{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Margin Protection</div>
             <div style={{background:"rgba(255,255,255,0.02)",borderRadius:6,padding:14,marginBottom:20}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:11,color:"rgba(255,255,255,0.3)"}}>Target margin floor</span>
+                <span style={{fontSize:15,color:"rgba(255,255,255,0.3)"}}>Target margin floor</span>
                 <span style={{fontSize:16,fontWeight:700,color:"#22c55e"}}>35%</span>
               </div>
               <div style={{height:3,background:"rgba(255,255,255,0.03)",borderRadius:2,marginTop:10,overflow:"hidden"}}>
                 <div style={{width:"35%",height:"100%",background:"#22c55e",borderRadius:2}}/>
               </div>
-              <div style={{fontSize:8,color:"rgba(255,255,255,0.08)",marginTop:6}}>Every estimate enforces 35% net margin. Binder index $627.50 + machine health $0.08/ton applied automatically.</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.08)",marginTop:6}}>Every estimate enforces 35% net margin. Binder index $627.50 + machine health $0.08/ton applied automatically.</div>
             </div>
             {/* By status */}
-            <div style={{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Pipeline by Status</div>
+            <div style={{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.12)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Pipeline by Status</div>
             {["Estimated","Proposed","Accepted","Scheduled","In Progress","Complete","Invoiced","Paid"].map(s=>{const sj=jobs.filter(j=>j.status===s);if(!sj.length)return null;const tot=sj.reduce((a,j)=>a+j.bid,0);return(
               <div key={s} style={{display:"flex",alignItems:"center",padding:"6px 10px",gap:8}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:s==="Paid"?"#22c55e":s==="In Progress"?"#f5a623":"rgba(255,255,255,0.08)",flexShrink:0}}/>
-                <span style={{flex:1,fontSize:11,color:"rgba(255,255,255,0.3)"}}>{s}</span>
-                <span style={{fontSize:10,color:"rgba(255,255,255,0.15)",fontVariantNumeric:"tabular-nums"}}>{sj.length} jobs</span>
-                <span style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.4)",fontVariantNumeric:"tabular-nums",minWidth:90,textAlign:"right"}}>{f$(tot)}</span>
+                <span style={{flex:1,fontSize:15,color:"rgba(255,255,255,0.3)"}}>{s}</span>
+                <span style={{fontSize:14,color:"rgba(255,255,255,0.15)",fontVariantNumeric:"tabular-nums"}}>{sj.length} jobs</span>
+                <span style={{fontSize:15,fontWeight:600,color:"rgba(255,255,255,0.4)",fontVariantNumeric:"tabular-nums",minWidth:90,textAlign:"right"}}>{f$(tot)}</span>
               </div>
             )})}
           </div>)}
@@ -363,7 +363,7 @@ export default function App(){
               <select value={legalSt} onChange={e=>setLegalSt(e.target.value)} className="wI" style={{...inp,cursor:"pointer"}}>
                 {Object.keys(STATES).sort().map(s=><option key={s}>{s}</option>)}
               </select>
-              <div style={{fontSize:8,color:"rgba(255,255,255,0.08)",marginTop:4}}>{Object.keys(STATES).length} states with detailed data · Ask Jarvis for any state not listed</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.08)",marginTop:4}}>{Object.keys(STATES).length} states with detailed data · Ask Jarvis for any state not listed</div>
             </div>
             {STATES[legalSt]&&(
               <div style={{display:"flex",flexDirection:"column",gap:2}}>
@@ -378,15 +378,15 @@ export default function App(){
                 ].map((r,i)=>(
                   <div key={i} style={{background:"rgba(255,255,255,0.015)",borderRadius:6,padding:"12px 14px",borderLeft:"2px solid rgba(245,166,35,0.15)"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                      <span style={{fontSize:12}}>{r.icon}</span>
-                      <span style={{fontSize:9,fontWeight:600,letterSpacing:"0.06em",textTransform:"uppercase",color:"#f5a623"}}>{r.l}</span>
+                      <span style={{fontSize:16}}>{r.icon}</span>
+                      <span style={{fontSize:13,fontWeight:600,letterSpacing:"0.06em",textTransform:"uppercase",color:"#f5a623"}}>{r.l}</span>
                     </div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.45)",lineHeight:1.7}}>{r.v}</div>
+                    <div style={{fontSize:15,color:"rgba(255,255,255,0.45)",lineHeight:1.7}}>{r.v}</div>
                   </div>
                 ))}
               </div>
             )}
-            <div style={{marginTop:16,padding:"10px 12px",borderRadius:6,border:"1px solid rgba(255,255,255,0.03)",fontSize:9,color:"rgba(255,255,255,0.12)",lineHeight:1.7}}>
+            <div style={{marginTop:16,padding:"10px 12px",borderRadius:6,border:"1px solid rgba(255,255,255,0.03)",fontSize:13,color:"rgba(255,255,255,0.12)",lineHeight:1.7}}>
               ⚖️ Educational information based on public law. Consult a licensed attorney for legal advice specific to your situation. Ask Jarvis for detailed questions about any state.
             </div>
           </div>)}
@@ -402,8 +402,8 @@ export default function App(){
             placeholder="Search or ask Jarvis..." style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid rgba(255,255,255,0.03)",color:"#e0e2e8",fontFamily:"inherit",fontSize:14,padding:"14px 18px",outline:"none"}}/>
           <div style={{padding:6}}>
             {[{l:"Home",c:"/home"},{l:"Estimate",c:"/estimate"},{l:"Jarvis",c:"/jarvis"},{l:"Jobs",c:"/jobs"},{l:"Weather",c:"/weather"},{l:"Banking",c:"/banking"},{l:"Legal",c:"/legal"},{l:"Crew",c:"/crew"},{l:"Equipment",c:"/equipment"}].map(s=>(
-              <button key={s.c} onClick={()=>cmdX(s.c)} className="wN" style={{display:"block",width:"100%",textAlign:"left",padding:"6px 12px",borderRadius:4,border:"none",background:"transparent",color:"rgba(255,255,255,0.35)",fontFamily:"inherit",fontSize:11,cursor:"pointer"}}>
-                {s.l}<span style={{float:"right",fontSize:8,color:"rgba(255,255,255,0.08)"}}>{s.c}</span>
+              <button key={s.c} onClick={()=>cmdX(s.c)} className="wN" style={{display:"block",width:"100%",textAlign:"left",padding:"6px 12px",borderRadius:4,border:"none",background:"transparent",color:"rgba(255,255,255,0.35)",fontFamily:"inherit",fontSize:15,cursor:"pointer"}}>
+                {s.l}<span style={{float:"right",fontSize:12,color:"rgba(255,255,255,0.08)"}}>{s.c}</span>
               </button>
             ))}
           </div>
