@@ -83,10 +83,12 @@ Browser                  Netlify Function              FastAPI Backend
 
 ### Step 1 — Copy the auth files
 
+Templates live in `docs/integration-templates/`:
+
 ```
-FRONTEND_AUTH_CLIENT.ts       → src/lib/auth.ts
-FRONTEND_REACT_EXAMPLES.ts    → src/hooks/  (copy individual hooks as needed)
-FRONTEND_NETLIFY_FUNCTION.ts  → netlify/functions/get-token.ts
+docs/integration-templates/FRONTEND_AUTH_CLIENT.ts       → src/lib/auth.ts
+docs/integration-templates/FRONTEND_REACT_EXAMPLES.ts    → src/hooks/  (copy individual hooks as needed)
+docs/integration-templates/FRONTEND_NETLIFY_FUNCTION.ts  → netlify/functions/get-token.ts
 ```
 
 ### Step 2 — Install dependencies
@@ -882,7 +884,7 @@ try {
 
 | File | Purpose | Deploy to |
 |---|---|---|
-| `FRONTEND_INTEGRATION.md` | This document — start here | — |
-| `FRONTEND_AUTH_CLIENT.ts` | Auth token lifecycle + `apiFetch` + typed API helpers | `src/lib/auth.ts` |
-| `FRONTEND_REACT_EXAMPLES.ts` | React hooks: `AuthProvider`, `useAuth`, `useCrmLeads`, `useAuthGuard` | `src/hooks/` (individual hooks) |
-| `FRONTEND_NETLIFY_FUNCTION.ts` | Server-side token proxy (master key → JWT via FastAPI) | `netlify/functions/get-token.ts` |
+| `docs/FRONTEND_INTEGRATION.md` | This document — start here | — |
+| `docs/integration-templates/FRONTEND_AUTH_CLIENT.ts` | Auth token lifecycle + `apiFetch` + typed API helpers | `src/lib/auth.ts` |
+| `docs/integration-templates/FRONTEND_REACT_EXAMPLES.ts` | React hooks: `AuthProvider`, `useAuth`, `useCrmLeads`, `useAuthGuard` | `src/hooks/` (individual hooks) |
+| `docs/integration-templates/FRONTEND_NETLIFY_FUNCTION.ts` | Server-side token proxy (master key → JWT via FastAPI) | `netlify/functions/get-token.ts` |
