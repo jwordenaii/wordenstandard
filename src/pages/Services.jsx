@@ -429,12 +429,29 @@ export default function Services() {
             </div>
 
             {/* Visual placeholder */}
-            <div className="bg-brand-navy/5 rounded-2xl aspect-video flex items-center justify-center border-2 border-dashed border-brand-navy/20">
-              <div className="text-center text-brand-navy/30">
-                <div className="text-6xl mb-2">{svc.icon}</div>
-                <p className="text-sm">Photo coming soon</p>
+            {svc.id === 'sealcoating' ? (
+              <div className="rounded-2xl overflow-hidden aspect-video bg-black border border-brand-navy/10 shadow-lg">
+                <video
+                  className="w-full h-full object-cover"
+                  src="/videos/sealcoating.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster="/hero-paving.jpg"
+                >
+                  Your browser does not support embedded video.
+                </video>
               </div>
-            </div>
+            ) : (
+              <div className="bg-brand-navy/5 rounded-2xl aspect-video flex items-center justify-center border-2 border-dashed border-brand-navy/20">
+                <div className="text-center text-brand-navy/30">
+                  <div className="text-6xl mb-2">{svc.icon}</div>
+                  <p className="text-sm">Photo coming soon</p>
+                </div>
+              </div>
+            )}
           </motion.section>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ParkingSquare, ShieldCheck, Zap, Ruler, CheckCircle2, Car, Building2, Truck } from 'lucide-react'
 import Navbar from '@/components/Navbar'
@@ -110,6 +110,13 @@ export default function ParkingLots() {
     ],
   }
 
+  const heroVideoRef = useRef(null)
+  useEffect(() => {
+    if (heroVideoRef.current) {
+      heroVideoRef.current.playbackRate = 0.6
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-brand-navy">
       <SEO
@@ -180,11 +187,22 @@ export default function ParkingLots() {
 
             {/* Right — Image + floating stat */}
             <div className="lg:w-1/2 relative">
-              <img
-                src={commercialImg?.url || 'https://images.unsplash.com/photo-1590674896609-e7f6e4a6e8f1?auto=format&fit=crop&q=80&w=800'}
-                alt="Commercial parking lot paving Richmond VA"
-                className="rounded-3xl w-full h-[480px] object-cover border border-white/10 shadow-2xl"
-              />
+              <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black h-[480px]">
+                <video
+                  ref={heroVideoRef}
+                  className="w-full h-full object-cover"
+                  src="/videos/parking-lot.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster={commercialImg?.url || undefined}
+                  aria-label="Commercial parking lot paving in progress"
+                >
+                  Your browser does not support embedded video.
+                </video>
+              </div>
               <div className="absolute -bottom-6 -left-6 bg-brand-amber rounded-2xl p-6 shadow-xl">
                 <p className="text-brand-navy font-black text-4xl leading-none">20yr</p>
                 <p className="text-brand-navy/70 text-xs font-bold uppercase tracking-widest mt-1">Life Expectancy<br />When Done Right</p>

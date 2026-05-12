@@ -148,11 +148,16 @@ export default function VirginiaSealcoating() {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 overflow-hidden bg-black">
         <div className="absolute inset-0">
-          <img
-            src="/work/imported/KFC/IMG_9496.JPG"
-            className="w-full h-full object-cover opacity-25 grayscale"
-            alt="Virginia sealcoating"
-            loading="eager"
+          <video
+            className="w-full h-full object-cover opacity-40"
+            src="/videos/sealcoating.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/work/imported/KFC/IMG_9496.JPG"
+            aria-hidden="true"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
         </div>

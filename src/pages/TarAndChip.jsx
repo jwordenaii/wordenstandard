@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle2, Layers, Phone, ShieldCheck } from 'lucide-react'
 import Navbar from '@/components/Navbar'
@@ -46,6 +46,14 @@ const FAQS = [
 
 export default function TarAndChip() {
   const canonicalPath = '/tar-and-chip'
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.45
+    }
+  }, [])
+
   const title = 'Tar and Chip Paving in Virginia | Driveways and Parking Areas'
   const description =
     'Tar and chip paving for driveways, private roads, and parking areas in Virginia. Cost-effective, durable, and traction-focused installation with clear scope.'
@@ -128,6 +136,33 @@ export default function TarAndChip() {
               Request Tar And Chip Quote
             </Link>
           </div>
+        </div>
+      </section>
+
+      <section className="py-12 md:py-16 border-b border-border bg-card/40">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <p className="font-display text-primary text-xs tracking-[0.28em] uppercase mb-2">See It In Action</p>
+          <h2 className="font-display font-black text-foreground text-3xl md:text-4xl uppercase tracking-tight leading-[0.95] mb-6">
+            Tar And Chip Installation Video
+          </h2>
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-black aspect-video shadow-xl">
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover"
+              src="/videos/chip-and-tar.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/hero-paving.jpg"
+            >
+              Your browser does not support embedded video.
+            </video>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Real J. Worden &amp; Sons crew performing tar and chip installation in Virginia.
+          </p>
         </div>
       </section>
 
