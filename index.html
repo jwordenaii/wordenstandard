@@ -9,9 +9,13 @@
     <!-- Font display swap — prevents FOIT (invisible text while fonts load) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
 
-    <!-- LCP preload: homepage hero image (used by SmartImage on / route) -->
-    <link rel="preload" as="image" href="/work/portfolio/portfolio-010.jpg" fetchpriority="high" />
+    <!-- LCP preload: homepage hero image (used by SmartImage on / route).
+         AVIF first (smallest, supported by all modern browsers); SmartImage's
+         <picture> source list will pick AVIF -> WebP -> JPG based on accept. -->
+    <link rel="preload" as="image" href="/work/portfolio/portfolio-010.avif" type="image/avif" fetchpriority="high" />
+    <link rel="preload" as="image" href="/work/portfolio/portfolio-010.webp" type="image/webp" fetchpriority="high" />
 
     <!-- Google tag (gtag.js) — Google Ads + GA4
          To enable GA4, add your G-XXXXXXXXXX measurement ID below.

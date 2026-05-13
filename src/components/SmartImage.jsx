@@ -95,6 +95,22 @@ export default function SmartImage({
   return (
     <div className={`image-presentation-premium image-reveal-obsidian ${className}`} style={presentationStyle}>
       <picture>
+        {(() => {
+          // Auto-derive AVIF / WebP siblings for images under /work/* (the
+          // portfolio + KFC + market galleries that scripts/optimize-images.mjs
+          // generates modern-format siblings for at build time).
+          // Skips other paths so we don't claim formats that don't exist.
+          const m = typeof activeSrc === 'string' && activeSrc.match(/^(\/work\/.+)\.(jpe?g|png)(\?.*)?$/i)
+          if (!m) return null
+          const base = m[1]
+          const query = m[3] || ''
+          return (
+            <>
+              <source type="image/avif" srcSet={`${base}.avif${query}`} sizes={sizes} />
+              <source type="image/webp" srcSet={`${base}.webp${query}`} sizes={sizes} />
+            </>
+          )
+        })()}
         {webpSrc && <source type="image/webp" srcSet={webpSrc} sizes={sizes} />}
         <img
           src={activeSrc}
