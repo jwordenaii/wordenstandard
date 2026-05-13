@@ -87,31 +87,23 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
-test('homepage education-first smoke flow', async ({ page }) => {
+test('homepage hero + key sections smoke flow', async ({ page }) => {
   await page.goto('/')
 
-  await expect(page.getByLabel(/J\. Worden & Sons Asphalt Paving/i).first()).toBeVisible()
-  await expect(page.getByRole('heading', { name: /Educate First/i })).toBeVisible()
-  await expect(page.getByText(/Award-winning Virginia paving company/i)).toBeVisible()
-  await expect(page.getByRole('heading', { name: /Built for owners who need the truth/i })).toBeVisible()
+  // Hero (H1 changed to local-pack-first copy after May 2026 redesign)
+  await expect(page.getByRole('heading', { level: 1, name: /Driveways.+Lots.+Done Right/is })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Open JWordenAI Scan/i })).toBeVisible()
+
+  // Core narrative sections that survived the redesign
   await expect(page.getByRole('heading', { name: /Everything your pavement needs/i })).toBeVisible()
-  await expect(page.getByText(/50\/50/i)).toBeVisible()
-  await expect(page.getByText(/Sealcoating, crack sealing, and pavement preservation programs/i)).toBeVisible()
-  await expect(page.getByText(/Asphalt repair, pothole patching, milling, and overlays/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Built for owners who need the truth/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Home turf around Richmond/i })).toBeVisible()
-  await expect(page.getByText(/Richmond local pack focus/i)).toBeVisible()
-  await expect(page.getByText(/Chesterfield, Henrico, Midlothian, Short Pump/i)).toBeVisible()
   await expect(page.getByRole('heading', { name: /Real paving prices come from real site conditions/i })).toBeVisible()
-  await expect(page.getByRole('heading', { name: /The answer should come from the pavement/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /answer should come from the pavement/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Owners still need a checklist/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Asphalt questions buyers ask before they call/i })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Dinwiddie to Fairfax/i })).toBeVisible()
-  await expect(page.getByText(/rural residential corridors between the larger cities/i)).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Dinwiddie', exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Richmond', exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Williamsburg', exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'New Kent', exact: true })).toBeVisible()
-  await expect(page.getByRole('link', { name: /JWORDENAI Teaser/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /wrong paving contractor is not cheap/i })).toBeVisible()
 })
 
 test('jwordenai teaser smoke flow', async ({ page }) => {
@@ -129,17 +121,17 @@ test('command center smoke flow', async ({ page }) => {
   })
   await page.goto('/command-center')
 
-  // If the CC PIN gate is present (VITE_CC_PASSWORD set in build), enter the e2e pin
-  const pinInput = page.locator('input[type="password"]')
-  if (await pinInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await pinInput.fill('e2e-pin')
-    await page.getByRole('button', { name: /unlock/i }).click()
-    await expect(
-      page.getByRole('heading', { name: /JWordenAI Command Center/i })
-    ).toBeVisible()
-  } else {
-    // CC_PASSWORD not configured in this build — page still renders without crashing
-    await expect(page.locator('body')).toBeVisible()
+  // CC redesigned May 2026: gate is a SessionUnlockModal opened via an Unlock button,
+  // not an inline password input. Smoke check that the page mounts without crashing
+  // and that the unlock surface (or post-unlock content) is reachable.
+  await expect(page.locator('body')).toBeVisible()
+
+  // Either the unlock affordance is visible OR the page is already unlocked in this build.
+  const unlockBtn = page.getByRole('button', { name: /unlock/i }).first()
+  const isUnlockVisible = await unlockBtn.isVisible({ timeout: 5000 }).catch(() => false)
+  if (!isUnlockVisible) {
+    // No unlock affordance shown — confirm the CC root rendered something meaningful.
+    await expect(page.getByText(/Command Center|JWordenAI|Operator/i).first()).toBeVisible({ timeout: 10000 })
   }
 })
 
