@@ -5,11 +5,11 @@ import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 const SPLASH_KEY = 'jworden_splash_shown';
 
 export default function SplashScreen() {
-  // Only show once per browser session — avoids showing on every route change
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !sessionStorage.getItem(SPLASH_KEY);
-  });
+  // Initial state MUST match the prerendered HTML (which has no splash, since
+  // `typeof window === 'undefined'` during prerender). We start as not-visible
+  // and flip to visible inside useEffect after hydration completes — this
+  // avoids React hydration error #418 (Text content does not match server).
+  const [visible, setVisible] = useState(false);
 
   const dismiss = () => {
     sessionStorage.setItem(SPLASH_KEY, '1');
@@ -17,7 +17,9 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
-    if (!visible) return;
+    // Decide whether to show the splash now that we're on the client.
+    if (sessionStorage.getItem(SPLASH_KEY)) return;
+    setVisible(true);
     sessionStorage.setItem(SPLASH_KEY, '1');
     const timer = setTimeout(() => setVisible(false), 2500);
     const onKey = (e) => {
@@ -30,7 +32,7 @@ export default function SplashScreen() {
       clearTimeout(timer);
       window.removeEventListener('keydown', onKey);
     };
-  }, [visible]);
+  }, []);
 
   const [logoSrc, setLogoSrc] = useState(PRIMARY_LOGO_URL);
 
