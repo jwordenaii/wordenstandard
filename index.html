@@ -18,19 +18,30 @@
     <link rel="preload" as="image" href="/work/portfolio/portfolio-010.webp" type="image/webp" fetchpriority="high" />
 
     <!-- Google tag (gtag.js) — Google Ads + GA4
-         To enable GA4, add your G-XXXXXXXXXX measurement ID below.
-         Conversion labels are configured via Vite env vars in Netlify:
+         Loaded on requestIdleCallback so it doesn't block LCP. The dataLayer
+         + gtag stub is set up immediately so any early gtag() calls queue
+         correctly and are flushed once gtag.js downloads. Conversion labels:
            VITE_GADS_LABEL_LEAD_FORM, VITE_GADS_LABEL_PHONE_CLICK -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1410045668"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
       gtag('js', new Date());
       gtag('config', 'AW-1410045668');
-      // Enhanced conversions: forward email/phone hashed automatically
       gtag('set', 'allow_enhanced_conversions', true);
-      // Add GA4 here when you have a G-XXX id:
-      // gtag('config', 'G-XXXXXXXXXX');
+      (function(){
+        var load = function(){
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=AW-1410045668';
+          document.head.appendChild(s);
+        };
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(load, { timeout: 4000 });
+        } else {
+          window.addEventListener('load', function(){ setTimeout(load, 1500); });
+        }
+      })();
     </script>
 
     <!-- Primary SEO -->
