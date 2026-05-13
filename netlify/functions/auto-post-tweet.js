@@ -77,7 +77,31 @@ export const handler = async (event, context) => {
     }
 
     const grokData = await grokResponse.json();
-    const tweetText = (grokData.output?.[0]?.content?.[0]?.text || grokData.response || '').trim();
+    // Grok-4 reasoning models return an array of output blocks. The first block
+    // can be a "reasoning" summary; the actual assistant message lives in the
+    // first block whose type === "message" (or any block exposing content[].text).
+    // Falling back to grokData.response keeps compatibility with older shapes.
+    const extractGrokText = (data) => {
+      if (!data) return '';
+      if (typeof data.response === 'string') return data.response;
+      const blocks = Array.isArray(data.output) ? data.output : [];
+      for (const block of blocks) {
+        if (block?.type === 'message' && Array.isArray(block.content)) {
+          const piece = block.content.find((c) => typeof c?.text === 'string' && c.text.trim());
+          if (piece) return piece.text;
+        }
+      }
+      // Last-resort scan: any block with content[].text (skips reasoning summaries).
+      for (const block of blocks) {
+        if (block?.type === 'reasoning') continue;
+        if (Array.isArray(block?.content)) {
+          const piece = block.content.find((c) => typeof c?.text === 'string' && c.text.trim());
+          if (piece) return piece.text;
+        }
+      }
+      return '';
+    };
+    const tweetText = extractGrokText(grokData).trim();
 
     if (!tweetText || tweetText.length > 280) {
       // In dryRun, return the raw Grok payload so we can see what shape it actually returned.

@@ -50,6 +50,26 @@ class ContactRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
 
 
+class WebsiteLeadRequest(BaseModel):
+    """Loose-shape lead from the public marketing site (gemni-investigate).
+
+    All fields optional except firstName + phone + jobDescription, mirroring
+    what the customer-facing form requires. Email is optional because many
+    paving customers will only leave a phone number.
+    """
+
+    model_config = {"str_strip_whitespace": True, "extra": "ignore"}
+
+    firstName: str = Field(..., min_length=1, max_length=80)
+    lastName: Optional[str] = Field(default=None, max_length=80)
+    phone: str = Field(..., min_length=7, max_length=30)
+    email: Optional[str] = Field(default=None, max_length=200)
+    serviceAddress: Optional[str] = Field(default=None, max_length=300)
+    jobDescription: str = Field(..., min_length=1, max_length=2000)
+    source: Optional[str] = Field(default="gemni-investigate", max_length=60)
+    path: Optional[str] = Field(default=None, max_length=200)
+
+
 class EstimateRequest(BaseModel):
     service_type: str = Field(..., max_length=60)
     property_type: str = Field(default="residential", max_length=30)
@@ -254,3 +274,64 @@ async def get_estimate(request: Request, req: EstimateRequest):
     if result is None:
         return {"estimate_available": False, "reason": "Service type not recognized"}
     return {"estimate_available": True, "state_code": validated_state, **result}
+
+
+
+@router.post("/website", summary="Receive a public-website lead from the marketing site")
+@limiter.limit("20/minute")
+async def submit_website_lead(
+    request: Request,
+    req: WebsiteLeadRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """Bridge endpoint for the gemni-investigate (public marketing) site.
+
+    Persists the lead exactly like /contact, but accepts the site's looser
+    field shape (firstName/lastName/phone/jobDescription/...). Email is
+    optional; when missing we synthesize a placeholder so downstream code
+    that expects an email field doesn't crash.
+    """
+
+    full_name = " ".join(p for p in (req.firstName, req.lastName) if p).strip()
+    email = req.email or f"no-email+{(req.phone or 'unknown').replace('+', '').replace(' ', '')}@jwordenasphaltpaving.com"
+
+    message_parts = [req.jobDescription]
+    if req.serviceAddress:
+        message_parts.append(f"Service address: {req.serviceAddress}")
+    if req.source:
+        message_parts.append(f"Source: {req.source}{(' ' + req.path) if req.path else ''}")
+    message_body = "\n\n".join(message_parts)
+
+    db_msg = ContactMessage(
+        name=full_name,
+        email=email,
+        phone=req.phone,
+        message=message_body,
+    )
+    db.add(db_msg)
+    db.commit()
+    db.refresh(db_msg)
+
+    write_audit_event(
+        db,
+        event_type="lead.website_submitted",
+        actor_type="customer",
+        actor_id=db_msg.email,
+        entity_type="contact_message",
+        entity_id=db_msg.id,
+        summary="Public website lead submitted (gemni-investigate).",
+        detail={
+            "source": req.source,
+            "path": req.path,
+            "has_email": bool(req.email),
+            "has_address": bool(req.serviceAddress),
+        },
+    )
+
+    payload = {**req.model_dump(), "type": "website"}
+    background_tasks.add_task(send_lead_notification, payload)
+    if req.email:
+        background_tasks.add_task(send_contact_response, db_msg)
+
+    return {"status": "received", "id": db_msg.id}
