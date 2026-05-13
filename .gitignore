@@ -76,3 +76,11 @@ docs/reliability/latest-synthetic.json
 _archive/
 
 
+
+# Lighthouse audit dumps + temp logs
+lh-*.json
+live-api-routes.txt
+playwright-fix-check.txt
+build_check.txt
+staging-compare.txt
+temp_view.txt
