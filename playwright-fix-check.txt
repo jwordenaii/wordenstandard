@@ -1,0 +1,18 @@
+
+Running 14 tests using 2 workers
+
+[1A[2K[1/14] tests\e2e\forms.spec.js:30:3 ΓÇ║ Quote form ΓÇ║ quote page renders with service selector
+[1A[2K[2/14] tests\e2e\quote-and-command-center.spec.js:90:1 ΓÇ║ homepage hero + key sections smoke flow
+[1A[2K[3/14] tests\e2e\quote-and-command-center.spec.js:109:1 ΓÇ║ jwordenai teaser smoke flow
+[1A[2K[4/14] tests\e2e\forms.spec.js:37:3 ΓÇ║ Quote form ΓÇ║ quote form shows validation error on empty submit
+[1A[2K[5/14] tests\e2e\quote-and-command-center.spec.js:117:1 ΓÇ║ command center smoke flow
+[1A[2K[6/14] tests\e2e\forms.spec.js:56:3 ΓÇ║ Quote form ΓÇ║ quote form accepts a service selection
+[1A[2K[7/14] tests\e2e\quote-and-command-center.spec.js:138:1 ΓÇ║ admin documents visual smoke flow
+[1A[2K[8/14] tests\e2e\forms.spec.js:96:3 ΓÇ║ Contact form ΓÇ║ contact page renders form fields
+[1A[2K[9/14] tests\e2e\quote-and-command-center.spec.js:150:1 ΓÇ║ customer portal visual smoke flow
+[1A[2K[10/14] tests\e2e\forms.spec.js:105:3 ΓÇ║ Contact form ΓÇ║ contact form shows phone CTA link
+[1A[2K[11/14] tests\e2e\quote-and-command-center.spec.js:160:1 ΓÇ║ crew eta visual smoke flow
+[1A[2K[12/14] tests\e2e\forms.spec.js:109:3 ΓÇ║ Contact form ΓÇ║ contact form fills and submits successfully
+[1A[2K[13/14] tests\e2e\forms.spec.js:141:3 ΓÇ║ Contact form ΓÇ║ contact form rejects obviously invalid email
+[1A[2K[14/14] tests\e2e\forms.spec.js:159:1 ΓÇ║ key service pages all have clickable phone number
+[1A[2K  14 passed (1.2m)

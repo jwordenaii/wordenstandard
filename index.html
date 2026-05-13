@@ -22,11 +22,12 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" />
 
     <!-- LCP preload: homepage hero image (used by SmartImage on / route).
-         Only preload AVIF (smallest, ~84KB, supported by all modern browsers).
-         Older browsers still get WebP/JPG via the <picture> fallback inside
-         SmartImage; we just don't preload those (preloading both wastes ~100KB
-         on the critical path because <link preload as=image> ignores `type`). -->
-    <link rel="preload" as="image" href="/work/portfolio/portfolio-010.avif" type="image/avif" fetchpriority="high" />
+         Responsive AVIF: phones get 800w (~55KB), desktop gets 1600w (~84KB).
+         Older browsers fall back to <picture> WebP/JPG inside SmartImage. -->
+    <link rel="preload" as="image" type="image/avif" fetchpriority="high"
+      href="/work/portfolio/portfolio-010.avif"
+      imagesrcset="/work/portfolio/portfolio-010-mobile.avif 800w, /work/portfolio/portfolio-010.avif 1600w"
+      imagesizes="(max-width: 768px) 100vw, 1600px" />
 
     <!-- Google tag (gtag.js) — Google Ads + GA4
          Loaded on requestIdleCallback so it doesn't block LCP. The dataLayer

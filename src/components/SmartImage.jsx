@@ -104,6 +104,21 @@ export default function SmartImage({
           if (!m) return null
           const base = m[1]
           const query = m[3] || ''
+          // If a -mobile sibling exists (only generated for true LCP heroes
+          // like portfolio-010), use srcset+sizes so phones pull the smaller
+          // variant. We can't feature-detect at runtime so we hard-list bases.
+          const HAS_MOBILE = new Set(['/work/portfolio/portfolio-010'])
+          if (HAS_MOBILE.has(base)) {
+            const avifSet = `${base}-mobile.avif${query} 800w, ${base}.avif${query} 1600w`
+            const webpSet = `${base}-mobile.webp${query} 800w, ${base}.webp${query} 1600w`
+            const sz = sizes || '(max-width: 768px) 100vw, 1600px'
+            return (
+              <>
+                <source type="image/avif" srcSet={avifSet} sizes={sz} />
+                <source type="image/webp" srcSet={webpSet} sizes={sz} />
+              </>
+            )
+          }
           return (
             <>
               <source type="image/avif" srcSet={`${base}.avif${query}`} sizes={sizes} />
