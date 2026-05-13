@@ -13,6 +13,13 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: false,
+    // The three.js bundle (~1MB) is only used by lazy-loaded components
+    // (WebGLPersonaAvatar, PropertyVisualizer, GCFloorPlanCanvas). Strip it
+    // from the entry's modulepreload graph so the homepage doesn't fetch it.
+    modulePreload: {
+      resolveDependencies: (_filename, deps) =>
+        deps.filter((d) => !d.includes('three-world'))
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {

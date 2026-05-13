@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, Mic, MicOff, Volume2, VolumeX, Radio, Phone, Sparkles, ShieldCheck } from 'lucide-react';
 import { api } from '@/api/client';
-import WebGLPersonaAvatar from './WebGLPersonaAvatar';
+// Lazy-load the WebGL avatar so the 500+KB three.js bundle never blocks the
+// initial page render. It is only mounted when AVATAR_REALISM_MODE === 'hybrid'
+// AND the user has opted into the model view.
+const WebGLPersonaAvatar = lazy(() => import('./WebGLPersonaAvatar'));
 import SmartImage from './SmartImage';
 import { PRIMARY_LOGO_URL, FALLBACK_LOGO_URL } from '@/lib/branding';
 import { trackEvent, trackQualifiedLeadSignal } from '@/lib/analytics';
@@ -648,13 +651,15 @@ export default function AIConciergeBubble() {
               <button type="button" onClick={handleOpen} aria-label="Open AI consultant chat" className="relative z-10">
                 <div className="w-[116px] h-[148px] rounded-2xl border border-primary/65 bg-black/65 overflow-hidden shadow-[0_26px_56px_rgba(0,0,0,0.58)]">
                   {useModelRender ? (
-                    <WebGLPersonaAvatar
-                      mode={avatarState}
-                      speechPulse={speechPulse}
-                      speechIntensity={speaking ? 0.9 : 0.55}
-                      onModelModeChange={setModelMode}
-                      className="w-full h-full"
-                    />
+                    <Suspense fallback={null}>
+                      <WebGLPersonaAvatar
+                        mode={avatarState}
+                        speechPulse={speechPulse}
+                        speechIntensity={speaking ? 0.9 : 0.55}
+                        onModelModeChange={setModelMode}
+                        className="w-full h-full"
+                      />
+                    </Suspense>
                   ) : (
                     <SmartImage
                       src={AVATAR_POSTER_URL}
@@ -711,13 +716,15 @@ export default function AIConciergeBubble() {
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full border border-primary/60 overflow-hidden bg-black/60 shadow-[0_12px_28px_rgba(0,0,0,0.42)]">
                   {useModelRender ? (
-                    <WebGLPersonaAvatar
-                      mode={avatarState}
-                      speechPulse={speechPulse}
-                      speechIntensity={speaking ? 0.95 : 0.5}
-                      onModelModeChange={setModelMode}
-                      className="w-full h-full"
-                    />
+                    <Suspense fallback={null}>
+                      <WebGLPersonaAvatar
+                        mode={avatarState}
+                        speechPulse={speechPulse}
+                        speechIntensity={speaking ? 0.95 : 0.5}
+                        onModelModeChange={setModelMode}
+                        className="w-full h-full"
+                      />
+                    </Suspense>
                   ) : (
                     <SmartImage
                       src={AVATAR_POSTER_URL}
