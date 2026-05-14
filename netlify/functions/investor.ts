@@ -40,7 +40,7 @@ const FALLBACK_RSMEANS: Record<string, number> = {
   Virginia:98, 'North Carolina':94, 'South Carolina':91, Georgia:93,
   Florida:97, Maryland:105, Pennsylvania:107, Ohio:102, Texas:96,
   California:132, 'New York':138, Illinois:108, 'New Jersey':115,
-  Virginia:98, Washington:118, Colorado:106, Arizona:97,
+  Washington:118, Colorado:106, Arizona:97,
 };
 
 // ─── FRED API: SOFR + TREASURY ────────────────────────────────────────────────
