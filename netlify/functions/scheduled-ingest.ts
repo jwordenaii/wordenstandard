@@ -22,6 +22,11 @@ import type {
   SignalSource,
   IngestRunSummary,
 } from '../../src/types/signals.types';
+import { fetchBps, fetchAcs } from '../../src/lib/census';
+import { fetchFredExtended } from '../../src/lib/fred-extended';
+import { fetchSam } from '../../src/lib/sam';
+import { fetchBls } from '../../src/lib/bls';
+import { fetchEia } from '../../src/lib/eia';
 
 // ---------------------------------------------------------------------
 // Fetcher registry — one entry per src/lib/<source>.ts that emits
@@ -71,12 +76,14 @@ async function fetchNoaaSnapshot(): Promise<SourceFetchResult[]> {
 
 const FETCHERS: FetcherEntry[] = [
   { source: 'noaa', fn: fetchNoaaSnapshot },
-  // TRACK B (Claude) appends here as each src/lib/<source>.ts ships:
-  // { source: 'census',  fn: fetchCensusBpsSnapshot   },
-  // { source: 'fred',    fn: fetchFredCoreSeries      },
-  // { source: 'sam',     fn: fetchSamConstructionAwards },
-  // { source: 'bls',     fn: fetchBlsJoltsConstruction },
-  // { source: 'eia',     fn: fetchEiaMaterialIndices  },
+  // Track B fetchers — single SourceFetchResult per call wrapped into array.
+  // Defaults below cover the Virginia primary footprint; nationwide expansion
+  // is a config-only change in each lib's params.
+  { source: 'census', fn: async () => [await fetchBps(), await fetchAcs()] },
+  { source: 'fred',   fn: async () => [await fetchFredExtended()] },
+  { source: 'sam',    fn: async () => [await fetchSam()] },
+  { source: 'bls',    fn: async () => [await fetchBls()] },
+  { source: 'eia',    fn: async () => [await fetchEia()] },
 ];
 
 // ---------------------------------------------------------------------
