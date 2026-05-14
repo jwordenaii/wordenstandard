@@ -276,8 +276,7 @@ function buildFallbackContract(a: Partial<SiteAnalysis>): string {
     '  Oil Buffer: ±$9/ton liquid asphalt shield',
     '',
     '> CONTRACT GENERATED. READY FOR SIGNATURE.',
-  ].join('
-');
+  ].join('\n');
 }
 
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────────
