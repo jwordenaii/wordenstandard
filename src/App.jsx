@@ -141,11 +141,12 @@ export default function App(){
 
       },()=>{
 
-        // Default to Chester VA if geolocation denied
+        const dlat = import.meta.env.VITE_DISPATCH_LAT || '37.5407';
+        const dlon = import.meta.env.VITE_DISPATCH_LON || '-77.4360';
 
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=37.38&longitude=-77.45&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,weathercode&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=10`)
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${dlat}&longitude=${dlon}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,weathercode&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=10`)
 
-          .then(r=>r.json()).then(d=>{setWx(d);setWxLoc({lat:37.38,lon:-77.45})}).catch(()=>setWxErr("Failed to load weather"));
+          .then(r=>r.json()).then(d=>{setWx(d);setWxLoc({lat:parseFloat(dlat),lon:parseFloat(dlon)})}).catch(()=>setWxErr("Failed to load weather"));
 
       });
 
