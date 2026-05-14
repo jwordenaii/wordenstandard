@@ -140,8 +140,7 @@ const ContractTerminal: FC<TerminalProps> = ({ contractText, loading }) => {
           <span className="pco-terminal-cursor">█</span> Generating Worden Contract via Claude…
         </div>
       ) : (
-        contractText.split('
-').map((line, i) => (
+        contractText.split('\n').map((line, i) => (
           <div key={i} className={`pco-terminal-line ${
             line.startsWith('━') ? 'pco-tl-div'
             : line.includes('J. WORDEN') || line.includes('Virginia Class') ? 'pco-tl-header'

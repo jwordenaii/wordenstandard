@@ -1,4 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
+
+const IronGridMap = lazy(() => import("./components/IronGridMap"));
+const PreConOmniNode = lazy(() => import("./components/PreConOmniNode"));
+const InvestorROINode = lazy(() => import("./components/InvestorROINode"));
+const ForecastStation = lazy(() => import("./components/ForecastStation"));
+const DispatchWeatherStation = lazy(() => import("./components/DispatchWeatherStation"));
+const RealityEngineNode = lazy(() => import("./components/RealityEngineNode"));
 
 /* THE WORDEN STANDARD v4.0 — 9 STATIONS — ALL FUNCTIONAL */
 
@@ -170,7 +177,7 @@ export default function App(){
 
   const sendJ=async()=>{const m=jI.trim();if(!m||jW)return;setJI("");setJL(p=>[...p,{r:"u",t:m}]);setJW(true);try{const r=await fetch("/api/jarvis",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:`You are Jarvis — AI engine in The Worden Standard. ${Object.keys(T).length} construction trades, 51 US states. Paving: T=(sqft/9×depth×density)/24000. Res 145, Com 148. 35% margin floor. Binder $627.50. Machine health $0.08/ton. Full 51-state compliance: licensing, lien law, worker classification, prevailing wage, OSHA. Jobs: ${jobs.length}. Crew: ${crew.length}. Equipment: ${eqp.length}. Autonomy: ${auto.toUpperCase()}. Be concise. Mission control.`,messages:[{role:"user",content:m}]})});const d=await r.json();setJL(p=>[...p,{r:"j",t:d.content?.map(b=>b.text||"").filter(Boolean).join("\n")||"Error."}])}catch(e){setJL(p=>[...p,{r:"j",t:`Error: ${e.message}`}])}setJW(false)};
 
-  const cmdX=q=>{setCmd(false);const c=q.replace("/","").toLowerCase();const map={home:"home",jarvis:"jarvis",estimate:"estimate",jobs:"jobs",crew:"crew",equipment:"equipment",weather:"weather",banking:"banking",legal:"legal"};if(map[c]){setV(map[c]);return}setJI(q);setV("jarvis");setTimeout(sendJ,100)};
+  const cmdX=q=>{setCmd(false);const c=q.replace("/","").toLowerCase();const map={home:"home",jarvis:"jarvis",estimate:"estimate",jobs:"jobs",crew:"crew",equipment:"equipment",weather:"weather",banking:"banking",legal:"legal",ironmap:"ironmap",precon:"precon",investor:"investor",forecast:"forecast",dispatch:"dispatch",reality:"reality"};if(map[c]){setV(map[c]);return}setJI(q);setV("jarvis");setTimeout(sendJ,100)};
 
   const acl=auto==="auto"?"#22c55e":auto==="hybrid"?"#eab308":"#6b7280";
 
@@ -200,11 +207,17 @@ export default function App(){
 
     {id:"banking",icon:"$",l:"Banking"},{id:"legal",icon:"§",l:"Legal"},
 
+    {id:"ironmap",icon:"🗺",l:"IronGrid"},{id:"precon",icon:"📐",l:"PreCon"},
+
+    {id:"investor",icon:"📈",l:"Investor"},{id:"forecast",icon:"🔮",l:"Forecast"},
+
+    {id:"dispatch",icon:"🚛",l:"Dispatch"},{id:"reality",icon:"⚖",l:"Reality"},
+
   ];
 
   const pending=[{icon:"→",l:"Routing"},{icon:"°",l:"Thermal"},{icon:"♡",l:"Wearables"},{icon:"◈",l:"Marketing"}];
 
-  const viewTitle={home:"Home",jarvis:"Jarvis",estimate:"New Estimate",jobs:"Jobs",crew:"Crew",equipment:"Equipment",weather:"Weather",banking:"Banking",legal:"Legal / Compliance"};
+  const viewTitle={home:"Home",jarvis:"Jarvis",estimate:"New Estimate",jobs:"Jobs",crew:"Crew",equipment:"Equipment",weather:"Weather",banking:"Banking",legal:"Legal / Compliance",ironmap:"IronGrid Map",precon:"Pre-Con Omni",investor:"Investor ROI",forecast:"Forecast Station",dispatch:"Dispatch Weather",reality:"Reality Engine"};
 
   return(
 
@@ -732,6 +745,18 @@ export default function App(){
 
           </div>)}
 
+          {v==="ironmap"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading IronGrid Map...</div>}><IronGridMap/></Suspense>)}
+
+          {v==="precon"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Pre-Con Omni...</div>}><PreConOmniNode/></Suspense>)}
+
+          {v==="investor"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Investor ROI...</div>}><InvestorROINode/></Suspense>)}
+
+          {v==="forecast"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Forecast Station...</div>}><ForecastStation/></Suspense>)}
+
+          {v==="dispatch"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Dispatch Weather...</div>}><DispatchWeatherStation/></Suspense>)}
+
+          {v==="reality"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Reality Engine...</div>}><RealityEngineNode/></Suspense>)}
+
         </div>
 
       </div>
@@ -750,7 +775,7 @@ export default function App(){
 
           <div style={{padding:6}}>
 
-            {[{l:"Home",c:"/home"},{l:"Estimate",c:"/estimate"},{l:"Jarvis",c:"/jarvis"},{l:"Jobs",c:"/jobs"},{l:"Weather",c:"/weather"},{l:"Banking",c:"/banking"},{l:"Legal",c:"/legal"},{l:"Crew",c:"/crew"},{l:"Equipment",c:"/equipment"}].map(s=>(
+            {[{l:"Home",c:"/home"},{l:"Estimate",c:"/estimate"},{l:"Jarvis",c:"/jarvis"},{l:"Jobs",c:"/jobs"},{l:"Weather",c:"/weather"},{l:"Banking",c:"/banking"},{l:"Legal",c:"/legal"},{l:"Crew",c:"/crew"},{l:"Equipment",c:"/equipment"},{l:"IronGrid Map",c:"/ironmap"},{l:"Pre-Con Omni",c:"/precon"},{l:"Investor ROI",c:"/investor"},{l:"Forecast Station",c:"/forecast"},{l:"Dispatch Weather",c:"/dispatch"},{l:"Reality Engine",c:"/reality"}].map(s=>(
 
               <button key={s.c} onClick={()=>cmdX(s.c)} className="wN" style={{display:"block",width:"100%",textAlign:"left",padding:"6px 12px",borderRadius:4,border:"none",background:"transparent",color:"rgba(255,255,255,0.35)",fontFamily:"inherit",fontSize:15,cursor:"pointer"}}>
 
