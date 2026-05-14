@@ -6,3 +6,7 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Daily signal ingest — 06:00 UTC
+[functions."scheduled-ingest"]
+  schedule = "0 6 * * *"
