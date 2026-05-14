@@ -34,10 +34,11 @@ import type {
 
 function loadBlueprint(module: TwsModuleKey): TwsBlueprint | null {
   try {
-    // Dynamic require — works in Netlify Functions (Node.js)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const bp = require(`../../ai-page-blueprints/thewordenstandard-${module}.json`);
-    return bp as TwsBlueprint;
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.resolve(__dirname, '../../ai-page-blueprints/thewordenstandard-' + module + '.json');
+    const raw = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(raw) as TwsBlueprint;
   } catch {
     return null;
   }
