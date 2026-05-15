@@ -106,7 +106,7 @@ export async function writePrediction(p: PredictionRow): Promise<void> {
     INSERT INTO predictions (model, geo_fips, horizon_days, score, components, narrative)
     VALUES (${p.model}, ${p.geoFips}, ${p.horizonDays}, ${p.score},
             ${JSON.stringify(p.components)}::jsonb, ${p.narrative ?? null})
-    ON CONFLICT (model, geo_fips, horizon_days, ((generated_at)::date))
+    ON CONFLICT (model, geo_fips, horizon_days, tstz_to_date(generated_at))
     DO UPDATE SET score = EXCLUDED.score,
                   components = EXCLUDED.components,
                   narrative = EXCLUDED.narrative,
