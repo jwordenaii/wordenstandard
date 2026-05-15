@@ -201,6 +201,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
       noaa: Object.keys(tmp).length,
     });
 
+    // Log individual fetch statuses for debugging
+    if (trends.status === 'rejected') console.error('TRENDS REJECTED:', trends.reason);
+    if (resPermits.status === 'rejected') console.error('CENSUS REJECTED:', resPermits.reason);
+    if (diesel.status === 'rejected') console.error('EIA REJECTED:', diesel.reason);
+    if (blsEmp.status === 'rejected') console.error('BLS REJECTED:', blsEmp.reason);
+    if (noaaTemps.status === 'rejected') console.error('NOAA REJECTED:', noaaTemps.reason);
+
     const now = new Date().toISOString();
 
     const signals: StateSignal[] = STATE_ABBRS.map(abbr => {
