@@ -40,6 +40,20 @@ const FIPS: Record<string,string> = {
 
 const STATE_ABBRS = Object.keys(FIPS);
 
+const STATE_NAMES: Record<string,string> = {
+  'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA',
+  'Colorado':'CO','Connecticut':'CT','Delaware':'DE','District of Columbia':'DC',
+  'Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL',
+  'Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA',
+  'Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN',
+  'Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV',
+  'New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY',
+  'North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR',
+  'Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',
+  'Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA',
+  'Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY'
+};
+
 // ─── GOOGLE TRENDS (via SerpAPI or pytrends microservice) ────────────────────
 async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
   try {
@@ -50,7 +64,7 @@ async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
     const data = await res.json();
     const out: Record<string,number> = {};
     (data.interest_by_region ?? []).forEach((r: {location:string;max_value_index:number}) => {
-      const abbr = STATE_ABBRS.find(a => r.location.includes(a)) ?? '';
+      const abbr = STATE_NAMES[r.location] ?? '';
       if (abbr) out[abbr] = r.max_value_index ?? 0;
     });
     return out;
@@ -63,7 +77,7 @@ async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
 // ─── CENSUS BUILDING PERMITS (BPS API) ──────────────────────────────────────
 async function fetchResPermits(): Promise<Record<string,{sf:number;mf:number;total:number;changePct:number}>> {
   try {
-    const url = `https://api.census.gov/data/timeseries/bps/totals?get=NAME,RPCOUNITS,BLDGS5PLUS&for=state:*&time=2024-06&key=${CENSUS_KEY}`;
+    const url = `https://api.census.gov/data/timeseries/bps/totals?get=NAME,UNITS,BLDGS&for=state:*&time=2024-06&key=${CENSUS_KEY}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Census BPS ${res.status}`);
     const rows: string[][] = await res.json();
@@ -71,7 +85,7 @@ async function fetchResPermits(): Promise<Record<string,{sf:number;mf:number;tot
     rows.slice(1).forEach(row => {
       const fips = row[row.length-1];
       const abbr = STATE_ABBRS.find(a => FIPS[a] === fips) ?? '';
-      if (abbr) out[abbr] = { sf: parseInt(row[2])||0, mf: parseInt(row[3])||0, total:(parseInt(row[2])||0)+(parseInt(row[3])||0), changePct: 0 };
+      if (abbr) out[abbr] = { sf: parseInt(row[1])||0, mf: parseInt(row[2])||0, total:(parseInt(row[1])||0)+(parseInt(row[2])||0), changePct: 0 };
     });
     return out;
   } catch (e) { console.error('FETCH_ERROR fetchResPermits:', e); return {}; }
@@ -80,7 +94,7 @@ async function fetchResPermits(): Promise<Record<string,{sf:number;mf:number;tot
 // ─── EIA DIESEL PRICES ───────────────────────────────────────────────────────
 async function fetchDieselPrices(): Promise<Record<string,number>> {
   try {
-    const url = `https://api.eia.gov/v2/petroleum/pri/gnd/data/?api_key=${EIA_KEY}&frequency=weekly&data[0]=value&facets[product][]=DPF&sort[0][column]=period&sort[0][direction]=desc&length=51`;
+    const url = `https://api.eia.gov/v2/petroleum/pri/gnd/data/?api_key=${EIA_KEY}&frequency=weekly&data[0]=value&facets[product][]=EPD2DXL0&sort[0][column]=period&sort[0][direction]=desc&length=51`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`EIA ${res.status}`);
     const data = await res.json();
@@ -121,15 +135,28 @@ async function fetchConstructionEmployment(): Promise<Record<string,number>> {
 // ─── NOAA TEMPERATURE DATA ───────────────────────────────────────────────────
 async function fetchNoaaTemps(): Promise<Record<string,{tempF:number;hdd:number}>> {
   try {
-    const url = `https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&datatypeid=TAVG&locationcategoryid=ST&units=standard&startdate=2025-05-01&enddate=2025-05-07&limit=1000&token=${NOAA_TOKEN}`;
+    const url = `https://www.ncei.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&locationcategoryid=ST&startdate=2010-05-01&enddate=2010-05-01&limit=52&units=standard`;
     const res = await fetch(url, { headers: { token: NOAA_TOKEN } });
     if (!res.ok) throw new Error(`NOAA ${res.status}`);
     const data = await res.json();
     const out: Record<string,{tempF:number;hdd:number}> = {};
+    const stateMap: Record<string,string> = {
+      'FIPS:01':'AL','FIPS:02':'AK','FIPS:04':'AZ','FIPS:05':'AR','FIPS:06':'CA',
+      'FIPS:08':'CO','FIPS:09':'CT','FIPS:10':'DE','FIPS:11':'DC','FIPS:12':'FL',
+      'FIPS:13':'GA','FIPS:15':'HI','FIPS:16':'ID','FIPS:17':'IL','FIPS:18':'IN',
+      'FIPS:19':'IA','FIPS:20':'KS','FIPS:21':'KY','FIPS:22':'LA','FIPS:23':'ME',
+      'FIPS:24':'MD','FIPS:25':'MA','FIPS:26':'MI','FIPS:27':'MN','FIPS:28':'MS',
+      'FIPS:29':'MO','FIPS:30':'MT','FIPS:31':'NE','FIPS:32':'NV','FIPS:33':'NH',
+      'FIPS:34':'NJ','FIPS:35':'NM','FIPS:36':'NY','FIPS:37':'NC','FIPS:38':'ND',
+      'FIPS:39':'OH','FIPS:40':'OK','FIPS:41':'OR','FIPS:42':'PA','FIPS:44':'RI',
+      'FIPS:45':'SC','FIPS:46':'SD','FIPS:47':'TN','FIPS:48':'TX','FIPS:49':'UT',
+      'FIPS:50':'VT','FIPS:51':'VA','FIPS:53':'WA','FIPS:54':'WV','FIPS:55':'WI',
+      'FIPS:56':'WY'
+    };
     (data.results ?? []).forEach((r: {station:string;value:number}) => {
-      const abbr = r.station?.slice(0,2) ?? '';
-      if (abbr && STATE_ABBRS.includes(abbr)) {
-        const f = r.value * 9/5 + 32;
+      const abbr = stateMap[r.station] ?? '';
+      if (abbr) {
+        const f = r.value;
         out[abbr] = { tempF: f, hdd: Math.max(0, 65 - f) };
       }
     });
