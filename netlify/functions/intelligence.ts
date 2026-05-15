@@ -42,10 +42,6 @@ const STATE_ABBRS = Object.keys(FIPS);
 
 // ─── GOOGLE TRENDS (via SerpAPI or pytrends microservice) ────────────────────
 async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
-  // Option A: Use SerpAPI Google Trends endpoint
-  // Option B: Point to your own pytrends Python microservice
-  // Returns: { STATE_ABBR: interest_0_to_100 }
-  // Stub returns zeros until API is wired — swap this block with real call
   try {
     const kw = encodeURIComponent(keywords.slice(0,3).join(','));
     const url = `https://serpapi.com/search?engine=google_trends&q=${kw}&geo=US&data_type=GEO_MAP_0&api_key=${process.env.SERPAPI_KEY}`;
@@ -53,13 +49,13 @@ async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
     if (!res.ok) throw new Error(`SerpAPI ${res.status}`);
     const data = await res.json();
     const out: Record<string,number> = {};
-    // SerpAPI returns interest_by_region array
     (data.interest_by_region ?? []).forEach((r: {location:string;max_value_index:number}) => {
       const abbr = STATE_ABBRS.find(a => r.location.includes(a)) ?? '';
       if (abbr) out[abbr] = r.max_value_index ?? 0;
     });
     return out;
-  } catch {
+  } catch (e) {
+    console.error('FETCH_ERROR fetchTrends:', e);
     return {};
   }
 }
@@ -67,9 +63,7 @@ async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
 // ─── CENSUS BUILDING PERMITS (BPS API) ──────────────────────────────────────
 async function fetchResPermits(): Promise<Record<string,{sf:number;mf:number;total:number;changePct:number}>> {
   try {
-    // Census BPS: https://www.census.gov/construction/bps/
-    // Endpoint: https://api.census.gov/data/timeseries/bps/totals
-    const url = `https://api.census.gov/data/timeseries/bps/totals?get=NAME,RPCOUNITS,BLDGS5PLUS&for=state:*&time=2025-01&key=${CENSUS_KEY}`;
+    const url = `https://api.census.gov/data/timeseries/bps/totals?get=NAME,RPCOUNITS,BLDGS5PLUS&for=state:*&time=2024-06&key=${CENSUS_KEY}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Census BPS ${res.status}`);
     const rows: string[][] = await res.json();
@@ -80,7 +74,7 @@ async function fetchResPermits(): Promise<Record<string,{sf:number;mf:number;tot
       if (abbr) out[abbr] = { sf: parseInt(row[2])||0, mf: parseInt(row[3])||0, total:(parseInt(row[2])||0)+(parseInt(row[3])||0), changePct: 0 };
     });
     return out;
-  } catch { return {}; }
+  } catch (e) { console.error('FETCH_ERROR fetchResPermits:', e); return {}; }
 }
 
 // ─── EIA DIESEL PRICES ───────────────────────────────────────────────────────
@@ -96,14 +90,13 @@ async function fetchDieselPrices(): Promise<Record<string,number>> {
       if (abbr && STATE_ABBRS.includes(abbr)) out[abbr] = parseFloat(d.value)||0;
     });
     return out;
-  } catch { return {}; }
+  } catch (e) { console.error('FETCH_ERROR fetchDieselPrices:', e); return {}; }
 }
 
 // ─── BLS CONSTRUCTION EMPLOYMENT ────────────────────────────────────────────
 async function fetchConstructionEmployment(): Promise<Record<string,number>> {
   try {
-    // BLS Series IDs for state construction employment: SMU{FIPS}0000230000001
-    const seriesIds = STATE_ABBRS.map(a => `SMU${FIPS[a]}0000230000001`);
+    const seriesIds = STATE_ABBRS.map(a => `SMS${FIPS[a]}000003000000001`);
     const batches = [];
     for (let i = 0; i < seriesIds.length; i += 50) batches.push(seriesIds.slice(i, i+50));
     const out: Record<string,number> = {};
@@ -111,7 +104,7 @@ async function fetchConstructionEmployment(): Promise<Record<string,number>> {
       const res = await fetch('https://api.bls.gov/publicAPI/v2/timeseries/data/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seriesid: batch, startyear: '2025', endyear: '2025', registrationkey: BLS_KEY }),
+        body: JSON.stringify({ seriesid: batch, startyear: '2024', endyear: '2024', registrationkey: BLS_KEY }),
       });
       if (!res.ok) continue;
       const data = await res.json();
@@ -122,7 +115,7 @@ async function fetchConstructionEmployment(): Promise<Record<string,number>> {
       });
     }
     return out;
-  } catch { return {}; }
+  } catch (e) { console.error('FETCH_ERROR fetchConstructionEmployment:', e); return {}; }
 }
 
 // ─── NOAA TEMPERATURE DATA ───────────────────────────────────────────────────
@@ -141,7 +134,7 @@ async function fetchNoaaTemps(): Promise<Record<string,{tempF:number;hdd:number}
       }
     });
     return out;
-  } catch { return {}; }
+  } catch (e) { console.error('FETCH_ERROR fetchNoaaTemps:', e); return {}; }
 }
 
 // ─── HANDLER ─────────────────────────────────────────────────────────────────
@@ -159,7 +152,6 @@ export const handler: Handler = async (event: HandlerEvent) => {
   };
 
   try {
-    // Parallel fetch all data sources
     const [trends, resPermits, diesel, blsEmp, noaaTemps] = await Promise.allSettled([
       fetchTrends(CLUSTERS[cluster] ?? CLUSTERS.paving),
       fetchResPermits(),
@@ -174,6 +166,14 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const emp = blsEmp.status      === 'fulfilled' ? blsEmp.value      : {};
     const tmp = noaaTemps.status   === 'fulfilled' ? noaaTemps.value   : {};
 
+    console.log('INTELLIGENCE FETCH RESULTS:', {
+      trends: Object.keys(tr).length,
+      permits: Object.keys(rp).length,
+      diesel: Object.keys(di).length,
+      employment: Object.keys(emp).length,
+      noaa: Object.keys(tmp).length,
+    });
+
     const now = new Date().toISOString();
 
     const signals: StateSignal[] = STATE_ABBRS.map(abbr => {
@@ -187,9 +187,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       const dieselPrice = di[abbr] ?? null;
       const employment  = emp[abbr] ?? null;
       const constructionInterest = tr[abbr] ?? 0;
-      // Composite civil demand score (0-100)
       const civilDemandScore = Math.min(100, Math.round(constructionInterest * 0.4 + (resData?.total ? Math.min(50,resData.total/50) : 0) + (employment ? Math.min(30,employment/10) : 0)));
-      // Weather opportunity score: open season + freeze-thaw damage = high opportunity
       const weatherRiskScore = pavingSeason === 'open' ? 70 + (freezeThawRisk === 'high' ? 25 : freezeThawRisk === 'medium' ? 12 : 0) : pavingSeason === 'marginal' ? 40 : 10;
 
       return {
