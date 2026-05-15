@@ -10,7 +10,7 @@ function serviceAreaListSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'PavingContractor',
-    name: 'J. Worden & Sons Asphalt Paving',
+    name: 'J. Worden & Sons Paving LLC',
     telephone: '+18044461296',
     url: SITE_URL,
     areaServed: SERVICE_AREAS.map((a) => ({
@@ -39,7 +39,7 @@ export default function ServiceAreas() {
     <>
       <SchemaMarkup
         title="Service Areas — Asphalt Paving Across Virginia"
-        description="J. Worden & Sons Asphalt Paving serves Richmond, Chester, Chesterfield, Henrico, Colonial Heights, Petersburg, Hopewell, Midlothian, and 20+ Virginia cities. Free estimates — call (804) 446-1296."
+        description="J. Worden & Sons Paving LLC serves Richmond, Chester, Chesterfield, Henrico, Colonial Heights, Petersburg, Hopewell, Midlothian, and 20+ Virginia cities. Free estimates — call (804) 446-1296."
         canonical="/service-areas"
         schema={[LOCAL_BUSINESS_SCHEMA, serviceAreaListSchema()]}
         breadcrumb={[

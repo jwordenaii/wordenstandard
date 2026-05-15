@@ -24,7 +24,7 @@ const TIMELINE = [
     year: 'Est. 1984',
     headline: 'J. Worden & Sons Is Born.',
     event:
-      'After three decades in roofing, the founder launched J. Worden & Sons Asphalt Paving. The work ethic was the same, the trade was different. The company built its reputation one job at a time — from Motels, Virginia all the way out to Virginia Beach — earning trust through quality work and zero shortcuts.',
+      'After three decades in roofing, the founder launched J. Worden & Sons Paving LLC. The work ethic was the same, the trade was different. The company built its reputation one job at a time — from Motels, Virginia all the way out to Virginia Beach — earning trust through quality work and zero shortcuts.',
   },
   {
     year: 'Virginia Coast Roots',

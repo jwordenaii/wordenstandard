@@ -392,7 +392,7 @@ export default function Projects() {
             name: 'Commercial Asphalt Access Road & Gated Facility',
             description:
               'Commercial asphalt access road beside a fenced industrial facility with fresh pavement and clean edge detail.',
-            creditText: 'J. Worden & Sons Asphalt Paving',
+            creditText: 'J. Worden & Sons Paving LLC',
             // State-level Place — finer geo unavailable for this entry.
             contentLocation: {
               '@type': 'Place',

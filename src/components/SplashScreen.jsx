@@ -51,7 +51,7 @@ export default function SplashScreen() {
         >
           <motion.img
             src={logoSrc}
-            alt="J. Worden & Sons Paving"
+            alt="J. Worden & Sons Paving LLC"
             onError={() => setLogoSrc(FALLBACK_LOGO_URL)}
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

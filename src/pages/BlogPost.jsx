@@ -87,7 +87,7 @@ export default function BlogPost() {
         },
         publisher: {
           '@type': 'Organization',
-          name: 'J. Worden & Sons Asphalt Paving',
+          name: 'J. Worden & Sons Paving LLC',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.jwordenasphaltpaving.com/logo.png',
@@ -117,7 +117,7 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-background font-body">
       <SEO
-        title={`${post.title} | J. Worden & Sons Asphalt Paving`}
+        title={`${post.title} | J. Worden & Sons Paving LLC`}
         description={post.excerpt}
         canonicalPath={`/blog/${post.slug}`}
         ogImage={post.cover_image}
@@ -171,7 +171,7 @@ export default function BlogPost() {
             <div className="aspect-[21/9] overflow-hidden bg-muted border-b border-border">
               <img
                 src={post.cover_image}
-                alt={`${post.title} — expert guide by J. Worden & Sons Asphalt Paving`}
+                alt={`${post.title} — expert guide by J. Worden & Sons Paving LLC`}
                 className="w-full h-full object-cover"
               />
             </div>

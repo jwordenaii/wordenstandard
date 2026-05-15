@@ -57,7 +57,7 @@ export default function CustomerPortal() {
   return (
     <div className="min-h-screen bg-background font-body">
       <SEO
-        title="Customer Portal | J. Worden & Sons Asphalt Paving"
+        title="Customer Portal | J. Worden & Sons Paving LLC"
         description="Secure customer portal — view your project status, invoices, warranty documentation, and progress photos."
         canonicalPath="/portal"
       />

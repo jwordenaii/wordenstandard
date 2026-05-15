@@ -49,7 +49,7 @@ export default function Blog() {
         '@type': 'CollectionPage',
         '@id': `${PRIMARY_DOMAIN}/blog#page`,
         url: `${PRIMARY_DOMAIN}/blog`,
-        name: 'J. Worden & Sons Asphalt Paving Blog',
+        name: 'J. Worden & Sons Paving LLC Blog',
         description:
           'Expert guides on asphalt paving, sealcoating, driveway maintenance, and commercial paving across Central Virginia and the Southeast.',
       },
@@ -57,12 +57,12 @@ export default function Blog() {
         '@type': 'Blog',
         '@id': `${PRIMARY_DOMAIN}/blog#blog`,
         url: `${PRIMARY_DOMAIN}/blog`,
-        name: 'J. Worden & Sons Asphalt Paving Blog',
+        name: 'J. Worden & Sons Paving LLC Blog',
         description:
           'Expert guides on asphalt paving, sealcoating, driveway maintenance, and commercial paving across Central Virginia and the Southeast.',
         publisher: {
           '@type': 'Organization',
-          name: 'J. Worden & Sons Asphalt Paving',
+          name: 'J. Worden & Sons Paving LLC',
         },
         blogPost: safePosts.map((p) => ({
           '@type': 'BlogPosting',
@@ -150,7 +150,7 @@ export default function Blog() {
                     <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                       <SmartImage
                         src={post.cover_image}
-                        alt={`${post.title} — J. Worden & Sons Asphalt Paving expert guide`}
+                        alt={`${post.title} — J. Worden & Sons Paving LLC expert guide`}
                         width={1280}
                         height={800}
                         loading="lazy"

@@ -77,10 +77,10 @@ export default function HomeSchema() {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'Is J. Worden & Sons Asphalt Paving the same company as Worden Paving?',
+          name: 'Is J. Worden & Sons Paving LLC the same company as Worden Paving?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'No. J. Worden & Sons Asphalt Paving (jwordenasphaltpaving.com) is a separate, independent company with its own office, phone number, and operations.',
+            text: 'No. J. Worden & Sons Paving LLC (jwordenasphaltpaving.com) is a separate, independent company with its own office, phone number, and operations.',
           },
         },
         {

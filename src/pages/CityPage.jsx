@@ -12,14 +12,14 @@ function cityLocalBusinessSchema(area) {
   return {
     '@context': 'https://schema.org',
     '@type': ['PavingContractor', 'LocalBusiness'],
-    name: 'J. Worden & Sons Asphalt Paving',
+    name: 'J. Worden & Sons Paving LLC',
     description: area.description,
     telephone: '+18044461296',
     email: 'contact@jwordenasphaltpaving.com',
     url: `${SITE_URL}/service-areas/${area.slug}`,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '1601 Ware Bottom Springs Rd Suite 214',
+      streetAddress: '1601 Ware Bottom Spring Rd Suite 214',
       addressLocality: 'Chester',
       addressRegion: 'VA',
       postalCode: '23836',

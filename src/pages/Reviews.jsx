@@ -247,7 +247,7 @@ export default function Reviews() {
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="J. Worden & Sons Asphalt Paving on Google Maps"
+              title="J. Worden & Sons Paving LLC on Google Maps"
             />
           </div>
           <div className="flex flex-wrap justify-center gap-4 mt-6">

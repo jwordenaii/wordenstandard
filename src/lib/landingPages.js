@@ -520,7 +520,7 @@ export function buildLandingJsonLd(page) {
       },
       provider: {
         '@type': 'LocalBusiness',
-        name: 'J. Worden & Sons Asphalt Paving',
+        name: 'J. Worden & Sons Paving LLC',
         url: PRIMARY_DOMAIN,
         telephone: '+18044461296',
       },

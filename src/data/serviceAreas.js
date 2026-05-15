@@ -1,5 +1,5 @@
 /**
- * Service area data for J. Worden & Sons Asphalt Paving.
+ * Service area data for J. Worden & Sons Paving LLC.
  * All string values use double-quotes to avoid apostrophe escaping issues.
  */
 
@@ -15,7 +15,7 @@ export const SERVICE_AREAS = [
     headline: 'Asphalt Paving Contractor in Chester, VA',
     tagline: 'Headquartered in Chester — serving the Chesterfield corridor since 1984.',
     description:
-      'J. Worden & Sons Asphalt Paving is headquartered in Chester, Virginia. From our base at 1601 Ware Bottom Springs Rd, we serve residential homeowners and commercial property managers across Chester and the entire Chesterfield County corridor. New driveways, parking lot construction, sealcoating, and crack filling — four generations of work, all in your backyard.',
+      'J. Worden & Sons Paving LLC is headquartered in Chester, Virginia. From our base at 1601 Ware Bottom Spring Rd, we serve residential homeowners and commercial property managers across Chester and the entire Chesterfield County corridor. New driveways, parking lot construction, sealcoating, and crack filling — four generations of work, all in your backyard.',
     services: [
       'Asphalt Paving',
       'Sealcoating',

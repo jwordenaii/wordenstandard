@@ -40,7 +40,7 @@ export default function SchemaMarkup({
   breadcrumb,
   noindex = false,
 }) {
-  const fullTitle = `${title} | J. Worden & Sons Asphalt Paving`
+  const fullTitle = `${title} | J. Worden & Sons Paving LLC`
   const canonicalUrl = `${SITE_URL}${canonical}`
 
   const schemas = []
@@ -81,7 +81,7 @@ export default function SchemaMarkup({
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={image} />
-      <meta property="og:site_name" content="J. Worden & Sons Asphalt Paving" />
+      <meta property="og:site_name" content="J. Worden & Sons Paving LLC" />
       <meta property="og:locale" content="en_US" />
 
       {/* Twitter Card */}

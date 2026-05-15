@@ -89,7 +89,7 @@ export default function LocationsIndex() {
       },
       {
         '@type': 'ItemList',
-        name: 'Virginia Cities Served by J. Worden & Sons Asphalt Paving',
+        name: 'Virginia Cities Served by J. Worden & Sons Paving LLC',
         numberOfItems: cityCount,
         itemListElement: LOCATIONS.map((loc, i) => ({
           '@type': 'ListItem',

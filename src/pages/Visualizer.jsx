@@ -83,7 +83,7 @@ function AddressStep({ onParcelFound, onSkip }) {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
-          placeholder="e.g. 1601 Ware Bottom Springs Rd, Chester, VA"
+          placeholder="e.g. 1601 Ware Bottom Spring Rd, Chester, VA"
           className="flex-1 border border-gray-200 rounded-lg px-4 py-3 text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-amber/50 text-sm"
         />
         <button

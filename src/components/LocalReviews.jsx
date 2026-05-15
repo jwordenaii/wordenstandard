@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Star, ExternalLink, Award } from 'lucide-react';
 
 // Real, verified review data from public profiles.
-// Source: Google Search results for "J. Worden & Sons Asphalt Paving" (April 2026).
+// Source: Google Search results for "J. Worden & Sons Paving LLC" (April 2026).
 // Update these numbers as profile counts grow.
 const REVIEW_PLATFORMS = [
   {
@@ -186,7 +186,7 @@ export default function LocalReviews() {
             <div className="relative bg-white p-6 md:p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-border">
               <img
                 src={HOUZZ_SCREENSHOT}
-                alt="Screenshot from houzz.com verifying J. Worden & Sons Paving has earned 4 Houzz Awards — Best of Houzz Service 2014, 2015, 2016, and 2023 — plus 3 Houzz Badges (Houzz Pro Software User, Recommended, and 500 Ideabook Saves) and 12 verified customer reviews."
+                alt="Screenshot from houzz.com verifying J. Worden & Sons Paving LLC has earned 4 Houzz Awards — Best of Houzz Service 2014, 2015, 2016, and 2023 — plus 3 Houzz Badges (Houzz Pro Software User, Recommended, and 500 Ideabook Saves) and 12 verified customer reviews."
                 loading="lazy"
                 className="max-w-full max-h-[520px] object-contain"
               />

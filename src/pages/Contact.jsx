@@ -141,7 +141,7 @@ export default function Contact() {
     <>
       <SchemaMarkup
         title="Contact Us — Free Estimates & Project Questions"
-        description="Contact J. Worden & Sons Asphalt Paving. Call, email, or fill out our form. We respond within one business day. Free estimates always."
+        description="Contact J. Worden & Sons Paving LLC. Call, email, or fill out our form. We respond within one business day. Free estimates always."
         canonical="/contact"
         schema={CONTACT_SCHEMA}
         breadcrumb={[
@@ -177,7 +177,7 @@ export default function Contact() {
                 {
                   icon: '📍',
                   label: 'Address',
-                  value: '1601 Ware Bottom Springs Rd Suite 214, Chester VA 23836',
+                  value: '1601 Ware Bottom Spring Rd Suite 214, Chester VA 23836',
                   href: 'https://www.google.com/maps/search/1601+Ware+Bottom+Springs+Rd+Chester+VA+23836',
                 },
                 { icon: '🕐', label: 'Hours', value: 'Monday–Friday, 7am–5pm' },

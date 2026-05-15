@@ -350,7 +350,7 @@ export default function Gallery() {
             name: img.job_name,
             description: img.description || img.job_name,
             uploadDate: img.uploaded_at,
-            creditText: 'J. Worden & Sons Asphalt Paving',
+            creditText: 'J. Worden & Sons Paving LLC',
           })),
         }}
       />

@@ -77,7 +77,7 @@ function AdminOpsPanel({ isAdmin, selectedJob, documents, onSeeded, onChanged })
       const doc = new jsPDF();
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(18);
-      doc.text('J. Worden & Sons Asphalt Paving', 18, 22);
+      doc.text('J. Worden & Sons Paving LLC', 18, 22);
       doc.setFontSize(14);
       doc.text(selectedJob.title || selectedJob.name || `Job ${selectedJob.id}`, 18, 34);
       doc.setFont('helvetica', 'normal');

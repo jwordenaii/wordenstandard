@@ -148,7 +148,7 @@ export default function CrewEta() {
         </div>
 
         <p className="font-body text-muted-foreground text-xs text-center pt-4">
-          J. Worden & Sons Asphalt Paving · 40+ years in Central Virginia · Licensed · Bonded · Insured
+          J. Worden & Sons Paving LLC · 40+ years in Central Virginia · Licensed · Bonded · Insured
         </p>
       </div>
     </div>

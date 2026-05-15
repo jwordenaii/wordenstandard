@@ -13,8 +13,8 @@ export const SITE_URL = 'https://www.jwordenasphaltpaving.com';
 // ──────────────────────────────────────────────────────────────────────────────
 // IDENTITY
 // ──────────────────────────────────────────────────────────────────────────────
-export const BUSINESS_NAME = 'J. Worden & Sons Asphalt Paving';
-export const BUSINESS_LEGAL_NAME = 'J. Worden & Sons Paving, L.L.C.';
+export const BUSINESS_NAME = 'J. Worden & Sons Paving LLC';
+export const BUSINESS_LEGAL_NAME = 'J. Worden & Sons Paving LLC';
 export const BUSINESS_FOUNDING_YEAR = '1984';
 export const TAX_ID_EIN = '20-4419522';
 
@@ -27,8 +27,8 @@ export const ALTERNATE_NAMES = [
   'J. Worden and Sons',
   'J Worden and Sons',
   'JWorden & Sons',
-  'J. Worden & Sons Paving',
-  'J. Worden and Sons Asphalt Paving',
+  'J. Worden & Sons Paving LLC',
+  'J. Worden & Sons Paving LLC',
   'J Worden Asphalt',
 ];
 

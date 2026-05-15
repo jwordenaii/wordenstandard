@@ -66,7 +66,7 @@ export default function ResidentialAsphalt() {
         name: 'Residential Asphalt Paving',
         provider: {
           '@type': 'LocalBusiness',
-          name: 'J. Worden & Sons Asphalt Paving',
+          name: 'J. Worden & Sons Paving LLC',
           url: 'https://www.jwordenasphaltpaving.com/',
           telephone: '+18044461296',
         },

@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-6">
               <img
                 src={PRIMARY_LOGO_URL}
-                alt="J. Worden & Sons Asphalt Paving logo"
+                alt="J. Worden & Sons Paving LLC logo"
                 width={560}
                 height={120}
                 className="w-40 h-12 object-contain rounded-md border border-border bg-white p-1"
@@ -108,7 +108,7 @@ export default function Footer() {
               <div className="flex items-start gap-3 text-muted-foreground">
                 <MapPin className="w-4 h-4 text-primary mt-0.5" />
                 <span className="font-body text-sm">
-                  1601 Ware Bottom Springs Rd<br />
+                  1601 Ware Bottom Spring Rd<br />
                   Suite 214<br />
                   Chester, VA 23836
                 </span>
@@ -120,14 +120,14 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="font-body text-muted-foreground text-xs">
-            © 2026 J. Worden & Sons Asphalt Paving. All rights reserved. Serving Richmond, VA and surrounding areas.
+            © 2026 J. Worden & Sons Paving LLC. All rights reserved. Serving Richmond, VA and surrounding areas.
           </p>
           <p className="font-body text-muted-foreground text-xs">
             Licensed · Bonded · Insured · VA Contractor
           </p>
         </div>
         <p className="font-body text-muted-foreground/80 text-[11px] mt-4 text-center sm:text-left">
-          Independent company notice: J. Worden & Sons Asphalt Paving operates at jwordenasphaltpaving.com and is not affiliated with Worden Paving.
+          Independent company notice: J. Worden & Sons Paving LLC operates at jwordenasphaltpaving.com and is not affiliated with Worden Paving.
         </p>
       </div>
     </footer>

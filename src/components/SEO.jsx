@@ -50,7 +50,7 @@ export default function SEO({
         ? `${window.location.protocol}//${window.location.host}`
         : siteProfile?.canonicalUrl || PRIMARY_DOMAIN;
     const canonicalUrl = `${canonicalBase}${normalizedPath}`;
-    const siteName = siteProfile?.label || 'J. Worden & Sons Asphalt Paving';
+    const siteName = siteProfile?.label || 'J. Worden & Sons Paving LLC';
 
     const isInternalRoute = [
       '/command-center',

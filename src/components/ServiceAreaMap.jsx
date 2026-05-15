@@ -44,7 +44,7 @@ const extendedIcon = new Icon({
   popupAnchor: [0, -32],
 });
 
-// HQ coordinates (Ware Bottom Springs Rd, Chester VA)
+// HQ coordinates (Ware Bottom Spring Rd, Chester VA)
 const HQ = { lat: 37.3563, lng: -77.4411 };
 
 // Central Virginia + nearby coverage — filter to VA markets for this primary-zones map
@@ -127,7 +127,7 @@ export default function ServiceAreaMap() {
                       Chester, VA
                     </p>
                     <p style={{ fontSize: 12, color: '#4a4a4a', marginBottom: 8 }}>
-                      1601 Ware Bottom Springs Rd, Suite 214
+                      1601 Ware Bottom Spring Rd, Suite 214
                     </p>
                     <a href="tel:+18044461296" style={{ fontSize: 12, fontWeight: 700, color: '#0a0a0a', textDecoration: 'underline' }}>
                       (804) 446-1296

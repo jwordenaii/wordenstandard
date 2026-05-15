@@ -51,10 +51,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex h-[72px] items-center justify-between md:h-20">
           {/* Logo — top left corner */}
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0 shrink-0" aria-label="J. Worden & Sons Asphalt Paving — Home">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center min-w-0 shrink-0" aria-label="J. Worden & Sons Paving LLC — Home">
             <img
               src={PRIMARY_LOGO_URL}
-              alt="J. Worden & Sons Asphalt Paving — Quality Work. Built To Last."
+              alt="J. Worden & Sons Paving LLC — Quality Work. Built To Last."
               width={560}
               height={120}
               sizes="(max-width: 640px) 190px, (max-width: 768px) 240px, 300px"
@@ -159,7 +159,7 @@ export default function Navbar() {
 
             <img
               src={PRIMARY_LOGO_URL}
-              alt="J. Worden & Sons Asphalt Paving mini logo"
+              alt="J. Worden & Sons Paving LLC mini logo"
               width={560}
               height={120}
               sizes="160px"

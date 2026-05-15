@@ -18,7 +18,7 @@ export const LOCATIONS = [
     isHeadquarters: true,
     headline: 'Asphalt Paving in Chester, VA — Our Hometown for 40+ Years',
     intro:
-      'J. Worden & Sons was founded in Chester, Virginia, and we still run every job from our Ware Bottom Springs Road headquarters. From River\'s Bend driveways to Route 10 commercial lots, this is the community that built us — and the streets we know inch by inch.',
+      'J. Worden & Sons was founded in Chester, Virginia, and we still run every job from our Ware Bottom Spring Road headquarters. From River\'s Bend driveways to Route 10 commercial lots, this is the community that built us — and the streets we know inch by inch.',
     neighborhoods: [
       'River\'s Bend', 'Bermuda Hundred', 'Enon', 'Curtis', 'Rivers Bend',
       'Meadowville', 'Old Centralia', 'Indian Hill', 'Point of Rocks',

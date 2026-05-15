@@ -10,7 +10,7 @@ const buildAltText = (p) => {
   const loc = p.location ? ` in ${p.location}` : '';
   const year = p.year ? ` (completed ${p.year})` : '';
   const cat = p.category ? `${p.category} asphalt paving project` : 'asphalt paving project';
-  return `${p.title} \u2014 ${area}${cat}${loc}${year} by J. Worden & Sons Asphalt Paving.`;
+  return `${p.title} \u2014 ${area}${cat}${loc}${year} by J. Worden & Sons Paving LLC.`;
 };
 
 // Inject ImageGallery JSON-LD into <head> so Google can index each photo with context.
@@ -26,7 +26,7 @@ const useImageGalleryJsonLd = (projects) => {
         'Real photographs of completed asphalt paving, sealcoating, and site-work projects across Central Virginia and the Southeast by J. Worden & Sons.',
       author: {
         '@type': 'Organization',
-        name: 'J. Worden & Sons Asphalt Paving',
+        name: 'J. Worden & Sons Paving LLC',
         url: 'https://www.jwordenasphaltpaving.com/',
       },
       image: projects.map((p) => ({
@@ -37,12 +37,12 @@ const useImageGalleryJsonLd = (projects) => {
         description: p.description || buildAltText(p),
         contentLocation: p.location ? { '@type': 'Place', name: p.location } : undefined,
         datePublished: p.year ? `${p.year}-01-01` : undefined,
-        creditText: 'J. Worden & Sons Asphalt Paving',
+        creditText: 'J. Worden & Sons Paving LLC',
         creator: {
           '@type': 'Organization',
-          name: 'J. Worden & Sons Asphalt Paving',
+          name: 'J. Worden & Sons Paving LLC',
         },
-        copyrightNotice: `\u00a9 ${p.year || new Date().getFullYear()} J. Worden & Sons Asphalt Paving`,
+        copyrightNotice: `\u00a9 ${p.year || new Date().getFullYear()} J. Worden & Sons Paving LLC`,
         license: 'https://www.jwordenasphaltpaving.com/',
       })),
     };

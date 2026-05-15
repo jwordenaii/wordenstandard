@@ -14,8 +14,8 @@ export const SCHEMA_IDS = {
   founder:       `${SITE_URL}/about#founder`,
 }
 
-export const BUSINESS_NAME         = 'J. Worden & Sons Asphalt Paving'
-export const BUSINESS_LEGAL_NAME   = 'J. Worden & Sons Paving, L.L.C.'
+export const BUSINESS_NAME         = 'J. Worden & Sons Paving LLC'
+export const BUSINESS_LEGAL_NAME   = 'J. Worden & Sons Paving LLC'
 export const BUSINESS_DESCRIPTION  =
   '4th-generation family asphalt paving contractor est. 1984. ' +
   'Paved 100+ KFC locations across Georgia and the Southeast. ' +

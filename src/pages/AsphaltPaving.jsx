@@ -39,10 +39,10 @@ export default function AsphaltPaving() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'PavingService',
-    'name': 'J. Worden & Sons Paving',
+    'name': 'J. Worden & Sons Paving LLC',
     'provider': {
       '@type': 'LocalBusiness',
-      'name': 'J. Worden & Sons Asphalt Paving',
+      'name': 'J. Worden & Sons Paving LLC',
       'telephone': '+18044461296',
       'priceRange': '$$'
     },

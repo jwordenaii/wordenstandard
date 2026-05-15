@@ -6,7 +6,7 @@ export default function NotFound() {
     <>
       <SchemaMarkup
         title="Page Not Found"
-        description="The page you are looking for does not exist. Return to J. Worden & Sons Asphalt Paving."
+        description="The page you are looking for does not exist. Return to J. Worden & Sons Paving LLC."
         canonical="/404"
         noindex
       />

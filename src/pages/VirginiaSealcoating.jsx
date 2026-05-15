@@ -73,7 +73,7 @@ export default function VirginiaSealcoating() {
         name: 'Asphalt Sealcoating — Virginia Statewide',
         provider: {
           '@type': 'LocalBusiness',
-          name: 'J. Worden & Sons Asphalt Paving',
+          name: 'J. Worden & Sons Paving LLC',
           url: 'https://www.jwordenasphaltpaving.com/',
           telephone: '+18044461296',
           award: ['Best Of Houzz 2022', 'Best Of Houzz 2023', 'Pavement Magazine Top 75'],

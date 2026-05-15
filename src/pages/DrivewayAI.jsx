@@ -320,7 +320,7 @@ export default function DrivewayAI() {
   return (
     <div className="min-h-screen bg-background font-body">
       <SEO
-        title="Driveway & Parking Lot AI Scan | J. Worden & Sons Asphalt Paving"
+        title="Driveway & Parking Lot AI Scan | J. Worden & Sons Paving LLC"
         description="Use your phone to sketch driveway or small parking lot edges, upload photos or video, flag potholes and drainage failures, and receive a premium asphalt estimate review from J. Worden & Sons."
         canonicalPath="/driveway-ai"
       />

@@ -199,7 +199,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background font-body relative text-foreground">
       <SEO 
-        title="J. Worden & Sons Asphalt Paving | Award-Winning Virginia Paving Contractor"
+        title="J. Worden & Sons Paving LLC | Award-Winning Virginia Paving Contractor"
         description="Award-winning Virginia asphalt paving from Dinwiddie north to Fairfax, east to Virginia Beach, through Williamsburg/New Kent and rural residential corridors, and west through I-81."
       />
       <HomeSchema />

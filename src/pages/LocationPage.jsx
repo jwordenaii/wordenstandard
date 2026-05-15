@@ -26,7 +26,7 @@ export default function LocationPage() {
   const businessSchema = {
     '@type': 'GeneralContractor',
     '@id': `${PRIMARY_DOMAIN}${canonicalPath}#business`,
-    name: loc.localGbpName || `J. Worden & Sons Asphalt Paving — ${loc.city}`,
+    name: loc.localGbpName || `J. Worden & Sons Paving LLC — ${loc.city}`,
       image: loc.gallery && loc.gallery.length > 0 
         ? loc.gallery.map(img => `${PRIMARY_DOMAIN}${img}`) 
         : `${PRIMARY_DOMAIN}/hero-paving.jpg`,
@@ -60,7 +60,7 @@ export default function LocationPage() {
       if (loc.isHeadquarters || loc.stateAbbr === 'VA') {
       businessSchema.address = {
         '@type': 'PostalAddress',
-        streetAddress: '1601 Ware Bottom Springs Rd, Suite 214',
+        streetAddress: '1601 Ware Bottom Spring Rd, Suite 214',
         addressLocality: 'Chester',
         addressRegion: 'VA',
         postalCode: '23836',
