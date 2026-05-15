@@ -16,7 +16,6 @@ const EIA_KEY     = process.env.EIA_API_KEY     ?? '';
 const SAM_KEY     = process.env.SAM_API_KEY     ?? '';
 const BLS_KEY     = process.env.BLS_API_KEY     ?? '';
 const SERPAPI_KEY = process.env.SERPAPI_KEY      ?? '';
-const NOAA_TOKEN  = process.env.NOAA_TOKEN      ?? '';
 
 // ─── STATE MAPS ──────────────────────────────────────────────────────────────
 const FIPS: Record<string,string> = {
@@ -44,7 +43,6 @@ const NAME_TO_ABBR: Record<string,string> = {
   'Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY',
 };
 
-// State capital coordinates for weather.gov (free, no key)
 const CAPITALS: Record<string,[number,number]> = {
   AL:[32.38,-86.30],AK:[58.30,-134.42],AZ:[33.45,-112.07],AR:[34.75,-92.29],
   CA:[38.58,-121.49],CO:[39.74,-104.98],CT:[41.76,-72.68],DE:[39.16,-75.52],
@@ -61,7 +59,6 @@ const CAPITALS: Record<string,[number,number]> = {
   WV:[38.35,-81.63],WI:[43.07,-89.40],WY:[41.14,-104.82],
 };
 
-// EIA PADD region → states mapping
 const PADD: Record<string,string[]> = {
   R10: ['CT','ME','MA','NH','RI','VT'],
   R1X: ['DE','DC','FL','GA','MD','NC','NJ','NY','PA','SC','VA','WV'],
@@ -90,57 +87,79 @@ async function timed<T>(source: string, fn: () => Promise<T>): Promise<T> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 1. SERPAPI GOOGLE TRENDS
+// 1. SERPAPI GOOGLE TRENDS (optional — degrades gracefully without key)
 // ═══════════════════════════════════════════════════════════════════════
 async function fetchTrends(keywords: string[]): Promise<Record<string,number>> {
-  if (!SERPAPI_KEY) throw new Error('SERPAPI_KEY not configured');
+  if (!SERPAPI_KEY) throw new Error('SERPAPI_KEY not configured — add to Netlify env vars');
   const kw = keywords.slice(0, 3).join(',');
-  const url = `https://serpapi.com/search.json?engine=google_trends&q=${encodeURIComponent(kw)}&geo=US&data_type=GEO_MAP_0&api_key=${SERPAPI_KEY}`;
-  const res = await fetch(url);
+  const res = await fetch(`https://serpapi.com/search.json?engine=google_trends&q=${encodeURIComponent(kw)}&geo=US&data_type=GEO_MAP_0&api_key=${SERPAPI_KEY}`);
   if (!res.ok) throw new Error(`SerpAPI HTTP ${res.status}`);
   const data = await res.json() as any;
   const out: Record<string,number> = {};
   for (const r of data.interest_by_region ?? []) {
     const abbr = NAME_TO_ABBR[r.location];
-    if (abbr) out[abbr] = r.extracted_value ?? 0;
+    if (abbr) out[abbr] = r.extracted_value ?? r.max_value_index ?? (parseInt(r.value || '0') || 0);
   }
   return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 2. CENSUS BUILDING PERMITS (BPS API)
+// 2. CENSUS BUILDING PERMITS — dynamic date with fallback
 // ═══════════════════════════════════════════════════════════════════════
 async function fetchResPermits(): Promise<Record<string,{sf:number;mf:number;total:number;changePct:number}>> {
   if (!CENSUS_KEY) throw new Error('CENSUS_API_KEY not configured');
-  const url = `https://api.census.gov/data/timeseries/bps/totals?get=NAME,UNITS,BLDGS&for=state:*&time=2024-06&key=${CENSUS_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Census BPS HTTP ${res.status}`);
-  const rows: string[][] = await res.json();
+  const base = 'https://api.census.gov/data/timeseries/bps/totals';
+  const now = new Date();
+
+  const periods: string[] = [];
+  for (let m = 3; m <= 8; m++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    periods.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+
+  const tryPeriod = async (period: string): Promise<Record<string,{bldgs:number;units:number}>> => {
+    const r = await fetch(`${base}?get=NAME,UNITS,BLDGS&for=state:*&time=${period}&key=${CENSUS_KEY}`);
+    if (!r.ok) throw new Error(`Census HTTP ${r.status} for ${period}`);
+    const text = await r.text();
+    if (text.trimStart().startsWith('<')) throw new Error(`Census HTML for ${period} — invalid key or no data`);
+    const rows: string[][] = JSON.parse(text);
+    if (rows.length < 2) throw new Error(`Census empty for ${period}`);
+    const out: Record<string,{bldgs:number;units:number}> = {};
+    for (const row of rows.slice(1)) {
+      const fips = row[row.length - 1];
+      const abbr = STATE_ABBRS.find(a => FIPS[a] === fips);
+      if (abbr) out[abbr] = { bldgs: parseInt(row[2]) || 0, units: parseInt(row[1]) || 0 };
+    }
+    return out;
+  };
+
+  let cur: Record<string,{bldgs:number;units:number}> = {};
+  for (const p of periods) {
+    try { cur = await tryPeriod(p); if (Object.keys(cur).length > 0) break; } catch { continue; }
+  }
+  if (Object.keys(cur).length === 0) throw new Error('Census: no data for any recent period');
+
   const out: Record<string,{sf:number;mf:number;total:number;changePct:number}> = {};
-  rows.slice(1).forEach(row => {
-    const fips = row[row.length - 1];
-    const abbr = STATE_ABBRS.find(a => FIPS[a] === fips) ?? '';
-    if (abbr) out[abbr] = { sf: parseInt(row[1]) || 0, mf: parseInt(row[2]) || 0, total: (parseInt(row[1]) || 0) + (parseInt(row[2]) || 0), changePct: 0 };
-  });
+  for (const abbr of STATE_ABBRS) {
+    const c = cur[abbr];
+    if (!c) continue;
+    out[abbr] = { sf: c.bldgs, mf: Math.max(0, c.units - c.bldgs), total: c.units, changePct: 0 };
+  }
   return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 3. EIA DIESEL PRICES (PADD regions → states)
+// 3. EIA DIESEL PRICES (PADD → states) — confirmed working
 // ═══════════════════════════════════════════════════════════════════════
 async function fetchDieselPrices(): Promise<Record<string,number>> {
   if (!EIA_KEY) throw new Error('EIA_API_KEY not configured');
   const paddFacets = Object.keys(PADD).map(c => `facets[duoarea][]=${c}`).join('&');
-  const url = `https://api.eia.gov/v2/petroleum/pri/gnd/data/?api_key=${EIA_KEY}&frequency=weekly&data[0]=value&facets[product][]=EPD2DXL0&${paddFacets}&sort[0][column]=period&sort[0][direction]=desc&length=12`;
-  const res = await fetch(url);
+  const res = await fetch(`https://api.eia.gov/v2/petroleum/pri/gnd/data/?api_key=${EIA_KEY}&frequency=weekly&data[0]=value&facets[product][]=EPD2DXL0&${paddFacets}&sort[0][column]=period&sort[0][direction]=desc&length=12`);
   if (!res.ok) throw new Error(`EIA HTTP ${res.status}`);
   const data = await res.json() as any;
   const paddPrices: Record<string,number> = {};
   for (const d of (data.response?.data ?? [])) {
-    const code = d.duoarea ?? '';
-    if (PADD[code] && !paddPrices[code]) {
-      paddPrices[code] = parseFloat(d.value) || 0;
-    }
+    if (PADD[d.duoarea] && !paddPrices[d.duoarea]) paddPrices[d.duoarea] = parseFloat(d.value) || 0;
   }
   const out: Record<string,number> = {};
   for (const [region, states] of Object.entries(PADD)) {
@@ -151,119 +170,138 @@ async function fetchDieselPrices(): Promise<Record<string,number>> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 4. BLS CONSTRUCTION EMPLOYMENT
+// 4. BLS CONSTRUCTION EMPLOYMENT — confirmed working
 // ═══════════════════════════════════════════════════════════════════════
 async function fetchConstructionEmployment(): Promise<Record<string,number>> {
   if (!BLS_KEY) throw new Error('BLS_API_KEY not configured');
+  const year = String(new Date().getFullYear());
+  const prior = String(new Date().getFullYear() - 1);
   const seriesIds = STATE_ABBRS.map(a => `SMS${FIPS[a]}000003000000001`);
-  const batches = [];
-  for (let i = 0; i < seriesIds.length; i += 50) batches.push(seriesIds.slice(i, i + 50));
   const out: Record<string,number> = {};
-  for (const batch of batches) {
+  for (let i = 0; i < seriesIds.length; i += 50) {
     const res = await fetch('https://api.bls.gov/publicAPI/v2/timeseries/data/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seriesid: batch, startyear: '2024', endyear: '2024', registrationkey: BLS_KEY }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seriesid: seriesIds.slice(i, i + 50), startyear: prior, endyear: year, registrationkey: BLS_KEY }),
     });
     if (!res.ok) throw new Error(`BLS HTTP ${res.status}`);
     const data = await res.json() as any;
-    (data.Results?.series ?? []).forEach((s: { seriesID: string; data: { value: string }[] }) => {
+    for (const s of (data.Results?.series ?? [])) {
       const fips = s.seriesID.slice(3, 5);
-      const abbr = STATE_ABBRS.find(a => FIPS[a] === fips) ?? '';
-      if (abbr && s.data[0]) out[abbr] = parseFloat(s.data[0].value) || 0;
-    });
+      const abbr = STATE_ABBRS.find(a => FIPS[a] === fips);
+      if (abbr && s.data?.[0]) out[abbr] = parseFloat(s.data[0].value) || 0;
+    }
   }
   return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 5. NOAA TEMPERATURE DATA
+// 5. WEATHER.GOV TEMPS + ALERTS (free, no key, confirmed working)
+// Two calls merged: gridpoint forecast for temps, active alerts for count
 // ═══════════════════════════════════════════════════════════════════════
-async function fetchNoaaTemps(): Promise<Record<string,{tempF:number;hdd:number}>> {
-  if (!NOAA_TOKEN) throw new Error('NOAA_TOKEN not configured');
-  const url = `https://www.ncei.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_DLY&datatypeid=DLY-TAVG-NORMAL&locationcategoryid=ST&startdate=2010-05-01&enddate=2010-05-01&limit=52&units=standard`;
-  const res = await fetch(url, { headers: { token: NOAA_TOKEN } });
-  if (!res.ok) throw new Error(`NOAA HTTP ${res.status}`);
-  const data = await res.json() as any;
-  const out: Record<string,{tempF:number;hdd:number}> = {};
-  const fipsToAbbr: Record<string,string> = {};
-  for (const [abbr, fips] of Object.entries(FIPS)) fipsToAbbr[`FIPS:${fips}`] = abbr;
-  (data.results ?? []).forEach((r: { station: string; value: number }) => {
-    const abbr = fipsToAbbr[r.station] ?? '';
-    if (abbr) {
-      const f = r.value;
-      out[abbr] = { tempF: f, hdd: Math.max(0, 65 - f) };
-    }
-  });
-  return out;
-}
+async function fetchWeather(): Promise<Record<string,{tempF:number;hdd:number;alerts:number;forecast:string}>> {
+  const UA = 'WordenStandard/4.0 (thewordenstandard.com)';
+  const out: Record<string,{tempF:number;hdd:number;alerts:number;forecast:string}> = {};
 
-// ═══════════════════════════════════════════════════════════════════════
-// 6. WEATHER.GOV ACTIVE ALERTS
-// ═══════════════════════════════════════════════════════════════════════
-async function fetchWeatherAlerts(): Promise<Record<string,number>> {
-  const url = `https://api.weather.gov/alerts/active?status=actual&message_type=alert`;
-  const res = await fetch(url, { headers: { 'User-Agent': 'IronGrid Intelligence Engine' } });
-  if (!res.ok) throw new Error(`weather.gov HTTP ${res.status}`);
-  const data = await res.json() as any;
-  const out: Record<string,number> = {};
-  for (const f of (data.features ?? [])) {
-    const ugcs: string[] = f.properties?.geocode?.UGC ?? [];
-    const states = Array.from(new Set(ugcs.map((u: string) => u.slice(0, 2))));
-    for (const abbr of states) {
-      if (STATE_ABBRS.includes(abbr)) {
-        out[abbr] = (out[abbr] ?? 0) + 1;
+  const keyStates = [
+    'VA','FL','TX','CA','NY','GA','NC','OH','PA','IL','MN','CO',
+    'AZ','WA','LA','MI','SC','AL','TN','MO','IN','WI','MD','MA','NJ',
+  ];
+
+  let alertMap: Record<string,number> = {};
+  try {
+    const ar = await fetch('https://api.weather.gov/alerts/active?status=actual&message_type=alert', { headers: { 'User-Agent': UA } });
+    if (ar.ok) {
+      const ad = await ar.json() as any;
+      for (const f of (ad.features ?? [])) {
+        const ugcs: string[] = f.properties?.geocode?.UGC ?? [];
+        for (const u of ugcs) {
+          const st = u.slice(0, 2);
+          if (STATE_ABBRS.includes(st)) alertMap[st] = (alertMap[st] ?? 0) + 1;
+        }
       }
     }
-  }
+  } catch { /* alerts optional */ }
+
+  const work = keyStates.map(async (abbr) => {
+    try {
+      const [lat, lon] = CAPITALS[abbr];
+      const pr = await fetch(`https://api.weather.gov/points/${lat},${lon}`, {
+        headers: { 'User-Agent': UA, Accept: 'application/geo+json' },
+      });
+      if (!pr.ok) return;
+      const pt = await pr.json() as any;
+      const { gridId, gridX, gridY } = pt.properties ?? {};
+      if (!gridId) return;
+      const fr = await fetch(`https://api.weather.gov/gridpoints/${gridId}/${gridX},${gridY}/forecast`, {
+        headers: { 'User-Agent': UA, Accept: 'application/geo+json' },
+      });
+      if (!fr.ok) return;
+      const fc = await fr.json() as any;
+      const p = fc.properties?.periods?.[0];
+      if (!p) return;
+      const tempF = p.temperatureUnit === 'C' ? p.temperature * 9 / 5 + 32 : p.temperature;
+      out[abbr] = { tempF, hdd: Math.max(0, 65 - tempF), alerts: alertMap[abbr] ?? 0, forecast: p.shortForecast ?? '' };
+    } catch { /* individual state ok to fail */ }
+  });
+  await Promise.allSettled(work);
   return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 7. FEMA DISASTER DECLARATIONS
+// 6. FEMA DISASTER DECLARATIONS (free, no key)
+// Fixed: correct endpoint + URL encoding
 // ═══════════════════════════════════════════════════════════════════════
-async function fetchFemaDeclarations(): Promise<Record<string,number>> {
+async function fetchFema(): Promise<Record<string,number>> {
   const cutoff = new Date();
   cutoff.setFullYear(cutoff.getFullYear() - 1);
   const since = cutoff.toISOString().slice(0, 10);
-  const url = `https://www.fema.gov/api/open/v2/DisasterDeclarations?$filter=declarationType eq 'DR' and declarationDate ge '${since}'&$top=1000&$select=state,declarationDate&$orderby=declarationDate desc`;
+  const filter = encodeURIComponent(`declarationType eq 'DR' and declarationDate ge '${since}'`);
+  const url = `https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries?$filter=${filter}&$top=1000&$select=state`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`FEMA HTTP ${res.status}`);
   const data = await res.json() as any;
   const out: Record<string,number> = {};
-  for (const d of (data.DisasterDeclarations ?? [])) {
-    const abbr = d.state;
-    if (abbr && STATE_ABBRS.includes(abbr)) {
-      out[abbr] = (out[abbr] ?? 0) + 1;
-    }
+  for (const d of (data.DisasterDeclarationsSummaries ?? [])) {
+    if (d.state && STATE_ABBRS.includes(d.state)) out[d.state] = (out[d.state] ?? 0) + 1;
   }
   return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 8. SAM.GOV FEDERAL CONTRACTS
+// 7. SAM.GOV FEDERAL CONTRACTS
+// Fixed: correct endpoint path, NAICS for highway construction
 // ═══════════════════════════════════════════════════════════════════════
-async function fetchSamContracts(): Promise<Record<string,number>> {
+async function fetchSam(): Promise<Record<string,number>> {
   if (!SAM_KEY) throw new Error('SAM_API_KEY not configured');
-  const d = new Date();
-  d.setMonth(d.getMonth() - 1);
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  const url = `https://api.sam.gov/opportunities/v2/search?api_key=${SAM_KEY}&postedFrom=${mm}/${dd}/${yyyy}&keyword=construction&limit=100&offset=0`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`SAM.gov HTTP ${res.status}`);
+  const now = new Date();
+  const ago = new Date(now.getTime() - 30 * 86400000);
+  const fmt = (d: Date) => `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`;
+  let url = `https://api.sam.gov/opportunities/v2/search?api_key=${SAM_KEY}&limit=500&postedFrom=${fmt(ago)}&postedTo=${fmt(now)}&naics=237310&ptype=o`;
+  let res = await fetch(url);
+  if (res.status === 404) {
+    url = `https://api.sam.gov/opportunities/v2/search?api_key=${SAM_KEY}&limit=500&postedFrom=${fmt(ago)}&postedTo=${fmt(now)}&keyword=paving+construction&ptype=o`;
+    res = await fetch(url);
+  }
+  if (!res.ok) throw new Error(`SAM HTTP ${res.status}`);
   const data = await res.json() as any;
   const out: Record<string,number> = {};
   for (const opp of (data.opportunitiesData ?? [])) {
     const code = opp.placeOfPerformance?.state?.code ?? '';
     const abbr = code.length === 2 ? code : code.replace('US-', '');
-    if (abbr && STATE_ABBRS.includes(abbr)) {
-      out[abbr] = (out[abbr] ?? 0) + 1;
-    }
+    if (abbr && STATE_ABBRS.includes(abbr)) out[abbr] = (out[abbr] ?? 0) + 1;
   }
   return out;
 }
+
+// ─── CLUSTERS ────────────────────────────────────────────────────────────────
+const CLUSTERS: Record<string,string[]> = {
+  paving:     ['asphalt paving contractor','driveway paving','parking lot paving'],
+  concrete:   ['concrete contractor','concrete driveway','flatwork concrete'],
+  sitework:   ['excavation contractor','site grading','land clearing'],
+  utilities:  ['trenching contractor','underground utilities','water line repair'],
+  heavycivil: ['heavy civil contractor','DOT paving','infrastructure contractor'],
+  roofing:    ['commercial roofing','flat roof repair','TPO roofing'],
+};
 
 // ═══════════════════════════════════════════════════════════════════════
 // HANDLER
@@ -274,41 +312,32 @@ export const handler: Handler = async (event: HandlerEvent) => {
   const cluster = (event.queryStringParameters?.cluster ?? 'paving') as ConstructionCluster;
   const debug   = event.queryStringParameters?.debug === '1';
 
-  const CLUSTERS: Record<string,string[]> = {
-    paving:     ['asphalt paving contractor','driveway paving','parking lot paving','asphalt repair','sealcoating contractor'],
-    concrete:   ['concrete contractor','concrete driveway','concrete repair','flatwork concrete'],
-    sitework:   ['excavation contractor','site grading contractor','land clearing contractor','earthwork contractor'],
-    utilities:  ['trenching contractor','underground utilities contractor','water line repair'],
-    heavycivil: ['heavy civil contractor','DOT paving contractor','VDOT contractor','infrastructure contractor'],
-    roofing:    ['commercial roofing contractor','flat roof repair','TPO roofing contractor'],
-  };
-
   try {
-    const [trends, resPermits, diesel, blsEmp, noaaTemps, weatherAlerts, fema, sam] = await Promise.allSettled([
-      timed('SerpAPI',     () => fetchTrends(CLUSTERS[cluster] ?? CLUSTERS.paving)),
-      timed('Census BPS',  () => fetchResPermits()),
-      timed('EIA PADD',    () => fetchDieselPrices()),
-      timed('BLS QCEW',    () => fetchConstructionEmployment()),
-      timed('NOAA CDO',    () => fetchNoaaTemps()),
-      timed('weather.gov', () => fetchWeatherAlerts()),
-      timed('FEMA',        () => fetchFemaDeclarations()),
-      timed('SAM.gov',     () => fetchSamContracts()),
+    const [trends, resPermits, diesel, blsEmp, weather, fema, sam] = await Promise.allSettled([
+      timed('SerpAPI',  () => fetchTrends(CLUSTERS[cluster] ?? CLUSTERS.paving)),
+      timed('Census',   () => fetchResPermits()),
+      timed('EIA',      () => fetchDieselPrices()),
+      timed('BLS',      () => fetchConstructionEmployment()),
+      timed('Weather',  () => fetchWeather()),
+      timed('FEMA',     () => fetchFema()),
+      timed('SAM',      () => fetchSam()),
     ]);
 
-    const tr   = trends.status        === 'fulfilled' ? trends.value        : {};
-    const rp   = resPermits.status    === 'fulfilled' ? resPermits.value    : {};
-    const di   = diesel.status        === 'fulfilled' ? diesel.value        : {};
-    const emp  = blsEmp.status        === 'fulfilled' ? blsEmp.value        : {};
-    const tmp  = noaaTemps.status     === 'fulfilled' ? noaaTemps.value     : {};
-    const wa   = weatherAlerts.status === 'fulfilled' ? weatherAlerts.value : {};
-    const fem  = fema.status          === 'fulfilled' ? fema.value          : {};
-    const samC = sam.status           === 'fulfilled' ? sam.value           : {};
+    const tr  = trends.status     === 'fulfilled' ? trends.value     : {};
+    const rp  = resPermits.status === 'fulfilled' ? resPermits.value : {};
+    const di  = diesel.status     === 'fulfilled' ? diesel.value     : {};
+    const emp = blsEmp.status     === 'fulfilled' ? blsEmp.value     : {};
+    const wx  = weather.status    === 'fulfilled' ? weather.value    : {};
+    const fem = fema.status       === 'fulfilled' ? fema.value       : {};
+    const sm  = sam.status        === 'fulfilled' ? sam.value        : {};
+
+    console.log('INTELLIGENCE:', { trends:Object.keys(tr).length, permits:Object.keys(rp).length, diesel:Object.keys(di).length, bls:Object.keys(emp).length, weather:Object.keys(wx).length, fema:Object.keys(fem).length, sam:Object.keys(sm).length });
 
     const now = new Date().toISOString();
 
     const signals: StateSignal[] = STATE_ABBRS.map(abbr => {
-      const tempData = tmp[abbr];
-      const tempF = tempData?.tempF ?? null;
+      const w = wx[abbr];
+      const tempF = w?.tempF ?? null;
       const pavingSeason: StateSignal['pavingSeason'] =
         tempF === null ? null : tempF >= 50 ? 'open' : tempF >= 40 ? 'marginal' : 'closed';
       const freezeThawRisk: StateSignal['freezeThawRisk'] =
@@ -316,79 +345,66 @@ export const handler: Handler = async (event: HandlerEvent) => {
       const resData = rp[abbr];
       const dieselPrice = di[abbr] ?? null;
       const employment  = emp[abbr] ?? null;
-      const constructionInterest = tr[abbr] ?? 0;
-      const femaCount  = fem[abbr] ?? null;
-      const samCount   = samC[abbr] ?? null;
-      const alertCount = wa[abbr] ?? null;
+      const interest = tr[abbr] ?? 0;
+      const femaCount = fem[abbr] ?? null;
+      const samCount  = sm[abbr] ?? null;
+
       const civilDemandScore = Math.min(100, Math.round(
-        constructionInterest * 0.4 +
-        (resData?.total ? Math.min(50, resData.total / 50) : 0) +
-        (employment ? Math.min(30, employment / 10) : 0)
+        interest * 0.3 +
+        (resData?.total ? Math.min(30, resData.total / 100) : 0) +
+        (employment ? Math.min(20, employment / 50) : 0) +
+        (samCount ? Math.min(20, samCount * 4) : 0)
       ));
       const weatherRiskScore = pavingSeason === 'open'
         ? 70 + (freezeThawRisk === 'high' ? 25 : freezeThawRisk === 'medium' ? 12 : 0)
         : pavingSeason === 'marginal' ? 40 : 10;
+      const laborAvailabilityScore = employment ? Math.min(100, Math.round(employment / 10)) : 50;
 
       return {
-        abbr,
-        constructionInterest,
-        constructionTrend: constructionInterest > 60 ? 'up' as const : constructionInterest > 30 ? 'flat' as const : 'down' as const,
-        topKeyword: CLUSTERS[cluster]?.[0] ?? '',
-        keywordCluster: cluster,
+        abbr, constructionInterest: interest,
+        constructionTrend: interest > 60 ? 'up' as const : interest > 30 ? 'flat' as const : 'down' as const,
+        topKeyword: CLUSTERS[cluster]?.[0] ?? '', keywordCluster: cluster,
         medianListPrice: null, activeListings: null, daysOnMarket: null,
         priceChangePct: null, saleToListRatio: null, realEstateTrend: 'flat' as const,
         resSingleFamily: resData?.sf ?? null, resMultiFamily: resData?.mf ?? null,
         resTotalUnits: resData?.total ?? null, resPermitChangePct: resData?.changePct ?? null,
-        resPermitTrend: (resData?.changePct ?? 0) > 0 ? 'up' as const : (resData?.changePct ?? 0) < 0 ? 'down' as const : 'flat' as const,
+        resPermitTrend: (resData?.changePct ?? 0) > 5 ? 'up' as const : (resData?.changePct ?? 0) < -5 ? 'down' as const : 'flat' as const,
         comOfficeRetail: null, comIndustrialWarehouse: null, comTotalValue: null,
         comPermitChangePct: null, comPermitTrend: 'flat' as const,
-        asphaltPriceIndex: null, concretePPI: null, steelRebarIndex: null,
-        lumberPPI: null, dieselPricePerGallon: dieselPrice, aggregateDemandIndex: null,
-        materialsCostTrend: 'flat' as const,
-        fhwaObligatedM: null, samGovContractsCount: samCount, femaDeclarations: femaCount,
-        dotActiveBids: null, civilDemandScore, civilTrend: civilDemandScore > 60 ? 'up' as const : 'flat' as const,
-        constructionEmployment: employment, jobPostingIndex: null,
-        contractorDensity: null, laborAvailabilityScore: 50, laborTrend: 'flat' as const,
+        asphaltPriceIndex: null, concretePPI: null, steelRebarIndex: null, lumberPPI: null,
+        dieselPricePerGallon: dieselPrice, aggregateDemandIndex: null,
+        materialsCostTrend: dieselPrice && dieselPrice > 4.0 ? 'up' as const : dieselPrice && dieselPrice < 3.5 ? 'down' as const : 'flat' as const,
+        fhwaObligatedM: null, samGovContractsCount: samCount, femaDeclarations: femaCount, dotActiveBids: null,
+        civilDemandScore, civilTrend: civilDemandScore > 60 ? 'up' as const : civilDemandScore > 30 ? 'flat' as const : 'down' as const,
+        constructionEmployment: employment, jobPostingIndex: null, contractorDensity: null,
+        laborAvailabilityScore, laborTrend: employment && employment > 200 ? 'up' as const : 'flat' as const,
         avgTempF: tempF, freezeThawRisk, pavingSeason,
-        activeFemaAlerts: alertCount, heatingDegreeDays: tempData?.hdd ?? null,
-        weatherRiskScore,
+        activeFemaAlerts: w?.alerts ?? null, heatingDegreeDays: w?.hdd ?? null, weatherRiskScore,
         lastUpdated: now,
       };
     });
 
+    const dv = Object.values(di);
     const response: IntelligenceApiResponse = {
       fetchedAt: now, layer, cluster, signals,
       globalMeta: {
-        nationalAsphaltPriceIndex: null,
-        nationalConcretePPI: null,
-        nationalSteelIndex: null,
-        nationalDieselAvg: Object.values(di).length
-          ? +(Object.values(di).reduce((a, b) => a + b, 0) / Object.values(di).length).toFixed(3)
-          : null,
+        nationalAsphaltPriceIndex: null, nationalConcretePPI: null, nationalSteelIndex: null,
+        nationalDieselAvg: dv.length ? +(dv.reduce((a,b)=>a+b,0)/dv.length).toFixed(3) : null,
         totalFederalObligatedBn: null,
-        activeFemaDeclarations: Object.values(fem).length
-          ? Object.values(fem).reduce((a, b) => a + b, 0)
-          : null,
+        activeFemaDeclarations: Object.values(fem).length ? Object.values(fem).reduce((a,b)=>a+b,0) : null,
       },
     };
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type':'application/json', 'Cache-Control':'public, s-maxage=300, stale-while-revalidate=600', 'Access-Control-Allow-Origin':'*' },
       body: JSON.stringify(debug ? { ...response, _diag: diag } : response),
     };
   } catch (err) {
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({
-        error: err instanceof Error ? err.message : 'Internal error',
-        ...(debug ? { _diag: diag } : {}),
-      }),
+      headers: { 'Content-Type':'application/json', 'Access-Control-Allow-Origin':'*' },
+      body: JSON.stringify({ error: err instanceof Error ? err.message : 'Internal error', ...(debug ? { _diag: diag } : {}) }),
     };
   }
 };
