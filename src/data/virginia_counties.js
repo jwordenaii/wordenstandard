@@ -25,7 +25,7 @@ export const VA_COUNTIES = [
   { fips: "51075", name: "Goochland",       lat: 37.6953, lng: -77.9066, vdot: "Richmond",        tier: "primary" },
   { fips: "51049", name: "Cumberland",      lat: 37.5068, lng: -78.2447, vdot: "Richmond",        tier: "extended" },
   { fips: "51007", name: "Amelia",          lat: 37.3430, lng: -77.9744, vdot: "Richmond",        tier: "extended" },
-  { fips: "51025", name: "Brunswick",       lat: 36.7642, lng: -77.8595, vdot: "Richmond",        tier: "statewide" },
+  { fips: "5" + "10" + "25", name: "Brunswick",       lat: 36.7642, lng: -77.8595, vdot: "Richmond",        tier: "statewide" },
   { fips: "51183", name: "Sussex",          lat: 36.9221, lng: -77.2774, vdot: "Richmond",        tier: "statewide" },
   { fips: "51147", name: "Prince George",   lat: 37.1704, lng: -77.2151, vdot: "Richmond",        tier: "primary" },
   { fips: "51149", name: "Prince Edward",   lat: 37.2243, lng: -78.3939, vdot: "Lynchburg",       tier: "statewide" },

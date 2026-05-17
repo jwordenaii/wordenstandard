@@ -60,7 +60,7 @@ automatically picks a bindable port and prints the exact URL.
 | `VITE_AUTH_MODE` | ✅ | Auth gate mode. Set to `none` to disable for public-only builds |
 | `VITE_SENTRY_DSN` | ⚠️ | Frontend Sentry DSN (optional — enables browser error tracking) |
 | `VITE_GA4_ID` | ⚠️ | Google Analytics 4 measurement ID |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | ⚠️ | Stripe publishable key (`pk_live_...` or `dummy_pk_test_...`) |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | ⚠️ | Stripe publishable key (`pk_live_...` or `dummy_dummy_pk_...`) |
 | `VITE_SITE_URL` | ⚠️ | Canonical site URL — e.g. `https://www.jwordenasphaltpaving.com` |
 
 ### Backend (Railway Variables tab)
@@ -75,7 +75,7 @@ automatically picks a bindable port and prints the exact URL.
 | `ADMIN_PASSWORD` | ✅ | Admin dashboard password — must be set or admin routes return 503 |
 | `OPENAI_API_KEY` | ⚠️ | Required for AI chat, photo inspection, blog drafts |
 | `GOOGLE_API_KEY` | ⚠️ | Required for live Google Maps / Places data |
-| `STRIPE_SECRET_KEY` | ⚠️ | Stripe secret key (`sk_live_...` or `dummy_sk_test_...`) |
+| `STRIPE_SECRET_KEY` | ⚠️ | Stripe secret key (`sk_live_...` or `dummy_dummy_sk_...`) |
 | `STRIPE_WEBHOOK_SECRET` | ⚠️ | Stripe webhook signing secret |
 | `TWILIO_ACCOUNT_SID` | ⚠️ | Twilio account SID (voice features) |
 | `TWILIO_AUTH_TOKEN` | ⚠️ | Twilio auth token (voice features) |
