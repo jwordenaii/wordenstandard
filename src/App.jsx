@@ -95,6 +95,7 @@ const AdvisoryTaxCompliance = lazy(() => import('./pages/advisory/TaxComplianceA
 // Worden Standard Internal / Operational
 const PrintableOnboardingPacket = lazy(() => import('./components/PrintableOnboardingPacket'));
 const AiPublicRelationsDept = lazy(() => import('./pages/AiPublicRelationsDept'));
+const WordenStandard = lazy(() => import('./pages/WordenStandard'));
 // Add page imports here
 
 // Initialise GA4 once — silently skipped when the measurement ID is not set.
@@ -332,6 +333,7 @@ const AuthenticatedApp = () => {
           }
         />
         <Route path="/virginia-statewide" element={<RequireAuth><VirginiaStatewide /></RequireAuth>} />
+        <Route path="/worden-standard" element={<RequireAuth><WordenStandard /></RequireAuth>} />
         <Route path="/autonomy" element={<RequireAuth><AutonomyDashboard /></RequireAuth>} />
         <Route path="/contractor-ai" element={<RequireAuth><ContractorAIPlatform /></RequireAuth>} />
         <Route path="/consultant" element={<RequireAuth><LeadConsultant /></RequireAuth>} />
