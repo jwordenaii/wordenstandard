@@ -7,6 +7,12 @@ const ForecastStation = lazy(() => import("../components/wordenstandard/Forecast
 const DispatchWeatherStation = lazy(() => import("../components/wordenstandard/DispatchWeatherStation"));
 const RealityEngineNode = lazy(() => import("../components/wordenstandard/RealityEngineNode"));
 const DroneRealityEngine = lazy(() => import("../components/wordenstandard/DroneRealityEngine"));
+const SovereignAssetAnalysis = lazy(() => import("../components/wordenstandard/SovereignAssetAnalysis"));
+const RoutingEngine = lazy(() => import("../components/wordenstandard/RoutingEngine"));
+const ThermalCompaction = lazy(() => import("../components/wordenstandard/ThermalCompaction"));
+const CrewWearables = lazy(() => import("../components/wordenstandard/CrewWearables"));
+const AdsIntelligence = lazy(() => import("../components/wordenstandard/AdsIntelligence"));
+const BidBoard = lazy(() => import("../components/wordenstandard/BidBoard"));
 
 /* THE WORDEN STANDARD v4.0 — 9 STATIONS — ALL FUNCTIONAL */
 
@@ -211,15 +217,15 @@ export default function App(){
 
     {id:"ironmap",icon:"🗺",l:"IronGrid"},{id:"precon",icon:"📐",l:"PreCon"},
 
-    {id:"investor",icon:"📈",l:"Investor"},{id:"forecast",icon:"🔮",l:"Forecast"},
-
+    {id:"investor",icon:"📈",l:"Investor"},{id:"sovereign",icon:"🏛",l:"Sovereign Asset"},{id:"forecast",icon:"🔮",l:"Forecast"},
     {id:"dispatch",icon:"🚛",l:"Dispatch"},{id:"reality",icon:"⚖",l:"Reality"},{id:"drone",icon:"🚁",l:"Drone Fleet"},
-
+    {id:"routing",icon:"→",l:"Routing"},{id:"thermal",icon:"°",l:"Thermal"},{id:"wearables",icon:"♡",l:"Wearables"},
+    {id:"ads",icon:"◈",l:"Ads AI"},{id:"bidboard",icon:"🏛",l:"VDOT Bids"}
   ];
 
-  const pending=[{icon:"→",l:"Routing"},{icon:"°",l:"Thermal"},{icon:"♡",l:"Wearables"},{icon:"◈",l:"Marketing"}];
+  const pending=[];
 
-  const viewTitle={home:"Home",jarvis:"Jarvis",estimate:"New Estimate",jobs:"Jobs",crew:"Crew",equipment:"Equipment",weather:"Weather",banking:"Banking",legal:"Legal / Compliance",ironmap:"IronGrid Map",precon:"Pre-Con Omni",investor:"Investor ROI",forecast:"Forecast Station",dispatch:"Dispatch Weather",reality:"Reality Engine",drone:"UAV Fleet Reality Engine"};
+  const viewTitle={home:"Home",jarvis:"Jarvis",estimate:"New Estimate",jobs:"Jobs",crew:"Crew",equipment:"Equipment",weather:"Weather",banking:"Banking",legal:"Legal / Compliance",ironmap:"IronGrid Map",precon:"Pre-Con Omni",investor:"Investor ROI",sovereign:"Sovereign Asset Analysis",forecast:"Forecast Station",dispatch:"Dispatch Weather",reality:"Reality Engine",drone:"UAV Fleet Reality Engine",routing:"Fleet Routing Engine",thermal:"Thermal Compaction",wearables:"Crew Wearables",ads:"Ads Intelligence",bidboard:"Statewide Bid Board"};
 
   return(
 
@@ -758,7 +764,13 @@ export default function App(){
           {v==="dispatch"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Dispatch Weather...</div>}><DispatchWeatherStation/></Suspense>)}
 
           {v==="reality"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Reality Engine...</div>}><RealityEngineNode/></Suspense>)}
-
+          {v==="drone"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading UAV Fleet...</div>}><DroneRealityEngine/></Suspense>)}
+          {v==="sovereign"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Sovereign Asset...</div>}><SovereignAssetAnalysis/></Suspense>)}
+          {v==="routing"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Routing...</div>}><RoutingEngine/></Suspense>)}
+          {v==="thermal"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Thermal...</div>}><ThermalCompaction/></Suspense>)}
+          {v==="wearables"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Wearables...</div>}><CrewWearables/></Suspense>)}
+          {v==="ads"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Ads AI...</div>}><AdsIntelligence/></Suspense>)}
+          {v==="bidboard"&&(<Suspense fallback={<div style={{color:"rgba(255,255,255,0.12)",padding:40}}>Loading Bid Board...</div>}><BidBoard/></Suspense>)}
         </div>
 
       </div>
