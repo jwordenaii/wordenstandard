@@ -217,6 +217,12 @@
     Cache-Control = "no-store, no-cache, must-revalidate"
 
 [[headers]]
+  for = "/worden-standard"
+  [headers.values]
+    X-Robots-Tag  = "noindex, nofollow, noarchive"
+    Cache-Control = "no-store, no-cache, must-revalidate"
+
+[[headers]]
   for = "/command-center/*"
   [headers.values]
     X-Robots-Tag  = "noindex, nofollow, noarchive"
