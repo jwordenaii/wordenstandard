@@ -55,7 +55,7 @@ These must be set for the application to start and function correctly in product
 | `XAI_API_KEY` | 🔴 SECRET | Grok AI integration | xAI API key for generating automated content |
 | `OPENAI_CODEX_MODEL` | 🟡 INTERNAL | Planned multi-provider AI router | Optional codex model override for file/code task routing (example: `gpt-5.3-codex`). |
 | `GOOGLE_API_KEY` | 🔴 SECRET | Geo endpoints, review fetching | Required for live Google Maps / Places data. |
-| `STRIPE_SECRET_KEY` | 🔴 SECRET | `/api/v1/payments/checkout-session` | Stripe secret key. Use `sk_test_...` for staging, `sk_live_...` for production. |
+| `STRIPE_SECRET_KEY` | 🔴 SECRET | `/api/v1/payments/checkout-session` | Stripe secret key. Use `dummy_sk_...` for staging, `sk_live_...` for production. |
 | `STRIPE_WEBHOOK_SECRET` | 🔴 SECRET | `/api/v1/payments/webhook` | Stripe webhook signing secret. Obtained from the Stripe dashboard → Webhooks. |
 | `STRIPE_SUCCESS_URL` | 🟢 SAFE | `/api/v1/payments/checkout-session` | Redirect URL after successful payment. Default: `http://localhost:5173/quote?payment=success` |
 | `STRIPE_CANCEL_URL` | 🟢 SAFE | `/api/v1/payments/checkout-session` | Redirect URL after cancelled payment. Default: `http://localhost:5173/quote?payment=cancel` |
@@ -197,7 +197,7 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=dev-admin-password
 
 # OpenAI
-OPENAI_API_KEY=sk-proj-your-key-here
+OPENAI_API_KEY=dummy-proj-your-key-here
 
 # Logging
 LOG_FORMAT=text

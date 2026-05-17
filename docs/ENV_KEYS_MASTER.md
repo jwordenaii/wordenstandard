@@ -180,7 +180,7 @@ Vite-exposed variables must start with `VITE_`. The frontend currently mostly pr
 If you only have time for the smallest possible setup, set these 5 keys on Railway:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
+ANTHROPIC_API_KEY=dummy-ant-xxxxxxxxxxxxxxxxxxxxxxxx
 TAVILY_API_KEY=tvly-xxxxxxxxxxxxxxxxxxxxxxxx
 VAPI_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 VAPI_PHONE_NUMBER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
